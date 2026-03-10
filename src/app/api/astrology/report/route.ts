@@ -96,6 +96,7 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
   let coverTitle: string
   let sectionTitle: string
   let nameB = ''
+  let coverProfileB: { name: string; dob: { day: string; month: string; year: string } } | undefined
 
   if (service === 'career') {
     const blocks = getCareerBlocks(chart, kb)
@@ -140,6 +141,7 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
     prompt = typeof result === 'string' ? result : result.prompt
     coverTitle = 'LUẬN GIẢI BẢN ĐỒ CẶP ĐÔI'
     sectionTitle = 'TỔNG HỢP LUẬN GIẢI BẢN ĐỒ CẶP ĐÔI'
+    coverProfileB = { name: fullNameB, dob: profileB.dob }
 
   } else if (service === 'transit') {
     const { buildVanhanEssayPrompt } = await import('@/lib/logic/vanhan/prompt')
@@ -170,7 +172,7 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
 
   // Step 5: Generate PDF
   updateJob(jobId, { progress: 90, label: 'Đang tạo file PDF...' })
-  const pdfBuffer = await generatePdf(essayText, { coverTitle, sectionTitle, profile })
+  const pdfBuffer = await generatePdf(essayText, { coverTitle, sectionTitle, profile, profileB: coverProfileB })
 
   // Step 6: Save PDF
   let pdfUrl: string | null = null

@@ -1,6 +1,6 @@
 === YÊU CẦU VIẾT BÀI LUẬN GIẢI BẢN ĐỒ MỐI QUAN HỆ ===
 
-Bạn là chuyên gia chiêm tinh học quan hệ với nhiều năm kinh nghiệm. Viết bài luận giải bản đồ mối quan hệ đầy đủ cho cặp đôi {title_A} {full_name_A} và {title_B} {full_name_B} theo đúng cấu trúc từ mục 1 đến mục 6 bên dưới. Bắt đầu trực tiếp với phần mở đầu, không cần hỏi thêm.
+Bạn là chuyên gia chiêm tinh học quan hệ với nhiều năm kinh nghiệm. Viết bài luận giải bản đồ mối quan hệ đầy đủ cho cặp đôi {title_A} {name_A} và {title_B} {name_B} theo đúng cấu trúc từ mục 1 đến mục 6 bên dưới. Bắt đầu trực tiếp với phần mở đầu, không cần hỏi thêm.
 
 Phía trên là DỮ LIỆU ĐÃ TÍNH TOÁN. Mỗi tiểu mục đã được đánh dấu "→ VIẾT" hoặc "→ KHÔNG VIẾT". Đây là kết quả tính toán đã xác nhận — giữ nguyên khi viết bài.
 
@@ -11,7 +11,7 @@ Hướng dẫn viết bài
 - Tuân theo đánh dấu VIẾT/KHÔNG VIẾT: tiểu mục "→ VIẾT" thì viết, "→ KHÔNG VIẾT" = không xuất hiện trong bài — không nhắc, không giải thích vì sao không có.
 - Chỉ được sử dụng dữ liệu đã cung cấp bên trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
 - Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick.
-- Gọi người thứ nhất là "{pronoun_A} {name_A}", người thứ hai là "{pronoun_B} {name_B}" xuyên suốt bài viết.
+- Gọi người thứ nhất là "{pronoun_A} {name_A}", người thứ hai là "{pronoun_B} {name_B}" xuyên suốt bài viết. KHÔNG dùng họ hoặc đệm trong xưng hô và tiêu đề — chỉ dùng tên đơn.
 - Mỗi tiêu đề MỤC LỚN phải bắt đầu bằng số thứ tự (ví dụ: "1. Tổng Quan Mối Quan Hệ").
 - Mỗi tiểu mục có tiêu đề kết thúc bằng dấu hai chấm (ví dụ "Lõi Tính Cách Của {title_A} {name_A}:").
 - {gender_note}

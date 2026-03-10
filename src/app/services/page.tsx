@@ -82,7 +82,7 @@ export default function ServicesPage() {
             id: String(p.id),
             ho: p.data?.ho || '',
             dem: p.data?.dem || '',
-            ten: p.data?.ten || p.name,
+            ten: p.data?.ten || (p.name.trim().split(/\s+/).pop() || p.name),
             name: p.name,
             gender: p.gender || 'Female',
             dob: p.data?.dob || { day: 1, month: 1, year: 1990 },
