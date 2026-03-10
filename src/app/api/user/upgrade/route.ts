@@ -24,21 +24,23 @@ export async function POST(request: Request) {
 
     const adminCode = process.env.ADMIN_UPGRADE_CODE || 'TaiKhoanAdmin'
     const trimmed = code?.trim() || ''
-    if (!trimmed || (trimmed !== expected && trimmed !== adminCode)) {
+    const isLifetime = trimmed === adminCode
+    if (!trimmed || (trimmed !== expected && !isLifetime)) {
       return NextResponse.json({ error: 'Mã nâng cấp không hợp lệ' }, { status: 401 })
     }
 
     const token = premiumToken(expected)
     const uid = (session.user as any).uid as string
+    const planType = isLifetime ? 'lifetime' : 'premium'
 
     if (uid) {
       await prisma.user.update({
         where: { userUid: uid },
-        data: { isPremium: true, premiumToken: token },
+        data: { isPremium: true, premiumToken: token, planType },
       })
     }
 
-    return NextResponse.json({ token })
+    return NextResponse.json({ token, planType })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

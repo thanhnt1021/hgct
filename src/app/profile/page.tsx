@@ -3,12 +3,12 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
-interface SidebarAvatarProps { user: { image?: string; isPremium: boolean; username: string }; avatarVersion: number }
+interface SidebarAvatarProps { user: { image?: string; isPremium: boolean; planType?: string; username: string }; avatarVersion: number }
 function SidebarAvatar({ user, avatarVersion }: SidebarAvatarProps) {
   const [showCustom, setShowCustom] = useState(true)
   const [showGoogle, setShowGoogle] = useState(false)
   useEffect(() => { setShowCustom(true); setShowGoogle(false) }, [avatarVersion])
-  const borderColor = user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'
+  const borderColor = user.planType === 'lifetime' ? 'rgba(255,215,100,0.5)' : user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'
   const style = { width: 36, height: 36, borderRadius: '50%', border: `1px solid ${borderColor}`, flexShrink: 0 as const }
   if (showCustom) return <img src={`/api/user/avatar?v=${avatarVersion}`} alt="avatar" style={{ ...style, objectFit: 'cover' }} referrerPolicy="no-referrer" onError={() => { setShowCustom(false); setShowGoogle(!!user.image) }} />
   if (showGoogle && user.image) return <img src={user.image} alt="avatar" style={{ ...style, objectFit: 'cover' }} referrerPolicy="no-referrer" onError={() => setShowGoogle(false)} />
@@ -138,7 +138,7 @@ function ProfileContent() {
                   {displayTen || user.username}
                 </p>
                 <p className="text-xs" style={{ color: user.isPremium ? '#d9ab55' : '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
-                  {user.isPremium ? 'Premium ✦' : 'Miễn phí'}
+                  {user.planType === 'lifetime' ? 'Lifetime ★' : user.isPremium ? 'Premium ✦' : 'Miễn phí'}
                 </p>
               </div>
             </div>

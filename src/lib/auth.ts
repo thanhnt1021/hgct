@@ -48,15 +48,16 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         if (account?.provider === 'google') {
-          // Look up by email since user.id = Google subject ID
           const dbUser = await prisma.user.findUnique({ where: { email: user.email as string } })
           token.uid = dbUser?.userUid ?? ''
           token.isPremium = dbUser?.isPremium ?? false
+          token.planType = dbUser?.planType ?? 'free'
           token.username = dbUser?.username ?? ''
         } else {
           token.uid = user.id
           const dbUser = await prisma.user.findUnique({ where: { userUid: user.id as string } })
           token.isPremium = dbUser?.isPremium ?? false
+          token.planType = dbUser?.planType ?? 'free'
           token.username = dbUser?.username ?? ''
         }
       }
@@ -66,6 +67,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).uid = token.uid
         ;(session.user as any).isPremium = token.isPremium ?? false
+        ;(session.user as any).planType = token.planType ?? 'free'
         ;(session.user as any).username = token.username ?? ''
       }
       return session

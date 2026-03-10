@@ -81,8 +81,8 @@ export default function SubscriptionPlans() {
   const [toastMsg, setToastMsg] = useState('')
 
   const isPremium = user?.isPremium ?? false
-  // Derive current plan label
-  const currentPlanId = isPremium ? 'premium_month' : 'free' // simplified — no multi-tier in DB yet
+  const planType = user?.planType ?? 'free'
+  const currentPlanId = planType === 'lifetime' ? 'lifetime' : planType === 'premium' ? 'premium_month' : 'free'
 
   const showToast = (msg: string) => {
     setToastMsg(msg)
@@ -118,7 +118,7 @@ export default function SubscriptionPlans() {
           <div>
             <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>GÓI HIỆN TẠI</p>
             <p className="font-bold" style={{ color: isPremium ? '#d9ab55' : '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem' }}>
-              {isPremium ? 'Premium ✦' : 'Miễn phí'}
+              {planType === 'lifetime' ? 'Lifetime ★' : isPremium ? 'Premium ✦' : 'Miễn phí'}
             </p>
           </div>
           {isPremium && (

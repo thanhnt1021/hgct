@@ -8,6 +8,7 @@ interface User {
   name: string
   email: string
   isPremium: boolean
+  planType: 'free' | 'premium' | 'lifetime'
   premiumToken: string
   image?: string
   uid?: string
@@ -28,8 +29,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session = null, status = 'unauthenticated' as const } = useSession() ?? {}
   const [premiumOverride, setPremiumOverride] = useState<boolean | null>(null)
 
-  type SessionUserExt = { uid?: string; username?: string; isPremium?: boolean; name?: string | null; email?: string | null; image?: string | null }
+  type SessionUserExt = { uid?: string; username?: string; isPremium?: boolean; planType?: string; name?: string | null; email?: string | null; image?: string | null }
   const sessionUser = session?.user as SessionUserExt | undefined
+  const [planTypeOverride, setPlanTypeOverride] = useState<string | null>(null)
 
   const user: User | null = sessionUser
     ? {
@@ -37,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: sessionUser.name ?? '',
         email: sessionUser.email ?? '',
         isPremium: premiumOverride ?? sessionUser.isPremium ?? false,
+        planType: (planTypeOverride ?? sessionUser.planType ?? 'free') as User['planType'],
         premiumToken: '',
         image: sessionUser.image ?? undefined,
         uid: sessionUser.uid,
@@ -76,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setPremiumOverride(null)
+    setPlanTypeOverride(null)
     signOut({ callbackUrl: '/' })
   }
 
@@ -89,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json()
       if (!res.ok) return { ok: false, error: data.error || 'Mã không hợp lệ' }
       setPremiumOverride(true)
+      if (data.planType) setPlanTypeOverride(data.planType)
       return { ok: true }
     } catch {
       return { ok: false, error: 'Lỗi kết nối server' }
