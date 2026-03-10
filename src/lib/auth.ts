@@ -45,7 +45,19 @@ export const authOptions: NextAuthOptions = {
     newUser: '/auth/register',
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
+      // Force re-read from DB when session.update() is called
+      if (trigger === 'update' && token.uid) {
+        const dbUser = await prisma.user.findUnique({
+          where: { userUid: token.uid as string },
+          select: { isPremium: true, planType: true },
+        })
+        if (dbUser) {
+          token.isPremium = dbUser.isPremium
+          token.planType = dbUser.planType
+        }
+        return token
+      }
       if (user) {
         if (account?.provider === 'google') {
           const dbUser = await prisma.user.findUnique({ where: { email: user.email as string } })

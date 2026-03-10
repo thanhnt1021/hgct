@@ -26,7 +26,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data: session = null, status = 'unauthenticated' as const } = useSession() ?? {}
+  const { data: session = null, status = 'unauthenticated' as const, update: updateSession } = useSession() ?? {}
   const [premiumOverride, setPremiumOverride] = useState<boolean | null>(null)
 
   type SessionUserExt = { uid?: string; username?: string; isPremium?: boolean; planType?: string; name?: string | null; email?: string | null; image?: string | null }
@@ -94,6 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res.ok) return { ok: false, error: data.error || 'Mã không hợp lệ' }
       setPremiumOverride(true)
       if (data.planType) setPlanTypeOverride(data.planType)
+      // Force JWT cookie re-read from DB so F5 keeps the new planType
+      await updateSession?.()
       return { ok: true }
     } catch {
       return { ok: false, error: 'Lỗi kết nối server' }
