@@ -45,6 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="vi" className={`${fontClasses} dark`}>
+      <head>
+        <link rel="privacy-policy" href="https://hatgiongchiemtinh.com/privacy" />
+      </head>
       <body className="font-sans antialiased">
         <Providers>
           <main>{children}</main>
