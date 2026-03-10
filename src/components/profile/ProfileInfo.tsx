@@ -3,10 +3,18 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import { Pencil } from 'lucide-react'
+import ProfileFormModal, { ProfileFormData, EMPTY_PROFILE_FORM } from './ProfileFormModal'
 
 export default function ProfileInfo() {
   const { user, upgradeToPremium } = useAuth()
   const router = useRouter()
+
+  // Main chart (bản đồ chính của tài khoản)
+  const [mainChart, setMainChart] = useState<ProfileFormData | null>(null)
+  const [mainChartLoading, setMainChartLoading] = useState(true)
+  const [mainChartModalOpen, setMainChartModalOpen] = useState(false)
+  const [mainChartSaving, setMainChartSaving] = useState(false)
 
   // Email
   const [acEmail, setAcEmail] = useState('')
@@ -16,14 +24,13 @@ export default function ProfileInfo() {
 
   // Change password
   const [showCp, setShowCp] = useState(false)
-  const [cpCurrent, setCpCurrent] = useState('')
   const [cpNew, setCpNew] = useState('')
   const [cpConfirm, setCpConfirm] = useState('')
   const [cpLoading, setCpLoading] = useState(false)
   const [cpError, setCpError] = useState('')
   const [cpSuccess, setCpSuccess] = useState(false)
 
-  // Upgrade code (for users without premium)
+  // Upgrade code
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [upgradeCode, setUpgradeCode] = useState('')
   const [upgrading, setUpgrading] = useState(false)
@@ -32,6 +39,30 @@ export default function ProfileInfo() {
   useEffect(() => {
     if (user) setAcEmail(user.email || '')
   }, [user])
+
+  useEffect(() => {
+    fetch('/api/user/account')
+      .then(r => r.json())
+      .then(data => {
+        if (data.mainChartData) setMainChart(data.mainChartData as ProfileFormData)
+      })
+      .catch(() => {})
+      .finally(() => setMainChartLoading(false))
+  }, [])
+
+  const handleSaveMainChart = async (data: ProfileFormData) => {
+    setMainChartSaving(true)
+    const res = await fetch('/api/user/account', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mainChartData: data }),
+    })
+    setMainChartSaving(false)
+    if (res.ok) {
+      setMainChart(data)
+      setMainChartModalOpen(false)
+    }
+  }
 
   const handleUpdateEmail = async () => {
     setAcLoading(true); setAcError(''); setAcSuccess(false)
@@ -60,7 +91,7 @@ export default function ProfileInfo() {
     setCpLoading(false)
     if (!res.ok) { setCpError(data.error || 'Lỗi'); return }
     setCpSuccess(true)
-    setCpCurrent(''); setCpNew(''); setCpConfirm('')
+    setCpNew(''); setCpConfirm('')
     setTimeout(() => { setCpSuccess(false); setShowCp(false) }, 2000)
   }
 
@@ -82,6 +113,8 @@ export default function ProfileInfo() {
     padding: '1.5rem',
     marginBottom: '1.5rem',
   }
+
+  const displayName = mainChart ? [mainChart.ho, mainChart.dem, mainChart.ten].filter(Boolean).join(' ') : ''
 
   return (
     <div>
@@ -112,48 +145,102 @@ export default function ProfileInfo() {
             </div>
           </div>
           {!user.isPremium && (
-            <button
-              onClick={() => router.push('/profile?tab=plans')}
+            <button onClick={() => router.push('/profile?tab=plans')}
               className="px-4 py-2 rounded-xl font-semibold text-sm"
-              style={{ background: 'rgba(201,168,76,0.12)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
-            >
+              style={{ background: 'rgba(201,168,76,0.12)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}>
               Xem gói dịch vụ →
             </button>
           )}
         </div>
-
-        {/* Quick upgrade for free users */}
         {!user.isPremium && (
           <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(201,168,76,0.08)' }}>
-            <button
-              onClick={() => setShowUpgrade(v => !v)}
-              className="text-sm"
-              style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}
-            >
+            <button onClick={() => setShowUpgrade(v => !v)} className="text-sm"
+              style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
               {showUpgrade ? '▲ Ẩn' : '▼ Nhập mã kích hoạt'}
             </button>
             {showUpgrade && (
               <div className="mt-3 flex gap-2">
-                <input
-                  type="text"
-                  value={upgradeCode}
-                  onChange={e => setUpgradeCode(e.target.value)}
+                <input type="text" value={upgradeCode} onChange={e => setUpgradeCode(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleUpgrade()}
-                  placeholder="Mã kích hoạt..."
-                  className="flex-1"
-                  style={{ fontFamily: 'var(--font-vietnam)' }}
-                />
-                <button
-                  onClick={handleUpgrade}
-                  disabled={upgrading || !upgradeCode.trim()}
+                  placeholder="Mã kích hoạt..." className="flex-1" style={{ fontFamily: 'var(--font-vietnam)' }} />
+                <button onClick={handleUpgrade} disabled={upgrading || !upgradeCode.trim()}
                   className="px-4 py-2 rounded-xl font-semibold text-sm"
-                  style={{ background: upgradeCode.trim() ? '#c9a84c' : 'rgba(201,168,76,0.15)', color: upgradeCode.trim() ? '#0a0a1a' : '#6b7280' }}
-                >
+                  style={{ background: upgradeCode.trim() ? '#c9a84c' : 'rgba(201,168,76,0.15)', color: upgradeCode.trim() ? '#0a0a1a' : '#6b7280' }}>
                   {upgrading ? '...' : 'Kích hoạt'}
                 </button>
               </div>
             )}
             {upgradeError && <p className="mt-2 text-xs" style={{ color: '#ef4444', fontFamily: 'var(--font-vietnam)' }}>{upgradeError}</p>}
+          </div>
+        )}
+      </div>
+
+      {/* ── Bản đồ sao chính ── */}
+      <div style={cardStyle}>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Bản đồ sao của bạn</h3>
+            <p className="text-xs mt-0.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+              Bản đồ sao gắn liền với tài khoản
+            </p>
+          </div>
+          <button
+            onClick={() => setMainChartModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm"
+            style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}
+          >
+            <Pencil size={13} /> {mainChart ? 'Sửa' : 'Cập nhật'}
+          </button>
+        </div>
+
+        {mainChartLoading ? (
+          <div className="flex justify-center py-4">
+            <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(201,168,76,0.2)', borderTopColor: '#c9a84c' }} />
+          </div>
+        ) : mainChart ? (
+          /* Display like a chart row */
+          <div className="flex items-center gap-3 rounded-xl px-4 py-3 flex-wrap"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.1)' }}>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(61,43,94,0.6)', fontSize: '0.9rem' }}>
+              {mainChart.gender === 'Female' ? '♀' : mainChart.gender === 'Male' ? '♂' : '⊕'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}>
+                {displayName || '(Chưa có tên)'}
+              </p>
+              <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginTop: '0.1rem' }}>
+                {mainChart.dob.day > 0 ? `${mainChart.dob.day}/${mainChart.dob.month}/${mainChart.dob.year}` : 'Chưa có ngày'} ·{' '}
+                {mainChart.tob.unknown ? 'Không rõ giờ' : mainChart.tob.hour >= 0 ? `${String(mainChart.tob.hour).padStart(2,'0')}:${String(mainChart.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
+                {mainChart.loc.address}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                sessionStorage.setItem('inputData', JSON.stringify({
+                  name: displayName, gender: mainChart.gender, dob: mainChart.dob,
+                  tob: { hour: mainChart.tob.unknown ? 12 : (mainChart.tob.hour >= 0 ? mainChart.tob.hour : 12), minute: mainChart.tob.unknown ? 0 : (mainChart.tob.minute >= 0 ? mainChart.tob.minute : 0) },
+                  loc: mainChart.loc,
+                }))
+                router.push('/services')
+              }}
+              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0"
+              style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+            >
+              Dịch vụ →
+            </button>
+          </div>
+        ) : (
+          /* CTA when not set */
+          <div className="text-center py-5 rounded-xl" style={{ border: '1px dashed rgba(201,168,76,0.15)' }}>
+            <p className="text-sm mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+              Cập nhật thông tin để xem bản đồ sao của bạn ✦
+            </p>
+            <button onClick={() => setMainChartModalOpen(true)}
+              className="px-5 py-2 rounded-xl font-semibold text-sm"
+              style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}>
+              + Thêm thông tin ngay
+            </button>
           </div>
         )}
       </div>
@@ -171,25 +258,16 @@ export default function ProfileInfo() {
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL</label>
             <div className="flex gap-2">
-              <input
-                type="email"
-                value={acEmail}
-                onChange={e => setAcEmail(e.target.value)}
-                placeholder="email@example.com"
-                className="flex-1"
-                style={{ fontFamily: 'var(--font-vietnam)' }}
-              />
-              <button
-                onClick={handleUpdateEmail}
-                disabled={acLoading || !acEmail.trim()}
+              <input type="email" value={acEmail} onChange={e => setAcEmail(e.target.value)}
+                placeholder="email@example.com" className="flex-1" style={{ fontFamily: 'var(--font-vietnam)' }} />
+              <button onClick={handleUpdateEmail} disabled={acLoading || !acEmail.trim()}
                 className="px-4 py-2 rounded-xl font-semibold text-sm"
-                style={{ background: acEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: acEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap' }}
-              >
+                style={{ background: acEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: acEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap' }}>
                 {acLoading ? 'Đang lưu...' : 'Lưu email'}
               </button>
             </div>
             {acError && <p className="mt-1.5 text-xs" style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)' }}>{acError}</p>}
-            {acSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Email đã cập nhật! Bạn có thể dùng email này để đăng nhập.</p>}
+            {acSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Email đã cập nhật!</p>}
           </div>
         </div>
       </div>
@@ -198,10 +276,8 @@ export default function ProfileInfo() {
       <div style={cardStyle}>
         <div className="flex items-center justify-between">
           <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Đổi mật khẩu</h3>
-          <button
-            onClick={() => { setShowCp(v => !v); setCpError(''); setCpSuccess(false) }}
-            style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}
-          >
+          <button onClick={() => { setShowCp(v => !v); setCpError(''); setCpSuccess(false) }}
+            style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
             {showCp ? 'Hủy' : 'Đổi mật khẩu'}
           </button>
         </div>
@@ -211,16 +287,23 @@ export default function ProfileInfo() {
             {cpSuccess && <div className="text-sm" style={{ color: '#4ade80' }}>Đổi mật khẩu thành công!</div>}
             <input type="password" value={cpNew} onChange={e => setCpNew(e.target.value)} placeholder="Mật khẩu mới" />
             <input type="password" value={cpConfirm} onChange={e => setCpConfirm(e.target.value)} placeholder="Xác nhận mật khẩu mới" />
-            <button
-              onClick={handleChangePassword}
-              disabled={cpLoading}
-              style={{ background: 'linear-gradient(135deg,#c8943f,#f0cc78)', color: '#06060f', padding: '0.6rem 1.5rem', borderRadius: '4px', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem', opacity: cpLoading ? 0.7 : 1 }}
-            >
+            <button onClick={handleChangePassword} disabled={cpLoading}
+              style={{ background: 'linear-gradient(135deg,#c8943f,#f0cc78)', color: '#06060f', padding: '0.6rem 1.5rem', borderRadius: '4px', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem', opacity: cpLoading ? 0.7 : 1 }}>
               {cpLoading ? 'Đang lưu...' : 'Lưu mật khẩu mới'}
             </button>
           </div>
         )}
       </div>
+
+      {/* Main chart modal */}
+      <ProfileFormModal
+        open={mainChartModalOpen}
+        title={mainChart ? 'Chỉnh sửa bản đồ sao của bạn' : 'Thêm bản đồ sao của bạn'}
+        initialData={mainChart ?? EMPTY_PROFILE_FORM}
+        saving={mainChartSaving}
+        onSave={handleSaveMainChart}
+        onClose={() => setMainChartModalOpen(false)}
+      />
     </div>
   )
 }

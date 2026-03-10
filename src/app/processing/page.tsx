@@ -290,10 +290,27 @@ function ProcessingInner() {
               fontSize: '0.8rem',
               fontFamily: 'var(--font-vietnam)',
               lineHeight: 1.7,
+              marginBottom: '0.75rem',
             }}
           >
             Bạn có thể <strong>đóng trang này</strong> — báo cáo sẽ tự động gửi vào email khi hoàn thành
           </p>
+          <button
+            onClick={() => router.push('/profile?tab=history')}
+            style={{
+              background: 'rgba(61,184,138,0.12)',
+              border: '1px solid rgba(61,184,138,0.3)',
+              color: '#3db88a',
+              fontFamily: 'var(--font-vietnam)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              padding: '0.45rem 1rem',
+              borderRadius: '8px',
+              cursor: 'pointer',
+            }}
+          >
+            Đóng &amp; về lịch sử →
+          </button>
         </div>
 
         <p style={{ color: '#4a4560', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)' }}>
