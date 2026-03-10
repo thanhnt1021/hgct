@@ -8,7 +8,10 @@ APP_DIR="/root/hgct"
 
 echo "=== HGCT Deploy ==="
 
-# 0. Ensure required directories exist
+# 0. Allow root to access hgct-owned repo
+git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
+
+# 0b. Ensure required directories exist
 mkdir -p /var/hgct/pdfs
 chmod 755 /var/hgct/pdfs
 

@@ -11,7 +11,11 @@ BRANCH="${1:-$(git -C $APP_DIR branch --show-current)}"
 
 echo "=== HGCT Demo Deploy (branch: $BRANCH) ==="
 
-# 0. Ensure required directories exist
+# 0. Allow root to access hgct-owned repo
+git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
+git config --global --add safe.directory "$DEMO_DIR" 2>/dev/null || true
+
+# 0b. Ensure required directories exist
 mkdir -p /var/hgct/pdfs
 chmod 755 /var/hgct/pdfs
 

@@ -26,7 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession()
   const [premiumOverride, setPremiumOverride] = useState<boolean | null>(null)
 
-  const sessionUser = session?.user as (typeof session.user & { uid?: string; username?: string; isPremium?: boolean }) | undefined
+  type SessionUserExt = { uid?: string; username?: string; isPremium?: boolean; name?: string | null; email?: string | null }
+  const sessionUser = session?.user as SessionUserExt | undefined
 
   const user: User | null = sessionUser
     ? {
