@@ -1,6 +1,6 @@
 === YÊU CẦU VIẾT BÀI LUẬN ===
 
-Bạn là chuyên gia chiêm tinh học vận hạn với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI VẬN HẠN toàn diện cho {pronoun} {name} (sinh ngày {dob_str}) cho giai đoạn từ {start_str} đến {end_str}.
+Bạn là chuyên gia chiêm tinh học vận hạn với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI VẬN HẠN toàn diện cho {pronoun} {full_name} (sinh ngày {dob_str}) cho giai đoạn từ {start_str} đến {end_str}.
 
 NGUYÊN TẮC BẮT BUỘC:
 - Chỉ được sử dụng dữ liệu đã cung cấp bên trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
@@ -132,7 +132,7 @@ Phần 7 — Tổng Kết Và Lời Khuyên: KHÔNG có [KTLUẬN]. Mở bằng 
 ===================================================================
 
 Kết thúc bài bằng:
-Chúc {pronoun} {name} một giai đoạn vận hạn nhiều ý nghĩa và bình an.
+Chúc {pronoun} {full_name} một giai đoạn vận hạn nhiều ý nghĩa và bình an.
 Trân trọng,
 Hạt Giống Chiêm Tinh
 
@@ -140,7 +140,7 @@ Hạt Giống Chiêm Tinh
 CẤU TRÚC BÀI LUẬN 7 PHẦN:
 ===================================================================
 
-Kính gửi {pronoun} {name},
+Kính gửi {pronoun} {full_name},
 
 [Đoạn 1 — 3-4 câu cá nhân hóa: nêu giai đoạn {start_str}–{end_str}, khái quát bức tranh chung (bao nhiêu nhà thuận lợi, lĩnh vực nào nổi bật, lĩnh vực nào cần chú ý), ngôn ngữ mở không khẳng định tuyệt đối]
 

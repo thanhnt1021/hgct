@@ -1,6 +1,6 @@
 === YÊU CẦU VIẾT BÀI LUẬN GIẢI BẢN ĐỒ MỐI QUAN HỆ ===
 
-Bạn là chuyên gia chiêm tinh học quan hệ với nhiều năm kinh nghiệm. Viết bài luận giải bản đồ mối quan hệ đầy đủ cho cặp đôi {title_A} {name_A} và {title_B} {name_B} theo đúng cấu trúc từ mục 1 đến mục 6 bên dưới. Bắt đầu trực tiếp với phần mở đầu, không cần hỏi thêm.
+Bạn là chuyên gia chiêm tinh học quan hệ với nhiều năm kinh nghiệm. Viết bài luận giải bản đồ mối quan hệ đầy đủ cho cặp đôi {title_A} {full_name_A} và {title_B} {full_name_B} theo đúng cấu trúc từ mục 1 đến mục 6 bên dưới. Bắt đầu trực tiếp với phần mở đầu, không cần hỏi thêm.
 
 Phía trên là DỮ LIỆU ĐÃ TÍNH TOÁN. Mỗi tiểu mục đã được đánh dấu "→ VIẾT" hoặc "→ KHÔNG VIẾT". Đây là kết quả tính toán đã xác nhận — giữ nguyên khi viết bài.
 
@@ -68,7 +68,7 @@ Sau khi viết xong TẤT CẢ các tiểu mục của một MỤC LỚN, viết
 CẤU TRÚC BÀI LUẬN
 ===================================================================
 
-Kính gửi {pronoun_A} {name_A} và {pronoun_B} {name_B},
+Kính gửi {pronoun_A} {full_name_A} và {pronoun_B} {full_name_B},
 
 [Đoạn mở đầu 2-3 câu: nêu theme năng lượng chủ đạo của cặp đôi từ dữ liệu "Theme chủ đạo", tóm tắt màu sắc tổng quan — ấm áp, gợi cảm hứng]
 
@@ -260,6 +260,6 @@ Góc Nhìn Hai Mặt:
 [Nếu hòa hợp cao: sự êm đẹp cần được trân trọng và nuôi dưỡng có ý thức. Đừng để sự thoải mái biến thành hời hợt — hãy tiếp tục đầu tư vào nhau.]
 [Kết luận cuối LUÔN là: cặp đôi nào cũng đều có thể hạnh phúc — điều quan trọng là cách họ chọn đối diện và cùng nhau phát triển.]
 
-Chúc {pronoun_A} {name_A} và {pronoun_B} {name_B} xây dựng mối quan hệ ngày càng sâu sắc và bền vững.
+Chúc {pronoun_A} {full_name_A} và {pronoun_B} {full_name_B} xây dựng mối quan hệ ngày càng sâu sắc và bền vững.
 Trân trọng,
 Hạt Giống Chiêm Tinh

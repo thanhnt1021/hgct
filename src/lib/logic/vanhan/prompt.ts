@@ -439,9 +439,10 @@ export function buildVanhanEssayPrompt(
   natalChart: ChartData,
   startDate: string,
   endDate: string,
-  profile: Profile,
+  profile: Profile & { fullName?: string; onlyName?: string },
 ): string {
-  const name = profile.name || ''
+  const fullName = profile.fullName || profile.name || ''
+  const name = profile.onlyName || profile.name || ''
   const gender = profile.gender || 'Female'
   const pronoun = gender === 'Female' ? 'chị' : 'anh'
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
@@ -455,7 +456,7 @@ export function buildVanhanEssayPrompt(
   const dataLines: string[] = []
 
   dataLines.push('=== DỮ LIỆU VẬN HẠN ===')
-  dataLines.push(`Họ tên: ${name}`)
+  dataLines.push(`Họ tên: ${fullName}`)
   dataLines.push(`Giới tính: ${gender === 'Female' ? 'Nữ' : 'Nam'}`)
   dataLines.push(`Ngày sinh: ${dobStr}`)
   dataLines.push(`Giai đoạn: ${startStr} — ${endStr}`)
@@ -530,6 +531,7 @@ export function buildVanhanEssayPrompt(
   const template = loadPromptTemplate('vanhan')
   const filledTemplate = template
     .replace(/\{pronoun\}/g, pronoun)
+    .replace(/\{full_name\}/g, fullName)
     .replace(/\{name\}/g, name)
     .replace(/\{dob_str\}/g, dobStr)
     .replace(/\{start_str\}/g, startStr)

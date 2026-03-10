@@ -1,6 +1,6 @@
 === YÊU CẦU VIẾT BÀI LUẬN ===
 
-Bạn là chuyên gia chiêm tinh học hướng nghiệp với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI HƯỚNG NGHIỆP TỔNG HỢP hoàn chỉnh cho {pronoun} {name} (sinh ngày {dob_str}).
+Bạn là chuyên gia chiêm tinh học hướng nghiệp với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI HƯỚNG NGHIỆP TỔNG HỢP hoàn chỉnh cho {pronoun} {full_name} (sinh ngày {dob_str}).
 
 NGUYÊN TẮC BẮT BUỘC:
 - Chỉ được sử dụng dữ liệu đã cung cấp bên trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
@@ -16,13 +16,13 @@ CÁCH VIẾT ĐỂ BÀI SÂU SẮC VÀ HAY:
 - Tone như người cố vấn thân thiết: Viết như người đã nghiên cứu sâu bản đồ này và thực sự muốn giúp {pronoun} {name} thành công — ấm áp, thẳng thắn, đôi khi chỉ ra điểm mù, luôn khích lệ.
 
 Kết thúc bài bằng:
-Chúc {pronoun} {name} một hành trình nghề nghiệp thăng hoa và viên mãn.
+Chúc {pronoun} {full_name} một hành trình nghề nghiệp thăng hoa và viên mãn.
 Trân trọng,
 Hạt Giống Chiêm Tinh
 
 Cấu trúc bài luận (1000-1400 chữ):
 
-Kính gửi {pronoun} {name},
+Kính gửi {pronoun} {full_name},
 
 [Đoạn mở đầu 3-4 câu: vẽ chân dung tổng thể {name} từ bộ ba Cung Mọc – Mặt Trời – Mặt Trăng, nêu bật sự kết hợp đặc biệt và ý nghĩa của nó với hướng nghiệp]
 

@@ -1,17 +1,17 @@
 # HGCT - Hạt Giống Chiêm Tinh
 
 ## Project Overview
-Migrating astrology web app from **~/mo** (Python/Flask) to **~/hgct** (Next.js 15 + TypeScript).
-Source reference: `~/mo` — read files there for logic reference, but **NEVER edit files outside ~/hgct**.
+Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc lập, hoàn chỉnh.
+**KHÔNG liên quan** đến bất kỳ source code cũ nào nữa. Chỉ làm việc trong `/root/hgct`.
 
 ## Tech Stack
 - Next.js 15.2.3, React 19, App Router, Tailwind v4
 - Prisma v5 + PostgreSQL (db: zodiacdb)
-- Swiss Ephemeris (`swisseph` npm) for astronomical calculations
-- Puppeteer for PDF generation
-- OpenRouter API (Claude Sonnet 4.6) for AI essay generation
-- Nodemailer for email
-- NextAuth.js for auth
+- Swiss Ephemeris (`swisseph` npm) — tính toán thiên văn
+- @sparticuz/chromium + puppeteer-core — sinh PDF
+- OpenRouter API (Claude Sonnet 4.6) — AI sinh luận giải
+- Nodemailer — gửi email (Hostinger SMTP)
+- NextAuth.js — xác thực (Google OAuth + credentials)
 - APP_PORT=65498, domain=hatgiongchiemtinh.com
 
 ## Key Architecture
@@ -31,58 +31,113 @@ Source reference: `~/mo` — read files there for logic reference, but **NEVER e
 - **"deploy demo"** → chỉ deploy branch hiện tại lên demo (không tạo branch mới)
 - **"branch hiện tại là gì"** → `git branch --show-current`
 
+## Cấu trúc thư mục chính
+```
+src/
+  app/                    # Next.js App Router pages + API routes
+    api/
+      astrology/          # calculate/, report/ — chart + report APIs
+      auth/               # NextAuth handlers
+      chart/              # Lưu/lấy chart
+      email/              # Gửi email
+      job/, jobs/         # Job status tracking
+      location/           # Nominatim geocoding
+      payment/confirm/    # Payment webhook (placeholder)
+      pdf/                # PDF generation endpoint
+      profiles/           # CRUD profiles
+      user/account|avatar|upgrade/  # Quản lý tài khoản
+    auth/                 # Trang login/register/forgot-password
+    chart/                # Trang xem biểu đồ natal
+    checkout/             # Trang thanh toán
+    input/                # Trang nhập liệu
+    my-charts/            # Trang danh sách biểu đồ của user
+    processing/           # Trang chờ xử lý report
+    profile/              # Trang quản lý hồ sơ
+    services/             # Trang chọn dịch vụ
+    success/              # Trang sau khi order
+  components/
+    astrology/            # AstrologyInput, ReportCard, ...
+    auth/                 # Form login/register
+    chart/                # NatalWheel.tsx (vẽ biểu đồ SVG)
+    checkout/             # CheckoutForm
+    home/                 # Hero, Features, CTA, Process, FloatingButtons
+    layout/               # Navbar, Footer, Sidebar
+    profile/              # AvatarCropModal, ChartList, HistoryReports, LocationPicker, ProfileFormModal, ProfileInfo, SubscriptionPlans
+    ui/                   # Shared UI components
+  lib/
+    astrology/            # calculations.ts, knowledge.ts, base.ts, constants.ts, transit-stubs.ts
+    logic/
+      career/             # block1-4 + manager + prompt
+      love/               # manager + prompt
+      relationship/       # manager + prompt (synastry)
+      vanhan/             # manager + prompt (transit)
+    auth.ts               # NextAuth config
+    db.ts                 # Prisma client
+    email.ts              # sendReportEmail()
+    jobs.ts               # Job system (DB + in-memory cache)
+    jobHistory.ts         # Lịch sử job
+    openrouter.ts         # OpenRouter AI client
+    pdf/generator.ts      # PDF generation
+  prompts/                # AI prompt templates (4 loại dịch vụ)
+  types/                  # TypeScript types
+```
+
+## Prisma Schema (models)
+- `User` — auth, planType (free/premium/lifetime), isPremium, avatar, reportEmail
+- `Profile` — hồ sơ người dùng (name, gender, data JSON)
+- `KnowledgeBase` — dữ liệu KB chiêm tinh từ DB
+- `Job` — job tracking (status, progress, label, result, error)
+- `Order` — đơn hàng (service, profileData, email, status, pdfUrl)
+
 ## What's DONE ✓
 - [x] Project scaffolding (Next.js, Prisma, Tailwind)
-- [x] Auth system (NextAuth.js, register, forgot-password)
+- [x] Auth system — NextAuth.js, credentials + Google OAuth, register, forgot-password
+- [x] Session: uid, username, isPremium, planType
+- [x] Plan tiers: free / premium / lifetime — `/api/user/upgrade`, SubscriptionPlans UI
 - [x] `/src/lib/astrology/calculations.ts` — Swiss Ephemeris chart calculator (TESTED, working)
 - [x] `/src/lib/astrology/knowledge.ts` — Prisma KB query
 - [x] `/src/lib/astrology/base.ts` — KB lookup utilities
 - [x] `/src/lib/astrology/constants.ts` — Astrology constants
 - [x] `/src/lib/openrouter.ts` — OpenRouter AI client
-- [x] `/src/lib/pdf/generator.ts` — Uses @sparticuz/chromium + puppeteer-core (system Chrome deps not needed)
+- [x] `/src/lib/pdf/generator.ts` — @sparticuz/chromium + puppeteer-core
 - [x] `/src/lib/email.ts` — Nodemailer + sendReportEmail()
-- [x] `/src/lib/logic/career/` — block1-4 + manager + prompt (Career service)
-- [x] `/src/lib/logic/love/` — manager + prompt (Love service)
-- [x] `/src/lib/logic/relationship/` — manager + prompt (Relationship/Synastry service)
-- [x] `/src/lib/logic/vanhan/` — manager + prompt (Transit service)
-- [x] `/src/lib/astrology/transit-stubs.ts` — Full transit functions: scanHouseTransitsInRange, findExactAspectTimes, getOuterPlanetCycleData
-- [x] `/src/app/api/astrology/report/route.ts` — Unified report API (all 4 services)
+- [x] Logic blocks — career (block1-4), love, relationship/synastry, vanhan/transit
+- [x] `/src/app/api/astrology/report/route.ts` — Unified report API (4 services)
 - [x] `/src/app/api/astrology/calculate/route.ts` — Chart calculation API
-- [x] Fonts copied from ~/mo to /public/fonts/
-- [x] Prompt templates copied to /src/prompts/
-- [x] All 4 report services TESTED end-to-end (career, love, synastry, transit) — AI + PDF working
-- [x] UI pages — homepage, /services, /input, /checkout, /success, /profile, /auth/*
-- [x] `/deploy.sh` — Deploy script (run as root to update systemd service)
-- [x] Typography — Cinzel, Cinzel Decorative, Cormorant Garamond, EB Garamond, Lora (next/font/google), navy #0a0a1a + gold #c9a84c palette
-- [x] Auth — NextAuth + Prisma DB (migrated from localStorage mock); session includes uid, username, isPremium
-- [x] Profile page — split name (Họ/Đệm/Tên), date/time pickers, multi-profile management, profiles synced to DB via /api/profiles
-- [x] LocationPicker component — Nominatim geocoding + geo-tz timezone lookup, `/api/location/search`
-- [x] Profile selection flow — services page shows profile dropdown before checkout
-- [x] Test email service — `/test-email` page + `/api/test-email` (Hostinger SMTP, detailed error reporting)
-- [x] `.env.example` — with all required keys
-- [x] Job system — persisted to DB (jobs table) with in-memory cache; `getJobFromDb` survives server restarts
-- [x] PDF storage — moved from /tmp/hgct-pdfs to /var/hgct/pdfs (persistent, created by deploy.sh)
-- [x] Demo environment — demo.hatgiongchiemtinh.com on port 65500 (hgct-demo.service, deploy-demo.sh, nginx config)
-- [x] GitHub — private repo hentaiikidd/hgct, SSH key at /home/hgct/.ssh/github_hgct
-- [x] Sudoers — hgct has NOPASSWD: ALL (full sudo, needed for Claude Code automation)
+- [x] `/src/app/api/chart/route.ts` — Lưu/lấy natal chart vào DB
+- [x] All 4 report services TESTED end-to-end (career, love, synastry, transit)
+- [x] UI pages — homepage, /services, /input, /checkout, /success, /profile, /auth/*, /my-charts, /chart
+- [x] NatalWheel.tsx — vẽ biểu đồ natal SVG
+- [x] Profile page — split name (Họ/Đệm/Tên), date/time pickers, multi-profile management
+- [x] Avatar upload — crop preview, lưu vào DB (base64/URL)
+- [x] Google avatar + displayTen name sync
+- [x] LocationPicker — Nominatim geocoding + hardcode Asia/Ho_Chi_Minh
+- [x] Profile selection flow — services page shows profile dropdown
+- [x] Job system — persisted to DB + in-memory cache; survives server restarts
+- [x] PDF storage — /var/hgct/pdfs (persistent, created by deploy.sh)
+- [x] Deploy scripts — deploy.sh (production), deploy-demo.sh (demo)
+- [x] Demo environment — port 65500, hgct-demo.service
+- [x] Nginx + SSL — Certbot, HTTPS cho hatgiongchiemtinh.com + demo.hatgiongchiemtinh.com, HTTP→HTTPS redirect
+- [x] GitHub — private repo hentaiikidd/hgct, SSH via /home/hgct/.ssh/github_hgct
+- [x] Pricing page — 3 tiers (Free/Premium/Lifetime) + billing toggle UI
+- [x] SubscriptionPlans component trong /profile
+- [x] Fonts: Cinzel, Cinzel Decorative, Cormorant Garamond, EB Garamond, Lora (next/font/google)
+- [x] Design: navy #0a0a1a + gold #c9a84c
 
 ## What's TODO
-- [ ] **Payment integration** — QR code placeholder; needs real bank transfer verification or payment gateway
-- [ ] **Port chart drawing** — natal chart, synastry chart, vanhan map, timeline, aspect grid (Python PIL → Canvas/SVG or skip)
-- [ ] **Nginx/SSL** — reverse proxy + SSL cert for hatgiongchiemtinh.com + demo.hatgiongchiemtinh.com
-- [ ] **Merge feature/auth-db-migration → main** — sau khi test xong trên demo
+- [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật
 
 ## Known Fixes Applied
 - `siderealTime` → `siderialTime` (swisseph library typo)
 - House cusps: 0-indexed (swisseph returns array[0..11])
 - Prisma model: `knowledgeBase` (camelCase auto-mapping from knowledge_base table)
-- Vanhan route calls `buildVanhanEssayPrompt(chart, startDate, endDate, profile)` directly (no blocks needed)
+- Vanhan route calls `buildVanhanEssayPrompt(chart, startDate, endDate, profile)` trực tiếp (không cần blocks)
+- `geo-tz` sai TZ cho Việt Nam → hardcode `Asia/Ho_Chi_Minh` trong `/api/location/search`
+- `.next/standalone/` owned by root sau deploy → luôn deploy qua `sudo bash deploy.sh`
 
 ## Important Notes
 - Run dev server: `PORT=65498 npm run dev`
-- Run standalone: `cd .next/standalone && PORT=65498 node server.js` (needs `.env.local` in that dir)
+- Run standalone: `cd .next/standalone && PORT=65498 node server.js` (cần `.env.local` trong đó)
 - After build: `cp .env.local .next/standalone/.env.local`
-- PDF generation uses `@sparticuz/chromium` + `puppeteer-core` (no system Chrome deps needed)
-- Python source reference at ~/mo — READ ONLY, never edit
-- The `swisseph` npm package has typo: property is `siderialTime` not `siderealTime`
-- When user says "continue" — pick up from the TODO list above
+- DB: zodiacdb (PostgreSQL), user: nguydev
+- SMTP: smtp.hostinger.com:465 (SSL), env: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS

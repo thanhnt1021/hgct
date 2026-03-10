@@ -10,6 +10,7 @@ import Navbar from '@/components/layout/Navbar'
 interface Profile {
   id: string
   name: string
+  ten?: string
   dob: { day: number; month: number; year: number }
   tob: { hour: number; minute: number; unknown: boolean }
   loc: { address: string; lat: number; lon: number; tz: string }
@@ -37,6 +38,7 @@ const services: ServiceDef[] = [
 function profileToInputData(p: Profile) {
   return {
     name: p.name,
+    ten: p.ten || '',
     gender: p.gender,
     dob: { day: p.dob.day, month: p.dob.month, year: p.dob.year },
     tob: { hour: p.tob.unknown ? 12 : p.tob.hour, minute: p.tob.unknown ? 0 : p.tob.minute },

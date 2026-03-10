@@ -58,13 +58,17 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
     inputData: Record<string, unknown>
     email?: string
   }
-  const { dob, tob, loc, name, gender } = inputData as {
+  const { dob, tob, loc, name, ten, gender } = inputData as {
     dob: { day: number; month: number; year: number }
     tob: { hour: number; minute: number }
     loc: { lat: number; lon: number; tz: string; address: string }
     name: string
+    ten?: string
     gender: string
   }
+
+  const fullName = name
+  const onlyName = (ten || '').trim() || name
 
   // Step 1: Calculate chart
   updateJob(jobId, { progress: 5, label: 'Đang tính toán bản đồ sao...' })
@@ -74,7 +78,9 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
   if (!chart) throw new Error('Chart calculation failed')
 
   const profile = {
-    name,
+    name: fullName,
+    fullName,
+    onlyName,
     gender: gender || 'Female',
     dob: { day: String(dob.day), month: String(dob.month), year: String(dob.year) },
   }
@@ -111,7 +117,9 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
     const dobB = inputDataB.dob as { day: number; month: number; year: number }
     const tobB = inputDataB.tob as { hour: number; minute: number }
     const locB = inputDataB.loc as { lat: number; lon: number; tz: string }
-    nameB = (inputDataB.name as string) || ''
+    const fullNameB = (inputDataB.name as string) || ''
+    const onlyNameB = ((inputDataB.ten as string) || '').trim() || fullNameB
+    nameB = fullNameB
     const chartB = calculateChart(
       `${dobB.day}/${dobB.month}/${dobB.year}`,
       `${tobB.hour}:${String(tobB.minute).padStart(2, '0')}`,
@@ -121,7 +129,9 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
     const { getRelationshipBlocks } = await import('@/lib/logic/relationship/manager')
     const { buildRelationshipEssayPrompt } = await import('@/lib/logic/relationship/prompt')
     const profileB = {
-      name: nameB,
+      name: fullNameB,
+      fullName: fullNameB,
+      onlyName: onlyNameB,
       gender: (inputDataB.gender as string) || 'Male',
       dob: { day: String(dobB.day), month: String(dobB.month), year: String(dobB.year) },
     }

@@ -62,6 +62,8 @@ function aspType(asp: AspectResult | null): 'soft' | 'hard' | null {
 
 interface Profile {
   name: string
+  fullName?: string
+  onlyName?: string
   gender?: string
   dob: { day: string; month: string; year: string }
 }
@@ -82,6 +84,7 @@ interface DuyenSoData {
 interface RelBrief {
   meta: {
     name_A: string; name_B: string
+    full_name_A: string; full_name_B: string
     title_A: string; title_B: string
     pronoun_A: string; pronoun_B: string
     gender_note: string
@@ -212,8 +215,10 @@ export function buildRelationshipBrief(
 
   const genderA = profileA.gender || 'Female'
   const genderB = profileB.gender || 'Female'
-  const nameA = profileA.name || 'A'
-  const nameB = profileB.name || 'B'
+  const nameA = profileA.onlyName || profileA.name || 'A'
+  const nameB = profileB.onlyName || profileB.name || 'B'
+  const fullNameA = profileA.fullName || profileA.name || nameA
+  const fullNameB = profileB.fullName || profileB.name || nameB
   const isMaleFemale = new Set([genderA, genderB]).has('Male') && new Set([genderA, genderB]).has('Female') && genderA !== genderB
 
   let titleA: string, titleB: string, pronounA: string, pronounB: string
@@ -499,6 +504,7 @@ export function buildRelationshipBrief(
   return {
     meta: {
       name_A: nameA, name_B: nameB,
+      full_name_A: fullNameA, full_name_B: fullNameB,
       title_A: titleA, title_B: titleB,
       pronoun_A: pronounA, pronoun_B: pronounB,
       gender_note: genderNote,
@@ -761,8 +767,10 @@ export function buildRelationshipEssayPrompt(
   const aliasB = m._alias_B || m.name_B
 
   let instructions = loadPromptTemplate('relationship')
-  // Replace template variables
+  // Replace template variables — full_name first (before name_A/B alias replacement)
   const replacements: Record<string, string> = {
+    '{full_name_A}': m.full_name_A,
+    '{full_name_B}': m.full_name_B,
     '{name_A}': aliasA,
     '{pronoun_A}': m.pronoun_A,
     '{title_A}': m.title_A,

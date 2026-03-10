@@ -1,6 +1,6 @@
 === YÊU CẦU VIẾT BÀI LUẬN ===
 
-Bạn là chuyên gia chiêm tinh học tình duyên với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI TÌNH DUYÊN toàn diện cho {pronoun} {name} (sinh ngày {dob_str}).
+Bạn là chuyên gia chiêm tinh học tình duyên với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI TÌNH DUYÊN toàn diện cho {pronoun} {full_name} (sinh ngày {dob_str}).
 
 NGUYÊN TẮC BẮT BUỘC:
 - Chỉ được sử dụng dữ liệu đã cung cấp bên trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
@@ -16,13 +16,13 @@ CÁCH VIẾT ĐỂ BÀI SÂU SẮC VÀ HAY:
 - Tone như người bạn thân thông thái: Ấm áp, đồng cảm, không phán xét — nhưng đủ thẳng thắn để chỉ ra cả điểm mù tình cảm và cơ hội chữa lành.
 
 Kết thúc bài bằng:
-Chúc {pronoun} {name} tìm được tình yêu đích thực và hạnh phúc bền lâu.
+Chúc {pronoun} {full_name} tìm được tình yêu đích thực và hạnh phúc bền lâu.
 Trân trọng,
 Hạt Giống Chiêm Tinh
 
 Cấu trúc bài luận (1000-1400 chữ):
 
-Kính gửi {pronoun} {name},
+Kính gửi {pronoun} {full_name},
 
 [Đoạn mở đầu 3-4 câu: phác họa bản năng tình cảm tổng thể của {name} từ bộ Cung Mọc – Mặt Trăng – Sao Kim, nêu bật đặc trưng trong cách yêu và nhu cầu cảm xúc cốt lõi]
 

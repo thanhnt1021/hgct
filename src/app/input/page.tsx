@@ -56,6 +56,7 @@ function InputPageInner() {
     const name = [form.ho, form.dem, form.ten].filter(Boolean).join(' ')
     const data = {
       name,
+      ten: form.ten.trim(),
       gender: form.gender,
       dob: form.dob,
       tob: { hour: form.tob.unknown ? 12 : form.tob.hour, minute: form.tob.unknown ? 0 : form.tob.minute },

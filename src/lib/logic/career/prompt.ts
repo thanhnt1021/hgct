@@ -26,9 +26,10 @@ function loadPromptTemplate(name: string): string {
 
 export function buildCareerPrompt(
   careerData: Record<string, unknown>,
-  profile: { name: string; gender?: string; dob: { day: string; month: string; year: string } }
+  profile: { name: string; fullName?: string; onlyName?: string; gender?: string; dob: { day: string; month: string; year: string } }
 ): string {
-  const name = profile.name || ''
+  const fullName = profile.fullName || profile.name || ''
+  const name = profile.onlyName || profile.name || ''
   const gender = profile.gender || 'Female'
   const pronoun = gender === 'Female' ? 'chị' : 'anh'
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
@@ -159,12 +160,13 @@ export function buildCareerPrompt(
 
   const instructions = loadPromptTemplate('career')
     .replace(/{pronoun}/g, pronoun)
+    .replace(/{full_name}/g, fullName)
     .replace(/{name}/g, name)
     .replace(/{dob_str}/g, dobStr)
 
   return (
     `=== DỮ LIỆU PHÂN TÍCH BẢN ĐỒ SAO ===\n` +
-    `Họ tên: ${name} | Ngày sinh: ${dobStr}\n` +
+    `Họ tên: ${fullName} | Ngày sinh: ${dobStr}\n` +
     `\n${dataText}\n\n` +
     instructions
   )
