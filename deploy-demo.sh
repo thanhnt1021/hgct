@@ -23,7 +23,6 @@ chmod 755 /var/hgct/pdfs
 if [ ! -d "$DEMO_DIR/.git" ]; then
   echo "[1/6] Cloning repo to $DEMO_DIR..."
   git clone "$APP_DIR" "$DEMO_DIR"
-  git -C "$DEMO_DIR" remote set-url origin git@github.com:hentaiikidd/hgct.git
 fi
 echo "[1/6] Switching demo to branch: $BRANCH..."
 git -C "$DEMO_DIR" fetch origin
