@@ -16,6 +16,7 @@ export default function ProfileInfo() {
   const [mainChartLoading, setMainChartLoading] = useState(true)
   const [mainChartModalOpen, setMainChartModalOpen] = useState(false)
   const [mainChartSaving, setMainChartSaving] = useState(false)
+  const [modalInitialData, setModalInitialData] = useState<ProfileFormData>(EMPTY_PROFILE_FORM)
 
   // Duplicate name check dialog
   const [dupCheckOpen, setDupCheckOpen] = useState(false)
@@ -63,6 +64,9 @@ export default function ProfileInfo() {
   const doSaveMainChart = async (formData: ProfileFormData, existingProfileId?: string) => {
     setMainChartSaving(true)
     try {
+      // Trim whitespace from name parts before saving
+      const trimmedData: ProfileFormData = { ...formData, ho: formData.ho.trim(), dem: formData.dem.trim(), ten: formData.ten.trim() }
+      formData = trimmedData
       const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
       let profileId: string | null = existingProfileId ?? mainChartProfileId ?? null
 
@@ -109,13 +113,13 @@ export default function ProfileInfo() {
   }
 
   const handleSaveMainChart = async (formData: ProfileFormData) => {
-    const newName = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
+    const newName = [formData.ho.trim(), formData.dem.trim(), formData.ten.trim()].filter(Boolean).join(' ')
     try {
       const res = await fetch('/api/profiles')
       const data = await res.json()
       if (data.profiles) {
         const dup = (data.profiles as any[]).find(p =>
-          p.name.trim().toLowerCase() === newName.trim().toLowerCase() &&
+          p.name.trim().toLowerCase() === newName.toLowerCase() &&
           String(p.id) !== mainChartProfileId
         )
         if (dup) {
@@ -250,7 +254,7 @@ export default function ProfileInfo() {
             </p>
           </div>
           <button
-            onClick={() => setMainChartModalOpen(true)}
+            onClick={() => { setModalInitialData(mainChart ?? EMPTY_PROFILE_FORM); setMainChartModalOpen(true) }}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm"
             style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}
           >
@@ -312,7 +316,7 @@ export default function ProfileInfo() {
             <p className="text-sm mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
               Cập nhật thông tin để xem bản đồ sao của bạn ✦
             </p>
-            <button onClick={() => setMainChartModalOpen(true)}
+            <button onClick={() => { setModalInitialData(EMPTY_PROFILE_FORM); setMainChartModalOpen(true) }}
               className="px-5 py-2 rounded-xl font-semibold text-sm"
               style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}>
               + Thêm thông tin ngay
@@ -375,7 +379,7 @@ export default function ProfileInfo() {
       <ProfileFormModal
         open={mainChartModalOpen}
         title={mainChart ? 'Chỉnh sửa bản đồ sao của bạn' : 'Thêm bản đồ sao của bạn'}
-        initialData={mainChart ?? EMPTY_PROFILE_FORM}
+        initialData={modalInitialData}
         saving={mainChartSaving}
         onSave={handleSaveMainChart}
         onClose={() => setMainChartModalOpen(false)}
@@ -385,7 +389,7 @@ export default function ProfileInfo() {
       {dupCheckOpen && (
         <div
           style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-          onClick={() => setDupCheckOpen(false)}
+          onClick={() => { setDupCheckOpen(false); if (pendingFormData) { setModalInitialData(pendingFormData); setMainChartModalOpen(true) } }}
         >
           <div
             style={{ background: '#120d2e', border: '1px solid rgba(200,148,63,0.25)', borderRadius: '1rem', padding: '1.5rem', maxWidth: '420px', width: '100%' }}
@@ -405,22 +409,16 @@ export default function ProfileInfo() {
                 }}
                 style={{ background: 'linear-gradient(135deg,#c8943f,#f0cc78)', color: '#06060f', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', border: 'none' }}
               >
-                Có, cập nhật
+                Có, dùng hồ sơ đó
               </button>
               <button
-                onClick={async () => {
+                onClick={() => {
                   setDupCheckOpen(false)
-                  if (pendingFormData) await doSaveMainChart(pendingFormData)
+                  if (pendingFormData) { setModalInitialData(pendingFormData); setMainChartModalOpen(true) }
                 }}
-                style={{ background: 'rgba(200,148,63,0.08)', color: '#d9ab55', border: '1px solid rgba(200,148,63,0.2)', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', cursor: 'pointer' }}
+                style={{ background: 'rgba(11,11,31,0.8)', color: '#8a8399', border: '1px solid rgba(200,148,63,0.1)', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', cursor: 'pointer' }}
               >
-                Không, thêm mới
-              </button>
-              <button
-                onClick={() => setDupCheckOpen(false)}
-                style={{ background: 'rgba(11,11,31,0.8)', color: '#6b7280', border: '1px solid rgba(200,148,63,0.08)', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', cursor: 'pointer' }}
-              >
-                Hủy
+                Đổi tên khác
               </button>
             </div>
           </div>
