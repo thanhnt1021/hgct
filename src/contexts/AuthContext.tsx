@@ -23,7 +23,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data: session, status } = useSession()
+  const { data: session = null, status = 'unauthenticated' as const } = useSession() ?? {}
   const [premiumOverride, setPremiumOverride] = useState<boolean | null>(null)
 
   type SessionUserExt = { uid?: string; username?: string; isPremium?: boolean; name?: string | null; email?: string | null }
