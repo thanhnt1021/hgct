@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import ProfileInfo from '@/components/profile/ProfileInfo'
 import ChartList from '@/components/profile/ChartList'
@@ -27,6 +28,7 @@ function ProfileContent() {
 
   // Local state for instant highlight — syncs from URL on mount/nav
   const [activeTab, setActiveTab] = useState<TabId>(urlTab)
+  const [displayTen, setDisplayTen] = useState('')
 
   useEffect(() => {
     setActiveTab(urlTab)
@@ -35,6 +37,17 @@ function ProfileContent() {
   useEffect(() => {
     if (!isLoading && !user) router.push('/auth/login')
   }, [user, isLoading, router])
+
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/user/account', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { mainChartData?: Record<string, string> | null } | null) => {
+        const ten = data?.mainChartData?.ten
+        setDisplayTen(ten?.trim() || '')
+      })
+      .catch(() => {})
+  }, [user?.uid])
 
   if (isLoading || !user) return null
 
@@ -95,13 +108,25 @@ function ProfileContent() {
           {/* User badge */}
           <div className="px-5 pt-6 pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: user.isPremium ? 'rgba(201,168,76,0.12)' : 'rgba(61,43,94,0.5)', border: `1px solid ${user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'}` }}>
-                <span style={{ fontSize: '1rem' }}>{user.isPremium ? '✦' : '○'}</span>
-              </div>
+              {user.image ? (
+                <Image
+                  src={user.image}
+                  alt="avatar"
+                  width={36}
+                  height={36}
+                  className="rounded-full object-cover flex-shrink-0"
+                  style={{ border: `1px solid ${user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'}` }}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: user.isPremium ? 'rgba(201,168,76,0.12)' : 'rgba(61,43,94,0.5)', border: `1px solid ${user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'}` }}>
+                  <span style={{ fontSize: '1rem' }}>{user.isPremium ? '✦' : '○'}</span>
+                </div>
+              )}
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
-                  {user.username}
+                  {displayTen || user.username}
                 </p>
                 <p className="text-xs" style={{ color: user.isPremium ? '#d9ab55' : '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
                   {user.isPremium ? 'Premium ✦' : 'Miễn phí'}

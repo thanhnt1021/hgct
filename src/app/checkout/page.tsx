@@ -68,7 +68,14 @@ export default function CheckoutPage() {
     if (data) setInputData(JSON.parse(data))
     if (dataB) setInputDataB(JSON.parse(dataB))
 
-    if (user?.email) setEmail(user.email)
+    // Pre-fill with reportEmail if set, else account email
+    fetch('/api/user/account', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { reportEmail?: string; accountEmail?: string } | null) => {
+        const prefill = data?.reportEmail || data?.accountEmail || user?.email || ''
+        if (prefill) setEmail(prefill)
+      })
+      .catch(() => { if (user?.email) setEmail(user.email) })
   }, [user, router])
 
   const nameA = (inputData?.name as string) || ''

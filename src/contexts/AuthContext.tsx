@@ -9,6 +9,8 @@ interface User {
   email: string
   isPremium: boolean
   premiumToken: string
+  image?: string
+  uid?: string
 }
 
 interface AuthContextType {
@@ -26,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session = null, status = 'unauthenticated' as const } = useSession() ?? {}
   const [premiumOverride, setPremiumOverride] = useState<boolean | null>(null)
 
-  type SessionUserExt = { uid?: string; username?: string; isPremium?: boolean; name?: string | null; email?: string | null }
+  type SessionUserExt = { uid?: string; username?: string; isPremium?: boolean; name?: string | null; email?: string | null; image?: string | null }
   const sessionUser = session?.user as SessionUserExt | undefined
 
   const user: User | null = sessionUser
@@ -36,6 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: sessionUser.email ?? '',
         isPremium: premiumOverride ?? sessionUser.isPremium ?? false,
         premiumToken: '',
+        image: sessionUser.image ?? undefined,
+        uid: sessionUser.uid,
       }
     : null
 

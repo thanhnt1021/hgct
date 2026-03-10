@@ -24,7 +24,8 @@ export default function ProfileInfo() {
   const [pendingFormData, setPendingFormData] = useState<ProfileFormData | null>(null)
 
   // Email
-  const [acEmail, setAcEmail] = useState('')
+  const [accountEmail, setAccountEmail] = useState('')   // readonly — từ Google/đăng ký
+  const [acEmail, setAcEmail] = useState('')             // reportEmail — email nhận PDF
   const [acLoading, setAcLoading] = useState(false)
   const [acError, setAcError] = useState('')
   const [acSuccess, setAcSuccess] = useState(false)
@@ -44,11 +45,7 @@ export default function ProfileInfo() {
   const [upgradeError, setUpgradeError] = useState('')
 
   useEffect(() => {
-    if (user) setAcEmail(user.email || '')
-  }, [user])
-
-  useEffect(() => {
-    fetch('/api/user/account')
+    fetch('/api/user/account', { cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
         if (data.mainChartData) {
@@ -56,10 +53,14 @@ export default function ProfileInfo() {
           setMainChart(formData)
           if (_profileId) setMainChartProfileId(String(_profileId))
         }
+        // accountEmail: từ tài khoản, không thay đổi được
+        setAccountEmail(data.accountEmail || user?.email || '')
+        // reportEmail: email nhận PDF, mặc định = accountEmail nếu chưa set
+        setAcEmail(data.reportEmail || data.accountEmail || user?.email || '')
       })
       .catch(() => {})
       .finally(() => setMainChartLoading(false))
-  }, [])
+  }, [user?.uid])
 
   const doSaveMainChart = async (formData: ProfileFormData, existingProfileId?: string) => {
     setMainChartSaving(true)
@@ -138,7 +139,7 @@ export default function ProfileInfo() {
     const res = await fetch('/api/user/account', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: acEmail }),
+      body: JSON.stringify({ reportEmail: acEmail }),
     })
     const data = await res.json()
     setAcLoading(false)
@@ -335,19 +336,33 @@ export default function ProfileInfo() {
               {user.username}
             </div>
           </div>
+          {/* Email tài khoản — readonly */}
           <div>
-            <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL</label>
+            <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL TÀI KHOẢN</label>
+            <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+              {accountEmail || <span style={{ color: '#4a4560' }}>Chưa có email tài khoản</span>}
+            </div>
+            <p className="mt-1 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+              Email đăng nhập hoặc email Google, không thể thay đổi.
+            </p>
+          </div>
+          {/* Email nhận PDF — editable */}
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL NHẬN BÁO CÁO PDF</label>
             <div className="flex gap-2">
               <input type="email" value={acEmail} onChange={e => setAcEmail(e.target.value)}
                 placeholder="email@example.com" className="flex-1" style={{ fontFamily: 'var(--font-vietnam)' }} />
               <button onClick={handleUpdateEmail} disabled={acLoading || !acEmail.trim()}
                 className="px-4 py-2 rounded-xl font-semibold text-sm"
                 style={{ background: acEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: acEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap' }}>
-                {acLoading ? 'Đang lưu...' : 'Lưu email'}
+                {acLoading ? 'Đang lưu...' : 'Lưu'}
               </button>
             </div>
             {acError && <p className="mt-1.5 text-xs" style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)' }}>{acError}</p>}
-            {acSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Email đã cập nhật!</p>}
+            {acSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Đã cập nhật email nhận PDF!</p>}
+            <p className="mt-1 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+              PDF báo cáo sẽ được gửi đến địa chỉ này.
+            </p>
           </div>
         </div>
       </div>

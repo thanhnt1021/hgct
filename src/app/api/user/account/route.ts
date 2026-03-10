@@ -9,8 +9,15 @@ export async function GET() {
   const uid = (session.user as any).uid
   if (!uid) return NextResponse.json({ error: 'Session không hợp lệ' }, { status: 401 })
 
-  const user = await prisma.user.findUnique({ where: { userUid: uid }, select: { mainChartData: true } })
-  return NextResponse.json({ mainChartData: user?.mainChartData ?? null })
+  const user = await prisma.user.findUnique({
+    where: { userUid: uid },
+    select: { mainChartData: true, email: true, reportEmail: true },
+  })
+  return NextResponse.json({
+    mainChartData: user?.mainChartData ?? null,
+    accountEmail: user?.email ?? null,
+    reportEmail: user?.reportEmail ?? null,
+  })
 }
 
 export async function PUT(request: Request) {
@@ -22,17 +29,12 @@ export async function PUT(request: Request) {
   const body = await request.json()
   const updates: Record<string, unknown> = {}
 
-  if ('email' in body) {
-    const { email } = body
-    if (!email || !email.includes('@') || !email.includes('.')) {
+  if ('reportEmail' in body) {
+    const { reportEmail } = body
+    if (!reportEmail || !reportEmail.includes('@') || !reportEmail.includes('.')) {
       return NextResponse.json({ error: 'Email không hợp lệ' }, { status: 400 })
     }
-    const normalized = email.trim().toLowerCase()
-    const existing = await prisma.user.findUnique({ where: { email: normalized } })
-    if (existing && existing.userUid !== uid) {
-      return NextResponse.json({ error: 'Email này đã được sử dụng bởi tài khoản khác' }, { status: 409 })
-    }
-    updates.email = normalized
+    updates.reportEmail = reportEmail.trim().toLowerCase()
   }
 
   if ('mainChartData' in body) {

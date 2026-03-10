@@ -3,7 +3,7 @@
 // VISUAL ONLY — navigation bar restyled to Celestial Sanctum design
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 
@@ -11,7 +11,20 @@ export default function Navbar() {
   const { user, logout, isLoading } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
+  const [displayTen, setDisplayTen] = useState<string>('')
   const router = useRouter()
+
+  // Fetch "Tên" from main chart data (first name override)
+  useEffect(() => {
+    if (!user) { setDisplayTen(''); return }
+    fetch('/api/user/account', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { mainChartData?: Record<string, string> | null } | null) => {
+        const ten = data?.mainChartData?.ten
+        setDisplayTen(ten?.trim() || '')
+      })
+      .catch(() => setDisplayTen(''))
+  }, [user?.uid])
 
   const handleLogout = () => {
     logout()
@@ -19,9 +32,12 @@ export default function Navbar() {
     router.push('/')
   }
 
-  const initials = user?.name
-    ? user.name.split(' ').map(w => w[0]).slice(-2).join('').toUpperCase()
-    : '?'
+  // Display name: Tên (from chart) > Google name > username
+  const dropdownName = displayTen || user?.name || user?.username || ''
+  // Initials fallback when no avatar image
+  const initials = dropdownName
+    ? dropdownName.trim().split(' ').map((w: string) => w[0]).slice(-2).join('').toUpperCase()
+    : (user?.username?.[0] ?? '?').toUpperCase()
 
   return (
     <nav
@@ -38,7 +54,6 @@ export default function Navbar() {
 
           {/* ── Logo ── */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            {/* Constellation mark */}
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style={{ flexShrink: 0 }}>
               <circle cx="11" cy="11" r="2.5" fill="#d9ab55" opacity="0.9"/>
               <circle cx="3"  cy="4"  r="1.2" fill="#d9ab55" opacity="0.6"/>
@@ -67,21 +82,29 @@ export default function Navbar() {
             {!isLoading && (
               user ? (
                 <div className="relative">
-                  <button onClick={() => setAvatarOpen(!avatarOpen)} className="flex items-center gap-2 group">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                      style={{
-                        background: 'linear-gradient(135deg, #261c56, #38287a)',
-                        color: '#d9ab55',
-                        border: '1.5px solid rgba(217,171,85,0.45)',
-                        fontFamily: 'var(--font-vietnam)',
-                      }}
-                    >
-                      {initials}
-                    </div>
-                    <span className="text-sm" style={{ color: '#c9c3d6', fontFamily: 'var(--font-vietnam)' }}>
-                      {user.name.split(' ').slice(-1)[0]}
-                    </span>
+                  <button onClick={() => setAvatarOpen(!avatarOpen)} className="flex items-center group">
+                    {/* Avatar: Google image or initials */}
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt="avatar"
+                        className="w-8 h-8 rounded-full object-cover"
+                        style={{ border: '1.5px solid rgba(217,171,85,0.45)' }}
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                        style={{
+                          background: 'linear-gradient(135deg, #261c56, #38287a)',
+                          color: '#d9ab55',
+                          border: '1.5px solid rgba(217,171,85,0.45)',
+                          fontFamily: 'var(--font-vietnam)',
+                        }}
+                      >
+                        {initials}
+                      </div>
+                    )}
                   </button>
 
                   {avatarOpen && (
@@ -96,7 +119,7 @@ export default function Navbar() {
                     >
                       <div className="px-4 py-2.5 border-b" style={{ borderColor: 'rgba(200,148,63,0.1)' }}>
                         <p className="text-sm font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
-                          {user.name}
+                          {dropdownName}
                         </p>
                         <p className="text-xs mt-0.5" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)' }}>
                           {user.email}
@@ -126,12 +149,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
-                  <Link
-                    href="/auth/login"
-                    className="nav-link"
-                  >
-                    Đăng nhập
-                  </Link>
+                  <Link href="/auth/login" className="nav-link">Đăng nhập</Link>
                   <Link
                     href="/auth/register"
                     className="px-4 py-2 text-xs font-bold tracking-wider transition-all hover:opacity-90"

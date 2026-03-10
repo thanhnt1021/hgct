@@ -2,9 +2,13 @@
 const nextConfig = {
   output: 'standalone',
   serverExternalPackages: ['swisseph', 'puppeteer'],
-  // Target modern browsers to eliminate unnecessary polyfills
   experimental: {
     optimizePackageImports: ['lucide-react'],
+  },
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+    ],
   },
 }
 
