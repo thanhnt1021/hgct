@@ -114,13 +114,13 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label style={labelStyle}>Tên đăng nhập</label>
+              <label style={labelStyle}>Tên đăng nhập hoặc Email</label>
               <input
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 required
-                placeholder="username"
+                placeholder="username hoặc email@example.com"
               />
             </div>
             <div>

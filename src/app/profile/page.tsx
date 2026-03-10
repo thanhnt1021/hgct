@@ -46,10 +46,18 @@ export default function ProfilePage() {
   const [cpLoading, setCpLoading] = useState(false)
   const [cpError, setCpError] = useState('')
   const [cpSuccess, setCpSuccess] = useState(false)
+  const [acEmail, setAcEmail] = useState('')
+  const [acLoading, setAcLoading] = useState(false)
+  const [acError, setAcError] = useState('')
+  const [acSuccess, setAcSuccess] = useState(false)
 
   useEffect(() => {
     if (!isLoading && !user) router.push('/auth/login')
   }, [user, isLoading, router])
+
+  useEffect(() => {
+    if (user) setAcEmail(user.email || '')
+  }, [user])
 
   useEffect(() => {
     fetch('/api/profiles')
@@ -156,6 +164,20 @@ export default function ProfilePage() {
     }
   }
 
+  const handleUpdateAccount = async () => {
+    setAcLoading(true); setAcError(''); setAcSuccess(false)
+    const res = await fetch('/api/user/account', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: acEmail }),
+    })
+    const data = await res.json()
+    setAcLoading(false)
+    if (!res.ok) { setAcError(data.error || 'Lỗi'); return }
+    setAcSuccess(true)
+    setTimeout(() => setAcSuccess(false), 3000)
+  }
+
   const handleChangePassword = async () => {
     if (cpNew !== cpConfirm) { setCpError('Mật khẩu không khớp'); return }
     if (cpNew.length < 6) { setCpError('Mật khẩu ít nhất 6 ký tự'); return }
@@ -248,6 +270,49 @@ export default function ProfilePage() {
               )}
             </div>
           )}
+        </div>
+
+        {/* Warning: no email */}
+        {user && !user.email && (
+          <div className="mb-6 p-4 rounded-xl text-sm" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', color: '#fbbf24', fontFamily: 'var(--font-vietnam)' }}>
+            ⚠️ Tài khoản chưa có email. Thêm email bên dưới để có thể đăng nhập bằng email và khôi phục mật khẩu.
+          </div>
+        )}
+
+        {/* Thông tin tài khoản */}
+        <div className="mb-8 rounded-2xl p-6" style={{ background: 'rgba(26,21,53,0.6)', border: '1px solid rgba(201,168,76,0.12)' }}>
+          <h3 className="mb-4 font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Thông tin tài khoản</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>TÊN ĐĂNG NHẬP</label>
+              <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+                {user?.username}
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL</label>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={acEmail}
+                  onChange={e => setAcEmail(e.target.value)}
+                  placeholder="email@example.com"
+                  className="flex-1"
+                  style={{ fontFamily: 'var(--font-vietnam)' }}
+                />
+                <button
+                  onClick={handleUpdateAccount}
+                  disabled={acLoading || !acEmail.trim()}
+                  className="px-4 py-2 rounded-xl font-semibold text-sm"
+                  style={{ background: acEmail.trim() ? 'linear-gradient(135deg, #c8943f, #f0cc78)' : 'rgba(201,168,76,0.15)', color: acEmail.trim() ? '#06060f' : '#6b7280', fontFamily: 'var(--font-vietnam)', whiteSpace: 'nowrap', transition: 'all 0.2s' }}
+                >
+                  {acLoading ? 'Đang lưu...' : 'Lưu email'}
+                </button>
+              </div>
+              {acError && <p className="mt-1.5 text-xs" style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)' }}>{acError}</p>}
+              {acSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Email đã được cập nhật! Bạn có thể dùng email này để đăng nhập.</p>}
+            </div>
+          </div>
         </div>
 
         {/* Đổi mật khẩu */}
