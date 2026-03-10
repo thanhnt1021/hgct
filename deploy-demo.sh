@@ -56,6 +56,8 @@ fi
 echo "[4/6] Building..."
 cd "$DEMO_DIR"
 rm -rf .next
+# Regenerate Prisma client in case schema changed
+DATABASE_URL=$(grep DATABASE_URL "$DEMO_DIR/.env.local" | cut -d= -f2- | tr -d '"') npx prisma generate
 npx next build
 
 # 5. Copy static assets to standalone
