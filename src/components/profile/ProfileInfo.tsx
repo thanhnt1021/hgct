@@ -12,9 +12,15 @@ export default function ProfileInfo() {
 
   // Main chart (bản đồ chính của tài khoản)
   const [mainChart, setMainChart] = useState<ProfileFormData | null>(null)
+  const [mainChartProfileId, setMainChartProfileId] = useState<string | null>(null)
   const [mainChartLoading, setMainChartLoading] = useState(true)
   const [mainChartModalOpen, setMainChartModalOpen] = useState(false)
   const [mainChartSaving, setMainChartSaving] = useState(false)
+
+  // Duplicate name check dialog
+  const [dupCheckOpen, setDupCheckOpen] = useState(false)
+  const [dupProfile, setDupProfile] = useState<{ id: string; name: string } | null>(null)
+  const [pendingFormData, setPendingFormData] = useState<ProfileFormData | null>(null)
 
   // Email
   const [acEmail, setAcEmail] = useState('')
@@ -44,24 +50,83 @@ export default function ProfileInfo() {
     fetch('/api/user/account')
       .then(r => r.json())
       .then(data => {
-        if (data.mainChartData) setMainChart(data.mainChartData as ProfileFormData)
+        if (data.mainChartData) {
+          const { _profileId, ...formData } = data.mainChartData as ProfileFormData & { _profileId?: string }
+          setMainChart(formData)
+          if (_profileId) setMainChartProfileId(String(_profileId))
+        }
       })
       .catch(() => {})
       .finally(() => setMainChartLoading(false))
   }, [])
 
-  const handleSaveMainChart = async (data: ProfileFormData) => {
+  const doSaveMainChart = async (formData: ProfileFormData, existingProfileId?: string) => {
     setMainChartSaving(true)
-    const res = await fetch('/api/user/account', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mainChartData: data }),
-    })
+    try {
+      const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
+      let profileId: string | null = existingProfileId ?? mainChartProfileId ?? null
+
+      if (existingProfileId) {
+        // Link to an existing profile (user confirmed dup)
+        await fetch('/api/profiles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: existingProfileId, name, gender: formData.gender, data: formData }),
+        })
+        profileId = existingProfileId
+      } else if (profileId) {
+        // Update currently linked profile
+        await fetch('/api/profiles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: profileId, name, gender: formData.gender, data: formData }),
+        })
+      } else {
+        // Create new profile
+        const res = await fetch('/api/profiles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, gender: formData.gender, data: formData }),
+        })
+        const created = await res.json()
+        if (created.profile) profileId = String(created.profile.id)
+      }
+
+      const toSave = { ...formData, _profileId: profileId }
+      const res = await fetch('/api/user/account', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mainChartData: toSave }),
+      })
+      if (res.ok) {
+        setMainChart(formData)
+        setMainChartProfileId(profileId)
+        setMainChartModalOpen(false)
+        window.dispatchEvent(new CustomEvent('profiles:refresh'))
+      }
+    } catch { /* ignore */ }
     setMainChartSaving(false)
-    if (res.ok) {
-      setMainChart(data)
-      setMainChartModalOpen(false)
-    }
+  }
+
+  const handleSaveMainChart = async (formData: ProfileFormData) => {
+    const newName = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
+    try {
+      const res = await fetch('/api/profiles')
+      const data = await res.json()
+      if (data.profiles) {
+        const dup = (data.profiles as any[]).find(p =>
+          p.name.trim().toLowerCase() === newName.trim().toLowerCase() &&
+          String(p.id) !== mainChartProfileId
+        )
+        if (dup) {
+          setPendingFormData(formData)
+          setDupProfile({ id: String(dup.id), name: dup.name })
+          setDupCheckOpen(true)
+          return
+        }
+      }
+    } catch { /* proceed without dup check */ }
+    await doSaveMainChart(formData)
   }
 
   const handleUpdateEmail = async () => {
@@ -215,20 +280,31 @@ export default function ProfileInfo() {
                 {mainChart.loc.address}
               </p>
             </div>
-            <button
-              onClick={() => {
-                sessionStorage.setItem('inputData', JSON.stringify({
-                  name: displayName, gender: mainChart.gender, dob: mainChart.dob,
-                  tob: { hour: mainChart.tob.unknown ? 12 : (mainChart.tob.hour >= 0 ? mainChart.tob.hour : 12), minute: mainChart.tob.unknown ? 0 : (mainChart.tob.minute >= 0 ? mainChart.tob.minute : 0) },
-                  loc: mainChart.loc,
-                }))
-                router.push('/services')
-              }}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0"
-              style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
-            >
-              Dịch vụ →
-            </button>
+            <div className="flex gap-1.5 flex-shrink-0 flex-wrap">
+              {mainChartProfileId && (
+                <button
+                  onClick={() => router.push(`/chart?id=${mainChartProfileId}`)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold"
+                  style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+                >
+                  Bản đồ ✦
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  sessionStorage.setItem('inputData', JSON.stringify({
+                    name: displayName, gender: mainChart.gender, dob: mainChart.dob,
+                    tob: { hour: mainChart.tob.unknown ? 12 : (mainChart.tob.hour >= 0 ? mainChart.tob.hour : 12), minute: mainChart.tob.unknown ? 0 : (mainChart.tob.minute >= 0 ? mainChart.tob.minute : 0) },
+                    loc: mainChart.loc,
+                  }))
+                  router.push('/services')
+                }}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold"
+                style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+              >
+                Dịch vụ →
+              </button>
+            </div>
           </div>
         ) : (
           /* CTA when not set */
@@ -304,6 +380,52 @@ export default function ProfileInfo() {
         onSave={handleSaveMainChart}
         onClose={() => setMainChartModalOpen(false)}
       />
+
+      {/* Duplicate name dialog */}
+      {dupCheckOpen && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          onClick={() => setDupCheckOpen(false)}
+        >
+          <div
+            style={{ background: '#120d2e', border: '1px solid rgba(200,148,63,0.25)', borderRadius: '1rem', padding: '1.5rem', maxWidth: '420px', width: '100%' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="font-bold mb-2" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+              Đã tồn tại hồ sơ
+            </p>
+            <p className="text-sm mb-5" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', lineHeight: 1.7 }}>
+              Đã có hồ sơ tên <strong style={{ color: '#d9ab55' }}>{dupProfile?.name}</strong> trong danh sách. Bạn có muốn cập nhật hồ sơ đó làm thông tin của bản thân không?
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={async () => {
+                  setDupCheckOpen(false)
+                  if (pendingFormData && dupProfile) await doSaveMainChart(pendingFormData, dupProfile.id)
+                }}
+                style={{ background: 'linear-gradient(135deg,#c8943f,#f0cc78)', color: '#06060f', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', border: 'none' }}
+              >
+                Có, cập nhật
+              </button>
+              <button
+                onClick={async () => {
+                  setDupCheckOpen(false)
+                  if (pendingFormData) await doSaveMainChart(pendingFormData)
+                }}
+                style={{ background: 'rgba(200,148,63,0.08)', color: '#d9ab55', border: '1px solid rgba(200,148,63,0.2)', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                Không, thêm mới
+              </button>
+              <button
+                onClick={() => setDupCheckOpen(false)}
+                style={{ background: 'rgba(11,11,31,0.8)', color: '#6b7280', border: '1px solid rgba(200,148,63,0.08)', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

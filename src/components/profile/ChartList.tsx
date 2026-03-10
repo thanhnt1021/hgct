@@ -42,26 +42,38 @@ export default function ChartList() {
   const [saving, setSaving] = useState(false)
 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [mainProfileId, setMainProfileId] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/profiles')
-      .then(r => r.json())
-      .then(data => {
-        if (data.profiles) {
-          setProfiles(data.profiles.map((p: any) => ({
-            id: String(p.id),
-            ho: p.data?.ho || '', dem: p.data?.dem || '',
-            ten: p.data?.ten || p.name, name: p.name,
-            gender: p.gender || 'Female',
-            dob: p.data?.dob || { day: 0, month: 0, year: 0 },
-            tob: p.data?.tob || { hour: -1, minute: -1, unknown: false },
-            loc: p.data?.loc || { address: 'Hà Nội', lat: 21.02, lon: 105.84, tz: 'Asia/Ho_Chi_Minh' },
-            createdAt: p.createdAt || '',
-          })))
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    const loadData = () => {
+      fetch('/api/profiles')
+        .then(r => r.json())
+        .then(data => {
+          if (data.profiles) {
+            setProfiles(data.profiles.map((p: any) => ({
+              id: String(p.id),
+              ho: p.data?.ho || '', dem: p.data?.dem || '',
+              ten: p.data?.ten || p.name, name: p.name,
+              gender: p.gender || 'Female',
+              dob: p.data?.dob || { day: 0, month: 0, year: 0 },
+              tob: p.data?.tob || { hour: -1, minute: -1, unknown: false },
+              loc: p.data?.loc || { address: 'Hà Nội', lat: 21.02, lon: 105.84, tz: 'Asia/Ho_Chi_Minh' },
+              createdAt: p.createdAt || '',
+            })))
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false))
+      fetch('/api/user/account')
+        .then(r => r.json())
+        .then(data => {
+          setMainProfileId(data.mainChartData?._profileId ? String(data.mainChartData._profileId) : null)
+        })
+        .catch(() => {})
+    }
+    loadData()
+    window.addEventListener('profiles:refresh', loadData)
+    return () => window.removeEventListener('profiles:refresh', loadData)
   }, [])
 
   const openNew = () => {
@@ -251,7 +263,14 @@ export default function ChartList() {
                 {p.gender === 'Female' ? '♀' : p.gender === 'Male' ? '♂' : '⊕'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>{p.name}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>{p.name}</p>
+                  {mainProfileId === p.id && (
+                    <span style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '4px', padding: '0.1rem 0.4rem', fontSize: '0.65rem', fontWeight: 700, fontFamily: 'var(--font-vietnam)', whiteSpace: 'nowrap' }}>
+                      ✦ Bạn
+                    </span>
+                  )}
+                </div>
                 <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginTop: '0.1rem' }}>
                   {p.dob.day > 0 ? `${p.dob.day}/${p.dob.month}/${p.dob.year}` : 'Chưa có ngày'} ·{' '}
                   {p.tob.unknown ? 'Không rõ giờ' : p.tob.hour >= 0 ? `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
