@@ -7,10 +7,10 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=/root/hgct-demo/.next/standalone
-Environment="PORT=65499"
+Environment="PORT=65500"
 Environment="NODE_ENV=production"
 EnvironmentFile=/root/hgct-demo/.env.local
-ExecStartPre=/bin/sh -c 'fuser -k 65499/tcp 2>/dev/null || true'
+ExecStartPre=/bin/sh -c 'fuser -k 65500/tcp 2>/dev/null || true'
 ExecStartPre=/bin/sleep 1
 ExecStart=/usr/bin/node /root/hgct-demo/.next/standalone/server.js
 Restart=always

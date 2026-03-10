@@ -47,7 +47,7 @@ if [ ! -f "$DEMO_DIR/.env.local" ]; then
   cp "$APP_DIR/.env.local" "$DEMO_DIR/.env.local"
   sed -i 's|NEXTAUTH_URL=.*|NEXTAUTH_URL=https://demo.hatgiongchiemtinh.com|' "$DEMO_DIR/.env.local"
   sed -i 's|NEXT_PUBLIC_APP_URL=.*|NEXT_PUBLIC_APP_URL=https://demo.hatgiongchiemtinh.com|' "$DEMO_DIR/.env.local"
-  sed -i 's|APP_PORT=.*|APP_PORT=65499|' "$DEMO_DIR/.env.local"
+  sed -i 's|APP_PORT=.*|APP_PORT=65500|' "$DEMO_DIR/.env.local"
 else
   echo "[3/6] Demo .env.local exists"
 fi
@@ -69,7 +69,7 @@ cp -r "$DEMO_DIR/public" "$DEMO_DIR/.next/standalone/public"
 # 6. Systemd service
 echo "[6/6] Starting hgct-demo service..."
 cp "$APP_DIR/server_conf/hgct-demo.service" /etc/systemd/system/hgct-demo.service
-fuser -k 65499/tcp 2>/dev/null || true
+fuser -k 65500/tcp 2>/dev/null || true
 sleep 1
 systemctl daemon-reload
 systemctl restart hgct-demo.service
