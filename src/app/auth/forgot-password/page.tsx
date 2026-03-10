@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
 
 type Step = 'identifier' | 'newPassword' | 'success'
 
@@ -55,6 +56,8 @@ export default function ForgotPasswordPage() {
     const data = await res.json()
     setLoading(false)
     if (!res.ok) { setError(data.error || 'Đặt lại thất bại'); return }
+    // Hủy session cũ để tránh conflict khi đăng nhập lại
+    await signOut({ redirect: false })
     setStep('success')
   }
 
