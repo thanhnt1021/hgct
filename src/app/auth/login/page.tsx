@@ -134,6 +134,17 @@ export default function LoginPage() {
               />
             </div>
 
+            <div className="text-right" style={{ marginTop: '-0.5rem' }}>
+              <Link
+                href="/auth/forgot-password"
+                style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#d9ab55')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#8a8399')}
+              >
+                Quên mật khẩu?
+              </Link>
+            </div>
+
             <button
               type="submit"
               disabled={loading}

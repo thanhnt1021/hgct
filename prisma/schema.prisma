@@ -15,8 +15,10 @@ model User {
   userUid      String    @unique @map("user_uid")
   createdAt    String    @default("") @map("created_at")
   isPremium    Boolean  @default(false) @map("is_premium")
-  premiumToken String?  @map("premium_token")
-  profiles     Profile[]
+  premiumToken     String?   @map("premium_token")
+  resetToken       String?   @map("reset_token")
+  resetTokenExpiry DateTime? @map("reset_token_expiry")
+  profiles         Profile[]
 
   @@map("users")
 }
