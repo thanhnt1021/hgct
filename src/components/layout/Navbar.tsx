@@ -7,24 +7,67 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 
+interface NavAvatarProps { user: { image?: string }; avatarVersion: number; initials: string; size: number }
+function NavAvatar({ user, avatarVersion, initials, size }: NavAvatarProps) {
+  const [showCustom, setShowCustom] = useState(true)
+  const [showGoogle, setShowGoogle] = useState(false)
+
+  useEffect(() => { setShowCustom(true); setShowGoogle(false) }, [avatarVersion])
+
+  const style = { width: size, height: size, border: '1.5px solid rgba(217,171,85,0.45)', borderRadius: '50%' }
+
+  if (showCustom) return (
+    <img src={`/api/user/avatar?v=${avatarVersion}`} alt="avatar"
+      style={{ ...style, objectFit: 'cover' }}
+      referrerPolicy="no-referrer"
+      onError={() => { setShowCustom(false); setShowGoogle(!!user.image) }} />
+  )
+  if (showGoogle && user.image) return (
+    <img src={user.image} alt="avatar"
+      style={{ ...style, objectFit: 'cover' }}
+      referrerPolicy="no-referrer"
+      onError={() => setShowGoogle(false)} />
+  )
+  return (
+    <div style={{ ...style, background: 'linear-gradient(135deg,#261c56,#38287a)', color: '#d9ab55', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.35, fontWeight: 700 }}>
+      {initials}
+    </div>
+  )
+}
+
 export default function Navbar() {
   const { user, logout, isLoading } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
   const [displayTen, setDisplayTen] = useState<string>('')
+  const [avatarVersion, setAvatarVersion] = useState(Date.now())
   const router = useRouter()
 
-  // Fetch "Tên" from main chart data (first name override)
+  // Fetch "Tên" from main chart data on login
   useEffect(() => {
     if (!user) { setDisplayTen(''); return }
     fetch('/api/user/account', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then((data: { mainChartData?: Record<string, string> | null } | null) => {
-        const ten = data?.mainChartData?.ten
-        setDisplayTen(ten?.trim() || '')
+        setDisplayTen(data?.mainChartData?.ten?.trim() || '')
       })
       .catch(() => setDisplayTen(''))
   }, [user?.uid])
+
+  // Listen for real-time chart updates + avatar updates
+  useEffect(() => {
+    const onChartUpdated = (e: Event) => {
+      const ten = (e as CustomEvent).detail?.ten ?? ''
+      setDisplayTen(ten.trim())
+    }
+    const onAvatarUpdated = () => setAvatarVersion(Date.now())
+    window.addEventListener('chart:updated', onChartUpdated)
+    window.addEventListener('avatar:updated', onAvatarUpdated)
+    return () => {
+      window.removeEventListener('chart:updated', onChartUpdated)
+      window.removeEventListener('avatar:updated', onAvatarUpdated)
+    }
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -83,28 +126,7 @@ export default function Navbar() {
               user ? (
                 <div className="relative">
                   <button onClick={() => setAvatarOpen(!avatarOpen)} className="flex items-center group">
-                    {/* Avatar: Google image or initials */}
-                    {user.image ? (
-                      <img
-                        src={user.image}
-                        alt="avatar"
-                        className="w-8 h-8 rounded-full object-cover"
-                        style={{ border: '1.5px solid rgba(217,171,85,0.45)' }}
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                        style={{
-                          background: 'linear-gradient(135deg, #261c56, #38287a)',
-                          color: '#d9ab55',
-                          border: '1.5px solid rgba(217,171,85,0.45)',
-                          fontFamily: 'var(--font-vietnam)',
-                        }}
-                      >
-                        {initials}
-                      </div>
-                    )}
+                    <NavAvatar user={user} avatarVersion={avatarVersion} initials={initials} size={32} />
                   </button>
 
                   {avatarOpen && (

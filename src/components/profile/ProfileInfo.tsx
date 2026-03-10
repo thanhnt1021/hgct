@@ -1,14 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { Pencil } from 'lucide-react'
 import ProfileFormModal, { ProfileFormData, EMPTY_PROFILE_FORM } from './ProfileFormModal'
+import AvatarCropModal from './AvatarCropModal'
 
 export default function ProfileInfo() {
   const { user, upgradeToPremium } = useAuth()
   const router = useRouter()
+
+  // Avatar
+  const [avatarCropFile, setAvatarCropFile] = useState<File | null>(null)
+  const [avatarVersion, setAvatarVersion] = useState(Date.now())
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Main chart (bản đồ chính của tài khoản)
   const [mainChart, setMainChart] = useState<ProfileFormData | null>(null)
@@ -108,6 +115,7 @@ export default function ProfileInfo() {
         setMainChartProfileId(profileId)
         setMainChartModalOpen(false)
         window.dispatchEvent(new CustomEvent('profiles:refresh', { detail: { mainProfileId: profileId } }))
+        window.dispatchEvent(new CustomEvent('chart:updated', { detail: { ten: formData.ten?.trim() || '' } }))
       }
     } catch { /* ignore */ }
     setMainChartSaving(false)
@@ -146,6 +154,21 @@ export default function ProfileInfo() {
     if (!res.ok) { setAcError(data.error || 'Lỗi'); return }
     setAcSuccess(true)
     setTimeout(() => setAcSuccess(false), 3000)
+  }
+
+  const handleAvatarCropped = async (blob: Blob) => {
+    setAvatarUploading(true)
+    const form = new FormData()
+    form.append('avatar', blob, 'avatar.jpg')
+    const res = await fetch('/api/user/avatar', { method: 'POST', body: form })
+    setAvatarUploading(false)
+    setAvatarCropFile(null)
+    if (res.ok) {
+      setAvatarVersion(Date.now())
+      window.dispatchEvent(new CustomEvent('avatar:updated'))
+    } else {
+      alert('Lỗi khi lưu ảnh, vui lòng thử lại')
+    }
   }
 
   const handleChangePassword = async () => {
@@ -323,6 +346,62 @@ export default function ProfileInfo() {
               + Thêm thông tin ngay
             </button>
           </div>
+        )}
+      </div>
+
+      {/* Avatar */}
+      <div style={cardStyle}>
+        <h3 className="font-bold mb-4" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Ảnh đại diện</h3>
+        <div className="flex items-center gap-5">
+          <div className="relative">
+            <img
+              key={avatarVersion}
+              src={`/api/user/avatar?v=${avatarVersion}`}
+              alt="avatar"
+              className="w-16 h-16 rounded-full object-cover"
+              style={{ border: '2px solid rgba(201,168,76,0.3)' }}
+              onError={e => {
+                // fallback: Google avatar or initials
+                const target = e.currentTarget
+                if (user.image && target.src !== user.image) {
+                  target.src = user.image
+                } else {
+                  target.style.display = 'none'
+                  const next = target.nextElementSibling as HTMLElement | null
+                  if (next) next.style.display = 'flex'
+                }
+              }}
+            />
+            {/* Initials fallback (hidden by default) */}
+            <div className="w-16 h-16 rounded-full items-center justify-center text-lg font-bold"
+              style={{ background: 'linear-gradient(135deg,#261c56,#38287a)', color: '#d9ab55', border: '2px solid rgba(201,168,76,0.3)', display: 'none', fontFamily: 'var(--font-vietnam)' }}>
+              {(user.name || user.username || '?')[0].toUpperCase()}
+            </div>
+            {avatarUploading && (
+              <div className="absolute inset-0 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)' }}>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+          <div>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) setAvatarCropFile(f); e.target.value = '' }} />
+            <button onClick={() => fileInputRef.current?.click()}
+              className="px-4 py-2 rounded-xl text-sm font-semibold"
+              style={{ background: 'rgba(201,168,76,0.12)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.25)', fontFamily: 'var(--font-vietnam)' }}>
+              Đổi ảnh đại diện
+            </button>
+            <p className="mt-2 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+              JPG, PNG. Ảnh sẽ được cắt thành hình tròn 200×200px.
+            </p>
+          </div>
+        </div>
+        {avatarCropFile && (
+          <AvatarCropModal
+            file={avatarCropFile}
+            onSave={handleAvatarCropped}
+            onClose={() => setAvatarCropFile(null)}
+          />
         )}
       </div>
 

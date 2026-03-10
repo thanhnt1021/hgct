@@ -1,9 +1,19 @@
 'use client'
-
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import Image from 'next/image'
+
+interface SidebarAvatarProps { user: { image?: string; isPremium: boolean; username: string }; avatarVersion: number }
+function SidebarAvatar({ user, avatarVersion }: SidebarAvatarProps) {
+  const [showCustom, setShowCustom] = useState(true)
+  const [showGoogle, setShowGoogle] = useState(false)
+  useEffect(() => { setShowCustom(true); setShowGoogle(false) }, [avatarVersion])
+  const borderColor = user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'
+  const style = { width: 36, height: 36, borderRadius: '50%', border: `1px solid ${borderColor}`, flexShrink: 0 as const }
+  if (showCustom) return <img src={`/api/user/avatar?v=${avatarVersion}`} alt="avatar" style={{ ...style, objectFit: 'cover' }} referrerPolicy="no-referrer" onError={() => { setShowCustom(false); setShowGoogle(!!user.image) }} />
+  if (showGoogle && user.image) return <img src={user.image} alt="avatar" style={{ ...style, objectFit: 'cover' }} referrerPolicy="no-referrer" onError={() => setShowGoogle(false)} />
+  return <div style={{ ...style, background: user.isPremium ? 'rgba(201,168,76,0.12)' : 'rgba(61,43,94,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '1rem' }}>{user.isPremium ? '✦' : '○'}</span></div>
+}
 import Navbar from '@/components/layout/Navbar'
 import ProfileInfo from '@/components/profile/ProfileInfo'
 import ChartList from '@/components/profile/ChartList'
@@ -29,6 +39,7 @@ function ProfileContent() {
   // Local state for instant highlight — syncs from URL on mount/nav
   const [activeTab, setActiveTab] = useState<TabId>(urlTab)
   const [displayTen, setDisplayTen] = useState('')
+  const [avatarVersion, setAvatarVersion] = useState(Date.now())
 
   useEffect(() => {
     setActiveTab(urlTab)
@@ -43,11 +54,24 @@ function ProfileContent() {
     fetch('/api/user/account', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then((data: { mainChartData?: Record<string, string> | null } | null) => {
-        const ten = data?.mainChartData?.ten
-        setDisplayTen(ten?.trim() || '')
+        setDisplayTen(data?.mainChartData?.ten?.trim() || '')
       })
       .catch(() => {})
   }, [user?.uid])
+
+  // Real-time updates from ProfileInfo
+  useEffect(() => {
+    const onChartUpdated = (e: Event) => {
+      setDisplayTen((e as CustomEvent).detail?.ten?.trim() ?? '')
+    }
+    const onAvatarUpdated = () => setAvatarVersion(Date.now())
+    window.addEventListener('chart:updated', onChartUpdated)
+    window.addEventListener('avatar:updated', onAvatarUpdated)
+    return () => {
+      window.removeEventListener('chart:updated', onChartUpdated)
+      window.removeEventListener('avatar:updated', onAvatarUpdated)
+    }
+  }, [])
 
   if (isLoading || !user) return null
 
@@ -108,22 +132,7 @@ function ProfileContent() {
           {/* User badge */}
           <div className="px-5 pt-6 pb-4">
             <div className="flex items-center gap-3">
-              {user.image ? (
-                <Image
-                  src={user.image}
-                  alt="avatar"
-                  width={36}
-                  height={36}
-                  className="rounded-full object-cover flex-shrink-0"
-                  style={{ border: `1px solid ${user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'}` }}
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: user.isPremium ? 'rgba(201,168,76,0.12)' : 'rgba(61,43,94,0.5)', border: `1px solid ${user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'}` }}>
-                  <span style={{ fontSize: '1rem' }}>{user.isPremium ? '✦' : '○'}</span>
-                </div>
-              )}
+              <SidebarAvatar user={user} avatarVersion={avatarVersion} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
                   {displayTen || user.username}
