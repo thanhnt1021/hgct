@@ -291,30 +291,33 @@ export default function ProfileInfo() {
             <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(201,168,76,0.2)', borderTopColor: '#c9a84c' }} />
           </div>
         ) : mainChart ? (
-          /* Display like a chart row */
-          <div className="flex items-center gap-3 rounded-xl px-4 py-3 flex-wrap"
+          /* Compact stacked card — same pattern as ChartList */
+          <div className="rounded-xl px-4 py-3"
             style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.1)' }}>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(61,43,94,0.6)', fontSize: '0.9rem' }}>
-              {mainChart.gender === 'Female' ? '♀' : mainChart.gender === 'Male' ? '♂' : '⊕'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}>
+            {/* Row 1: gender icon + name */}
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(61,43,94,0.6)', fontSize: '0.8rem' }}>
+                {mainChart.gender === 'Female' ? '♀' : mainChart.gender === 'Male' ? '♂' : '⊕'}
+              </div>
+              <p className="font-semibold truncate flex-1 min-w-0"
+                style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}>
                 {displayName || '(Chưa có tên)'}
               </p>
-              <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginTop: '0.1rem' }}>
-                {mainChart.dob.day > 0 ? `${mainChart.dob.day}/${mainChart.dob.month}/${mainChart.dob.year}` : 'Chưa có ngày'} ·{' '}
-                {mainChart.tob.unknown ? 'Không rõ giờ' : mainChart.tob.hour >= 0 ? `${String(mainChart.tob.hour).padStart(2,'0')}:${String(mainChart.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
-                {mainChart.loc.address}
-              </p>
             </div>
-            <div className="flex gap-1.5 flex-shrink-0 flex-wrap">
+            {/* Row 2: meta — single line, truncate */}
+            <p className="truncate mb-2.5"
+              style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', paddingLeft: '2.25rem' }}>
+              {mainChart.dob.day > 0 ? `${mainChart.dob.day}/${mainChart.dob.month}/${mainChart.dob.year}` : 'Chưa có ngày'} ·{' '}
+              {mainChart.tob.unknown ? 'Không rõ giờ' : mainChart.tob.hour >= 0 ? `${String(mainChart.tob.hour).padStart(2,'0')}:${String(mainChart.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
+              {mainChart.loc.address}
+            </p>
+            {/* Row 3: action buttons */}
+            <div className="flex gap-1.5 flex-wrap" style={{ paddingLeft: '2.25rem' }}>
               {mainChartProfileId && (
                 <button
                   onClick={() => router.push(`/chart?id=${mainChartProfileId}`)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
-                >
+                  style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
                   Bản đồ ✦
                 </button>
               )}
@@ -327,9 +330,7 @@ export default function ProfileInfo() {
                   }))
                   router.push('/services')
                 }}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
-              >
+                style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
                 Dịch vụ →
               </button>
             </div>

@@ -161,7 +161,8 @@ function ProfileContent() {
       )}
 
       {/* ── Main layout row ── */}
-      <div className="flex" style={{ paddingTop: 64, minHeight: 'calc(100vh - 64px)' }}>
+      <div className="flex justify-center" style={{ paddingTop: 64, minHeight: 'calc(100vh - 64px)' }}>
+        <div className="flex w-full max-w-7xl">
 
         {/* ── Sidebar ── */}
         <aside
@@ -198,15 +199,14 @@ function ProfileContent() {
         </aside>
 
         {/* ── Content ── */}
-        <main className="flex-1 flex justify-center overflow-x-hidden min-w-0">
-          <div className="w-full max-w-4xl px-4 md:px-8 pb-16" style={{ paddingTop: '3rem' }}>
-            {/* 3rem = 48px top padding: on mobile accounts for the 44px strip below navbar */}
-            {tab === 'info'    && <ProfileInfo />}
-            {tab === 'charts'  && <ChartList />}
-            {tab === 'history' && <HistoryReports />}
-            {tab === 'plans'   && <SubscriptionPlans />}
-          </div>
+        <main className="flex-1 overflow-x-hidden min-w-0 px-4 md:px-8 pb-16 pt-12 md:pt-8">
+          {tab === 'info'    && <ProfileInfo />}
+          {tab === 'charts'  && <ChartList />}
+          {tab === 'history' && <HistoryReports />}
+          {tab === 'plans'   && <SubscriptionPlans />}
         </main>
+
+        </div>{/* end max-w-7xl */}
       </div>
     </div>
   )
