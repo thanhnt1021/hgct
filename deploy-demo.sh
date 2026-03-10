@@ -19,15 +19,16 @@ git config --global --add safe.directory "$DEMO_DIR" 2>/dev/null || true
 mkdir -p /var/hgct/pdfs
 chmod 755 /var/hgct/pdfs
 
-# 1. Setup demo dir as git worktree if not exists
-if [ ! -d "$DEMO_DIR" ]; then
-  echo "[1/6] Creating git worktree at $DEMO_DIR..."
-  git -C "$APP_DIR" worktree add "$DEMO_DIR" "$BRANCH"
-else
-  echo "[1/6] Updating demo worktree to branch: $BRANCH..."
-  git -C "$DEMO_DIR" checkout "$BRANCH"
-  git -C "$DEMO_DIR" pull origin "$BRANCH" 2>/dev/null || true
+# 1. Setup demo dir as git clone if not exists
+if [ ! -d "$DEMO_DIR/.git" ]; then
+  echo "[1/6] Cloning repo to $DEMO_DIR..."
+  git clone "$APP_DIR" "$DEMO_DIR"
+  git -C "$DEMO_DIR" remote set-url origin git@github.com:hentaiikidd/hgct.git
 fi
+echo "[1/6] Switching demo to branch: $BRANCH..."
+git -C "$DEMO_DIR" fetch origin
+git -C "$DEMO_DIR" checkout "$BRANCH" 2>/dev/null || git -C "$DEMO_DIR" checkout -b "$BRANCH" "origin/$BRANCH"
+git -C "$DEMO_DIR" reset --hard "origin/$BRANCH"
 
 # 2. Install dependencies if needed
 if [ ! -d "$DEMO_DIR/node_modules" ]; then
