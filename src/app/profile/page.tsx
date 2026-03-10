@@ -40,6 +40,7 @@ export default function ProfilePage() {
   const [upgradeCode, setUpgradeCode] = useState('')
   const [upgrading, setUpgrading] = useState(false)
   const [upgradeError, setUpgradeError] = useState('')
+  const [showCharts, setShowCharts] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [cpNew, setCpNew] = useState('')
   const [cpConfirm, setCpConfirm] = useState('')
@@ -338,211 +339,173 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Bản đồ sao */}
+        {/* Danh sách Bản đồ sao */}
         <div className="mb-8 rounded-2xl p-6" style={{ background: 'rgba(26,21,53,0.6)', border: '1px solid rgba(201,168,76,0.12)' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Bản đồ sao</h3>
-            <a href="/chart" style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>Xem tất cả →</a>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Danh sách Bản đồ sao</h3>
+              <p className="text-xs mt-0.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>{profiles.length} hồ sơ đã lưu</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => { openNew(); setShowCharts(true) }}
+                className="px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-1.5"
+                style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}
+              >
+                + Thêm hồ sơ
+              </button>
+              <button
+                onClick={() => setShowCharts(v => !v)}
+                style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}
+              >
+                {showCharts ? 'Thu gọn ↑' : 'Xem tất cả ↓'}
+              </button>
+            </div>
           </div>
-          {profiles.length === 0 ? (
-            <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
-              Chưa có hồ sơ nào. Tạo hồ sơ để xem bản đồ sao.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {profiles.map(p => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between rounded-xl px-4 py-3"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.08)' }}
-                >
-                  <div>
-                    <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}>{p.name}</p>
-                    <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.1rem' }}>
-                      {p.dob.day}/{p.dob.month}/{p.dob.year} · {p.loc.address}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => router.push(`/chart?id=${p.id}`)}
-                    className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                    style={{ background: 'rgba(201,168,76,0.1)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
-                  >
-                    Xem bản đồ →
-                  </button>
+
+          {showCharts && (
+            <div className="mt-5">
+              {profiles.length === 0 && !showForm && (
+                <div className="text-center py-8 rounded-xl" style={{ border: '1px dashed rgba(201,168,76,0.15)' }}>
+                  <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
+                    Chưa có hồ sơ nào. Nhấn &quot;+ Thêm hồ sơ&quot; để bắt đầu.
+                  </p>
                 </div>
-              ))}
+              )}
+
+              <div className="space-y-2 mb-4">
+                {profiles.map(p => (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 flex-wrap"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.08)' }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}>{p.name}</p>
+                      <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.1rem' }}>
+                        {p.gender === 'Female' ? '♀' : p.gender === 'Male' ? '♂' : '⊕'} · {p.dob.day}/{p.dob.month}/{p.dob.year} · {p.tob.unknown ? 'Không rõ giờ' : `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}`} · {p.loc.address}
+                      </p>
+                    </div>
+                    <div className="flex gap-1.5 flex-shrink-0 flex-wrap">
+                      <button onClick={() => openEdit(p)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#c9a84c', background: 'rgba(201,168,76,0.1)', fontFamily: 'var(--font-vietnam)' }}>Sửa</button>
+                      {deleteConfirm === p.id ? (
+                        <>
+                          <button onClick={() => handleDelete(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xác nhận</button>
+                          <button onClick={() => setDeleteConfirm(null)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#94a3b8', background: 'rgba(148,163,184,0.1)', fontFamily: 'var(--font-vietnam)' }}>Hủy</button>
+                        </>
+                      ) : (
+                        <button onClick={() => setDeleteConfirm(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#6b7280', background: 'rgba(107,114,128,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xóa</button>
+                      )}
+                      <button
+                        onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : p.tob.hour, minute: p.tob.unknown ? 0 : p.tob.minute }, loc: p.loc })); router.push('/services') }}
+                        className="px-2.5 py-1.5 rounded-lg text-xs"
+                        style={{ color: '#c9a84c', background: 'rgba(61,43,94,0.5)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}
+                      >
+                        Dịch vụ
+                      </button>
+                      <button
+                        onClick={() => router.push(`/chart?id=${p.id}`)}
+                        className="px-2.5 py-1.5 rounded-lg text-xs"
+                        style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+                      >
+                        Bản đồ ✦
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add/Edit form */}
+              {showForm && (
+                <div className="rounded-2xl p-6 mt-2" style={{ background: 'rgba(26,21,53,0.8)', border: '1px solid rgba(201,168,76,0.25)' }}>
+                  <h2 className="text-xl font-bold mb-6" style={{ color: '#f5f0e8', fontFamily: 'var(--font-vietnam)' }}>
+                    {editingId ? 'Chỉnh sửa hồ sơ' : 'Tạo hồ sơ mới'}
+                  </h2>
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Họ</label>
+                        <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Đệm</label>
+                        <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
+                        <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giới tính</label>
+                      <div className="flex gap-3">
+                        {[{v:'Female',l:'♀ Nữ'},{v:'Male',l:'♂ Nam'},{v:'Other',l:'Khác'}].map(g => (
+                          <button key={g.v} type="button" onClick={() => setF('gender', g.v)} className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                            style={{ background: form.gender === g.v ? '#3d2b5e' : 'rgba(26,21,53,0.8)', color: form.gender === g.v ? '#c9a84c' : '#94a3b8', border: form.gender === g.v ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.1)' }}>
+                            {g.l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Ngày sinh</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Ngày</label>
+                          <select value={form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
+                            {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Tháng</label>
+                          <select value={form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
+                            {MONTHS.map(m => <option key={m} value={m}>Tháng {m}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Năm</label>
+                          <select value={form.dob.year} onChange={e => setF('dob', { ...form.dob, year: +e.target.value })}>
+                            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giờ sinh</label>
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={form.tob.unknown} onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })} style={{ width: 'auto', padding: 0 }} />
+                          <span className="text-sm" style={{ color: '#94a3b8' }}>Không rõ giờ sinh</span>
+                        </label>
+                      </div>
+                      {!form.tob.unknown && (
+                        <div className="grid grid-cols-2 gap-3 mt-2">
+                          <div>
+                            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Giờ (0-23)</label>
+                            <input type="number" min={0} max={23} value={form.tob.hour} onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })} />
+                          </div>
+                          <div>
+                            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Phút</label>
+                            <input type="number" min={0} max={59} value={form.tob.minute} onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
+                    <div className="flex gap-3 pt-2">
+                      <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold" style={{ background: '#c9a84c', color: '#0a0a1a' }}>
+                        {saving ? 'Đang lưu...' : editingId ? 'Cập nhật hồ sơ' : 'Lưu hồ sơ'}
+                      </button>
+                      <button onClick={() => { setShowForm(false); setEditingId(null) }} className="px-6 py-3 rounded-xl font-semibold" style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8' }}>
+                        Hủy
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
-
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: '#f5f0e8', fontFamily: 'var(--font-vietnam)' }}>Hồ sơ của tôi</h1>
-            <p className="text-sm mt-1" style={{ color: '#94a3b8' }}>Xin chào, {user.name}</p>
-          </div>
-          <button onClick={openNew} className="px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2" style={{ background: '#c9a84c', color: '#0a0a1a' }}>
-            <span>+</span> Thêm hồ sơ
-          </button>
-        </div>
-
-        {/* Profile cards */}
-        {profiles.length === 0 && !showForm && (
-          <div className="text-center py-16 rounded-2xl" style={{ border: '1px dashed rgba(201,168,76,0.2)' }}>
-            <p className="text-lg mb-2" style={{ color: '#94a3b8' }}>Chưa có hồ sơ nào</p>
-            <p className="text-sm mb-6" style={{ color: '#6b7280' }}>Tạo hồ sơ để lưu thông tin sinh nhật và sử dụng cho các báo cáo chiêm tinh</p>
-            <button onClick={openNew} className="px-6 py-3 rounded-xl font-semibold" style={{ background: '#c9a84c', color: '#0a0a1a' }}>
-              Tạo hồ sơ đầu tiên
-            </button>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          {profiles.map(p => (
-            <div key={p.id} className="rounded-2xl p-6" style={{ background: 'rgba(26,21,53,0.6)', border: '1px solid rgba(201,168,76,0.15)' }}>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-bold text-lg" style={{ color: '#f5f0e8', fontFamily: 'var(--font-vietnam)' }}>{p.name}</h3>
-                  <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{p.gender === 'Female' ? '♀ Nữ' : p.gender === 'Male' ? '♂ Nam' : '⊕ Khác'}</p>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-xs" style={{ color: '#c9a84c', background: 'rgba(201,168,76,0.1)' }}>Sửa</button>
-                  {deleteConfirm === p.id ? (
-                    <div className="flex gap-1">
-                      <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg text-xs" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)' }}>Xác nhận</button>
-                      <button onClick={() => setDeleteConfirm(null)} className="p-1.5 rounded-lg text-xs" style={{ color: '#94a3b8', background: 'rgba(148,163,184,0.1)' }}>Hủy</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => setDeleteConfirm(p.id)} className="p-1.5 rounded-lg text-xs" style={{ color: '#6b7280', background: 'rgba(107,114,128,0.1)' }}>Xóa</button>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-1.5 text-sm" style={{ color: '#94a3b8' }}>
-                <p>📅 {p.dob.day}/{p.dob.month}/{p.dob.year} · {p.tob.unknown ? 'Không rõ giờ' : `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}`}</p>
-                <p>📍 {p.loc.address}</p>
-              </div>
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : p.tob.hour, minute: p.tob.unknown ? 0 : p.tob.minute }, loc: p.loc })); router.push('/services') }}
-                  className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
-                  style={{ background: 'rgba(61,43,94,0.6)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(61,43,94,0.9)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(61,43,94,0.6)')}>
-                  Chọn dịch vụ →
-                </button>
-                <button
-                  onClick={() => router.push(`/chart?id=${p.id}`)}
-                  className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
-                  style={{ background: 'rgba(201,168,76,0.08)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.15)' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(201,168,76,0.18)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(201,168,76,0.08)')}>
-                  Bản đồ sao ✦
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Add/Edit form */}
-        {showForm && (
-          <div className="rounded-2xl p-6" style={{ background: 'rgba(26,21,53,0.8)', border: '1px solid rgba(201,168,76,0.25)' }}>
-            <h2 className="text-xl font-bold mb-6" style={{ color: '#f5f0e8', fontFamily: 'var(--font-vietnam)' }}>
-              {editingId ? 'Chỉnh sửa hồ sơ' : 'Tạo hồ sơ mới'}
-            </h2>
-
-            <div className="space-y-5">
-              {/* Name fields */}
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Họ</label>
-                  <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
-                </div>
-                <div>
-                  <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Đệm</label>
-                  <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
-                </div>
-                <div>
-                  <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
-                  <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
-                </div>
-              </div>
-
-              {/* Gender */}
-              <div>
-                <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giới tính</label>
-                <div className="flex gap-3">
-                  {[{v:'Female',l:'♀ Nữ'},{v:'Male',l:'♂ Nam'},{v:'Other',l:'Khác'}].map(g => (
-                    <button key={g.v} type="button" onClick={() => setF('gender', g.v)} className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
-                      style={{ background: form.gender === g.v ? '#3d2b5e' : 'rgba(26,21,53,0.8)', color: form.gender === g.v ? '#c9a84c' : '#94a3b8', border: form.gender === g.v ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.1)' }}>
-                      {g.l}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Date of birth */}
-              <div>
-                <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Ngày sinh</label>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Ngày</label>
-                    <select value={form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
-                      {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Tháng</label>
-                    <select value={form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
-                      {MONTHS.map(m => <option key={m} value={m}>Tháng {m}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Năm</label>
-                    <select value={form.dob.year} onChange={e => setF('dob', { ...form.dob, year: +e.target.value })}>
-                      {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Time of birth */}
-              <div>
-                <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giờ sinh</label>
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={form.tob.unknown} onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })} style={{ width: 'auto', padding: 0 }} />
-                    <span className="text-sm" style={{ color: '#94a3b8' }}>Không rõ giờ sinh</span>
-                  </label>
-                </div>
-                {!form.tob.unknown && (
-                  <div className="grid grid-cols-2 gap-3 mt-2">
-                    <div>
-                      <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Giờ (0-23)</label>
-                      <input type="number" min={0} max={23} value={form.tob.hour} onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })} />
-                    </div>
-                    <div>
-                      <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Phút</label>
-                      <input type="number" min={0} max={59} value={form.tob.minute} onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })} />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Location */}
-              <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-2">
-                <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold" style={{ background: '#c9a84c', color: '#0a0a1a' }}>
-                  {saving ? 'Đang lưu...' : editingId ? 'Cập nhật hồ sơ' : 'Lưu hồ sơ'}
-                </button>
-                <button onClick={() => { setShowForm(false); setEditingId(null) }} className="px-6 py-3 rounded-xl font-semibold" style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8' }}>
-                  Hủy
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
