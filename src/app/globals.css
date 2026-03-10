@@ -1,0 +1,503 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════
+   CELESTIAL SANCTUM · Design System
+   Visual-only layer — backend logic, routing, data flow untouched.
+═══════════════════════════════════════════════════════════════════ */
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── Tailwind theme: font & color utilities ───────────────────── */
+@theme inline {
+  /* Fonts — Tailwind classes: font-sans, font-serif, font-display, font-body */
+  --font-sans:    var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-serif:   var(--font-playfair), 'Playfair Display', Georgia, serif;
+  --font-display: var(--font-cinzel), 'Cinzel', serif;
+  --font-body:    var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+
+  /* Colors — Tailwind classes: text-gold-warm, bg-nebula-dark, etc. */
+  --color-void-deep:     #06060f;
+  --color-void-night:    #0b0b1f;
+  --color-nebula-dark:   #120d2e;
+  --color-nebula-mid:    #1c1540;
+  --color-nebula-glow:   #261c56;
+  --color-nebula-rim:    #38287a;
+  --color-gold-shadow:   #7a5420;
+  --color-gold-base:     #c8943f;
+  --color-gold-warm:     #d9ab55;
+  --color-gold-bright:   #f0cc78;
+  --color-lunar-bright:  #f4efe6;
+  --color-lunar-mid:     #c9c3d6;
+  --color-lunar-dim:     #8a8399;
+  --color-lunar-shadow:  #4a4560;
+  --color-success:       #3db88a;
+  --color-danger:        #c45252;
+}
+
+:root {
+  /* ── Void: depths of space ── */
+  --void-black:    #02020a;
+  --void-deep:     #06060f;
+  --void-night:    #0b0b1f;
+
+  /* ── Nebula: interstellar clouds ── */
+  --nebula-dark:   #120d2e;
+  --nebula-mid:    #1c1540;
+  --nebula-glow:   #261c56;
+  --nebula-rim:    #38287a;
+
+  /* ── Gold: ancient starlight ── */
+  --gold-shadow:   #7a5420;
+  --gold-deep:     #9a6f2a;
+  --gold-base:     #c8943f;
+  --gold-warm:     #d9ab55;
+  --gold-bright:   #f0cc78;
+  --gold-pale:     #fdf3d8;
+
+  /* ── Lunar: moonlight spectrum ── */
+  --lunar-bright:  #f4efe6;
+  --lunar-warm:    #e8e0d4;
+  --lunar-mid:     #c9c3d6;
+  --lunar-dim:     #8a8399;
+  --lunar-shadow:  #4a4560;
+
+  /* ── Semantic ── */
+  --success:       #3db88a;
+  --danger:        #c45252;
+
+  /* ── Font aliases — backward compat for inline styles ── */
+  --font-body-serif:  var(--font-playfair);   /* = Playfair Display (VN headings) */
+  --font-ui:          var(--font-vietnam);    /* = Be Vietnam Pro (VN UI text) */
+
+  /* ── Legacy aliases (backward compat) ── */
+  --bg-primary:    var(--void-deep);
+  --bg-secondary:  var(--void-night);
+  --bg-card:       var(--nebula-dark);
+  --text-primary:  var(--lunar-bright);
+  --text-secondary: var(--lunar-dim);
+  --gold:          var(--gold-warm);
+  --gold-light:    var(--gold-bright);
+  --purple:        var(--nebula-glow);
+  --purple-light:  var(--nebula-rim);
+  --accent-red:    var(--danger);
+}
+
+/* ── Base ─────────────────────────────────────────────────────── */
+
+body {
+  background: var(--void-deep);
+  color: var(--lunar-bright);
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--void-night); }
+::-webkit-scrollbar-thumb { background: var(--nebula-rim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold-base); }
+
+/* ── Form elements ────────────────────────────────────────────── */
+input, select, textarea {
+  background: rgba(11, 11, 31, 0.9);
+  border: 1px solid rgba(200, 148, 63, 0.2);
+  color: var(--lunar-bright);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 1rem;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--gold-warm);
+  box-shadow: 0 0 0 3px rgba(217, 171, 85, 0.1);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--lunar-shadow);
+  font-style: italic;
+}
+
+select option {
+  background: var(--void-night);
+  color: var(--lunar-bright);
+}
+
+/* Checkbox override */
+input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  accent-color: var(--gold-warm);
+}
+
+/* ── Keyframes ────────────────────────────────────────────────── */
+
+/* Shooting star trail */
+@keyframes shootingTrail {
+  0%   { transform: translateX(0) translateY(0) scaleX(1); opacity: 1; }
+  60%  { opacity: 0.9; }
+  100% { transform: translateX(320px) translateY(180px) scaleX(3); opacity: 0; }
+}
+
+/* Nebula drift — very slow background atmosphere shift */
+@keyframes nebulaDrift {
+  0%   { opacity: 0.5; transform: scale(1) translate(0, 0); }
+  50%  { opacity: 0.7; transform: scale(1.08) translate(-20px, 15px); }
+  100% { opacity: 0.5; transform: scale(1) translate(0, 0); }
+}
+
+/* Star twinkle */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50%       { opacity: 0.9; transform: scale(1.3); }
+}
+
+/* Fade in up — staggered entry */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse glow — for active elements */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 12px rgba(217, 171, 85, 0.25); }
+  50%       { box-shadow: 0 0 28px rgba(217, 171, 85, 0.55); }
+}
+
+/* Gold shimmer — for hero text */
+@keyframes goldShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Shooting star ────────────────────────────────────────────── */
+.shooting-star {
+  position: fixed;
+  width: 2px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright));
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px 2px rgba(240, 204, 120, 0.5), 0 0 3px rgba(240, 204, 120, 0.8);
+  animation: shootingTrail 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── Starfield ────────────────────────────────────────────────── */
+.starfield {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    /* Bright gold stars */
+    radial-gradient(1.2px 1.2px at 12% 8%,  rgba(240,204,120,0.7) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 67% 5%,  rgba(240,204,120,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 88% 22%, rgba(240,204,120,0.6) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 33% 85%, rgba(240,204,120,0.4) 0%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 52% 42%, rgba(240,204,120,0.55) 0%, transparent 100%),
+    /* White stars */
+    radial-gradient(1px   1px   at 78% 34%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 23% 62%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(0.8px 0.8px at 45% 18%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 91% 78%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(0.8px 0.8px at 7%  45%, rgba(255,255,255,0.25) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 63% 91%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(0.8px 0.8px at 38% 28%, rgba(255,255,255,0.2) 0%, transparent 100%),
+    /* Faint distant stars */
+    radial-gradient(0.7px 0.7px at 55% 70%, rgba(200,195,220,0.2) 0%, transparent 100%),
+    radial-gradient(0.7px 0.7px at 18% 38%, rgba(200,195,220,0.15) 0%, transparent 100%),
+    radial-gradient(0.7px 0.7px at 82% 55%, rgba(200,195,220,0.18) 0%, transparent 100%),
+    radial-gradient(0.7px 0.7px at 29% 14%, rgba(200,195,220,0.15) 0%, transparent 100%),
+    radial-gradient(0.7px 0.7px at 74% 82%, rgba(200,195,220,0.12) 0%, transparent 100%);
+}
+
+/* ── Glow orbs ────────────────────────────────────────────────── */
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+.sanctum-card {
+  background: rgba(28, 21, 64, 0.6);
+  border: 1px solid rgba(200, 148, 63, 0.14);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(20px);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sanctum-card:hover {
+  border-color: rgba(200, 148, 63, 0.38);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.5), 0 0 32px rgba(200, 148, 63, 0.07);
+}
+
+/* Legacy card classes — updated to new palette */
+.card {
+  background: rgba(28, 21, 64, 0.6);
+  border: 1px solid rgba(200, 148, 63, 0.14);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(20px);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(200, 148, 63, 0.38);
+  transform: translateY(-3px);
+}
+
+.feature-card {
+  background: rgba(18, 13, 46, 0.65);
+  border: 1px solid rgba(200, 148, 63, 0.12);
+  border-radius: 1rem;
+  padding: 2rem;
+  backdrop-filter: blur(16px);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  border-color: rgba(200, 148, 63, 0.34);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 24px rgba(200, 148, 63, 0.06);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btn-gold {
+  background: linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%);
+  background-size: 200% 200%;
+  color: #06060f;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 0.7rem 1.8rem;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px rgba(200, 148, 63, 0.25);
+}
+
+.btn-gold:hover {
+  background-position: right center;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(200, 148, 63, 0.45);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--gold-warm);
+  border: 1px solid rgba(217, 171, 85, 0.4);
+  border-radius: 4px;
+  padding: 0.7rem 1.8rem;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-outline:hover {
+  border-color: var(--gold-warm);
+  background: rgba(217, 171, 85, 0.08);
+  transform: translateY(-1px);
+}
+
+/* ── Dividers ─────────────────────────────────────────────────── */
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-base), transparent);
+  opacity: 0.45;
+  margin: 2rem 0;
+}
+
+/* Ornament divider: ——— ✦ ——— */
+.divider-ornament {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2.5rem 0;
+}
+.divider-ornament::before,
+.divider-ornament::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,148,63,0.35));
+}
+.divider-ornament::after {
+  background: linear-gradient(90deg, rgba(200,148,63,0.35), transparent);
+}
+.divider-ornament span {
+  color: var(--gold-base);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ── Nav links ────────────────────────────────────────────────── */
+.nav-link {
+  color: var(--lunar-dim);
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--lunar-bright);
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.footer-link {
+  color: #9090a8;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: var(--gold-warm);
+}
+
+/* ── Animations utility ───────────────────────────────────────── */
+.animate-fade-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-fade-up-delay-1 {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+.animate-fade-up-delay-2 {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+.animate-fade-up-delay-3 {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+}
+
+/* ── Section label ────────────────────────────────────────────── */
+.section-eyebrow {
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold-warm);
+}
+
+/* ── Hero CTA buttons (Server Component safe hover) ─────────────── */
+.btn-hero-primary {
+  display: inline-block;
+  padding: 0.85rem 2.5rem;
+  background: linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%);
+  background-size: 200% 200%;
+  color: #06060f;
+  border-radius: 4px;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 32px rgba(200,148,63,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-hero-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 48px rgba(200,148,63,0.55);
+}
+
+.btn-hero-secondary {
+  display: inline-block;
+  padding: 0.85rem 2.5rem;
+  background: transparent;
+  color: #c9c3d6;
+  border: 1px solid rgba(200,148,63,0.3);
+  border-radius: 4px;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.btn-hero-secondary:hover {
+  border-color: rgba(200,148,63,0.6);
+  color: #f4efe6;
+}
+
+/* ── Service card links (Server Component safe hover) ────────────── */
+.service-card-link {
+  display: block;
+  border-radius: 0.75rem;
+  backdrop-filter: blur(12px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.service-card-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+}
+
+/* ── CTA main button ─────────────────────────────────────────────── */
+.btn-cta-main {
+  display: inline-block;
+  padding: 0.95rem 3rem;
+  background: linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%);
+  background-size: 200% 200%;
+  color: #06060f;
+  border-radius: 4px;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 40px rgba(200,148,63,0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-cta-main:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 56px rgba(200,148,63,0.6);
+}
+
+/* ── PDF download button ──────────────────────────────────────────── */
+.btn-pdf-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(200,148,63,0.1);
+  color: #d9ab55;
+  border: 1px solid rgba(200,148,63,0.28);
+  border-radius: 4px;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  transition: background 0.2s ease;
+}
+.btn-pdf-download:hover {
+  background: rgba(200,148,63,0.18);
+}
+
+/* ── Support link hover ───────────────────────────────────────────── */
+.support-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d9ab55;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 0.83rem;
+  transition: color 0.2s ease;
+}
+.support-link:hover {
+  color: #f0cc78;
+}
+
+/* ── Back button ─────────────────────────────────────────────────── */
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #4a4560;
+  font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
+  transition: color 0.2s ease;
+}
+.btn-back:hover {
+  color: #d9ab55;
+}

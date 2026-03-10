@@ -1,0 +1,211 @@
+'use client'
+
+// VISUAL ONLY — LocationPicker restyled to Celestial Sanctum design
+// All search logic, API calls, and data flow untouched
+
+import { useState, useRef, useEffect, useCallback } from 'react'
+
+interface LocationResult {
+  display_name: string
+  short_name: string
+  lat: number
+  lon: number
+  tz: string
+  country_code: string
+}
+
+interface LocationValue {
+  address: string
+  lat: number
+  lon: number
+  tz: string
+}
+
+interface LocationPickerProps {
+  value: LocationValue
+  onChange: (v: LocationValue) => void
+  label?: string
+}
+
+export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }: LocationPickerProps) {
+  const [query, setQuery] = useState(value.address || '')
+  const [results, setResults] = useState<LocationResult[]>([])
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [cc, setCc] = useState('vn')
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setQuery(value.address || '')
+  }, [value.address])
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const search = useCallback(async (q: string, country: string) => {
+    if (q.length < 2) { setResults([]); return }
+    setLoading(true)
+    try {
+      const params = new URLSearchParams({ q, cc: country })
+      const res = await fetch(`/api/location/search?${params}`)
+      if (res.ok) { const data = await res.json(); setResults(data); setOpen(true) }
+    } catch { /* ignore */ }
+    setLoading(false)
+  }, [])
+
+  const handleInput = (v: string) => {
+    setQuery(v)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => search(v, cc), 600)
+  }
+
+  const select = (r: LocationResult) => {
+    onChange({ address: r.short_name || r.display_name.split(',')[0], lat: r.lat, lon: r.lon, tz: r.tz })
+    setQuery(r.short_name || r.display_name.split(',')[0])
+    setOpen(false)
+    setResults([])
+  }
+
+  const COUNTRIES = [
+    { code: 'vn', label: 'Việt Nam' },
+    { code: 'us', label: 'Mỹ' },
+    { code: 'gb', label: 'Anh' },
+    { code: 'au', label: 'Úc' },
+    { code: 'ca', label: 'Canada' },
+    { code: 'fr', label: 'Pháp' },
+    { code: 'de', label: 'Đức' },
+    { code: 'jp', label: 'Nhật' },
+    { code: 'kr', label: 'Hàn Quốc' },
+    { code: 'sg', label: 'Singapore' },
+    { code: 'th', label: 'Thái Lan' },
+    { code: '', label: 'Toàn cầu' },
+  ]
+
+  return (
+    <div ref={containerRef}>
+      <label
+        style={{
+          display: 'block',
+          marginBottom: '0.4rem',
+          color: '#8a8399',
+          fontFamily: 'var(--font-vietnam)',
+          fontSize: '0.62rem',
+          fontWeight: 700,
+          letterSpacing: '0.06em',
+          
+        }}
+      >
+        {label}
+      </label>
+
+      {/* Country filter chips */}
+      <div className="flex gap-1.5 mb-3 flex-wrap">
+        {COUNTRIES.map(c => (
+          <button
+            key={c.code}
+            type="button"
+            onClick={() => { setCc(c.code); if (query.length >= 2) search(query, c.code) }}
+            className="px-2.5 py-1 text-xs font-medium transition-all"
+            style={{
+              background: cc === c.code ? 'rgba(38,28,86,0.9)' : 'rgba(11,11,31,0.7)',
+              color: cc === c.code ? '#d9ab55' : '#4a4560',
+              border: cc === c.code ? '1px solid rgba(200,148,63,0.4)' : '1px solid rgba(200,148,63,0.08)',
+              borderRadius: '3px',
+              fontFamily: 'var(--font-vietnam)',
+              fontSize: '0.72rem',
+            }}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Search input */}
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={e => handleInput(e.target.value)}
+          placeholder="Nhập tên thành phố..."
+          className="w-full pr-16"
+        />
+
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div
+              className="w-4 h-4 border-2 rounded-full animate-spin"
+              style={{ borderColor: 'rgba(200,148,63,0.25)', borderTopColor: '#d9ab55' }}
+            />
+          </div>
+        )}
+
+        {!loading && query && (
+          <button
+            type="button"
+            onClick={() => search(query, cc)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold transition-colors"
+            style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.1em' }}
+          >
+            TÌM
+          </button>
+        )}
+
+        {/* Results dropdown */}
+        {open && results.length > 0 && (
+          <div
+            className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden"
+            style={{
+              background: 'rgba(11,11,31,0.98)',
+              border: '1px solid rgba(200,148,63,0.2)',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
+              maxHeight: '240px',
+              overflowY: 'auto',
+              backdropFilter: 'blur(20px)',
+            }}
+          >
+            {results.map((r, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => select(r)}
+                className="w-full text-left px-4 py-3 text-sm transition-all"
+                style={{
+                  color: '#f4efe6',
+                  borderBottom: i < results.length - 1 ? '1px solid rgba(200,148,63,0.07)' : 'none',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(38,28,86,0.5)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span className="font-medium" style={{ fontFamily: 'var(--font-vietnam)' }}>
+                  {r.short_name}
+                </span>
+                <span
+                  className="block truncate"
+                  style={{ color: '#4a4560', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.1rem' }}
+                >
+                  {r.display_name}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Selected location info */}
+      {value.lat !== 0 && (
+        <p
+          className="mt-2 text-xs"
+          style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontStyle: 'italic' }}
+        >
+          ✦ {value.address} · {value.lat.toFixed(4)}, {value.lon.toFixed(4)} · {value.tz}
+        </p>
+      )}
+    </div>
+  )
+}

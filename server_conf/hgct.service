@@ -1,0 +1,16 @@
+[Unit]
+Description=Next.js instance for hgct (hatgiongchiemtinh.com)
+After=network.target
+
+[Service]
+User=root
+Group=www-data
+WorkingDirectory=/root/hgct
+Environment="NODE_ENV=production"
+Environment="PORT=65498"
+ExecStart=/usr/bin/node /root/hgct/node_modules/.bin/next start -p 65498
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
