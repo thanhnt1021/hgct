@@ -112,10 +112,21 @@ export default function ChartPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('hatgiong_profiles')
-      if (raw) setProfiles(JSON.parse(raw))
-    } catch { /* ignore */ }
+    fetch('/api/profiles')
+      .then(r => r.json())
+      .then(data => {
+        if (data.profiles) {
+          setProfiles(data.profiles.map((p: any) => ({
+            id: String(p.id),
+            name: p.name,
+            gender: p.gender || 'Female',
+            dob: p.data?.dob || { day: 1, month: 1, year: 1990 },
+            tob: p.data?.tob || { hour: 12, minute: 0, unknown: false },
+            loc: p.data?.loc || { address: '', lat: 0, lon: 0, tz: 'Asia/Ho_Chi_Minh' },
+          })))
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const handleSubmit = async () => {
