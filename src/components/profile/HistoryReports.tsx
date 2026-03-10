@@ -3,8 +3,15 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { getJobHistory, HistoryEntry } from '@/lib/jobHistory'
 import { RefreshCw, Download, FileText } from 'lucide-react'
+
+interface HistoryEntry {
+  jobId: string
+  service: string
+  name: string
+  email: string
+  createdAt: string
+}
 
 interface JobStatus {
   status: 'processing' | 'done' | 'error'
@@ -42,13 +49,48 @@ export default function HistoryReports() {
   const [filterType, setFilterType] = useState<FilterType>('all')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [page, setPage] = useState(0)
+  const [loading, setLoading] = useState(true)
 
-  // Load history from localStorage
+  // Load history from DB
   useEffect(() => {
-    if (user?.username) {
-      setEntries(getJobHistory(user.username))
-    }
-  }, [user?.username])
+    if (!user) return
+    setLoading(true)
+    fetch('/api/jobs/history', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : [])
+      .then((jobs: Array<{
+        id: string
+        service: string | null
+        name: string | null
+        email: string | null
+        createdAt: string
+        status: string
+        progress: number
+        label: string
+        result: unknown
+        error: string | null
+      }>) => {
+        setEntries(jobs.map(j => ({
+          jobId: j.id,
+          service: j.service || 'career',
+          name: j.name || '',
+          email: j.email || '',
+          createdAt: j.createdAt,
+        })))
+        const initStatuses: Record<string, JobStatus> = {}
+        for (const j of jobs) {
+          initStatuses[j.id] = {
+            status: j.status as JobStatus['status'],
+            progress: j.progress,
+            label: j.label,
+            result: j.result as JobStatus['result'],
+            error: j.error || undefined,
+          }
+        }
+        setStatuses(initStatuses)
+      })
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false))
+  }, [user])
 
   const fetchStatus = useCallback(async (jobId: string) => {
     try {
@@ -59,11 +101,6 @@ export default function HistoryReports() {
       }
     } catch { /* ignore */ }
   }, [])
-
-  // Fetch all statuses on mount
-  useEffect(() => {
-    entries.forEach(e => fetchStatus(e.jobId))
-  }, [entries, fetchStatus])
 
   // Auto-refresh processing jobs every 30s
   useEffect(() => {
@@ -130,13 +167,22 @@ export default function HistoryReports() {
     )
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+        <RefreshCw size={18} className="animate-spin mr-2" />
+        Đang tải lịch sử...
+      </div>
+    )
+  }
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-2" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
         Lịch sử & Báo cáo
       </h2>
       <p className="text-sm mb-6" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
-        Lịch sử báo cáo được lưu trên thiết bị này.
+        Tất cả báo cáo đã tạo trên tài khoản của bạn.
       </p>
 
       {/* Filters */}
@@ -214,11 +260,11 @@ export default function HistoryReports() {
                     {/* Name + service badge */}
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
-                        Báo cáo {SERVICE_LABELS[entry.service]} — {entry.name}
+                        Báo cáo {SERVICE_LABELS[entry.service] || entry.service} — {entry.name}
                       </p>
                       <span className="px-2 py-0.5 rounded text-xs"
-                        style={{ background: `${SERVICE_COLORS[entry.service]}22`, color: SERVICE_COLORS[entry.service], fontFamily: 'var(--font-vietnam)', flexShrink: 0 }}>
-                        {SERVICE_LABELS[entry.service]}
+                        style={{ background: `${SERVICE_COLORS[entry.service] || '#6b7280'}22`, color: SERVICE_COLORS[entry.service] || '#6b7280', fontFamily: 'var(--font-vietnam)', flexShrink: 0 }}>
+                        {SERVICE_LABELS[entry.service] || entry.service}
                       </span>
                     </div>
                     {/* Date + email */}

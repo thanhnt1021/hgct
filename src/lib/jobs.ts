@@ -28,7 +28,14 @@ declare global {
 
 const jobs: Map<string, Job> = global.__hgctJobs ?? (global.__hgctJobs = new Map())
 
-export function createJob(id: string): Job {
+export interface JobMeta {
+  userUid?: string
+  service?: string
+  name?: string
+  email?: string
+}
+
+export function createJob(id: string, meta?: JobMeta): Job {
   const job: Job = {
     id,
     status: 'processing',
@@ -38,7 +45,7 @@ export function createJob(id: string): Job {
   }
   jobs.set(id, job)
   // Persist to DB (fire and forget)
-  prisma.job.create({ data: { id, status: 'processing', progress: 0, label: 'Đang khởi tạo...' } }).catch(console.error)
+  prisma.job.create({ data: { id, status: 'processing', progress: 0, label: 'Đang khởi tạo...', ...meta } }).catch(console.error)
   return job
 }
 

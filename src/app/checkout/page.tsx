@@ -88,6 +88,7 @@ export default function CheckoutPage() {
           inputData,
           email: email.trim(),
           premiumToken,
+          name: displayName,
           ...(service === 'synastry' && inputDataB ? { inputDataB } : {}),
         }),
       })

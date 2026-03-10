@@ -217,7 +217,15 @@ export async function POST(request: Request) {
     }
 
     const jobId = randomUUID()
-    createJob(jobId)
+    const userUid = (session?.user as any)?.uid as string | undefined
+    const { service: svc, inputData: iData, email: emailVal, name: displayName } = body as Record<string, unknown>
+    const meta = {
+      userUid: userUid || undefined,
+      service: typeof svc === 'string' ? svc : undefined,
+      name: typeof displayName === 'string' ? displayName : (typeof (iData as any)?.name === 'string' ? (iData as any).name : undefined),
+      email: typeof emailVal === 'string' ? emailVal : undefined,
+    }
+    createJob(jobId, meta)
 
     // Fire and forget — background continues after response is sent
     processReport(jobId, body).catch(err => {

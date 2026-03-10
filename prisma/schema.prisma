@@ -51,6 +51,10 @@ model Job {
   label     String   @default("")
   result    Json?
   error     String?
+  userUid   String?  @map("user_uid")
+  service   String?
+  name      String?
+  email     String?
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("jobs")
