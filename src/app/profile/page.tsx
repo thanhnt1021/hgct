@@ -338,6 +338,43 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* Bản đồ sao */}
+        <div className="mb-8 rounded-2xl p-6" style={{ background: 'rgba(26,21,53,0.6)', border: '1px solid rgba(201,168,76,0.12)' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Bản đồ sao</h3>
+            <a href="/chart" style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>Xem tất cả →</a>
+          </div>
+          {profiles.length === 0 ? (
+            <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
+              Chưa có hồ sơ nào. Tạo hồ sơ để xem bản đồ sao.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {profiles.map(p => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between rounded-xl px-4 py-3"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.08)' }}
+                >
+                  <div>
+                    <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}>{p.name}</p>
+                    <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.1rem' }}>
+                      {p.dob.day}/{p.dob.month}/{p.dob.year} · {p.loc.address}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => router.push(`/chart?id=${p.id}`)}
+                    className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                    style={{ background: 'rgba(201,168,76,0.1)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+                  >
+                    Xem bản đồ →
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -384,14 +421,24 @@ export default function ProfilePage() {
                 <p>📅 {p.dob.day}/{p.dob.month}/{p.dob.year} · {p.tob.unknown ? 'Không rõ giờ' : `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}`}</p>
                 <p>📍 {p.loc.address}</p>
               </div>
-              <button
-                onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : p.tob.hour, minute: p.tob.unknown ? 0 : p.tob.minute }, loc: p.loc })); router.push('/services') }}
-                className="mt-4 w-full py-2 rounded-xl text-sm font-semibold transition-all"
-                style={{ background: 'rgba(61,43,94,0.6)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(61,43,94,0.9)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(61,43,94,0.6)')}>
-                Chọn dịch vụ →
-              </button>
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : p.tob.hour, minute: p.tob.unknown ? 0 : p.tob.minute }, loc: p.loc })); router.push('/services') }}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+                  style={{ background: 'rgba(61,43,94,0.6)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(61,43,94,0.9)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(61,43,94,0.6)')}>
+                  Chọn dịch vụ →
+                </button>
+                <button
+                  onClick={() => router.push(`/chart?id=${p.id}`)}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+                  style={{ background: 'rgba(201,168,76,0.08)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.15)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(201,168,76,0.18)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(201,168,76,0.08)')}>
+                  Bản đồ sao ✦
+                </button>
+              </div>
             </div>
           ))}
         </div>

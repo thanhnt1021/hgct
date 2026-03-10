@@ -116,14 +116,20 @@ export default function ChartPage() {
       .then(r => r.json())
       .then(data => {
         if (data.profiles) {
-          setProfiles(data.profiles.map((p: any) => ({
+          const mapped = data.profiles.map((p: any) => ({
             id: String(p.id),
             name: p.name,
             gender: p.gender || 'Female',
             dob: p.data?.dob || { day: 1, month: 1, year: 1990 },
             tob: p.data?.tob || { hour: 12, minute: 0, unknown: false },
             loc: p.data?.loc || { address: '', lat: 0, lon: 0, tz: 'Asia/Ho_Chi_Minh' },
-          })))
+          }))
+          setProfiles(mapped)
+          // Pre-select from URL param ?id=
+          const preId = new URLSearchParams(window.location.search).get('id')
+          if (preId && mapped.find((p: Profile) => p.id === preId)) {
+            setSelected(preId)
+          }
         }
       })
       .catch(() => {})
@@ -181,74 +187,67 @@ export default function ChartPage() {
           </p>
         </div>
 
-        {profiles.length === 0 ? (
-          <div className="text-center py-14 rounded-2xl" style={{ border: '1px dashed rgba(200,148,63,0.2)' }}>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>
-              Chưa có hồ sơ nào. Hãy tạo hồ sơ trước.
-            </p>
-            <a href="/profile" style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
-              Đến trang hồ sơ →
-            </a>
-          </div>
-        ) : (
-          <>
-            <div className="space-y-3 mb-8">
-              {profiles.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelected(p.id)}
-                  className="w-full text-left rounded-xl p-5 transition-all"
-                  style={{
-                    background: selected === p.id ? 'rgba(200,148,63,0.1)' : 'rgba(18,13,46,0.6)',
-                    border: `1px solid ${selected === p.id ? 'rgba(200,148,63,0.45)' : 'rgba(200,148,63,0.12)'}`,
-                  }}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '1.05rem' }}>
-                        {p.name}
-                      </p>
-                      <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', marginTop: '0.25rem' }}>
-                        {p.dob.day}/{p.dob.month}/{p.dob.year}
-                        {!p.tob.unknown && ` · ${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}`}
-                        {' · '}{p.loc.address}
-                      </p>
-                    </div>
-                    <div style={{
-                      width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0,
-                      background: selected === p.id ? '#d9ab55' : 'transparent',
-                      border: `2px solid ${selected === p.id ? '#d9ab55' : 'rgba(200,148,63,0.3)'}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {selected === p.id && <span style={{ color: '#06060f', fontSize: '0.6rem', fontWeight: 700 }}>✓</span>}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {error && (
-              <p style={{ color: '#c45252', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1rem' }}>
-                {error}
+        <div
+          className="rounded-2xl p-8"
+          style={{ background: 'rgba(18,13,46,0.75)', border: '1px solid rgba(200,148,63,0.18)', backdropFilter: 'blur(20px)' }}
+        >
+          {profiles.length === 0 ? (
+            <div className="text-center py-6">
+              <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>
+                Chưa có hồ sơ nào. Hãy tạo hồ sơ trước.
               </p>
-            )}
+              <a href="/profile" style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+                Đến trang hồ sơ →
+              </a>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div>
+                <label className="block mb-2" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em' }}>
+                  CHỌN HỒ SƠ
+                </label>
+                <select
+                  value={selected ?? ''}
+                  onChange={e => setSelected(e.target.value || null)}
+                  style={{ fontFamily: 'var(--font-vietnam)', width: '100%' }}
+                >
+                  <option value="">— Chọn hồ sơ —</option>
+                  {profiles.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} · {p.dob.day}/{p.dob.month}/{p.dob.year}{!p.tob.unknown ? ` · ${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}` : ''} · {p.loc.address}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <button
-              onClick={handleSubmit}
-              disabled={!selected}
-              className="w-full py-4 font-bold text-sm tracking-wider"
-              style={{
-                background: selected ? 'linear-gradient(135deg,#c8943f,#f0cc78,#c8943f)' : 'rgba(200,148,63,0.15)',
-                color: selected ? '#06060f' : '#4a4560',
-                borderRadius: '4px', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.1em',
-                transition: 'all 0.2s',
-                boxShadow: selected ? '0 4px 24px rgba(200,148,63,0.25)' : 'none',
-              }}
-            >
-              Xem bản đồ sao ✦
-            </button>
-          </>
-        )}
+              {error && (
+                <p style={{ color: '#c45252', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
+                  {error}
+                </p>
+              )}
+
+              <button
+                onClick={handleSubmit}
+                disabled={!selected}
+                className="w-full py-3.5 font-bold text-sm"
+                style={{
+                  background: selected ? 'linear-gradient(135deg,#c8943f,#f0cc78,#c8943f)' : 'rgba(200,148,63,0.15)',
+                  color: selected ? '#06060f' : '#4a4560',
+                  borderRadius: '4px', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.1em',
+                  transition: 'all 0.2s',
+                  boxShadow: selected ? '0 4px 24px rgba(200,148,63,0.25)' : 'none',
+                }}
+              >
+                Xem bản đồ sao ✦
+              </button>
+
+              <p className="text-center" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+                Chưa có hồ sơ?{' '}
+                <a href="/profile" style={{ color: '#d9ab55' }}>Tạo hồ sơ tại đây →</a>
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
