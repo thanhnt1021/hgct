@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
+import { saveJobToHistory } from '@/lib/jobHistory'
 
 const SERVICE_NAMES: Record<string, string> = {
   career: 'Hướng Nghiệp',
@@ -92,6 +93,15 @@ export default function CheckoutPage() {
       })
       const result = await res.json()
       if (res.ok && result.jobId) {
+        if (user?.username) {
+          saveJobToHistory(user.username, {
+            jobId: result.jobId,
+            service: service as 'career' | 'love' | 'synastry' | 'transit',
+            name: displayName,
+            email: email.trim(),
+            createdAt: new Date().toISOString(),
+          })
+        }
         const params = new URLSearchParams({ job: result.jobId, service, name: displayName })
         router.push(`/processing?${params.toString()}`)
       } else {

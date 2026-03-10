@@ -1,0 +1,226 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
+
+export default function ProfileInfo() {
+  const { user, upgradeToPremium } = useAuth()
+  const router = useRouter()
+
+  // Email
+  const [acEmail, setAcEmail] = useState('')
+  const [acLoading, setAcLoading] = useState(false)
+  const [acError, setAcError] = useState('')
+  const [acSuccess, setAcSuccess] = useState(false)
+
+  // Change password
+  const [showCp, setShowCp] = useState(false)
+  const [cpCurrent, setCpCurrent] = useState('')
+  const [cpNew, setCpNew] = useState('')
+  const [cpConfirm, setCpConfirm] = useState('')
+  const [cpLoading, setCpLoading] = useState(false)
+  const [cpError, setCpError] = useState('')
+  const [cpSuccess, setCpSuccess] = useState(false)
+
+  // Upgrade code (for users without premium)
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [upgradeCode, setUpgradeCode] = useState('')
+  const [upgrading, setUpgrading] = useState(false)
+  const [upgradeError, setUpgradeError] = useState('')
+
+  useEffect(() => {
+    if (user) setAcEmail(user.email || '')
+  }, [user])
+
+  const handleUpdateEmail = async () => {
+    setAcLoading(true); setAcError(''); setAcSuccess(false)
+    const res = await fetch('/api/user/account', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: acEmail }),
+    })
+    const data = await res.json()
+    setAcLoading(false)
+    if (!res.ok) { setAcError(data.error || 'Lỗi'); return }
+    setAcSuccess(true)
+    setTimeout(() => setAcSuccess(false), 3000)
+  }
+
+  const handleChangePassword = async () => {
+    if (cpNew !== cpConfirm) { setCpError('Mật khẩu không khớp'); return }
+    if (cpNew.length < 6) { setCpError('Mật khẩu ít nhất 6 ký tự'); return }
+    setCpLoading(true); setCpError(''); setCpSuccess(false)
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: cpNew }),
+    })
+    const data = await res.json()
+    setCpLoading(false)
+    if (!res.ok) { setCpError(data.error || 'Lỗi'); return }
+    setCpSuccess(true)
+    setCpCurrent(''); setCpNew(''); setCpConfirm('')
+    setTimeout(() => { setCpSuccess(false); setShowCp(false) }, 2000)
+  }
+
+  const handleUpgrade = async () => {
+    if (!upgradeCode.trim()) return
+    setUpgrading(true); setUpgradeError('')
+    const result = await upgradeToPremium(upgradeCode)
+    setUpgrading(false)
+    if (result.ok) { setShowUpgrade(false); setUpgradeCode('') }
+    else setUpgradeError(result.error || 'Mã không hợp lệ')
+  }
+
+  if (!user) return null
+
+  const cardStyle: React.CSSProperties = {
+    background: 'rgba(26,21,53,0.6)',
+    border: '1px solid rgba(201,168,76,0.12)',
+    borderRadius: '1rem',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold mb-6" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+        Thông tin cá nhân
+      </h2>
+
+      {/* No email warning */}
+      {!user.email && (
+        <div className="mb-5 p-4 rounded-xl text-sm" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', color: '#fbbf24', fontFamily: 'var(--font-vietnam)' }}>
+          ⚠️ Tài khoản chưa có email. Thêm email bên dưới để đăng nhập bằng email và khôi phục mật khẩu.
+        </div>
+      )}
+
+      {/* Account type */}
+      <div style={cardStyle}>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: user.isPremium ? 'rgba(201,168,76,0.12)' : 'rgba(107,114,128,0.1)', border: `1px solid ${user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(107,114,128,0.2)'}` }}>
+              <span style={{ fontSize: '1.1rem' }}>{user.isPremium ? '✦' : '○'}</span>
+            </div>
+            <div>
+              <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginBottom: '0.1rem' }}>LOẠI TÀI KHOẢN</p>
+              <p style={{ color: user.isPremium ? '#d9ab55' : '#94a3b8', fontFamily: 'var(--font-vietnam)', fontWeight: 700 }}>
+                {user.isPremium ? 'Premium ✦' : 'Miễn phí'}
+              </p>
+            </div>
+          </div>
+          {!user.isPremium && (
+            <button
+              onClick={() => router.push('/profile?tab=plans')}
+              className="px-4 py-2 rounded-xl font-semibold text-sm"
+              style={{ background: 'rgba(201,168,76,0.12)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+            >
+              Xem gói dịch vụ →
+            </button>
+          )}
+        </div>
+
+        {/* Quick upgrade for free users */}
+        {!user.isPremium && (
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(201,168,76,0.08)' }}>
+            <button
+              onClick={() => setShowUpgrade(v => !v)}
+              className="text-sm"
+              style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}
+            >
+              {showUpgrade ? '▲ Ẩn' : '▼ Nhập mã kích hoạt'}
+            </button>
+            {showUpgrade && (
+              <div className="mt-3 flex gap-2">
+                <input
+                  type="text"
+                  value={upgradeCode}
+                  onChange={e => setUpgradeCode(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleUpgrade()}
+                  placeholder="Mã kích hoạt..."
+                  className="flex-1"
+                  style={{ fontFamily: 'var(--font-vietnam)' }}
+                />
+                <button
+                  onClick={handleUpgrade}
+                  disabled={upgrading || !upgradeCode.trim()}
+                  className="px-4 py-2 rounded-xl font-semibold text-sm"
+                  style={{ background: upgradeCode.trim() ? '#c9a84c' : 'rgba(201,168,76,0.15)', color: upgradeCode.trim() ? '#0a0a1a' : '#6b7280' }}
+                >
+                  {upgrading ? '...' : 'Kích hoạt'}
+                </button>
+              </div>
+            )}
+            {upgradeError && <p className="mt-2 text-xs" style={{ color: '#ef4444', fontFamily: 'var(--font-vietnam)' }}>{upgradeError}</p>}
+          </div>
+        )}
+      </div>
+
+      {/* Account info */}
+      <div style={cardStyle}>
+        <h3 className="font-bold mb-4" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Thông tin tài khoản</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>TÊN ĐĂNG NHẬP</label>
+            <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+              {user.username}
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL</label>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={acEmail}
+                onChange={e => setAcEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="flex-1"
+                style={{ fontFamily: 'var(--font-vietnam)' }}
+              />
+              <button
+                onClick={handleUpdateEmail}
+                disabled={acLoading || !acEmail.trim()}
+                className="px-4 py-2 rounded-xl font-semibold text-sm"
+                style={{ background: acEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: acEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap' }}
+              >
+                {acLoading ? 'Đang lưu...' : 'Lưu email'}
+              </button>
+            </div>
+            {acError && <p className="mt-1.5 text-xs" style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)' }}>{acError}</p>}
+            {acSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Email đã cập nhật! Bạn có thể dùng email này để đăng nhập.</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Change password */}
+      <div style={cardStyle}>
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Đổi mật khẩu</h3>
+          <button
+            onClick={() => { setShowCp(v => !v); setCpError(''); setCpSuccess(false) }}
+            style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}
+          >
+            {showCp ? 'Hủy' : 'Đổi mật khẩu'}
+          </button>
+        </div>
+        {showCp && (
+          <div className="mt-4 space-y-3">
+            {cpError && <div className="text-sm" style={{ color: '#e87070' }}>{cpError}</div>}
+            {cpSuccess && <div className="text-sm" style={{ color: '#4ade80' }}>Đổi mật khẩu thành công!</div>}
+            <input type="password" value={cpNew} onChange={e => setCpNew(e.target.value)} placeholder="Mật khẩu mới" />
+            <input type="password" value={cpConfirm} onChange={e => setCpConfirm(e.target.value)} placeholder="Xác nhận mật khẩu mới" />
+            <button
+              onClick={handleChangePassword}
+              disabled={cpLoading}
+              style={{ background: 'linear-gradient(135deg,#c8943f,#f0cc78)', color: '#06060f', padding: '0.6rem 1.5rem', borderRadius: '4px', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem', opacity: cpLoading ? 0.7 : 1 }}
+            >
+              {cpLoading ? 'Đang lưu...' : 'Lưu mật khẩu mới'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -25,6 +25,12 @@ Source reference: `~/mo` — read files there for logic reference, but **NEVER e
 - Làm việc trên nhánh `feature/...` → push GitHub → deploy demo để test
 - Khi OK → merge vào `main` → deploy production
 
+**Shorthand commands (dùng trong chat):**
+- **"feature: [tên]"** → tạo branch `feature/tên`, code tính năng, push, deploy demo — chờ feedback
+- **"merge main"** hoặc **"lên production"** → merge branch hiện tại vào main, push, deploy production
+- **"deploy demo"** → chỉ deploy branch hiện tại lên demo (không tạo branch mới)
+- **"branch hiện tại là gì"** → `git branch --show-current`
+
 ## What's DONE ✓
 - [x] Project scaffolding (Next.js, Prisma, Tailwind)
 - [x] Auth system (NextAuth.js, register, forgot-password)
