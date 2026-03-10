@@ -18,8 +18,12 @@ Source reference: `~/mo` — read files there for logic reference, but **NEVER e
 **Report flow:** Calculate chart → Get KB from DB → Run logic blocks → Build prompt → AI generates essay → Generate PDF → Send email
 
 **Environments:**
-- Production: hatgiongchiemtinh.com → port 65498, hgct.service, deploy with `bash /root/hgct/deploy.sh`
-- Demo: demo.hatgiongchiemtinh.com → port 65499, hgct-demo.service, deploy with `bash /root/hgct/deploy-demo.sh [branch]`
+- Production: hatgiongchiemtinh.com → port 65498, hgct.service, deploy with `sudo bash /root/hgct/deploy.sh`
+- Demo: demo.hatgiongchiemtinh.com → port 65500, hgct-demo.service, deploy with `sudo bash /root/hgct/deploy-demo.sh [branch]`
+
+**Workflow:**
+- Làm việc trên nhánh `feature/...` → push GitHub → deploy demo để test
+- Khi OK → merge vào `main` → deploy production
 
 ## What's DONE ✓
 - [x] Project scaffolding (Next.js, Prisma, Tailwind)
@@ -51,14 +55,16 @@ Source reference: `~/mo` — read files there for logic reference, but **NEVER e
 - [x] Test email service — `/test-email` page + `/api/test-email` (Hostinger SMTP, detailed error reporting)
 - [x] `.env.example` — with all required keys
 - [x] Job system — persisted to DB (jobs table) with in-memory cache; `getJobFromDb` survives server restarts
-- [x] PDF storage — moved from /tmp/hgct-pdfs to /var/hgct/pdfs (persistent)
-- [x] Demo environment — demo.hatgiongchiemtinh.com on port 65499 (hgct-demo.service, deploy-demo.sh, nginx config)
+- [x] PDF storage — moved from /tmp/hgct-pdfs to /var/hgct/pdfs (persistent, created by deploy.sh)
+- [x] Demo environment — demo.hatgiongchiemtinh.com on port 65500 (hgct-demo.service, deploy-demo.sh, nginx config)
+- [x] GitHub — private repo hentaiikidd/hgct, SSH key at /home/hgct/.ssh/github_hgct
+- [x] Sudoers — hgct has NOPASSWD: ALL (full sudo, needed for Claude Code automation)
 
 ## What's TODO
-- [ ] **Deploy** — Run `sudo bash /root/hgct/deploy.sh` to update systemd + restart production server
 - [ ] **Payment integration** — QR code placeholder; needs real bank transfer verification or payment gateway
 - [ ] **Port chart drawing** — natal chart, synastry chart, vanhan map, timeline, aspect grid (Python PIL → Canvas/SVG or skip)
-- [ ] **Nginx/SSL** — reverse proxy config for hatgiongchiemtinh.com
+- [ ] **Nginx/SSL** — reverse proxy + SSL cert for hatgiongchiemtinh.com + demo.hatgiongchiemtinh.com
+- [ ] **Merge feature/auth-db-migration → main** — sau khi test xong trên demo
 
 ## Known Fixes Applied
 - `siderealTime` → `siderialTime` (swisseph library typo)
