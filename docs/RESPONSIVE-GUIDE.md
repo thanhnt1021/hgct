@@ -1,0 +1,68 @@
+# Responsive Design Guidelines — Hạt Giống Chiêm Tinh
+
+## Breakpoints
+
+- Mobile: `< 768px`
+- Tablet: `768px – 1024px`
+- Desktop: `> 1024px`
+
+## Core Principles
+
+1. **Mobile-first**: base CSS targets mobile, scale up with `min-width` media queries or Tailwind `md:`/`lg:` prefixes.
+2. **Touch targets**: minimum `44×44px` for all interactive elements.
+3. **Font sizes**: base `16px`, never below `14px` for body text.
+4. **Spacing**: tighter on mobile (`p-3`, `gap-2`) vs desktop (`p-6`, `gap-4`).
+5. **No horizontal overflow**: every container must be `max-w-full`. Test at `320px` width.
+6. **No hardcoded pixel values** for layout positioning — use relative/flexible units.
+
+## Layout Shell (applies to /profile and all future dashboard-style pages)
+
+The page uses a shared layout shell: sidebar + main content area.
+
+- **Desktop (>=768px)**: sidebar visible (fixed ~240px), content area fills remaining space. Content is centered within its available space using `max-width` + `mx-auto` (NOT hardcoded margins/widths).
+- **Mobile (<768px)**: sidebar is HIDDEN by default. A hamburger/menu toggle button (sticky or fixed) slides the sidebar in/out as an overlay with smooth transition (`transform translateX`, transition `~300ms`). When sidebar is hidden, main content uses full width (still with `max-width` + centering). Overlay backdrop (semi-transparent dark) behind sidebar when open, clicking backdrop closes sidebar.
+- This layout shell is shared across ALL tabs so the fix is universal.
+
+## Sidebar
+
+- **Desktop**: persistent, fixed left, ~240px width
+- **Mobile**: hidden by default, slides in from left as overlay, close via button or backdrop tap
+- Animation: `transform translateX(-100%)` ↔ `translateX(0)` with `transition-transform duration-300`
+
+## Cards / List Items
+
+- **Desktop**: single-row, info left, action buttons right (inline)
+- **Mobile**: stack vertically:
+  - Name: full width, `font-semibold`, `text-base`, truncate if long
+  - Meta (date, time, location): single line, `text-sm`, `text-muted`, truncate with ellipsis
+  - Action buttons: row below meta, `flex wrap`, `gap-2`. "Bản đồ ✦" and "Dịch vụ" as small pill buttons, edit/delete as icon-only (no text). All `min-h-[44px]`.
+- No cards exceeding viewport width. Use `break-words` or truncate.
+
+## Tables
+
+- **Desktop**: standard table
+- **Mobile**: convert to card/list layout (each row = stacked card). Never horizontal-scroll table for primary content.
+
+## Forms
+
+- **Mobile**: all inputs `w-full`, labels above inputs, submit buttons `w-full`
+- **Desktop**: inputs can be narrower, buttons auto-width
+
+## Modals
+
+- **Mobile**: bottom-sheet style (slide up, rounded top, `max-h-[90vh]`)
+- **Desktop**: centered modal with max-width
+
+## Pagination
+
+- **Desktop**: page numbers + prev/next
+- **Mobile**: just "Trước" / "Sau" + "1/8" center, buttons `min-h-[44px]`, full-width row
+
+## Testing Checklist
+
+- [ ] 320px, 375px, 414px viewport widths — no overflow
+- [ ] All buttons tappable (44px min)
+- [ ] Readable without zoom
+- [ ] Tab navigation works on mobile
+- [ ] Sidebar slides smoothly
+- [ ] Same data loads on mobile and desktop for same account

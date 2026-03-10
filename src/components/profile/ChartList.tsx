@@ -35,7 +35,6 @@ export default function ChartList() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<SortKey>('date_newest')
 
-  // Modal
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingData, setEditingData] = useState<ProfileFormData | null>(null)
@@ -76,7 +75,6 @@ export default function ChartList() {
     const loadData = () => { fetchProfiles(); fetchMainId() }
 
     const handler = (e: Event) => {
-      // Update badge immediately from event detail (no fetch delay)
       const detail = (e as CustomEvent).detail
       if (detail?.mainProfileId !== undefined) {
         setMainProfileId(detail.mainProfileId ? String(detail.mainProfileId) : null)
@@ -89,11 +87,7 @@ export default function ChartList() {
     return () => window.removeEventListener('profiles:refresh', handler)
   }, [])
 
-  const openNew = () => {
-    setEditingId(null)
-    setEditingData(null)
-    setModalOpen(true)
-  }
+  const openNew = () => { setEditingId(null); setEditingData(null); setModalOpen(true) }
 
   const openEdit = (p: Profile) => {
     setEditingId(p.id)
@@ -145,7 +139,6 @@ export default function ChartList() {
 
   const applyPageSize = () => { setPageSize(pendingPageSize); setPage(0) }
 
-  // Search + sort
   const filtered = useMemo(() => {
     let list = [...profiles]
     if (search.trim()) {
@@ -164,38 +157,44 @@ export default function ChartList() {
   const totalPages = Math.ceil(filtered.length / pageSize)
   const paginated = filtered.slice(page * pageSize, (page + 1) * pageSize)
 
+  const formatMeta = (p: Profile) => {
+    const dateStr = p.dob.day > 0 ? `${p.dob.day}/${p.dob.month}/${p.dob.year}` : 'Chưa có ngày'
+    const timeStr = p.tob.unknown ? 'Không rõ giờ' : p.tob.hour >= 0 ? `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'
+    return `${dateStr} · ${timeStr} · ${p.loc.address}`
+  }
+
   return (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-        <div>
+      <div className="flex items-center justify-between mb-5 gap-3">
+        <div className="min-w-0">
           <h2 className="text-xl font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Bản đồ sao</h2>
           {profiles.length > 0 && (
             <p className="text-sm mt-0.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
-              {profiles.length} hồ sơ đã lưu{search && filtered.length !== profiles.length ? ` · ${filtered.length} kết quả` : ''}
+              {profiles.length} hồ sơ{search && filtered.length !== profiles.length ? ` · ${filtered.length} kết quả` : ''}
             </p>
           )}
         </div>
         <button onClick={openNew}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
-          style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}>
+          className="flex items-center gap-2 px-4 rounded-xl font-semibold text-sm flex-shrink-0"
+          style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)', minHeight: 44 }}>
           <Plus size={15} /> Thêm hồ sơ
         </button>
       </div>
 
-      {/* ── Toolbar: search + sort + page size ── */}
+      {/* Toolbar */}
       {profiles.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4 items-center">
           {/* Search */}
-          <div className="flex items-center gap-2 flex-1 min-w-40 rounded-xl px-3 py-2"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)' }}>
+          <div className="flex items-center gap-2 flex-1 min-w-0 rounded-xl px-3"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', minHeight: 40 }}>
             <Search size={14} style={{ color: '#6b7280', flexShrink: 0 }} />
             <input
               type="text"
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(0) }}
               placeholder="Tìm theo tên..."
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', width: '100%', padding: 0 }}
+              style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', width: '100%', padding: '0.5rem 0', minWidth: 0 }}
             />
             {search && (
               <button onClick={() => { setSearch(''); setPage(0) }}
@@ -204,8 +203,8 @@ export default function ChartList() {
           </div>
 
           {/* Sort */}
-          <div className="flex items-center gap-1.5 rounded-xl px-3 py-2"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)' }}>
+          <div className="flex items-center gap-1.5 rounded-xl px-3"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', minHeight: 40 }}>
             <ArrowUpDown size={13} style={{ color: '#6b7280', flexShrink: 0 }} />
             <select
               value={sort}
@@ -219,9 +218,9 @@ export default function ChartList() {
           </div>
 
           {/* Page size */}
-          <div className="flex items-center gap-2 rounded-xl px-3 py-2"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)' }}>
-            <span style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Hiển thị:</span>
+          <div className="flex items-center gap-2 rounded-xl px-3"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', minHeight: 40 }}>
+            <span style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Hiện:</span>
             <select
               value={pendingPageSize}
               onChange={e => setPendingPageSize(+e.target.value)}
@@ -247,7 +246,7 @@ export default function ChartList() {
         </div>
       )}
 
-      {/* Empty (no profiles at all) */}
+      {/* Empty */}
       {!loading && profiles.length === 0 && (
         <div className="text-center py-12 rounded-2xl" style={{ border: '1px dashed rgba(201,168,76,0.15)' }}>
           <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>Chưa có hồ sơ nào.</p>
@@ -269,53 +268,67 @@ export default function ChartList() {
       {!loading && paginated.length > 0 && (
         <div className="space-y-2">
           {paginated.map(p => (
-            <div key={p.id} className="rounded-xl flex items-center gap-3 px-4 py-3 flex-wrap"
+            <div key={p.id} className="rounded-xl px-4 py-3"
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.08)' }}>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(61,43,94,0.5)', fontSize: '0.9rem' }}>
-                {p.gender === 'Female' ? '♀' : p.gender === 'Male' ? '♂' : '⊕'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>{p.name}</p>
-                  {mainProfileId === p.id && (
-                    <span style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '4px', padding: '0.1rem 0.4rem', fontSize: '0.65rem', fontWeight: 700, fontFamily: 'var(--font-vietnam)', whiteSpace: 'nowrap' }}>
-                      ✦ Bạn
-                    </span>
-                  )}
+
+              {/* Row 1: gender icon + name + badge */}
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(61,43,94,0.5)', fontSize: '0.8rem' }}>
+                  {p.gender === 'Female' ? '♀' : p.gender === 'Male' ? '♂' : '⊕'}
                 </div>
-                <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginTop: '0.1rem' }}>
-                  {p.dob.day > 0 ? `${p.dob.day}/${p.dob.month}/${p.dob.year}` : 'Chưa có ngày'} ·{' '}
-                  {p.tob.unknown ? 'Không rõ giờ' : p.tob.hour >= 0 ? `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
-                  {p.loc.address}
+                <p className="font-semibold truncate flex-1 min-w-0"
+                  style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+                  {p.name}
                 </p>
+                {mainProfileId === p.id && (
+                  <span style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '4px', padding: '0.1rem 0.4rem', fontSize: '0.65rem', fontWeight: 700, fontFamily: 'var(--font-vietnam)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    ✦ Bạn
+                  </span>
+                )}
               </div>
-              <div className="flex gap-1.5 flex-shrink-0 flex-wrap">
-                <button onClick={() => router.push(`/chart?id=${p.id}`)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}>
+
+              {/* Row 2: meta info */}
+              <p className="truncate mb-2.5"
+                style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', paddingLeft: '2.25rem' }}>
+                {formatMeta(p)}
+              </p>
+
+              {/* Row 3: action buttons */}
+              <div className="flex gap-1.5 flex-wrap" style={{ paddingLeft: '2.25rem' }}>
+                <button
+                  onClick={() => router.push(`/chart?id=${p.id}`)}
+                  style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
                   Bản đồ ✦
                 </button>
                 <button
-                  onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : (p.tob.hour >= 0 ? p.tob.hour : 12), minute: p.tob.unknown ? 0 : (p.tob.minute >= 0 ? p.tob.minute : 0) }, loc: p.loc })); router.push('/services') }}
-                  className="px-2.5 py-1.5 rounded-lg text-xs"
-                  style={{ color: '#c9a84c', background: 'rgba(61,43,94,0.5)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}>
+                  onClick={() => {
+                    sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : (p.tob.hour >= 0 ? p.tob.hour : 12), minute: p.tob.unknown ? 0 : (p.tob.minute >= 0 ? p.tob.minute : 0) }, loc: p.loc }))
+                    router.push('/services')
+                  }}
+                  style={{ color: '#c9a84c', background: 'rgba(61,43,94,0.5)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
                   Dịch vụ
                 </button>
-                <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg"
-                  style={{ color: '#c9a84c', background: 'rgba(201,168,76,0.08)' }} title="Sửa">
+                <button onClick={() => openEdit(p)}
+                  title="Sửa"
+                  style={{ color: '#c9a84c', background: 'rgba(201,168,76,0.08)', padding: '0.375rem 0.5rem', borderRadius: '0.5rem', minHeight: 36, minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Pencil size={13} />
                 </button>
                 {deleteConfirm === p.id ? (
                   <>
-                    <button onClick={() => handleDelete(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs"
-                      style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xác nhận</button>
-                    <button onClick={() => setDeleteConfirm(null)} className="px-2.5 py-1.5 rounded-lg text-xs"
-                      style={{ color: '#94a3b8', background: 'rgba(148,163,184,0.08)', fontFamily: 'var(--font-vietnam)' }}>Hủy</button>
+                    <button onClick={() => handleDelete(p.id)}
+                      style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
+                      Xác nhận
+                    </button>
+                    <button onClick={() => setDeleteConfirm(null)}
+                      style={{ color: '#94a3b8', background: 'rgba(148,163,184,0.08)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
+                      Hủy
+                    </button>
                   </>
                 ) : (
-                  <button onClick={() => setDeleteConfirm(p.id)} className="p-1.5 rounded-lg"
-                    style={{ color: '#6b7280', background: 'rgba(107,114,128,0.08)' }} title="Xóa">
+                  <button onClick={() => setDeleteConfirm(p.id)}
+                    title="Xóa"
+                    style={{ color: '#6b7280', background: 'rgba(107,114,128,0.08)', padding: '0.375rem 0.5rem', borderRadius: '0.5rem', minHeight: 36, minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Trash2 size={13} />
                   </button>
                 )}
@@ -327,24 +340,21 @@ export default function ChartList() {
 
       {/* Pagination */}
       {!loading && totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between mt-4 gap-2">
           <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm"
-            style={{ color: page === 0 ? '#4a4560' : '#d9ab55', background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.1)' }}>
+            style={{ color: page === 0 ? '#4a4560' : '#d9ab55', background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.1)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', padding: '0.5rem 0.875rem', borderRadius: '0.5rem', minHeight: 44, display: 'flex', alignItems: 'center', gap: 4 }}>
             <ChevronLeft size={14} /> Trước
           </button>
           <span style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
             {page + 1} / {totalPages}
           </span>
           <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm"
-            style={{ color: page >= totalPages - 1 ? '#4a4560' : '#d9ab55', background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.1)' }}>
+            style={{ color: page >= totalPages - 1 ? '#4a4560' : '#d9ab55', background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.1)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', padding: '0.5rem 0.875rem', borderRadius: '0.5rem', minHeight: 44, display: 'flex', alignItems: 'center', gap: 4 }}>
             Sau <ChevronRight size={14} />
           </button>
         </div>
       )}
 
-      {/* Floating modal */}
       <ProfileFormModal
         open={modalOpen}
         title={editingId ? 'Chỉnh sửa hồ sơ' : 'Thêm hồ sơ mới'}

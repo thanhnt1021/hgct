@@ -233,7 +233,7 @@ export default function ProfileInfo() {
             <div>
               <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginBottom: '0.1rem' }}>LOẠI TÀI KHOẢN</p>
               <p style={{ color: user.isPremium ? '#d9ab55' : '#94a3b8', fontFamily: 'var(--font-vietnam)', fontWeight: 700 }}>
-                {user.isPremium ? 'Premium ✦' : 'Miễn phí'}
+                {user.planType === 'lifetime' ? 'Lifetime ★' : user.planType === 'cao_cap' ? 'Cao cấp ✦' : user.isPremium ? 'Tiêu chuẩn ✦' : 'Miễn phí'}
               </p>
             </div>
           </div>
@@ -428,12 +428,12 @@ export default function ProfileInfo() {
           {/* Email nhận PDF — editable */}
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL NHẬN BÁO CÁO PDF</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input type="email" value={acEmail} onChange={e => setAcEmail(e.target.value)}
                 placeholder="email@example.com" className="flex-1" style={{ fontFamily: 'var(--font-vietnam)' }} />
               <button onClick={handleUpdateEmail} disabled={acLoading || !acEmail.trim()}
                 className="px-4 py-2 rounded-xl font-semibold text-sm"
-                style={{ background: acEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: acEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap' }}>
+                style={{ background: acEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: acEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap', minHeight: 44 }}>
                 {acLoading ? 'Đang lưu...' : 'Lưu'}
               </button>
             </div>
