@@ -1,0 +1,417 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Navbar from '@/components/layout/Navbar'
+import { useAuth } from '@/contexts/AuthContext'
+import LocationPicker from '@/components/profile/LocationPicker'
+
+interface Profile {
+  id: string
+  ho: string
+  dem: string
+  ten: string
+  name: string
+  gender: string
+  dob: { day: number; month: number; year: number }
+  tob: { hour: number; minute: number; unknown: boolean }
+  loc: { address: string; lat: number; lon: number; tz: string }
+  createdAt: string
+}
+
+const CUR_YEAR = new Date().getFullYear()
+const MAX_YEAR = CUR_YEAR + 100
+const MIN_YEAR = 1911
+
+const MONTHS = [
+  [1,'Tháng 1'],[2,'Tháng 2'],[3,'Tháng 3'],[4,'Tháng 4'],
+  [5,'Tháng 5'],[6,'Tháng 6'],[7,'Tháng 7'],[8,'Tháng 8'],
+  [9,'Tháng 9'],[10,'Tháng 10'],[11,'Tháng 11'],[12,'Tháng 12'],
+] as [number, string][]
+const DAYS = Array.from({length: 31}, (_, i) => i + 1)
+const YEARS = Array.from({length: MAX_YEAR - MIN_YEAR + 1}, (_, i) => MAX_YEAR - i)
+const HOURS = Array.from({length: 24}, (_, i) => i)
+const MINUTES = Array.from({length: 60}, (_, i) => i)
+
+export default function MyChartsPage() {
+  const { user, isLoading } = useAuth()
+  const router = useRouter()
+  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [form, setForm] = useState<typeof EMPTY_FORM | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [yearMode, setYearMode] = useState<'select' | 'custom'>('select')
+  const [customYearText, setCustomYearText] = useState('')
+  const [yearError, setYearError] = useState('')
+  const [formError, setFormError] = useState('')
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+
+  const EMPTY_FORM = {
+    ho: '', dem: '', ten: '', gender: 'Female',
+    dob: { day: 0, month: 0, year: 0 },
+    tob: { hour: -1, minute: -1, unknown: false },
+    loc: { address: 'Hà Nội, Việt Nam', lat: 21.0245, lon: 105.8412, tz: 'Asia/Ho_Chi_Minh' },
+  }
+
+  useEffect(() => {
+    if (!isLoading && !user) router.push('/auth/login')
+  }, [user, isLoading, router])
+
+  useEffect(() => {
+    fetch('/api/profiles')
+      .then(r => r.json())
+      .then(data => {
+        if (data.profiles) {
+          setProfiles(data.profiles.map((p: any) => ({
+            id: String(p.id),
+            ho: p.data?.ho || '',
+            dem: p.data?.dem || '',
+            ten: p.data?.ten || p.name,
+            name: p.name,
+            gender: p.gender || 'Female',
+            dob: p.data?.dob || { day: 0, month: 0, year: 0 },
+            tob: p.data?.tob || { hour: -1, minute: -1, unknown: false },
+            loc: p.data?.loc || { address: 'Hà Nội', lat: 21.02, lon: 105.84, tz: 'Asia/Ho_Chi_Minh' },
+            createdAt: p.createdAt || '',
+          })))
+        }
+      })
+      .catch(() => setProfiles([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const setF = (k: string, v: unknown) => setForm(f => f ? { ...f, [k]: v } : f)
+
+  const openEdit = (p: Profile) => {
+    const inRange = p.dob.year >= MIN_YEAR && p.dob.year <= MAX_YEAR
+    setYearMode(inRange || p.dob.year === 0 ? 'select' : 'custom')
+    setCustomYearText(inRange || p.dob.year === 0 ? '' : String(p.dob.year))
+    setYearError('')
+    setFormError('')
+    setForm({ ho: p.ho, dem: p.dem, ten: p.ten, gender: p.gender, dob: p.dob, tob: p.tob, loc: p.loc })
+    setEditingId(p.id)
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setForm(null)
+    setYearError('')
+    setFormError('')
+  }
+
+  const handleSave = async () => {
+    if (!form) return
+    setFormError('')
+    setYearError('')
+
+    if (!form.ten.trim()) { setFormError('Vui lòng nhập tên'); return }
+    if (form.dob.day === 0) { setFormError('Vui lòng chọn ngày sinh'); return }
+    if (form.dob.month === 0) { setFormError('Vui lòng chọn tháng sinh'); return }
+
+    let finalYear = form.dob.year
+    if (yearMode === 'custom') {
+      const y = parseInt(customYearText, 10)
+      if (!customYearText.trim() || isNaN(y) || y < -4712 || y > 5399) {
+        setYearError('Năm không hợp lệ. Nhập số từ -4712 đến 5399.')
+        return
+      }
+      finalYear = y
+    } else if (form.dob.year === 0) {
+      setFormError('Vui lòng chọn năm sinh')
+      return
+    }
+
+    if (!form.tob.unknown && (form.tob.hour === -1 || form.tob.minute === -1)) {
+      setFormError('Vui lòng chọn giờ và phút sinh (hoặc tích "Không rõ giờ sinh")')
+      return
+    }
+
+    setSaving(true)
+    const finalDob = { ...form.dob, year: finalYear }
+    const name = [form.ho, form.dem, form.ten].filter(Boolean).join(' ')
+    const body = { id: editingId, name, gender: form.gender, data: { dob: finalDob, tob: form.tob, loc: form.loc, ho: form.ho, dem: form.dem, ten: form.ten } }
+
+    try {
+      const res = await fetch('/api/profiles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (res.ok) {
+        setProfiles(prev => prev.map(p => p.id === editingId
+          ? { ...p, ...form, dob: finalDob, name }
+          : p
+        ))
+        cancelEdit()
+      }
+    } catch { /* ignore */ }
+
+    setSaving(false)
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await fetch(`/api/profiles?id=${id}`, { method: 'DELETE' })
+    } catch { /* ignore */ }
+    setProfiles(prev => prev.filter(p => p.id !== id))
+    setDeleteConfirm(null)
+  }
+
+  if (isLoading || !user) return null
+
+  return (
+    <div className="min-h-screen" style={{ background: '#0a0a1a' }}>
+      <Navbar />
+      <div className="max-w-4xl mx-auto px-4 pt-24 pb-16">
+
+        {/* Header */}
+        <div className="mb-8 flex items-center gap-4">
+          <button
+            onClick={() => router.push('/profile')}
+            style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}
+          >
+            ← Hồ sơ
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+              Danh sách Bản đồ sao
+            </h1>
+            <p className="text-sm mt-0.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+              {profiles.length} hồ sơ đã lưu
+            </p>
+          </div>
+        </div>
+
+        {/* Loading */}
+        {loading && (
+          <div className="flex justify-center py-16">
+            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(201,168,76,0.2)', borderTopColor: '#c9a84c' }} />
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && profiles.length === 0 && (
+          <div className="rounded-2xl p-10 text-center" style={{ background: 'rgba(26,21,53,0.6)', border: '1px dashed rgba(201,168,76,0.2)' }}>
+            <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>
+              Chưa có hồ sơ nào.
+            </p>
+            <button
+              onClick={() => router.push('/profile')}
+              className="px-5 py-2.5 rounded-xl font-semibold text-sm"
+              style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}
+            >
+              + Thêm bản đồ sao
+            </button>
+          </div>
+        )}
+
+        {/* Profile list */}
+        {!loading && profiles.length > 0 && (
+          <div className="space-y-4">
+            {profiles.map(p => (
+              <div key={p.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(26,21,53,0.6)', border: editingId === p.id ? '1px solid rgba(201,168,76,0.35)' : '1px solid rgba(201,168,76,0.12)' }}>
+                {/* Row */}
+                <div className="flex items-center gap-3 px-5 py-4 flex-wrap">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>{p.name}</p>
+                    <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                      {p.gender === 'Female' ? '♀' : p.gender === 'Male' ? '♂' : '⊕'} ·{' '}
+                      {p.dob.day > 0 && p.dob.month > 0 && p.dob.year > 0
+                        ? `${p.dob.day}/${p.dob.month}/${p.dob.year}`
+                        : 'Chưa có ngày sinh'} ·{' '}
+                      {p.tob.unknown ? 'Không rõ giờ' : (p.tob.hour >= 0 && p.tob.minute >= 0) ? `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
+                      {p.loc.address}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5 flex-shrink-0 flex-wrap">
+                    <button
+                      onClick={() => editingId === p.id ? cancelEdit() : openEdit(p)}
+                      className="px-2.5 py-1.5 rounded-lg text-xs"
+                      style={{ color: editingId === p.id ? '#94a3b8' : '#c9a84c', background: editingId === p.id ? 'rgba(107,114,128,0.15)' : 'rgba(201,168,76,0.1)', fontFamily: 'var(--font-vietnam)' }}
+                    >
+                      {editingId === p.id ? 'Hủy' : 'Sửa'}
+                    </button>
+                    {deleteConfirm === p.id ? (
+                      <>
+                        <button onClick={() => handleDelete(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xác nhận xóa</button>
+                        <button onClick={() => setDeleteConfirm(null)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#94a3b8', background: 'rgba(148,163,184,0.1)', fontFamily: 'var(--font-vietnam)' }}>Hủy</button>
+                      </>
+                    ) : (
+                      <button onClick={() => setDeleteConfirm(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#6b7280', background: 'rgba(107,114,128,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xóa</button>
+                    )}
+                    <button
+                      onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : (p.tob.hour >= 0 ? p.tob.hour : 12), minute: p.tob.unknown ? 0 : (p.tob.minute >= 0 ? p.tob.minute : 0) }, loc: p.loc })); router.push('/services') }}
+                      className="px-2.5 py-1.5 rounded-lg text-xs"
+                      style={{ color: '#c9a84c', background: 'rgba(61,43,94,0.5)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}
+                    >
+                      Dịch vụ
+                    </button>
+                    <button
+                      onClick={() => router.push(`/chart?id=${p.id}`)}
+                      className="px-2.5 py-1.5 rounded-lg text-xs"
+                      style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+                    >
+                      Bản đồ ✦
+                    </button>
+                  </div>
+                </div>
+
+                {/* Inline edit form */}
+                {editingId === p.id && form && (
+                  <div className="px-5 pb-5 pt-2" style={{ borderTop: '1px solid rgba(201,168,76,0.15)' }}>
+                    <div className="space-y-5">
+                      {/* Name */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Họ</label>
+                          <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Đệm</label>
+                          <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
+                          <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
+                        </div>
+                      </div>
+
+                      {/* Gender */}
+                      <div>
+                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giới tính</label>
+                        <div className="flex gap-3">
+                          {[{v:'Female',l:'♀ Nữ'},{v:'Male',l:'♂ Nam'},{v:'Other',l:'Khác'}].map(g => (
+                            <button key={g.v} type="button" onClick={() => setF('gender', g.v)} className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                              style={{ background: form.gender === g.v ? '#3d2b5e' : 'rgba(26,21,53,0.8)', color: form.gender === g.v ? '#c9a84c' : '#94a3b8', border: form.gender === g.v ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.1)' }}>
+                              {g.l}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Date of birth */}
+                      <div>
+                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Ngày sinh</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Ngày</label>
+                            <select value={form.dob.day === 0 ? '' : form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
+                              <option value="">-</option>
+                              {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Tháng</label>
+                            <select value={form.dob.month === 0 ? '' : form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
+                              <option value="">-</option>
+                              {MONTHS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Năm</label>
+                            {yearMode === 'select' ? (
+                              <select
+                                value={form.dob.year === 0 ? '' : form.dob.year}
+                                onChange={e => {
+                                  if (e.target.value === '__custom__') {
+                                    setYearMode('custom')
+                                    setCustomYearText('')
+                                  } else {
+                                    setF('dob', { ...form.dob, year: +e.target.value })
+                                  }
+                                }}
+                              >
+                                <option value="">-</option>
+                                {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                                <option value="__custom__">Năm khác...</option>
+                              </select>
+                            ) : (
+                              <div className="flex gap-1">
+                                <input
+                                  type="text"
+                                  value={customYearText}
+                                  onChange={e => { setCustomYearText(e.target.value); setYearError('') }}
+                                  placeholder="VD: 1850"
+                                  style={{ flex: 1, minWidth: 0 }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
+                                  style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}
+                                >✕</button>
+                              </div>
+                            )}
+                            {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.25rem', fontFamily: 'var(--font-vietnam)' }}>{yearError}</p>}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Time of birth */}
+                      <div>
+                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giờ sinh</label>
+                        <div className="flex items-center gap-3 mb-2">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={form.tob.unknown} onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })} style={{ width: 'auto', padding: 0 }} />
+                            <span className="text-sm" style={{ color: '#94a3b8' }}>Không rõ giờ sinh</span>
+                          </label>
+                        </div>
+                        {!form.tob.unknown && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Giờ (0–23)</label>
+                              <select value={form.tob.hour === -1 ? '' : form.tob.hour} onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })}>
+                                <option value="">-</option>
+                                {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Phút</label>
+                              <select value={form.tob.minute === -1 ? '' : form.tob.minute} onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })}>
+                                <option value="">-</option>
+                                {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
+                              </select>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
+
+                      {formError && (
+                        <p style={{ color: '#ef4444', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>⚠ {formError}</p>
+                      )}
+
+                      <div className="flex gap-3 pt-2">
+                        <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold" style={{ background: '#c9a84c', color: '#0a0a1a' }}>
+                          {saving ? 'Đang lưu...' : 'Cập nhật hồ sơ'}
+                        </button>
+                        <button onClick={cancelEdit} className="px-6 py-3 rounded-xl font-semibold" style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8' }}>
+                          Hủy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add button at bottom */}
+        {!loading && (
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => router.push('/profile')}
+              className="px-6 py-3 rounded-xl font-semibold text-sm"
+              style={{ background: 'rgba(201,168,76,0.1)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+            >
+              + Thêm bản đồ sao mới
+            </button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  )
+}
