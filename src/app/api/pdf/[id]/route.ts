@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 
-const PDF_DIR = '/tmp/hgct-pdfs'
+const PDF_DIR = '/var/hgct/pdfs'
 
 export async function GET(
   _request: Request,

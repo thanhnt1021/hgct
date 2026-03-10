@@ -6,8 +6,6 @@ import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
 import LocationPicker from '@/components/profile/LocationPicker'
 
-const LS_PROFILES = 'hatgiong_profiles'
-
 interface Profile {
   id: string
   ho: string
@@ -20,13 +18,6 @@ interface Profile {
   loc: { address: string; lat: number; lon: number; tz: string }
   createdAt: string
 }
-
-function makeId() { return Math.random().toString(36).slice(2) + Date.now().toString(36) }
-
-function loadProfiles(): Profile[] {
-  try { return JSON.parse(localStorage.getItem(LS_PROFILES) || '[]') } catch { return [] }
-}
-function saveProfiles(ps: Profile[]) { localStorage.setItem(LS_PROFILES, JSON.stringify(ps)) }
 
 const EMPTY_FORM = {
   ho: '', dem: '', ten: '', gender: 'Female',
@@ -55,7 +46,25 @@ export default function ProfilePage() {
   }, [user, isLoading, router])
 
   useEffect(() => {
-    setProfiles(loadProfiles())
+    fetch('/api/profiles')
+      .then(r => r.json())
+      .then(data => {
+        if (data.profiles) {
+          setProfiles(data.profiles.map((p: any) => ({
+            id: String(p.id),
+            ho: p.data?.ho || '',
+            dem: p.data?.dem || '',
+            ten: p.data?.ten || p.name,
+            name: p.name,
+            gender: p.gender || 'Female',
+            dob: p.data?.dob || { day: 1, month: 1, year: 1990 },
+            tob: p.data?.tob || { hour: 12, minute: 0, unknown: false },
+            loc: p.data?.loc || { address: 'Hà Nội', lat: 21.02, lon: 105.84, tz: 'Asia/Ho_Chi_Minh' },
+            createdAt: p.createdAt || '',
+          })))
+        }
+      })
+      .catch(() => setProfiles([]))
   }, [])
 
   const setF = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
@@ -72,29 +81,58 @@ export default function ProfilePage() {
     setShowForm(true)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.ten.trim()) return alert('Vui lòng nhập tên')
     setSaving(true)
     const name = [form.ho, form.dem, form.ten].filter(Boolean).join(' ')
-    const updated = [...profiles]
+    const body = { name, gender: form.gender, data: { dob: form.dob, tob: form.tob, loc: form.loc, ho: form.ho, dem: form.dem, ten: form.ten } }
 
-    if (editingId) {
-      const idx = updated.findIndex(p => p.id === editingId)
-      if (idx >= 0) updated[idx] = { ...updated[idx], ...form, name }
-    } else {
-      updated.push({ id: makeId(), ...form, name, createdAt: new Date().toISOString() })
-    }
-    saveProfiles(updated)
-    setProfiles(updated)
+    try {
+      if (editingId) {
+        const res = await fetch('/api/profiles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingId, ...body }),
+        })
+        const data = await res.json()
+        if (res.ok && data.profile) {
+          setProfiles(prev => prev.map(p => p.id === editingId ? { ...p, ...form, name } : p))
+        }
+      } else {
+        const res = await fetch('/api/profiles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        const data = await res.json()
+        if (res.ok && data.profile) {
+          const p = data.profile
+          setProfiles(prev => [{
+            id: String(p.id),
+            ho: p.data?.ho || '',
+            dem: p.data?.dem || '',
+            ten: p.data?.ten || p.name,
+            name: p.name,
+            gender: p.gender || 'Female',
+            dob: p.data?.dob || form.dob,
+            tob: p.data?.tob || form.tob,
+            loc: p.data?.loc || form.loc,
+            createdAt: p.createdAt || '',
+          }, ...prev])
+        }
+      }
+    } catch { /* ignore */ }
+
     setShowForm(false)
     setEditingId(null)
     setSaving(false)
   }
 
-  const handleDelete = (id: string) => {
-    const updated = profiles.filter(p => p.id !== id)
-    saveProfiles(updated)
-    setProfiles(updated)
+  const handleDelete = async (id: string) => {
+    try {
+      await fetch(`/api/profiles?id=${id}`, { method: 'DELETE' })
+    } catch { /* ignore */ }
+    setProfiles(prev => prev.filter(p => p.id !== id))
     setDeleteConfirm(null)
   }
 

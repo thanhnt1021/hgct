@@ -17,6 +17,10 @@ Source reference: `~/mo` — read files there for logic reference, but **NEVER e
 ## Key Architecture
 **Report flow:** Calculate chart → Get KB from DB → Run logic blocks → Build prompt → AI generates essay → Generate PDF → Send email
 
+**Environments:**
+- Production: hatgiongchiemtinh.com → port 65498, hgct.service, deploy with `bash /root/hgct/deploy.sh`
+- Demo: demo.hatgiongchiemtinh.com → port 65499, hgct-demo.service, deploy with `bash /root/hgct/deploy-demo.sh [branch]`
+
 ## What's DONE ✓
 - [x] Project scaffolding (Next.js, Prisma, Tailwind)
 - [x] Auth system (NextAuth.js, register, forgot-password)
@@ -40,12 +44,15 @@ Source reference: `~/mo` — read files there for logic reference, but **NEVER e
 - [x] UI pages — homepage, /services, /input, /checkout, /success, /profile, /auth/*
 - [x] `/deploy.sh` — Deploy script (run as root to update systemd service)
 - [x] Typography — Cinzel, Cinzel Decorative, Cormorant Garamond, EB Garamond, Lora (next/font/google), navy #0a0a1a + gold #c9a84c palette
-- [x] Auth — localStorage mock auth context (`hatgiong_auth`), register/login rewrites
-- [x] Profile page — split name (Họ/Đệm/Tên), date/time pickers, multi-profile management, profiles in localStorage (`hatgiong_profiles`)
+- [x] Auth — NextAuth + Prisma DB (migrated from localStorage mock); session includes uid, username, isPremium
+- [x] Profile page — split name (Họ/Đệm/Tên), date/time pickers, multi-profile management, profiles synced to DB via /api/profiles
 - [x] LocationPicker component — Nominatim geocoding + geo-tz timezone lookup, `/api/location/search`
 - [x] Profile selection flow — services page shows profile dropdown before checkout
 - [x] Test email service — `/test-email` page + `/api/test-email` (Hostinger SMTP, detailed error reporting)
 - [x] `.env.example` — with all required keys
+- [x] Job system — persisted to DB (jobs table) with in-memory cache; `getJobFromDb` survives server restarts
+- [x] PDF storage — moved from /tmp/hgct-pdfs to /var/hgct/pdfs (persistent)
+- [x] Demo environment — demo.hatgiongchiemtinh.com on port 65499 (hgct-demo.service, deploy-demo.sh, nginx config)
 
 ## What's TODO
 - [ ] **Deploy** — Run `sudo bash /root/hgct/deploy.sh` to update systemd + restart production server

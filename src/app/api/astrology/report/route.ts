@@ -11,7 +11,7 @@ import { createJob, updateJob } from '@/lib/jobs'
 import fs from 'fs'
 import path from 'path'
 
-const PDF_DIR = '/tmp/hgct-pdfs'
+const PDF_DIR = '/var/hgct/pdfs'
 
 const SYSTEM_PROMPT = 'Bạn là một chiêm tinh gia chuyên nghiệp, có kiến thức sâu rộng về chiêm tinh học phương Tây. Bạn viết bằng tiếng Việt, văn phong ấm áp, dễ hiểu, truyền cảm hứng.'
 

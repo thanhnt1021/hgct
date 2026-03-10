@@ -8,6 +8,10 @@ APP_DIR="/root/hgct"
 
 echo "=== HGCT Deploy ==="
 
+# 0. Ensure required directories exist
+mkdir -p /var/hgct/pdfs
+chmod 755 /var/hgct/pdfs
+
 # 1. Clean previous build then build fresh
 cd "$APP_DIR"
 echo "[1/5] Cleaning old build & building..."

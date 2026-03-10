@@ -45,6 +45,27 @@ export async function POST(request: Request) {
   return NextResponse.json({ profile })
 }
 
+export async function PUT(request: Request) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const body = await request.json()
+  const { id, name, gender, data } = body
+
+  if (!id) {
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+  }
+
+  const profile = await prisma.profile.update({
+    where: { id: parseInt(id) },
+    data: { name, gender, data },
+  })
+
+  return NextResponse.json({ profile })
+}
+
 export async function DELETE(request: Request) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {

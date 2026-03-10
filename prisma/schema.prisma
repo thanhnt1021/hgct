@@ -14,6 +14,8 @@ model User {
   passwordHash String    @map("password_hash")
   userUid      String    @unique @map("user_uid")
   createdAt    String    @default("") @map("created_at")
+  isPremium    Boolean  @default(false) @map("is_premium")
+  premiumToken String?  @map("premium_token")
   profiles     Profile[]
 
   @@map("users")
@@ -37,6 +39,18 @@ model KnowledgeBase {
   updatedAt String @default("") @map("updated_at")
 
   @@map("knowledge_base")
+}
+
+model Job {
+  id        String   @id
+  status    String   @default("processing")
+  progress  Int      @default(0)
+  label     String   @default("")
+  result    Json?
+  error     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("jobs")
 }
 
 model Order {

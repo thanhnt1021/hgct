@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 
-const LS_PROFILES = 'hatgiong_profiles'
-
 interface Profile {
   id: string
   name: string
@@ -74,7 +72,25 @@ export default function ServicesPage() {
   const [profileB, setProfileB] = useState('')
 
   useEffect(() => {
-    try { setProfiles(JSON.parse(localStorage.getItem(LS_PROFILES) || '[]')) } catch { /* */ }
+    fetch('/api/profiles')
+      .then(r => r.json())
+      .then(data => {
+        if (data.profiles) {
+          setProfiles(data.profiles.map((p: any) => ({
+            id: String(p.id),
+            ho: p.data?.ho || '',
+            dem: p.data?.dem || '',
+            ten: p.data?.ten || p.name,
+            name: p.name,
+            gender: p.gender || 'Female',
+            dob: p.data?.dob || { day: 1, month: 1, year: 1990 },
+            tob: p.data?.tob || { hour: 12, minute: 0, unknown: false },
+            loc: p.data?.loc || { address: 'Hà Nội', lat: 21.02, lon: 105.84, tz: 'Asia/Ho_Chi_Minh' },
+            createdAt: p.createdAt || '',
+          })))
+        }
+      })
+      .catch(() => setProfiles([]))
   }, [])
 
   const handleServiceClick = (s: ServiceDef) => {
