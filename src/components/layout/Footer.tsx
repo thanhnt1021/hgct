@@ -97,7 +97,7 @@ export default function Footer() {
               © 2026 Hạt Giống Chiêm Tinh. All rights reserved.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>
-              <Link href="/privacy" className="footer-link">Chính sách bảo mật</Link>
+              <Link href="/privacy" className="footer-link" rel="privacy-policy">Chính sách bảo mật</Link>
               <span style={{ color: '#4a4560', margin: '0 0.5rem' }}>·</span>
               <Link href="/terms" className="footer-link">Điều khoản sử dụng</Link>
             </div>

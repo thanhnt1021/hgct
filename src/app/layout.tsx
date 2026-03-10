@@ -33,6 +33,7 @@ export const metadata: Metadata = {
   title: 'Hạt Giống Chiêm Tinh — Bản đồ sao của bạn nói gì?',
   description: 'Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Cặp Đôi và Vận Hạn. Báo cáo PDF chi tiết gửi qua email trong vài phút.',
   icons: { icon: '/favicon.ico' },
+  metadataBase: new URL('https://hatgiongchiemtinh.com'),
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
