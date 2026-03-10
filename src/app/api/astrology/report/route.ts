@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { randomUUID, createHash } from 'crypto'
+import { randomUUID } from 'crypto'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { calculateChart } from '@/lib/astrology/calculations'
 import { getKnowledgeFromDB } from '@/lib/astrology/knowledge'
 import { getCareerBlocks } from '@/lib/logic/career/manager'
@@ -195,27 +197,23 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
 
 // ── Route handler — returns jobId immediately ──────────────────────
 
-function isValidPremiumToken(token: unknown): boolean {
-  const upgradeCode = process.env.UPGRADE_CODE
-  if (!upgradeCode || typeof token !== 'string') return false
-  const expected = createHash('sha256').update(upgradeCode + ':hgct-premium').digest('hex')
-  return token === expected
-}
-
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { service, inputData, premiumToken } = body
+    const session = await getServerSession(authOptions)
+    const isPremium = (session?.user as any)?.isPremium === true
 
-    if (!service || !inputData) {
-      return NextResponse.json({ error: 'Missing data' }, { status: 400 })
-    }
-
-    if (!isValidPremiumToken(premiumToken)) {
+    if (!isPremium) {
       return NextResponse.json(
         { error: 'Chỉ tài khoản Premium mới có thể tạo báo cáo. Vui lòng nâng cấp tài khoản.', requiresPremium: true },
         { status: 403 }
       )
+    }
+
+    const body = await request.json()
+    const { service, inputData } = body
+
+    if (!service || !inputData) {
+      return NextResponse.json({ error: 'Missing data' }, { status: 400 })
     }
 
     const jobId = randomUUID()

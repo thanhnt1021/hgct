@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import LocationPicker from './LocationPicker'
-import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2, X } from 'lucide-react'
 
 interface Profile {
   id: string
@@ -17,7 +17,7 @@ interface Profile {
 const CUR_YEAR = new Date().getFullYear()
 const MAX_YEAR = CUR_YEAR + 100
 const MIN_YEAR = 1911
-const PAGE_SIZE = 10
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
 
 const MONTHS = [
   [1,'Tháng 1'],[2,'Tháng 2'],[3,'Tháng 3'],[4,'Tháng 4'],
@@ -41,9 +41,11 @@ export default function ChartList() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
+  const [pendingPageSize, setPendingPageSize] = useState(10)
 
-  // Form state
-  const [showForm, setShowForm] = useState(false)
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
@@ -74,14 +76,23 @@ export default function ChartList() {
       .finally(() => setLoading(false))
   }, [])
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (modalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [modalOpen])
+
   const setF = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
   const openNew = () => {
     setForm(EMPTY_FORM)
     setEditingId(null)
     setYearMode('select'); setCustomYearText(''); setYearError(''); setFormError('')
-    setShowForm(true)
-    setPage(0)
+    setModalOpen(true)
   }
 
   const openEdit = (p: Profile) => {
@@ -91,11 +102,13 @@ export default function ChartList() {
     setYearError(''); setFormError('')
     setForm({ ho: p.ho, dem: p.dem, ten: p.ten, gender: p.gender, dob: p.dob, tob: p.tob, loc: p.loc })
     setEditingId(p.id)
-    setShowForm(true)
+    setModalOpen(true)
   }
 
-  const cancelForm = () => {
-    setShowForm(false); setEditingId(null); setFormError(''); setYearError('')
+  const closeModal = () => {
+    setModalOpen(false)
+    setEditingId(null)
+    setFormError(''); setYearError('')
   }
 
   const handleSave = async () => {
@@ -132,7 +145,7 @@ export default function ChartList() {
         })
         if (res.ok) {
           setProfiles(prev => prev.map(p => p.id === editingId ? { ...p, ...form, dob: finalDob, name } : p))
-          cancelForm()
+          closeModal()
         }
       } else {
         const res = await fetch('/api/profiles', {
@@ -148,7 +161,7 @@ export default function ChartList() {
             dob: p.data?.dob || finalDob, tob: p.data?.tob || form.tob,
             loc: p.data?.loc || form.loc, createdAt: p.createdAt || '',
           }, ...prev])
-          cancelForm()
+          closeModal()
         }
       }
     } catch { /* ignore */ }
@@ -161,139 +174,16 @@ export default function ChartList() {
     setDeleteConfirm(null)
   }
 
-  const totalPages = Math.ceil(profiles.length / PAGE_SIZE)
-  const paginated = profiles.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const applyPageSize = () => {
+    setPageSize(pendingPageSize)
+    setPage(0)
+  }
 
-  const ProfileForm = () => (
-    <div className="rounded-2xl p-5 mb-6" style={{ background: 'rgba(10,8,26,0.7)', border: '1px solid rgba(201,168,76,0.25)' }}>
-      <h3 className="font-bold mb-5" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
-        {editingId ? 'Chỉnh sửa hồ sơ' : 'Tạo hồ sơ mới'}
-      </h3>
-      <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-2">
-          <div>
-            <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Họ</label>
-            <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Đệm</label>
-            <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
-            <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giới tính</label>
-          <div className="flex gap-2 flex-wrap">
-            {[{v:'Female',l:'♀ Nữ'},{v:'Male',l:'♂ Nam'},{v:'Other',l:'Khác'}].map(g => (
-              <button key={g.v} type="button" onClick={() => setF('gender', g.v)}
-                className="px-3 py-2 rounded-xl text-sm transition-all"
-                style={{ background: form.gender === g.v ? '#3d2b5e' : 'rgba(26,21,53,0.8)', color: form.gender === g.v ? '#c9a84c' : '#94a3b8', border: form.gender === g.v ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.1)' }}>
-                {g.l}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Ngày sinh</label>
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Ngày</label>
-              <select value={form.dob.day === 0 ? '' : form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
-                <option value="">-</option>
-                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Tháng</label>
-              <select value={form.dob.month === 0 ? '' : form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
-                <option value="">-</option>
-                {MONTHS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Năm</label>
-              {yearMode === 'select' ? (
-                <select
-                  value={form.dob.year === 0 ? '' : form.dob.year}
-                  onChange={e => {
-                    if (e.target.value === '__custom__') { setYearMode('custom'); setCustomYearText('') }
-                    else setF('dob', { ...form.dob, year: +e.target.value })
-                  }}
-                >
-                  <option value="">-</option>
-                  {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                  <option value="__custom__">Năm khác...</option>
-                </select>
-              ) : (
-                <div className="flex gap-1">
-                  <input type="text" value={customYearText}
-                    onChange={e => { setCustomYearText(e.target.value); setYearError('') }}
-                    placeholder="VD: 1850" style={{ flex: 1, minWidth: 0 }} />
-                  <button type="button"
-                    onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
-                    style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
-                </div>
-              )}
-              {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.2rem' }}>{yearError}</p>}
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giờ sinh</label>
-          <label className="flex items-center gap-2 cursor-pointer mb-2">
-            <input type="checkbox" checked={form.tob.unknown}
-              onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
-              style={{ width: 'auto', padding: 0 }} />
-            <span className="text-sm" style={{ color: '#94a3b8' }}>Không rõ giờ sinh</span>
-          </label>
-          {!form.tob.unknown && (
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Giờ (0–23)</label>
-                <select value={form.tob.hour === -1 ? '' : form.tob.hour}
-                  onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })}>
-                  <option value="">-</option>
-                  {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Phút</label>
-                <select value={form.tob.minute === -1 ? '' : form.tob.minute}
-                  onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })}>
-                  <option value="">-</option>
-                  {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
-
-        {formError && <p style={{ color: '#ef4444', fontSize: '0.82rem' }}>⚠ {formError}</p>}
-
-        <div className="flex gap-3 pt-1">
-          <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold"
-            style={{ background: '#c9a84c', color: '#0a0a1a' }}>
-            {saving ? 'Đang lưu...' : editingId ? 'Cập nhật' : 'Lưu hồ sơ'}
-          </button>
-          <button onClick={cancelForm} className="px-6 py-3 rounded-xl font-semibold"
-            style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8' }}>
-            Hủy
-          </button>
-        </div>
-      </div>
-    </div>
-  )
+  const totalPages = Math.ceil(profiles.length / pageSize)
+  const paginated = profiles.slice(page * pageSize, (page + 1) * pageSize)
 
   return (
-    <div>
+    <>
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
@@ -305,20 +195,13 @@ export default function ChartList() {
           )}
         </div>
         <button
-          onClick={() => showForm && !editingId ? cancelForm() : openNew()}
+          onClick={openNew}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
-          style={{ background: showForm && !editingId ? 'rgba(107,114,128,0.15)' : '#c9a84c', color: showForm && !editingId ? '#94a3b8' : '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}
+          style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}
         >
-          {showForm && !editingId ? (
-            'Hủy'
-          ) : (
-            <><Plus size={15} /> Thêm hồ sơ</>
-          )}
+          <Plus size={15} /> Thêm hồ sơ
         </button>
       </div>
-
-      {/* Form for new / edit */}
-      {showForm && <ProfileForm />}
 
       {/* Loading */}
       {loading && (
@@ -328,7 +211,7 @@ export default function ChartList() {
       )}
 
       {/* Empty */}
-      {!loading && profiles.length === 0 && !showForm && (
+      {!loading && profiles.length === 0 && (
         <div className="text-center py-12 rounded-2xl" style={{ border: '1px dashed rgba(201,168,76,0.15)' }}>
           <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>Chưa có hồ sơ nào.</p>
           <button onClick={openNew} className="px-5 py-2.5 rounded-xl font-semibold text-sm"
@@ -340,90 +223,264 @@ export default function ChartList() {
 
       {/* Profile list */}
       {!loading && paginated.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {paginated.map(p => (
-            <div key={p.id} className="rounded-xl overflow-hidden"
-              style={{ background: editingId === p.id ? 'rgba(26,21,53,0.85)' : 'rgba(255,255,255,0.03)', border: editingId === p.id ? '1px solid rgba(201,168,76,0.3)' : '1px solid rgba(201,168,76,0.08)' }}>
-              <div className="flex items-center gap-3 px-4 py-3 flex-wrap">
-                {/* Gender icon */}
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(61,43,94,0.5)', fontSize: '0.9rem' }}>
-                  {p.gender === 'Female' ? '♀' : p.gender === 'Male' ? '♂' : '⊕'}
-                </div>
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>{p.name}</p>
-                  <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginTop: '0.1rem' }}>
-                    {p.dob.day > 0 ? `${p.dob.day}/${p.dob.month}/${p.dob.year}` : 'Chưa có ngày'} ·{' '}
-                    {p.tob.unknown ? 'Không rõ giờ' : p.tob.hour >= 0 ? `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
-                    {p.loc.address}
-                  </p>
-                </div>
-                {/* Actions */}
-                <div className="flex gap-1.5 flex-shrink-0 flex-wrap">
-                  <button
-                    onClick={() => router.push(`/chart?id=${p.id}`)}
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold"
-                    style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
-                  >
-                    Bản đồ ✦
-                  </button>
-                  <button
-                    onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : (p.tob.hour >= 0 ? p.tob.hour : 12), minute: p.tob.unknown ? 0 : (p.tob.minute >= 0 ? p.tob.minute : 0) }, loc: p.loc })); router.push('/services') }}
-                    className="px-2.5 py-1.5 rounded-lg text-xs"
-                    style={{ color: '#c9a84c', background: 'rgba(61,43,94,0.5)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}
-                  >
-                    Dịch vụ
-                  </button>
-                  <button
-                    onClick={() => editingId === p.id ? cancelForm() : openEdit(p)}
-                    className="p-1.5 rounded-lg"
-                    style={{ color: editingId === p.id ? '#94a3b8' : '#c9a84c', background: editingId === p.id ? 'rgba(107,114,128,0.1)' : 'rgba(201,168,76,0.08)' }}
-                    title="Sửa"
-                  >
-                    <Pencil size={13} />
-                  </button>
-                  {deleteConfirm === p.id ? (
-                    <>
-                      <button onClick={() => handleDelete(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xác nhận</button>
-                      <button onClick={() => setDeleteConfirm(null)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#94a3b8', background: 'rgba(148,163,184,0.08)', fontFamily: 'var(--font-vietnam)' }}>Hủy</button>
-                    </>
-                  ) : (
-                    <button onClick={() => setDeleteConfirm(p.id)} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(107,114,128,0.08)' }} title="Xóa">
-                      <Trash2 size={13} />
-                    </button>
-                  )}
-                </div>
+            <div key={p.id} className="rounded-xl flex items-center gap-3 px-4 py-3 flex-wrap"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.08)' }}>
+              {/* Gender icon */}
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(61,43,94,0.5)', fontSize: '0.9rem' }}>
+                {p.gender === 'Female' ? '♀' : p.gender === 'Male' ? '♂' : '⊕'}
               </div>
-              {/* Inline edit form */}
-              {editingId === p.id && showForm && (
-                <div className="px-4 pb-4 pt-1" style={{ borderTop: '1px solid rgba(201,168,76,0.12)' }}>
-                  <ProfileForm />
-                </div>
-              )}
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>{p.name}</p>
+                <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginTop: '0.1rem' }}>
+                  {p.dob.day > 0 ? `${p.dob.day}/${p.dob.month}/${p.dob.year}` : 'Chưa có ngày'} ·{' '}
+                  {p.tob.unknown ? 'Không rõ giờ' : p.tob.hour >= 0 ? `${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
+                  {p.loc.address}
+                </p>
+              </div>
+              {/* Actions */}
+              <div className="flex gap-1.5 flex-shrink-0 flex-wrap">
+                <button onClick={() => router.push(`/chart?id=${p.id}`)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold"
+                  style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}>
+                  Bản đồ ✦
+                </button>
+                <button
+                  onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : (p.tob.hour >= 0 ? p.tob.hour : 12), minute: p.tob.unknown ? 0 : (p.tob.minute >= 0 ? p.tob.minute : 0) }, loc: p.loc })); router.push('/services') }}
+                  className="px-2.5 py-1.5 rounded-lg text-xs"
+                  style={{ color: '#c9a84c', background: 'rgba(61,43,94,0.5)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}>
+                  Dịch vụ
+                </button>
+                <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg"
+                  style={{ color: '#c9a84c', background: 'rgba(201,168,76,0.08)' }} title="Sửa">
+                  <Pencil size={13} />
+                </button>
+                {deleteConfirm === p.id ? (
+                  <>
+                    <button onClick={() => handleDelete(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs"
+                      style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xác nhận</button>
+                    <button onClick={() => setDeleteConfirm(null)} className="px-2.5 py-1.5 rounded-lg text-xs"
+                      style={{ color: '#94a3b8', background: 'rgba(148,163,184,0.08)', fontFamily: 'var(--font-vietnam)' }}>Hủy</button>
+                  </>
+                ) : (
+                  <button onClick={() => setDeleteConfirm(p.id)} className="p-1.5 rounded-lg"
+                    style={{ color: '#6b7280', background: 'rgba(107,114,128,0.08)' }} title="Xóa">
+                    <Trash2 size={13} />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-5">
-          <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm"
-            style={{ color: page === 0 ? '#4a4560' : '#d9ab55', background: page === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.1)' }}>
-            <ChevronLeft size={14} /> Trước
-          </button>
-          <span style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
-            Trang {page + 1} / {totalPages}
-          </span>
-          <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm"
-            style={{ color: page >= totalPages - 1 ? '#4a4560' : '#d9ab55', background: page >= totalPages - 1 ? 'rgba(255,255,255,0.02)' : 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.1)' }}>
-            Sau <ChevronRight size={14} />
-          </button>
+      {/* Footer: page size + pagination */}
+      {!loading && profiles.length > 0 && (
+        <div className="flex items-center justify-between flex-wrap gap-3 mt-5">
+          {/* Page size selector */}
+          <div className="flex items-center gap-2">
+            <span style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>Hiển thị:</span>
+            <select
+              value={pendingPageSize}
+              onChange={e => setPendingPageSize(+e.target.value)}
+              style={{ width: 'auto', padding: '0.3rem 0.5rem', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}
+            >
+              {PAGE_SIZE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            {pendingPageSize !== pageSize && (
+              <button
+                onClick={applyPageSize}
+                className="px-3 py-1 rounded-lg text-xs font-semibold"
+                style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}
+              >
+                Áp dụng
+              </button>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center gap-3">
+              <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm"
+                style={{ color: page === 0 ? '#4a4560' : '#d9ab55', background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.1)' }}>
+                <ChevronLeft size={14} /> Trước
+              </button>
+              <span style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+                {page + 1} / {totalPages}
+              </span>
+              <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm"
+                style={{ color: page >= totalPages - 1 ? '#4a4560' : '#d9ab55', background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.1)' }}>
+                Sau <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
         </div>
       )}
-    </div>
+
+      {/* ── Floating Modal ── */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+          onClick={e => { if (e.target === e.currentTarget) closeModal() }}
+        >
+          <div
+            className="w-full max-h-[90vh] overflow-y-auto rounded-2xl"
+            style={{
+              maxWidth: 560,
+              background: 'rgba(16,12,38,0.98)',
+              border: '1px solid rgba(201,168,76,0.25)',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            }}
+          >
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 pt-5 pb-4"
+              style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
+              <h3 className="font-bold text-lg" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+                {editingId ? 'Chỉnh sửa hồ sơ' : 'Thêm hồ sơ mới'}
+              </h3>
+              <button onClick={closeModal} className="p-1.5 rounded-lg transition-colors"
+                style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div className="px-6 py-5 space-y-5">
+              {/* Name */}
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Họ</label>
+                  <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Đệm</label>
+                  <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div>
+                <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giới tính</label>
+                <div className="flex gap-2 flex-wrap">
+                  {[{v:'Female',l:'♀ Nữ'},{v:'Male',l:'♂ Nam'},{v:'Other',l:'Khác'}].map(g => (
+                    <button key={g.v} type="button" onClick={() => setF('gender', g.v)}
+                      className="px-3 py-2 rounded-xl text-sm transition-all"
+                      style={{ background: form.gender === g.v ? '#3d2b5e' : 'rgba(26,21,53,0.8)', color: form.gender === g.v ? '#c9a84c' : '#94a3b8', border: form.gender === g.v ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.1)' }}>
+                      {g.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Date of birth */}
+              <div>
+                <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Ngày sinh</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Ngày</label>
+                    <select value={form.dob.day === 0 ? '' : form.dob.day}
+                      onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
+                      <option value="">-</option>
+                      {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Tháng</label>
+                    <select value={form.dob.month === 0 ? '' : form.dob.month}
+                      onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
+                      <option value="">-</option>
+                      {MONTHS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Năm</label>
+                    {yearMode === 'select' ? (
+                      <select value={form.dob.year === 0 ? '' : form.dob.year}
+                        onChange={e => {
+                          if (e.target.value === '__custom__') { setYearMode('custom'); setCustomYearText('') }
+                          else setF('dob', { ...form.dob, year: +e.target.value })
+                        }}>
+                        <option value="">-</option>
+                        {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                        <option value="__custom__">Năm khác...</option>
+                      </select>
+                    ) : (
+                      <div className="flex gap-1">
+                        <input type="text" value={customYearText}
+                          onChange={e => { setCustomYearText(e.target.value); setYearError('') }}
+                          placeholder="VD: 1850" style={{ flex: 1, minWidth: 0 }} />
+                        <button type="button"
+                          onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
+                          style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
+                      </div>
+                    )}
+                    {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.2rem' }}>{yearError}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Time of birth */}
+              <div>
+                <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giờ sinh</label>
+                <label className="flex items-center gap-2 cursor-pointer mb-2">
+                  <input type="checkbox" checked={form.tob.unknown}
+                    onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
+                    style={{ width: 'auto', padding: 0 }} />
+                  <span className="text-sm" style={{ color: '#94a3b8' }}>Không rõ giờ sinh</span>
+                </label>
+                {!form.tob.unknown && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Giờ (0–23)</label>
+                      <select value={form.tob.hour === -1 ? '' : form.tob.hour}
+                        onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })}>
+                        <option value="">-</option>
+                        {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Phút</label>
+                      <select value={form.tob.minute === -1 ? '' : form.tob.minute}
+                        onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })}>
+                        <option value="">-</option>
+                        {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
+
+              {formError && (
+                <p style={{ color: '#ef4444', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>⚠ {formError}</p>
+              )}
+            </div>
+
+            {/* Modal footer */}
+            <div className="flex gap-3 px-6 pb-6">
+              <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold"
+                style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)', opacity: saving ? 0.7 : 1 }}>
+                {saving ? 'Đang lưu...' : editingId ? 'Cập nhật hồ sơ' : 'Lưu hồ sơ'}
+              </button>
+              <button onClick={closeModal} className="px-6 py-3 rounded-xl font-semibold"
+                style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

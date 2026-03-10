@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import Navbar from '@/components/layout/Navbar'
@@ -23,7 +23,14 @@ function ProfileContent() {
   const { user, isLoading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const tab = (searchParams.get('tab') || 'info') as TabId
+  const urlTab = (searchParams.get('tab') || 'info') as TabId
+
+  // Local state for instant highlight — syncs from URL on mount/nav
+  const [activeTab, setActiveTab] = useState<TabId>(urlTab)
+
+  useEffect(() => {
+    setActiveTab(urlTab)
+  }, [urlTab])
 
   useEffect(() => {
     if (!isLoading && !user) router.push('/auth/login')
@@ -31,13 +38,18 @@ function ProfileContent() {
 
   if (isLoading || !user) return null
 
-  const setTab = (id: TabId) => router.push(`/profile?tab=${id}`, { scroll: false })
+  const handleTabClick = (id: TabId) => {
+    setActiveTab(id) // instant visual feedback
+    router.replace(`/profile?tab=${id}`, { scroll: false })
+  }
+
+  const tab = activeTab // use local state for rendering
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a1a' }}>
       <Navbar />
 
-      {/* ── Mobile top tab bar (hidden on md+) ── */}
+      {/* ── Mobile top tab bar ── */}
       <div
         className="md:hidden fixed left-0 right-0 z-30 overflow-x-auto"
         style={{ top: 64, background: '#06060f', borderBottom: '1px solid rgba(201,168,76,0.1)' }}
@@ -46,14 +58,15 @@ function ProfileContent() {
           {TABS.map(({ id, label, Icon }) => (
             <button
               key={id}
-              onClick={() => setTab(id)}
-              className="flex items-center gap-2 px-4 py-3 text-sm whitespace-nowrap transition-colors"
+              onClick={() => handleTabClick(id)}
+              className="flex items-center gap-2 px-4 py-3 text-sm whitespace-nowrap"
               style={{
                 color: tab === id ? '#d9ab55' : '#6b7280',
                 borderBottom: `2px solid ${tab === id ? '#c9a84c' : 'transparent'}`,
                 fontFamily: 'var(--font-vietnam)',
                 fontWeight: tab === id ? 600 : 400,
                 background: 'transparent',
+                transition: 'color 0.1s',
               }}
             >
               <Icon size={14} />
@@ -63,15 +76,10 @@ function ProfileContent() {
         </div>
       </div>
 
-      {/* ── Desktop layout: sidebar + content ── */}
-      <div
-        style={{
-          display: 'flex',
-          paddingTop: 64,        // navbar height
-          minHeight: 'calc(100vh - 0px)',
-        }}
-      >
-        {/* Sidebar (desktop only) */}
+      {/* ── Desktop layout ── */}
+      <div style={{ display: 'flex', paddingTop: 64, minHeight: 'calc(100vh - 64px)' }}>
+
+        {/* Sidebar */}
         <aside
           className="hidden md:flex flex-col flex-shrink-0"
           style={{
@@ -96,29 +104,29 @@ function ProfileContent() {
                   {user.username}
                 </p>
                 <p className="text-xs" style={{ color: user.isPremium ? '#d9ab55' : '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
-                  {user.isPremium ? 'Premium' : 'Miễn phí'}
+                  {user.isPremium ? 'Premium ✦' : 'Miễn phí'}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="mx-4 mb-4" style={{ height: 1, background: 'rgba(201,168,76,0.06)' }} />
+          <div className="mx-4 mb-3" style={{ height: 1, background: 'rgba(201,168,76,0.06)' }} />
 
-          {/* Nav items */}
           <nav className="px-3 flex-1 space-y-0.5">
             {TABS.map(({ id, label, Icon }) => (
               <button
                 key={id}
-                onClick={() => setTab(id)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
+                onClick={() => handleTabClick(id)}
+                className="w-full flex items-center gap-3 rounded-xl text-sm"
                 style={{
                   background: tab === id ? 'rgba(201,168,76,0.07)' : 'transparent',
                   color: tab === id ? '#d9ab55' : '#6b7280',
                   borderLeft: `2px solid ${tab === id ? '#c9a84c' : 'transparent'}`,
                   fontFamily: 'var(--font-vietnam)',
                   fontWeight: tab === id ? 600 : 400,
-                  paddingLeft: tab === id ? '0.625rem' : '0.75rem',
+                  padding: '0.625rem 0.75rem 0.625rem 0.625rem',
                   textAlign: 'left',
+                  transition: 'background 0.1s, color 0.1s',
                 }}
               >
                 <Icon size={15} />
@@ -128,16 +136,9 @@ function ProfileContent() {
           </nav>
         </aside>
 
-        {/* Main content area */}
-        <main
-          className="flex-1 overflow-x-hidden"
-          style={{ minWidth: 0 }}
-        >
-          {/* Mobile: extra top padding for the tab bar */}
-          <div
-            className="md:pt-0 pt-12"  // pt-12 accounts for mobile tab bar (~48px)
-            style={{ padding: '2rem 1.5rem 4rem', maxWidth: 780 }}
-          >
+        {/* Content */}
+        <main className="flex-1 overflow-x-hidden" style={{ minWidth: 0 }}>
+          <div style={{ padding: '2rem 1.5rem 4rem', maxWidth: 780 }} className="pt-12 md:pt-8">
             {tab === 'info'    && <ProfileInfo />}
             {tab === 'charts'  && <ChartList />}
             {tab === 'history' && <HistoryReports />}
