@@ -14,10 +14,13 @@ git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
 # 0b. Fix sudoers if corrupted (idempotent)
 printf '%s\n' \
   'hgct ALL=(ALL) NOPASSWD: /bin/bash /root/hgct/deploy.sh' \
+  'hgct ALL=(ALL) NOPASSWD: /bin/bash /root/hgct/deploy-demo.sh' \
   'hgct ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart hgct.service' \
   'hgct ALL=(ALL) NOPASSWD: /usr/bin/systemctl start hgct.service' \
   'hgct ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop hgct.service' \
   'hgct ALL=(ALL) NOPASSWD: /usr/bin/systemctl status hgct.service' \
+  'hgct ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart hgct-demo.service' \
+  'hgct ALL=(ALL) NOPASSWD: /usr/bin/systemctl status hgct-demo.service' \
   > /etc/sudoers.d/hgct-deploy
 chmod 440 /etc/sudoers.d/hgct-deploy
 
