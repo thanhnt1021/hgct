@@ -106,6 +106,7 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 
 export default function ChartPage() {
   const [profiles, setProfiles] = useState<Profile[]>([])
+  const [profilesLoading, setProfilesLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)
   const [result, setResult] = useState<ChartResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -133,6 +134,7 @@ export default function ChartPage() {
         }
       })
       .catch(() => {})
+      .finally(() => setProfilesLoading(false))
   }, [])
 
   const handleSubmit = async () => {
@@ -191,7 +193,12 @@ export default function ChartPage() {
           className="rounded-2xl p-8"
           style={{ background: 'rgba(18,13,46,0.75)', border: '1px solid rgba(200,148,63,0.18)', backdropFilter: 'blur(20px)' }}
         >
-          {profiles.length === 0 ? (
+          {profilesLoading ? (
+            <div className="text-center py-6">
+              <div className="w-8 h-8 rounded-full animate-spin mx-auto"
+                style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
+            </div>
+          ) : profiles.length === 0 ? (
             <div className="text-center py-6">
               <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>
                 Chưa có hồ sơ nào. Hãy tạo hồ sơ trước.
