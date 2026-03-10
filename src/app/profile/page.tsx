@@ -196,9 +196,15 @@ export default function ProfilePage() {
     setTimeout(() => { setCpSuccess(false); setShowChangePassword(false) }, 2000)
   }
 
-  const MONTHS = ['1','2','3','4','5','6','7','8','9','10','11','12']
-  const DAYS = Array.from({length: 31}, (_, i) => String(i + 1))
-  const YEARS = Array.from({length: 100}, (_, i) => String(2010 - i))
+  const MONTHS = [
+    [1,'Tháng 1'],[2,'Tháng 2'],[3,'Tháng 3'],[4,'Tháng 4'],
+    [5,'Tháng 5'],[6,'Tháng 6'],[7,'Tháng 7'],[8,'Tháng 8'],
+    [9,'Tháng 9'],[10,'Tháng 10'],[11,'Tháng 11'],[12,'Tháng 12'],
+  ] as [number, string][]
+  const DAYS = Array.from({length: 31}, (_, i) => i + 1)
+  const YEARS = Array.from({length: 100}, (_, i) => 2010 - i)
+  const HOURS = Array.from({length: 24}, (_, i) => i)
+  const MINUTES = Array.from({length: 60}, (_, i) => i)
 
   if (isLoading || !user) return null
 
@@ -346,22 +352,117 @@ export default function ProfilePage() {
               <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Danh sách Bản đồ sao</h3>
               <p className="text-xs mt-0.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>{profiles.length} hồ sơ đã lưu</p>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => { openNew(); setShowCharts(true) }}
-                className="px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-1.5"
-                style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}
-              >
-                + Thêm hồ sơ
-              </button>
-              <button
-                onClick={() => setShowCharts(v => !v)}
-                style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}
-              >
-                {showCharts ? 'Thu gọn ↑' : 'Xem tất cả ↓'}
-              </button>
-            </div>
+            <button
+              onClick={() => setShowCharts(v => !v)}
+              style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}
+            >
+              {showCharts ? 'Thu gọn ↑' : 'Xem tất cả ↓'}
+            </button>
           </div>
+
+          {/* Add button — always visible, independent of list toggle */}
+          <div className="mt-4">
+            <button
+              onClick={openNew}
+              className="px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-1.5"
+              style={{ background: showForm && !editingId ? 'rgba(201,168,76,0.15)' : '#c9a84c', color: showForm && !editingId ? '#d9ab55' : '#0a0a1a', fontFamily: 'var(--font-vietnam)', border: showForm && !editingId ? '1px solid rgba(201,168,76,0.3)' : 'none' }}
+            >
+              + Thêm bản đồ sao
+            </button>
+          </div>
+
+          {/* Add/Edit form — shown outside collapsible list */}
+          {showForm && (
+            <div className="rounded-2xl p-6 mt-4" style={{ background: 'rgba(26,21,53,0.8)', border: '1px solid rgba(201,168,76,0.25)' }}>
+              <h2 className="text-xl font-bold mb-6" style={{ color: '#f5f0e8', fontFamily: 'var(--font-vietnam)' }}>
+                {editingId ? 'Chỉnh sửa hồ sơ' : 'Tạo hồ sơ mới'}
+              </h2>
+              <div className="space-y-5">
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Họ</label>
+                    <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Đệm</label>
+                    <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giới tính</label>
+                  <div className="flex gap-3">
+                    {[{v:'Female',l:'♀ Nữ'},{v:'Male',l:'♂ Nam'},{v:'Other',l:'Khác'}].map(g => (
+                      <button key={g.v} type="button" onClick={() => setF('gender', g.v)} className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                        style={{ background: form.gender === g.v ? '#3d2b5e' : 'rgba(26,21,53,0.8)', color: form.gender === g.v ? '#c9a84c' : '#94a3b8', border: form.gender === g.v ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.1)' }}>
+                        {g.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Ngày sinh</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Ngày</label>
+                      <select value={form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
+                        {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Tháng</label>
+                      <select value={form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
+                        {MONTHS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Năm</label>
+                      <select value={form.dob.year} onChange={e => setF('dob', { ...form.dob, year: +e.target.value })}>
+                        {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giờ sinh</label>
+                  <div className="flex items-center gap-3 mb-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={form.tob.unknown} onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })} style={{ width: 'auto', padding: 0 }} />
+                      <span className="text-sm" style={{ color: '#94a3b8' }}>Không rõ giờ sinh</span>
+                    </label>
+                  </div>
+                  {!form.tob.unknown && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Giờ (0–23)</label>
+                        <select value={form.tob.hour} onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })}>
+                          {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Phút</label>
+                        <select value={form.tob.minute} onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })}>
+                          {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
+                <div className="flex gap-3 pt-2">
+                  <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold" style={{ background: '#c9a84c', color: '#0a0a1a' }}>
+                    {saving ? 'Đang lưu...' : editingId ? 'Cập nhật hồ sơ' : 'Lưu hồ sơ'}
+                  </button>
+                  <button onClick={() => { setShowForm(false); setEditingId(null) }} className="px-6 py-3 rounded-xl font-semibold" style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8' }}>
+                    Hủy
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {showCharts && (
             <div className="mt-5">
@@ -415,94 +516,6 @@ export default function ProfilePage() {
                 ))}
               </div>
 
-              {/* Add/Edit form */}
-              {showForm && (
-                <div className="rounded-2xl p-6 mt-2" style={{ background: 'rgba(26,21,53,0.8)', border: '1px solid rgba(201,168,76,0.25)' }}>
-                  <h2 className="text-xl font-bold mb-6" style={{ color: '#f5f0e8', fontFamily: 'var(--font-vietnam)' }}>
-                    {editingId ? 'Chỉnh sửa hồ sơ' : 'Tạo hồ sơ mới'}
-                  </h2>
-                  <div className="space-y-5">
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Họ</label>
-                        <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
-                      </div>
-                      <div>
-                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Đệm</label>
-                        <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
-                      </div>
-                      <div>
-                        <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
-                        <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giới tính</label>
-                      <div className="flex gap-3">
-                        {[{v:'Female',l:'♀ Nữ'},{v:'Male',l:'♂ Nam'},{v:'Other',l:'Khác'}].map(g => (
-                          <button key={g.v} type="button" onClick={() => setF('gender', g.v)} className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
-                            style={{ background: form.gender === g.v ? '#3d2b5e' : 'rgba(26,21,53,0.8)', color: form.gender === g.v ? '#c9a84c' : '#94a3b8', border: form.gender === g.v ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.1)' }}>
-                            {g.l}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Ngày sinh</label>
-                      <div className="grid grid-cols-3 gap-3">
-                        <div>
-                          <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Ngày</label>
-                          <select value={form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
-                            {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Tháng</label>
-                          <select value={form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
-                            {MONTHS.map(m => <option key={m} value={m}>Tháng {m}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Năm</label>
-                          <select value={form.dob.year} onChange={e => setF('dob', { ...form.dob, year: +e.target.value })}>
-                            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giờ sinh</label>
-                      <div className="flex items-center gap-3">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" checked={form.tob.unknown} onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })} style={{ width: 'auto', padding: 0 }} />
-                          <span className="text-sm" style={{ color: '#94a3b8' }}>Không rõ giờ sinh</span>
-                        </label>
-                      </div>
-                      {!form.tob.unknown && (
-                        <div className="grid grid-cols-2 gap-3 mt-2">
-                          <div>
-                            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Giờ (0-23)</label>
-                            <input type="number" min={0} max={23} value={form.tob.hour} onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })} />
-                          </div>
-                          <div>
-                            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Phút</label>
-                            <input type="number" min={0} max={59} value={form.tob.minute} onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
-                    <div className="flex gap-3 pt-2">
-                      <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold" style={{ background: '#c9a84c', color: '#0a0a1a' }}>
-                        {saving ? 'Đang lưu...' : editingId ? 'Cập nhật hồ sơ' : 'Lưu hồ sơ'}
-                      </button>
-                      <button onClick={() => { setShowForm(false); setEditingId(null) }} className="px-6 py-3 rounded-xl font-semibold" style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8' }}>
-                        Hủy
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>

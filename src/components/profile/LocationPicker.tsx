@@ -104,26 +104,17 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
         {label}
       </label>
 
-      {/* Country filter chips */}
-      <div className="flex gap-1.5 mb-3 flex-wrap">
-        {COUNTRIES.map(c => (
-          <button
-            key={c.code}
-            type="button"
-            onClick={() => { setCc(c.code); if (query.length >= 2) search(query, c.code) }}
-            className="px-2.5 py-1 text-xs font-medium transition-all"
-            style={{
-              background: cc === c.code ? 'rgba(38,28,86,0.9)' : 'rgba(11,11,31,0.7)',
-              color: cc === c.code ? '#d9ab55' : '#4a4560',
-              border: cc === c.code ? '1px solid rgba(200,148,63,0.4)' : '1px solid rgba(200,148,63,0.08)',
-              borderRadius: '3px',
-              fontFamily: 'var(--font-vietnam)',
-              fontSize: '0.72rem',
-            }}
-          >
-            {c.label}
-          </button>
-        ))}
+      {/* Country filter dropdown */}
+      <div className="mb-3">
+        <select
+          value={cc}
+          onChange={e => { setCc(e.target.value); if (query.length >= 2) search(query, e.target.value) }}
+          style={{ fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}
+        >
+          {COUNTRIES.map(c => (
+            <option key={c.code} value={c.code}>{c.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Search input */}
