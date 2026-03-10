@@ -15,7 +15,10 @@ export default function ProfileInfo() {
   const [avatarCropFile, setAvatarCropFile] = useState<File | null>(null)
   const [avatarVersion, setAvatarVersion] = useState(Date.now())
   const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarFallback, setAvatarFallback] = useState<'custom' | 'google' | 'initials'>('custom')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // Reset to custom whenever a new avatar is uploaded
+  useEffect(() => { setAvatarFallback('custom') }, [avatarVersion])
 
   // Main chart (bản đồ chính của tài khoản)
   const [mainChart, setMainChart] = useState<ProfileFormData | null>(null)
@@ -353,47 +356,49 @@ export default function ProfileInfo() {
       {/* Avatar */}
       <div style={cardStyle}>
         <h3 className="font-bold mb-4" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Ảnh đại diện</h3>
-        <div className="flex items-center gap-5">
-          <div className="relative">
-            <img
-              key={avatarVersion}
-              src={`/api/user/avatar?v=${avatarVersion}`}
-              alt="avatar"
-              className="w-16 h-16 rounded-full object-cover"
-              style={{ border: '2px solid rgba(201,168,76,0.3)' }}
-              onError={e => {
-                // fallback: Google avatar or initials
-                const target = e.currentTarget
-                if (user.image && target.src !== user.image) {
-                  target.src = user.image
-                } else {
-                  target.style.display = 'none'
-                  const next = target.nextElementSibling as HTMLElement | null
-                  if (next) next.style.display = 'flex'
-                }
-              }}
-            />
-            {/* Initials fallback (hidden by default) */}
-            <div className="w-16 h-16 rounded-full items-center justify-center text-lg font-bold"
-              style={{ background: 'linear-gradient(135deg,#261c56,#38287a)', color: '#d9ab55', border: '2px solid rgba(201,168,76,0.3)', display: 'none', fontFamily: 'var(--font-vietnam)' }}>
-              {(user.name || user.username || '?')[0].toUpperCase()}
-            </div>
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Avatar circle — always circular, state-driven fallback chain */}
+          <div className="relative flex-shrink-0" style={{ width: 64, height: 64 }}>
+            {avatarFallback === 'custom' && (
+              <img
+                key={avatarVersion}
+                src={`/api/user/avatar?v=${avatarVersion}`}
+                alt="avatar"
+                style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(201,168,76,0.3)', display: 'block' }}
+                onError={() => setAvatarFallback(user.image ? 'google' : 'initials')}
+              />
+            )}
+            {avatarFallback === 'google' && user.image && (
+              <img
+                src={user.image}
+                alt="avatar"
+                referrerPolicy="no-referrer"
+                style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(201,168,76,0.3)', display: 'block' }}
+                onError={() => setAvatarFallback('initials')}
+              />
+            )}
+            {(avatarFallback === 'initials' || (avatarFallback === 'google' && !user.image)) && (
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#261c56,#38287a)', color: '#d9ab55', border: '2px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 700, fontFamily: 'var(--font-vietnam)' }}>
+                {(user.name || user.username || '?')[0].toUpperCase()}
+              </div>
+            )}
             {avatarUploading && (
-              <div className="absolute inset-0 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)' }}>
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               </div>
             )}
           </div>
-          <div>
+          {/* Upload controls */}
+          <div className="min-w-0">
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) setAvatarCropFile(f); e.target.value = '' }} />
             <button onClick={() => fileInputRef.current?.click()}
               className="px-4 py-2 rounded-xl text-sm font-semibold"
-              style={{ background: 'rgba(201,168,76,0.12)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.25)', fontFamily: 'var(--font-vietnam)' }}>
+              style={{ background: 'rgba(201,168,76,0.12)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.25)', fontFamily: 'var(--font-vietnam)', minHeight: 44 }}>
               Đổi ảnh đại diện
             </button>
             <p className="mt-2 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
-              JPG, PNG. Ảnh sẽ được cắt thành hình tròn 200×200px.
+              JPG, PNG · Cắt hình tròn 200×200px
             </p>
           </div>
         </div>

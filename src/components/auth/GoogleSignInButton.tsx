@@ -17,9 +17,11 @@ export default function GoogleSignInButton({ callbackUrl = '/profile' }: { callb
 
   if (!available) return null
 
-  const handleClick = async () => {
+  const handleClick = () => {
     setLoading(true)
-    await signIn('google', { callbackUrl })
+    signIn('google', { callbackUrl, redirect: true })
+    // Safety: reset loading if somehow the redirect didn't navigate away (e.g. popup blocked)
+    setTimeout(() => setLoading(false), 10000)
   }
 
   return (
