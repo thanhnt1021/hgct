@@ -138,7 +138,7 @@ function ProfileContent() {
                   {displayTen || user.username}
                 </p>
                 <p className="text-xs" style={{ color: user.isPremium ? '#d9ab55' : '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
-                  {user.planType === 'lifetime' ? 'Lifetime ★' : user.isPremium ? 'Premium ✦' : 'Miễn phí'}
+                  {user.planType === 'lifetime' ? 'Lifetime ★' : user.planType === 'cao_cap' ? 'Cao cấp ✦' : user.isPremium ? 'Tiêu chuẩn ✦' : 'Miễn phí'}
                 </p>
               </div>
             </div>

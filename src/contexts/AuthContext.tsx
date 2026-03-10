@@ -8,7 +8,7 @@ interface User {
   name: string
   email: string
   isPremium: boolean
-  planType: 'free' | 'premium' | 'lifetime'
+  planType: 'free' | 'premium' | 'standard' | 'cao_cap' | 'lifetime'
   premiumToken: string
   image?: string
   uid?: string
