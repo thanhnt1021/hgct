@@ -106,7 +106,7 @@ export default function ProfileInfo() {
         setMainChart(formData)
         setMainChartProfileId(profileId)
         setMainChartModalOpen(false)
-        window.dispatchEvent(new CustomEvent('profiles:refresh'))
+        window.dispatchEvent(new CustomEvent('profiles:refresh', { detail: { mainProfileId: profileId } }))
       }
     } catch { /* ignore */ }
     setMainChartSaving(false)

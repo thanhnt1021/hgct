@@ -45,8 +45,8 @@ export default function ChartList() {
   const [mainProfileId, setMainProfileId] = useState<string | null>(null)
 
   useEffect(() => {
-    const loadData = () => {
-      fetch('/api/profiles')
+    const fetchProfiles = () =>
+      fetch('/api/profiles', { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           if (data.profiles) {
@@ -64,16 +64,29 @@ export default function ChartList() {
         })
         .catch(() => {})
         .finally(() => setLoading(false))
-      fetch('/api/user/account')
+
+    const fetchMainId = () =>
+      fetch('/api/user/account', { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           setMainProfileId(data.mainChartData?._profileId ? String(data.mainChartData._profileId) : null)
         })
         .catch(() => {})
+
+    const loadData = () => { fetchProfiles(); fetchMainId() }
+
+    const handler = (e: Event) => {
+      // Update badge immediately from event detail (no fetch delay)
+      const detail = (e as CustomEvent).detail
+      if (detail?.mainProfileId !== undefined) {
+        setMainProfileId(detail.mainProfileId ? String(detail.mainProfileId) : null)
+      }
+      fetchProfiles()
     }
+
     loadData()
-    window.addEventListener('profiles:refresh', loadData)
-    return () => window.removeEventListener('profiles:refresh', loadData)
+    window.addEventListener('profiles:refresh', handler)
+    return () => window.removeEventListener('profiles:refresh', handler)
   }, [])
 
   const openNew = () => {
