@@ -96,7 +96,7 @@ Response:
 **File:** `src/app/api/user/upgrade/route.ts`
 
 ```
-Input:  { code: "TaiKhoanAdmin" }
+Input:  { code: "<your-upgrade-code>" }
 Logic:  code === process.env.UPGRADE_CODE
 Output: { token: sha256(code + ':hgct-premium') }
 ```

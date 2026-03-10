@@ -172,14 +172,14 @@ Hiển thị:
 
 ```
 /profile → click "Nâng cấp tài khoản"
-  User nhập upgrade code (ví dụ: "TaiKhoanAdmin")
+  User nhập upgrade code (ví dụ: "<your-upgrade-code>")
 
   AuthContext.upgradeToPremium(code):
-    POST /api/user/upgrade { code: "TaiKhoanAdmin" }
+    POST /api/user/upgrade { code: "<your-upgrade-code>" }
 
     Server /api/user/upgrade:
-      process.env.UPGRADE_CODE === "TaiKhoanAdmin"
-      → token = sha256("TaiKhoanAdmin:hgct-premium")
+      process.env.UPGRADE_CODE === "<your-upgrade-code>"
+      → token = sha256("<upgrade-code>:hgct-premium")
       ← { token: "3f4a..." }
 
     Client nhận token:
