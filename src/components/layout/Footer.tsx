@@ -88,13 +88,36 @@ export default function Footer() {
 
         {/* Bottom */}
         <div
-          className="mt-14 pt-8 flex flex-col sm:flex-row justify-between items-center gap-3"
+          className="mt-14 pt-8 flex flex-col items-center gap-3"
           style={{ borderTop: '1px solid rgba(200,148,63,0.07)' }}
         >
-          <p style={{ color: '#9090a8', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)' }}>
-            © 2026 Hạt Giống Chiêm Tinh. All rights reserved.
-          </p>
-          <p style={{ color: '#8878b8', fontSize: '0.72rem', fontFamily: 'var(--font-vietnam)' }}>
+          {/* Row 1: copyright + legal links */}
+          <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-2">
+            <p style={{ color: '#9090a8', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)' }}>
+              © 2026 Hạt Giống Chiêm Tinh. All rights reserved.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>
+              <Link
+                href="/privacy"
+                style={{ color: '#9090a8', textDecoration: 'none' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#d9ab55')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#9090a8')}
+              >
+                Chính sách bảo mật
+              </Link>
+              <span style={{ color: '#4a4560', margin: '0 0.5rem' }}>·</span>
+              <Link
+                href="/terms"
+                style={{ color: '#9090a8', textDecoration: 'none' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#d9ab55')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#9090a8')}
+              >
+                Điều khoản sử dụng
+              </Link>
+            </div>
+          </div>
+          {/* Row 2: disclaimer */}
+          <p style={{ color: '#8878b8', fontSize: '0.72rem', fontFamily: 'var(--font-vietnam)', textAlign: 'center' }}>
             Kết quả chiêm tinh mang tính tham khảo, không thay thế lời khuyên chuyên nghiệp.
           </p>
         </div>

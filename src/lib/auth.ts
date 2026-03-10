@@ -45,12 +45,20 @@ export const authOptions: NextAuthOptions = {
     newUser: '/auth/register',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
-        token.uid = user.id
-        const dbUser = await prisma.user.findUnique({ where: { userUid: user.id as string } })
-        token.isPremium = dbUser?.isPremium ?? false
-        token.username = dbUser?.username ?? ''
+        if (account?.provider === 'google') {
+          // Look up by email since user.id = Google subject ID
+          const dbUser = await prisma.user.findUnique({ where: { email: user.email as string } })
+          token.uid = dbUser?.userUid ?? ''
+          token.isPremium = dbUser?.isPremium ?? false
+          token.username = dbUser?.username ?? ''
+        } else {
+          token.uid = user.id
+          const dbUser = await prisma.user.findUnique({ where: { userUid: user.id as string } })
+          token.isPremium = dbUser?.isPremium ?? false
+          token.username = dbUser?.username ?? ''
+        }
       }
       return token
     },
@@ -63,14 +71,19 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async signIn({ user, account }) {
-      // For Google OAuth, auto-create user if not exists
       if (account?.provider === 'google' && user.email) {
         const existing = await prisma.user.findUnique({ where: { email: user.email } })
         if (!existing) {
           const uid = crypto.randomUUID()
+          let baseUsername = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '')
+          if (!baseUsername) baseUsername = 'user'
+          // Ensure unique username
+          let username = baseUsername
+          const taken = await prisma.user.findUnique({ where: { username } })
+          if (taken) username = baseUsername + '_' + uid.slice(0, 4)
           await prisma.user.create({
             data: {
-              username: user.email.split('@')[0].toLowerCase(),
+              username,
               email: user.email,
               passwordHash: '',
               userUid: uid,

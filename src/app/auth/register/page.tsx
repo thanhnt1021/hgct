@@ -7,6 +7,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton'
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
@@ -149,6 +150,8 @@ export default function RegisterPage() {
             </button>
           </form>
 
+          <GoogleSignInButton />
+
           <div
             className="mt-5 text-center"
             style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
@@ -164,6 +167,12 @@ export default function RegisterPage() {
               Đăng nhập
             </Link>
           </div>
+        </div>
+
+        <div className="mt-6 text-center">
+          <Link href="/privacy" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>Chính sách bảo mật</Link>
+          <span style={{ color: '#4a4560', margin: '0 0.5rem', fontSize: '0.72rem' }}>·</span>
+          <Link href="/terms" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>Điều khoản sử dụng</Link>
         </div>
 
       </div>
