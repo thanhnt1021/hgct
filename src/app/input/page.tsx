@@ -8,8 +8,6 @@ import LocationPicker from '@/components/profile/LocationPicker'
 import { useAuth } from '@/contexts/AuthContext'
 
 const CUR_YEAR = new Date().getFullYear()
-const MAX_YEAR = CUR_YEAR + 100
-const MIN_YEAR = 1911
 
 const MONTHS = [
   [1,'Tháng 1'],[2,'Tháng 2'],[3,'Tháng 3'],[4,'Tháng 4'],
@@ -17,7 +15,7 @@ const MONTHS = [
   [9,'Tháng 9'],[10,'Tháng 10'],[11,'Tháng 11'],[12,'Tháng 12'],
 ] as [number, string][]
 const DAYS = Array.from({length: 31}, (_, i) => i + 1)
-const YEARS = Array.from({length: MAX_YEAR - MIN_YEAR + 1}, (_, i) => MAX_YEAR - i)
+const YEARS = Array.from({length: 101}, (_, i) => CUR_YEAR - i)
 const HOURS = Array.from({length: 24}, (_, i) => i)
 const MINUTES = Array.from({length: 60}, (_, i) => i)
 
@@ -243,8 +241,8 @@ function InputPageInner() {
                           else setF('dob', { ...form.dob, year: +e.target.value })
                         }}>
                         <option value="">-</option>
-                        {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                         <option value="__custom__">Năm khác...</option>
+                        {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                       </select>
                     ) : (
                       <div className="flex gap-1">

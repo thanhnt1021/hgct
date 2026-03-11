@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Be_Vietnam_Pro, Cinzel } from 'next/font/google'
 import './globals.css'
 import Providers from '@/components/Providers'
+import MobileInputFix from '@/components/ui/MobileInputFix'
 
 const cinzel = Cinzel({
   subsets: ['latin'],
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans antialiased">
         <Providers>
+          <MobileInputFix />
           <div style={{ textAlign: 'center', padding: '5px 8px', fontSize: '0.68rem', background: '#06060f', borderBottom: '1px solid rgba(201,168,76,0.06)' }}>
             <a href="https://hatgiongchiemtinh.com/privacy" rel="privacy-policy" style={{ color: '#6b6585', fontFamily: 'sans-serif' }}>Chính sách bảo mật</a>
             <span style={{ color: '#3a3555', margin: '0 0.4rem' }}>·</span>
