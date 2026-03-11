@@ -7,17 +7,27 @@ import Navbar from '@/components/layout/Navbar'
 import LocationPicker from '@/components/profile/LocationPicker'
 import { useAuth } from '@/contexts/AuthContext'
 
+const CUR_YEAR = new Date().getFullYear()
+const MAX_YEAR = CUR_YEAR + 100
+const MIN_YEAR = 1911
+
+const MONTHS = [
+  [1,'Tháng 1'],[2,'Tháng 2'],[3,'Tháng 3'],[4,'Tháng 4'],
+  [5,'Tháng 5'],[6,'Tháng 6'],[7,'Tháng 7'],[8,'Tháng 8'],
+  [9,'Tháng 9'],[10,'Tháng 10'],[11,'Tháng 11'],[12,'Tháng 12'],
+] as [number, string][]
+const DAYS = Array.from({length: 31}, (_, i) => i + 1)
+const YEARS = Array.from({length: MAX_YEAR - MIN_YEAR + 1}, (_, i) => MAX_YEAR - i)
+const HOURS = Array.from({length: 24}, (_, i) => i)
+const MINUTES = Array.from({length: 60}, (_, i) => i)
+
 const EMPTY_FORM = {
   ho: '', dem: '', ten: '', gender: 'Female',
-  dob: { day: 1, month: 1, year: 1990 },
-  tob: { hour: 12, minute: 0, unknown: false },
+  dob: { day: 0, month: 0, year: 0 },
+  tob: { hour: -1, minute: -1, unknown: false },
   loc: { address: 'Hà Nội, Việt Nam', lat: 21.0245, lon: 105.8412, tz: 'Asia/Ho_Chi_Minh' },
   note: '',
 }
-
-const MONTHS = ['1','2','3','4','5','6','7','8','9','10','11','12']
-const DAYS = Array.from({length: 31}, (_, i) => String(i + 1))
-const YEARS = Array.from({length: 100}, (_, i) => String(2010 - i))
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
@@ -47,20 +57,47 @@ function InputPageInner() {
   const forSynastry = searchParams.get('for') === 'synastry'
   const forChart = searchParams.get('for') === 'chart'
   const [form, setForm] = useState(EMPTY_FORM)
+  const [yearMode, setYearMode] = useState<'select' | 'custom'>('select')
+  const [customYearText, setCustomYearText] = useState('')
+  const [yearError, setYearError] = useState('')
+  const [formError, setFormError] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveProfile, setSaveProfile] = useState(false)
 
   const setF = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
   const handleSubmit = async () => {
-    if (!form.ten.trim()) return alert('Vui lòng nhập tên')
+    setFormError('')
+    setYearError('')
+
+    if (!form.ten.trim()) { setFormError('Vui lòng nhập tên'); return }
+    if (form.dob.day === 0) { setFormError('Vui lòng chọn ngày sinh'); return }
+    if (form.dob.month === 0) { setFormError('Vui lòng chọn tháng sinh'); return }
+
+    let finalYear = form.dob.year
+    if (yearMode === 'custom') {
+      const y = parseInt(customYearText, 10)
+      if (!customYearText.trim() || isNaN(y) || y < -4712 || y > 5399) {
+        setYearError('Năm không hợp lệ. Nhập số từ -4712 đến 5399.')
+        return
+      }
+      finalYear = y
+    } else if (form.dob.year === 0) {
+      setFormError('Vui lòng chọn năm sinh'); return
+    }
+
+    if (!form.tob.unknown && (form.tob.hour === -1 || form.tob.minute === -1)) {
+      setFormError('Vui lòng chọn giờ và phút sinh (hoặc tích "Không rõ")'); return
+    }
+
     setSaving(true)
+    const finalDob = { ...form.dob, year: finalYear }
     const name = [form.ho, form.dem, form.ten].filter(Boolean).join(' ')
     const data = {
       name,
       ten: form.ten.trim(),
       gender: form.gender,
-      dob: form.dob,
+      dob: finalDob,
       tob: { hour: form.tob.unknown ? 12 : form.tob.hour, minute: form.tob.unknown ? 0 : form.tob.minute },
       loc: form.loc,
     }
@@ -78,7 +115,7 @@ function InputPageInner() {
               dem: form.dem.trim(),
               ten: form.ten.trim(),
               note: form.note.trim(),
-              dob: form.dob,
+              dob: finalDob,
               tob: form.tob,
               loc: form.loc,
             },
@@ -144,9 +181,8 @@ function InputPageInner() {
         >
           <div className="space-y-4 form-compact">
 
-            {/* Row 1: Name + Gender side by side */}
+            {/* Row 1: Name + Gender same row */}
             <div className="grid gap-3 items-end" style={{ gridTemplateColumns: '1fr auto' }}>
-              {/* Name */}
               <div>
                 <label style={labelStyle}>Họ và tên</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -164,7 +200,6 @@ function InputPageInner() {
                   </div>
                 </div>
               </div>
-              {/* Gender */}
               <div style={{ width: '5.5rem' }}>
                 <label style={labelStyle}>Giới tính</label>
                 <select value={form.gender} onChange={e => setF('gender', e.target.value)}>
@@ -177,7 +212,7 @@ function InputPageInner() {
 
             {divider}
 
-            {/* Row 2: Date + Time — responsive stack on mobile */}
+            {/* Row 2: Date + Time same row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {/* Date */}
               <div>
@@ -185,24 +220,47 @@ function InputPageInner() {
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label style={subLabelStyle}>Ngày</label>
-                    <select value={form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
+                    <select value={form.dob.day === 0 ? '' : form.dob.day}
+                      onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
+                      <option value="">-</option>
                       {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                   </div>
                   <div>
                     <label style={subLabelStyle}>Tháng</label>
-                    <select value={form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
-                      {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                    <select value={form.dob.month === 0 ? '' : form.dob.month}
+                      onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
+                      <option value="">-</option>
+                      {MONTHS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
                   </div>
                   <div>
                     <label style={subLabelStyle}>Năm</label>
-                    <select value={form.dob.year} onChange={e => setF('dob', { ...form.dob, year: +e.target.value })}>
-                      {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                    </select>
+                    {yearMode === 'select' ? (
+                      <select value={form.dob.year === 0 ? '' : form.dob.year}
+                        onChange={e => {
+                          if (e.target.value === '__custom__') { setYearMode('custom'); setCustomYearText('') }
+                          else setF('dob', { ...form.dob, year: +e.target.value })
+                        }}>
+                        <option value="">-</option>
+                        {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                        <option value="__custom__">Năm khác...</option>
+                      </select>
+                    ) : (
+                      <div className="flex gap-1">
+                        <input type="text" value={customYearText}
+                          onChange={e => { setCustomYearText(e.target.value); setYearError('') }}
+                          placeholder="VD: 1850" style={{ flex: 1, minWidth: 0 }} />
+                        <button type="button"
+                          onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
+                          style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
+                      </div>
+                    )}
+                    {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.2rem' }}>{yearError}</p>}
                   </div>
                 </div>
               </div>
+
               {/* Time */}
               <div>
                 <div className="flex items-center gap-3 mb-2">
@@ -223,13 +281,19 @@ function InputPageInner() {
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label style={subLabelStyle}>Giờ (0–23)</label>
-                      <input type="number" min={0} max={23} value={form.tob.hour}
-                        onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })} />
+                      <select value={form.tob.hour === -1 ? '' : form.tob.hour}
+                        onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })}>
+                        <option value="">-</option>
+                        {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2, '0')}</option>)}
+                      </select>
                     </div>
                     <div>
                       <label style={subLabelStyle}>Phút</label>
-                      <input type="number" min={0} max={59} value={form.tob.minute}
-                        onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })} />
+                      <select value={form.tob.minute === -1 ? '' : form.tob.minute}
+                        onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })}>
+                        <option value="">-</option>
+                        {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2, '0')}</option>)}
+                      </select>
                     </div>
                   </div>
                 )}
@@ -275,6 +339,10 @@ function InputPageInner() {
               <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontStyle: 'italic' }}>
                 <Link href="/auth/login" style={{ color: '#d9ab55' }}>Đăng nhập</Link> để lưu hồ sơ
               </p>
+            )}
+
+            {formError && (
+              <p style={{ color: '#ef4444', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>⚠ {formError}</p>
             )}
 
             {divider}

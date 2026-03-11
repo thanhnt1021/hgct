@@ -81,10 +81,10 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
     { code: 'ca', label: 'Canada' },
     { code: 'fr', label: 'Pháp' },
     { code: 'de', label: 'Đức' },
-    { code: 'jp', label: 'Nhật' },
-    { code: 'kr', label: 'Hàn' },
-    { code: 'sg', label: 'S.pore' },
-    { code: 'th', label: 'Thái' },
+    { code: 'jp', label: 'Nhật Bản' },
+    { code: 'kr', label: 'Hàn Quốc' },
+    { code: 'sg', label: 'Singapore' },
+    { code: 'th', label: 'Thái Lan' },
     { code: '', label: 'Toàn cầu' },
   ]
 
@@ -114,7 +114,7 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
       )}
 
       {/* Single row: grid 12 cols — [Country col-3] [Address col-7] [Search col-2] */}
-      <div className="relative grid grid-cols-12 gap-2">
+      <div className="grid grid-cols-12 gap-2">
         {/* Country select */}
         <select
           value={cc}
@@ -127,15 +127,63 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
           ))}
         </select>
 
-        {/* Address text input */}
-        <input
-          type="text"
-          value={query}
-          onChange={e => handleInput(e.target.value)}
-          placeholder="Nhập tên thành phố..."
-          className="col-span-7"
-          style={{ ...inputStyle, minWidth: 0 }}
-        />
+        {/* Address text input — wrapped in relative div so dropdown aligns to it only */}
+        <div className="col-span-7 relative">
+          <input
+            type="text"
+            value={query}
+            onChange={e => handleInput(e.target.value)}
+            placeholder="Nhập tên thành phố..."
+            className="w-full"
+            style={{ ...inputStyle, minWidth: 0 }}
+          />
+
+          {/* Results dropdown — only as wide as Address input */}
+          {open && results.length > 0 && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                marginTop: '4px',
+                zIndex: 100,
+                background: 'rgba(11,11,31,0.98)',
+                border: '1px solid rgba(200,148,63,0.2)',
+                borderRadius: '0.75rem',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
+                maxHeight: '220px',
+                overflowY: 'auto',
+                backdropFilter: 'blur(20px)',
+              }}
+            >
+              {results.map((r, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => select(r)}
+                  className="w-full text-left px-4 py-3 text-sm transition-all"
+                  style={{
+                    color: '#f4efe6',
+                    borderBottom: i < results.length - 1 ? '1px solid rgba(200,148,63,0.07)' : 'none',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(38,28,86,0.5)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span className="font-medium" style={{ fontFamily: 'var(--font-vietnam)' }}>
+                    {r.short_name}
+                  </span>
+                  <span
+                    className="block truncate"
+                    style={{ color: '#4a4560', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.1rem' }}
+                  >
+                    {r.display_name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Search button */}
         <button
@@ -166,52 +214,6 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
             </>
           )}
         </button>
-
-        {/* Results dropdown — positioned below the full row */}
-        {open && results.length > 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              marginTop: '4px',
-              zIndex: 100,
-              background: 'rgba(11,11,31,0.98)',
-              border: '1px solid rgba(200,148,63,0.2)',
-              borderRadius: '0.75rem',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
-              maxHeight: '220px',
-              overflowY: 'auto',
-              backdropFilter: 'blur(20px)',
-            }}
-          >
-            {results.map((r, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => select(r)}
-                className="w-full text-left px-4 py-3 text-sm transition-all"
-                style={{
-                  color: '#f4efe6',
-                  borderBottom: i < results.length - 1 ? '1px solid rgba(200,148,63,0.07)' : 'none',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(38,28,86,0.5)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-              >
-                <span className="font-medium" style={{ fontFamily: 'var(--font-vietnam)' }}>
-                  {r.short_name}
-                </span>
-                <span
-                  className="block truncate"
-                  style={{ color: '#4a4560', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.1rem' }}
-                >
-                  {r.display_name}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Selected location info */}
