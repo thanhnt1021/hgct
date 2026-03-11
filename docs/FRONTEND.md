@@ -277,3 +277,15 @@ Border:        rgba(200,148,63,0.14–0.38)
 - Input height nhỏ hơn mặc định
 - Spacing tight hơn
 - Dùng trong `/input`, `ProfileFormModal`, inline edit trong `/my-charts`
+
+## 8. Mobile UX
+
+**`MobileInputFix.tsx`** (`src/components/ui/MobileInputFix.tsx`) — Client Component, render trong `layout.tsx`:
+- Lắng nghe `touchstart` (không phải `focusin` — vì focusin fire sau khi iOS đã zoom rồi)
+- Khi touch vào INPUT/SELECT/TEXTAREA: set `maximum-scale=1` trong viewport meta
+- Khi `focusout`: restore viewport meta về original
+- Kết quả: không auto-zoom, font giữ nguyên nhỏ, user vẫn pinch-zoom khi không focus input
+
+**Year dropdown** — 3 files (`/input`, `ProfileFormModal`, `/my-charts`):
+- Range: `CUR_YEAR - 100` đến `CUR_YEAR` (101 năm, không hardcode)
+- "Năm khác..." là option đầu tiên sau placeholder "-"

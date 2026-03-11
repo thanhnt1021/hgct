@@ -28,20 +28,25 @@ CREATE TABLE users (
   email         VARCHAR UNIQUE,
   password_hash VARCHAR NOT NULL,
   user_uid      VARCHAR UNIQUE NOT NULL,
+  plan_type     VARCHAR DEFAULT 'free',
+  is_premium    BOOLEAN DEFAULT false,
+  report_email  VARCHAR,
+  avatar        TEXT,
+  main_chart_data JSONB,
   created_at    VARCHAR DEFAULT ''
 );
 ```
 
 | Cột | Mô tả |
 |---|---|
-| `id` | Auto-increment PK |
-| `username` | Tên đăng nhập (unique, lowercase) |
-| `email` | Email (unique, nullable) |
-| `password_hash` | Hash password (bcrypt) |
-| `user_uid` | UUID dùng làm FK (thay vì id) |
-| `created_at` | ISO string |
+| `user_uid` | UUID dùng làm FK, cũng là NextAuth session uid |
+| `plan_type` | 'free'|'premium'|'lifetime' |
+| `is_premium` | true nếu plan_type != 'free' |
+| `report_email` | Email nhận báo cáo (có thể khác email đăng ký) |
+| `avatar` | URL hoặc base64 ảnh đại diện |
+| `main_chart_data` | JSON natal chart đã tính (cache) |
 
-**Trạng thái hiện tại:** Bảng này tồn tại nhưng **chưa được dùng bởi auth flow** (auth dùng localStorage). Chỉ `getKnowledgeFromDB()` và future features mới dùng Prisma.
+**Trạng thái:** Đang dùng bởi NextAuth + `/api/profiles` + `/api/user/*`.
 
 ---
 
@@ -61,11 +66,11 @@ CREATE TABLE profiles (
 | Cột | Mô tả |
 |---|---|
 | `user_uid` | FK → users.user_uid |
-| `name` | Tên đầy đủ |
+| `name` | Tên đầy đủ (họ đệm tên ghép) |
 | `gender` | 'Male'|'Female'|'Other' |
-| `data` | JSON: { ho, dem, ten, dob, tob, loc, ... } |
+| `data` | JSON: `{ ho, dem, ten, note, dob, tob, loc }` |
 
-**Trạng thái hiện tại:** Bảng tồn tại nhưng **profiles lưu trong localStorage** (`hatgiong_profiles`), không sync lên DB. Prisma Profile model chưa được gọi trong code.
+**Trạng thái:** **Đang dùng** — CRUD qua `/api/profiles` (GET/POST/PUT/DELETE). Hiển thị trong `/profile`, `/my-charts`, `/services`.
 
 ---
 
@@ -79,25 +84,38 @@ CREATE TABLE knowledge_base (
 );
 ```
 
-| Cột | Mô tả |
-|---|---|
-| `tab_name` | ID của bảng kiến thức (unique) |
-| `data` | JSON chứa nội dung chiêm tinh |
+**Đây là bảng quan trọng nhất** — query trong mỗi lần tạo báo cáo.
 
-**Đây là bảng quan trọng nhất** — được query trong mỗi lần tạo báo cáo.
-
-**Cách dùng:**
 ```ts
 const kb = await getKnowledgeFromDB()
-// kb là Map<tabName, any> hoặc Record<string, any>
-// các tab_name ví dụ:
+// kb là Record<tabName, any>
+// tab_name ví dụ:
 //   planet_in_sign_{planet}_{sign}
 //   planet_in_house_{planet}_{house}
 //   aspect_{planet1}_{aspect}_{planet2}
 //   house_meaning_{house}
 //   zodiac_trait_{sign}
-//   ... (tùy data migration từ ~/mo)
 ```
+
+---
+
+### `jobs` — Job Tracking
+
+```sql
+CREATE TABLE jobs (
+  id         VARCHAR PRIMARY KEY,   -- UUID
+  user_uid   VARCHAR,               -- nullable (guest)
+  service    VARCHAR,               -- career|love|synastry|transit
+  status     VARCHAR DEFAULT 'processing',  -- processing|done|error
+  progress   INTEGER DEFAULT 0,
+  label      VARCHAR DEFAULT '',
+  result     JSONB,
+  error      VARCHAR,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**Trạng thái:** **Đang dùng** — persist jobs ra DB, survive server restart. In-memory cache để fast read.
 
 ---
 
@@ -106,17 +124,17 @@ const kb = await getKnowledgeFromDB()
 ```sql
 CREATE TABLE orders (
   id           SERIAL PRIMARY KEY,
-  user_uid     VARCHAR,             -- nullable, guest order
-  service      VARCHAR NOT NULL,    -- career|love|synastry|transit
-  profile_data JSONB NOT NULL,      -- snapshot inputData lúc đặt
+  user_uid     VARCHAR,
+  service      VARCHAR NOT NULL,
+  profile_data JSONB NOT NULL,
   email        VARCHAR NOT NULL,
-  status       VARCHAR DEFAULT 'pending',  -- pending|paid|processing|done
+  status       VARCHAR DEFAULT 'pending',
   pdf_url      VARCHAR,
   created_at   TIMESTAMP DEFAULT NOW()
 );
 ```
 
-**Trạng thái hiện tại:** Bảng tồn tại nhưng **chưa được ghi** trong report flow. Order không được lưu DB hiện tại. Payment integration cũng chưa có.
+**Trạng thái:** Bảng tồn tại nhưng **chưa ghi** trong report flow. Cần tích hợp payment.
 
 ---
 
@@ -124,13 +142,18 @@ CREATE TABLE orders (
 
 ```prisma
 model User {
-  id           Int       @id @default(autoincrement())
-  username     String    @unique
-  email        String?   @unique
-  passwordHash String    @map("password_hash")
-  userUid      String    @unique @map("user_uid")
-  createdAt    String    @default("") @map("created_at")
-  profiles     Profile[]
+  id            Int       @id @default(autoincrement())
+  username      String    @unique
+  email         String?   @unique
+  passwordHash  String    @map("password_hash")
+  userUid       String    @unique @map("user_uid")
+  planType      String    @default("free") @map("plan_type")
+  isPremium     Boolean   @default(false) @map("is_premium")
+  reportEmail   String?   @map("report_email")
+  avatar        String?
+  mainChartData Json?     @map("main_chart_data")
+  createdAt     String    @default("") @map("created_at")
+  profiles      Profile[]
   @@map("users")
 }
 
@@ -150,6 +173,19 @@ model KnowledgeBase {
   data      Json
   updatedAt String @default("") @map("updated_at")
   @@map("knowledge_base")
+}
+
+model Job {
+  id        String   @id
+  userUid   String?  @map("user_uid")
+  service   String?
+  status    String   @default("processing")
+  progress  Int      @default(0)
+  label     String   @default("")
+  result    Json?
+  error     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("jobs")
 }
 
 model Order {
@@ -172,23 +208,14 @@ model Order {
 | Query | File | Tần suất |
 |---|---|---|
 | `prisma.knowledgeBase.findMany()` | `src/lib/astrology/knowledge.ts` | Mỗi lần tạo báo cáo |
-| `prisma.user.findUnique({ where: { email } })` | `src/app/api/auth/forgot-password/route.ts` | Khi user quên mật khẩu |
+| `prisma.profile.findMany({ where: { userUid } })` | `src/app/api/profiles/route.ts` | Mỗi lần load profile list |
+| `prisma.profile.create/update/delete` | `src/app/api/profiles/route.ts` | CRUD profiles |
+| `prisma.job.create/update/findUnique` | `src/lib/jobs.ts` | Mỗi lần tạo/update/query job |
+| `prisma.user.findUnique` | `src/lib/auth.ts`, `/api/auth/*` | Auth + forgot password |
 
 ---
 
-## 5. Trạng Thái Hiện Tại vs Tương Lai
-
-| Tính năng | Hiện tại | Nên làm |
-|---|---|---|
-| Auth users | localStorage only | Migrate sang DB (Prisma User) |
-| Profiles | localStorage only | Sync lên Prisma Profile |
-| Orders | Không lưu | Ghi Order khi confirm |
-| Password reset | Chưa hoạt động | Gửi email link reset |
-| Session | localStorage | Server session hoặc JWT |
-
----
-
-## 6. Migrations
+## 5. Migrations
 
 ```bash
 # Tạo migration mới

@@ -49,3 +49,5 @@
 - [x] Avatar upload + crop
 - [x] Google avatar sync
 - [x] SubscriptionPlans UI
+- [x] Mobile auto-zoom fix — `MobileInputFix.tsx` (touchstart → set maximum-scale=1, focusout → restore); font giữ nguyên nhỏ, user vẫn pinch-zoom được
+- [x] Year dropdown — "Năm khác..." là option đầu tiên; range chỉ 100 năm gần nhất (CUR_YEAR-100..CUR_YEAR)

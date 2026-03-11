@@ -30,7 +30,7 @@
    ```
    → 403 nếu sai
 
-2. `createJob(uuid)` → in-memory
+2. `createJob(uuid)` → ghi DB + in-memory
 
 3. Fire-and-forget `processReport()`, return `{ jobId }` ngay
 
@@ -45,7 +45,7 @@
        transit:     buildVanhanEssayPrompt() (không có blocks)
 18-85% generateEssayStreaming() → OpenRouter SSE
 90%  generatePdf() → Puppeteer → Buffer
-95%  savePdf() → /tmp/hgct-pdfs/{uuid}.pdf
+95%  savePdf() → /var/hgct/pdfs/{uuid}.pdf
      sendReportEmail() → Nodemailer
 100% job.status = 'done', job.result = { pdfUrl, pdfFilename, emailSent }
 ```
@@ -55,6 +55,8 @@
 ### `GET /api/job/:id` — Job Status
 
 **File:** `src/app/api/job/[id]/route.ts`
+
+Đọc từ in-memory cache trước, fallback về DB (`getJobFromDb`).
 
 Response:
 ```json
@@ -74,9 +76,33 @@ Response:
 
 **File:** `src/app/api/pdf/[id]/route.ts`
 
-- Đọc `/tmp/hgct-pdfs/{id}.pdf`
-- Response với `Content-Disposition: attachment; filename=...`
-- Query param `?filename=` để đặt tên file tải về
+- Đọc `/var/hgct/pdfs/{id}.pdf`
+- Response `Content-Disposition: attachment; filename=...`
+- Query param `?filename=` để đặt tên file
+
+---
+
+### `GET/POST/PUT/DELETE /api/profiles` — CRUD Profiles
+
+**File:** `src/app/api/profiles/route.ts`
+
+```
+GET    → prisma.profile.findMany({ where: { userUid: session.uid } })
+POST   { name, gender, data } → prisma.profile.create()
+PUT    { id, name, gender, data } → prisma.profile.update()
+DELETE ?id=... → prisma.profile.delete()
+```
+
+Yêu cầu session (NextAuth). `data` là JSON: `{ ho, dem, ten, note, dob, tob, loc }`.
+
+---
+
+### `GET/POST /api/chart` — Lưu / Lấy Natal Chart
+
+**File:** `src/app/api/chart/route.ts`
+
+- `GET ?id=profileId` → load profile từ DB → tính chart → trả ChartData
+- `POST { inputData }` → tính chart từ input → trả ChartData
 
 ---
 
@@ -84,10 +110,10 @@ Response:
 
 **File:** `src/app/api/location/search/route.ts`
 
-- Query param: `?q=Hà Nội&country=vn`
-- Gọi Nominatim API (OpenStreetMap) → kết quả địa điểm
+- Query param: `?q=Hà Nội&cc=vn`
+- Gọi Nominatim API → kết quả địa điểm
 - geo-tz lấy timezone từ lat/lon
-- Hardcode `Asia/Ho_Chi_Minh` nếu `country=vn` (bug geo-tz với Hà Nội)
+- Hardcode `Asia/Ho_Chi_Minh` nếu `cc=vn`
 
 ---
 
@@ -98,39 +124,23 @@ Response:
 ```
 Input:  { code: "<your-upgrade-code>" }
 Logic:  code === process.env.UPGRADE_CODE
+        → cập nhật User.planType = 'premium', User.isPremium = true (DB)
 Output: { token: sha256(code + ':hgct-premium') }
 ```
-
-Token này được lưu vào `localStorage.hatgiong_auth.premiumToken` và gửi kèm mỗi request report.
 
 ---
 
 ### `POST /api/auth/register`
 
-**File:** `src/app/api/auth/register/route.ts`
-
 - Nhận `{ username, name, email, password }`
-- Hash password (bcrypt hoặc tương tự)
-- Lưu vào `prisma.user` (PostgreSQL)
-- **Chú ý:** Auth context hiện tại dùng localStorage, không gọi endpoint này. Endpoint này là backup/future.
-
----
-
-### `POST /api/auth/forgot-password`
-
-**File:** `src/app/api/auth/forgot-password/route.ts`
-
-- Nhận `{ email }`
-- Check `prisma.user.findUnique({ where: { email } })`
-- **Chưa gửi email thực** — chỉ return 200. TODO.
+- bcrypt hash password
+- `prisma.user.create()` → PostgreSQL
 
 ---
 
 ### `POST /api/astrology/calculate` — Tính Chart Đơn Lẻ
 
-**File:** `src/app/api/astrology/calculate/route.ts`
-
-- Dùng để test / debug chart calculation
+- Debug/test endpoint
 - Input: dob, tob, lat, lon, tz
 - Output: ChartData object
 
@@ -140,36 +150,23 @@ Token này được lưu vào `localStorage.hatgiong_auth.premiumToken` và gử
 
 ### `calculations.ts` — Swiss Ephemeris Wrapper
 
-**Công cụ:** npm `swisseph` (binding C lib)
-
 **Hàm chính:**
 ```ts
 calculateChart(dobStr, tobStr, lat, lon, tz): ChartData
 ```
 
-**Steps nội bộ:**
+**Steps:**
 1. Parse date/time → convert local → UTC → Julian Day
 2. `swe.swe_calc_ut()` tính vị trí từng hành tinh (lon, lat, speed)
 3. `swe.swe_houses()` tính 12 nhà (Placidus) → cusps[0..11]
 4. Angles: Asc = cusps[0], MC = cusps[9]
 5. Return `ChartData { jd, cusps, angles, planets, meta, info }`
 
-**Planets tính:** Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Chiron, NNode
+**Planets:** Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Chiron, NNode
 
-**Lưu ý bug đã fix:**
-- `swe.siderialTime` → dùng `swe.siderealTime` (typo trong lib, thực ra là `siderialTime`)
-- House cusps: 0-indexed (trả về array[0..11])
-
-**Hàm tiện ích:**
-```ts
-getZodiac(lon)              → [idx, name_vn, code, degInSign]
-getHouseOfPlanet(lon, cusps) → house number 1-12
-checkAspect(lon1, lon2)     → AspectResult | null
-getElevatedPlanets(chart)
-analyzeHouseInteractions(chart, houseNum, kb)
-getDominantPlanetsLogic(chart)
-getDominantHousesSorted(chart)
-```
+**Bugs đã fix:**
+- `swe.siderialTime` (typo trong lib, KHÔNG phải `siderealTime`)
+- House cusps: 0-indexed
 
 ---
 
@@ -178,11 +175,7 @@ getDominantHousesSorted(chart)
 ```ts
 getKnowledgeFromDB(): Promise<KnowledgeBase>
 ```
-
-Query tất cả rows từ `knowledge_base` table (Prisma).
-Mỗi row: `{ tab_name, data (JSON), updated_at }`
-
-Tab names ví dụ: `zodiac_meaning`, `planet_in_sign`, `planet_in_house`, `aspect_meaning`, ...
+Query tất cả rows từ `knowledge_base` table.
 
 ---
 
@@ -200,97 +193,53 @@ getHouseMeaning(kb, houseNum)
 
 ## 3. Logic Blocks
 
-Mỗi service có `manager.ts` (orchestrate) + `prompt.ts` (build text prompt cho AI).
-
 ### Career (`src/lib/logic/career/`)
-
-**manager.ts — `getCareerBlocks(chart, kb)`:**
-- block1 (`blockWhoAmI`): Bản thân, tính cách, nguyên tố, phương thức
-- block2 (`blockTalents`): Năng khiếu, H1/H3/H6/H9/H10/H11
-- block3 (`blockPath`): Con đường sự nghiệp, H10, MC ruler
-- block4 (`blockFinance`): Tài chính, H2/H8
-
-Mỗi block trả về object với các fields text được format.
-
-**prompt.ts — `buildCareerPrompt(blocks, profile)`:**
-- Ghép tất cả blocks thành prompt text
-- Kèm system instructions cho AI cách viết
+- `getCareerBlocks(chart, kb)`: block1 (tính cách), block2 (năng khiếu), block3 (sự nghiệp H10), block4 (tài chính H2/H8)
+- `buildCareerPrompt(blocks, profile)` → prompt text
 
 ### Love (`src/lib/logic/love/`)
-
-**manager.ts — `getLoveBlocks(chart, kb)`:**
-- Phân tích H5, H7, H8, Venus, Mars, Moon
-- Synastry aspect giữa Venus-Mars trong bản đồ đơn
-
-**prompt.ts — `buildLovePrompt(chart, blocks, profile)`**
+- `getLoveBlocks(chart, kb)`: H5, H7, H8, Venus, Mars, Moon
+- `buildLovePrompt(chart, blocks, profile)` → prompt text
 
 ### Relationship/Synastry (`src/lib/logic/relationship/`)
-
-**manager.ts — `getRelationshipBlocks(chartA, chartB, kb)`:**
-- Cross-chart aspects (planets A vs planets B)
-- Overlay houses (planets A trong nhà của B và ngược lại)
-- Composite chart tính toán
-
-**prompt.ts — `buildRelationshipEssayPrompt(chartA, chartB, blocks, profileA, profileB)`**
+- `getRelationshipBlocks(chartA, chartB, kb)`: cross aspects, overlay houses, composite
+- `buildRelationshipEssayPrompt(chartA, chartB, blocks, profileA, profileB)` → prompt text
 
 ### Vanhan/Transit (`src/lib/logic/vanhan/`)
-
-**Không có blocks** — trực tiếp dùng `transit-stubs.ts`:
-- `scanHouseTransitsInRange(chart, startDate, endDate)` — hành tinh chậm transit qua nhà
-- `findExactAspectTimes(chart, startDate, endDate)` — aspect chính xác
-- `getOuterPlanetCycleData(chart, planet)` — Saturn return, Uranus square, etc.
-
-**prompt.ts — `buildVanhanEssayPrompt(chart, startDate, endDate, profile)`**
+- Không có blocks — dùng `transit-stubs.ts` trực tiếp
+- `buildVanhanEssayPrompt(chart, startDate, endDate, profile)` → prompt text
 
 ---
 
 ## 4. AI Generation
 
 **File:** `src/lib/openrouter.ts`
-
 **Model:** `anthropic/claude-sonnet-4-6` qua OpenRouter
 
-**Streaming:**
 ```ts
 generateEssayStreaming(systemPrompt, userPrompt, onProgress)
 ```
 - SSE stream → parse `data: {...}` lines
-- `onProgress(charsReceived)` callback → update job progress
 - `max_tokens: 16000`, `temperature: 0.75`
-
-**Expected output:**
-- Career/Love: ~9,000 chars
-- Synastry: ~22,000 chars
-- Transit: ~28,000 chars
-
-Progress mapping: `18% + (chars/expected) * 67%` → cap 85%
+- Expected: career/love ~9k chars, synastry ~22k, transit ~28k
+- Progress mapping: `18% + (chars/expected) * 67%` → cap 85%
 
 ---
 
 ## 5. PDF Generation
 
 **File:** `src/lib/pdf/generator.ts`
+**Stack:** `@sparticuz/chromium` + `puppeteer-core`
 
-**Stack:** `@sparticuz/chromium` + `puppeteer-core` (không cần Chrome hệ thống)
-
-**Flow:**
 ```ts
 generatePdf(essayText, { coverTitle, sectionTitle, profile }): Buffer
 ```
-1. `cleanForPdf(text)`:
-   - Strip markdown (#, **, *, _, ```)
-   - Filter "absence lines" (câu AI viết kiểu "không có dữ liệu")
-   - Filter bracket notes `[...]`
-   - Remove orphaned subheadings
-2. Build HTML với:
-   - Base64-encoded fonts từ `/public/fonts/`
-   - Cover page: tên, ngày sinh, title
-   - Section pages: essay text chia đoạn
-3. `puppeteer.launch()` với chromium từ `@sparticuz/chromium`
-4. `page.setContent(html)` → `page.pdf({ format: 'A4' })`
-5. Return Buffer
+1. `cleanForPdf(text)` — strip markdown, filter absence lines, filter `[...]`
+2. Build HTML với fonts base64 từ `/public/fonts/`
+3. `puppeteer.launch()` → `page.setContent(html)` → `page.pdf({ format: 'A4' })`
+4. Return Buffer
 
-PDF files lưu tại `/tmp/hgct-pdfs/{uuid}.pdf` (không persist qua reboot).
+**PDF storage:** `/var/hgct/pdfs/{uuid}.pdf` (persistent, tạo bởi deploy.sh)
 
 ---
 
@@ -302,16 +251,11 @@ PDF files lưu tại `/tmp/hgct-pdfs/{uuid}.pdf` (không persist qua reboot).
 sendReportEmail(to, name, service, pdfBuffer, nameB?): Promise<void>
 ```
 
-**Config:**
 ```
 host: smtp.hostinger.com
-port: 465
-secure: true (SSL)
+port: 465 (SSL)
 auth: SMTP_USER / SMTP_PASS
 ```
-
-Email HTML template có tên, dịch vụ, PDF đính kèm (inline attachment).
-`makePdfFilename(service, nameA, nameB?)` → tên file download.
 
 ---
 
@@ -319,33 +263,24 @@ Email HTML template có tên, dịch vụ, PDF đính kèm (inline attachment).
 
 **File:** `src/lib/jobs.ts`
 
-In-memory `Map<string, Job>` lưu trên `global.__hgctJobs` (tồn tại qua module re-evaluation).
+**Dual-layer:** DB (persist) + in-memory `Map` (fast read)
 
 ```ts
 interface Job {
-  id, status, progress, label, result, error, createdAt
+  id, status, progress, label, result, error, createdAt, userUid?, service?
 }
-createJob(id)       → Job
-updateJob(id, data) → void
-getJob(id)          → Job | undefined
+createJob(id, userUid?, service?)  → ghi DB + cache
+updateJob(id, data)                → update DB + cache
+getJob(id)                         → đọc cache trước, fallback DB (async)
+getJobFromDb(id)                   → đọc DB trực tiếp (dùng sau restart)
 ```
 
-Auto-cleanup: xóa jobs > 1 giờ, chạy mỗi 15 phút.
-
-**Giới hạn:** Nếu Node.js process restart → mất tất cả jobs (không persist ra DB/Redis).
+In-memory cache auto-cleanup sau 1 giờ. DB records giữ lâu hơn.
 
 ---
 
 ## 8. Prisma Client
 
 **File:** `src/lib/db.ts`
-
-```ts
-import { PrismaClient } from '@prisma/client'
-const globalForPrisma = global as { prisma?: PrismaClient }
-const prisma = globalForPrisma.prisma ?? new PrismaClient()
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-export default prisma
-```
 
 Singleton pattern — tránh tạo quá nhiều connection trong dev hot-reload.
