@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { Search, Plus } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
 import NatalWheel from '@/components/chart/NatalWheel'
 import { PLANET_SYMBOLS, ASPECT_TABLE_OBJECTS } from '@/lib/astrology/symbols'
@@ -106,6 +107,7 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 // ─── Main page ─────────────────────────────────────────────────────
 
 export default function ChartPage() {
+  const router = useRouter()
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [profilesLoading, setProfilesLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)
@@ -114,7 +116,29 @@ export default function ChartPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const submitWithData = useCallback(async (inputData: object) => {
+    setLoading(true); setError('')
+    try {
+      const res = await fetch('/api/chart', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputData }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Lỗi tính toán'); setLoading(false); return }
+      setResult(data)
+    } catch { setError('Lỗi kết nối server') }
+    setLoading(false)
+  }, [])
+
   useEffect(() => {
+    // Auto-submit if coming back from /input?for=chart
+    const chartData = sessionStorage.getItem('chartInputData')
+    if (chartData) {
+      sessionStorage.removeItem('chartInputData')
+      submitWithData(JSON.parse(chartData))
+      return
+    }
+
     fetch('/api/profiles')
       .then(r => r.json())
       .then(data => {
@@ -138,27 +162,16 @@ export default function ChartPage() {
       })
       .catch(() => {})
       .finally(() => setProfilesLoading(false))
-  }, [])
+  }, [submitWithData])
 
   const handleSubmit = async () => {
     const profile = profiles.find(p => p.id === selected)
     if (!profile) return
-    setLoading(true); setError('')
-    try {
-      const inputData = {
-        name: profile.name, gender: profile.gender, dob: profile.dob,
-        tob: profile.tob.unknown ? { hour: 12, minute: 0 } : { hour: profile.tob.hour, minute: profile.tob.minute },
-        loc: profile.loc,
-      }
-      const res = await fetch('/api/chart', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputData }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Lỗi tính toán'); setLoading(false); return }
-      setResult(data)
-    } catch { setError('Lỗi kết nối server') }
-    setLoading(false)
+    await submitWithData({
+      name: profile.name, gender: profile.gender, dob: profile.dob,
+      tob: profile.tob.unknown ? { hour: 12, minute: 0 } : { hour: profile.tob.hour, minute: profile.tob.minute },
+      loc: profile.loc,
+    })
   }
 
   const resetResult = () => { setResult(null); setError('') }
@@ -201,97 +214,109 @@ export default function ChartPage() {
               <div className="w-8 h-8 rounded-full animate-spin mx-auto"
                 style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
             </div>
-          ) : profiles.length === 0 ? (
-            <div className="text-center py-6">
-              <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>
-                Chưa có hồ sơ nào. Hãy tạo hồ sơ trước.
-              </p>
-              <a href="/profile" style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
-                Đến trang hồ sơ →
-              </a>
-            </div>
           ) : (
             <div className="space-y-4">
               <label style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em', display: 'block', marginBottom: '0.25rem' }}>
                 CHỌN HỒ SƠ
               </label>
 
-              {/* Search */}
-              <div className="flex items-center gap-2 rounded-lg px-3"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,148,63,0.1)', minHeight: 38 }}>
-                <Search size={13} style={{ color: '#6b7280', flexShrink: 0 }} />
-                <input
-                  type="text"
-                  value={profileSearch}
-                  onChange={e => setProfileSearch(e.target.value)}
-                  placeholder="Tìm hồ sơ..."
-                  style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', width: '100%', padding: '0.4rem 0' }}
-                />
-                {profileSearch && (
-                  <button onClick={() => setProfileSearch('')} style={{ color: '#6b7280', flexShrink: 0, lineHeight: 1 }}>✕</button>
-                )}
-              </div>
-
-              {/* Profile list */}
-              <div className="space-y-1 overflow-y-auto pr-0.5" style={{ maxHeight: 240 }}>
-                {profiles
-                  .filter(p => {
-                    const q = profileSearch.toLowerCase()
-                    return p.name.toLowerCase().includes(q) || p.note.toLowerCase().includes(q)
-                  })
-                  .map(p => {
-                    const isSelected = selected === p.id
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setSelected(p.id)}
-                        className="w-full text-left rounded-lg px-3 py-2.5"
-                        style={{
-                          background: isSelected ? 'rgba(200,148,63,0.12)' : 'rgba(255,255,255,0.03)',
-                          border: `1px solid ${isSelected ? 'rgba(200,148,63,0.32)' : 'rgba(255,255,255,0.05)'}`,
-                          transition: 'all 0.15s',
-                        }}
-                        onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
-                        onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)' }}
-                      >
-                        <p style={{ color: isSelected ? '#f0cc78' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
-                          {p.name}
-                        </p>
-                        <p style={{ color: '#8b8fa8', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontStyle: 'italic', minHeight: '1em', marginTop: '0.15rem' }}>
-                          {p.note || ''}
-                        </p>
-                      </button>
-                    )
-                  })}
-              </div>
-
-              {error && (
-                <p style={{ color: '#c45252', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
-                  {error}
-                </p>
-              )}
-
+              {/* Nút Nhập thông tin mới */}
               <button
-                onClick={handleSubmit}
-                disabled={!selected}
-                className="w-full py-3.5 font-bold text-sm"
+                type="button"
+                onClick={() => router.push('/input?for=chart')}
+                className="w-full flex items-center gap-2"
                 style={{
-                  background: selected ? 'linear-gradient(135deg,#c8943f,#f0cc78,#c8943f)' : 'rgba(200,148,63,0.15)',
-                  color: selected ? '#06060f' : '#4a4560',
-                  borderRadius: '4px', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.1em',
-                  transition: 'all 0.2s',
-                  boxShadow: selected ? '0 4px 24px rgba(200,148,63,0.25)' : 'none',
-                  cursor: selected ? 'pointer' : 'not-allowed',
+                  background: 'transparent',
+                  border: '1px solid rgba(200,148,63,0.28)',
+                  color: '#d9ab55',
+                  borderRadius: '6px',
+                  padding: '0.55rem 0.875rem',
+                  fontFamily: 'var(--font-vietnam)',
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s',
                 }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(200,148,63,0.07)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
-                Xem bản đồ sao ✦
+                <Plus size={14} /> Nhập thông tin mới
               </button>
 
-              <p className="text-center" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
-                Chưa có hồ sơ?{' '}
-                <a href="/profile" style={{ color: '#d9ab55' }}>Tạo hồ sơ tại đây →</a>
-              </p>
+              {profiles.length > 0 && (
+                <>
+                  {/* Search */}
+                  <div className="flex items-center gap-2 rounded-lg px-3"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,148,63,0.1)', minHeight: 38 }}>
+                    <Search size={13} style={{ color: '#6b7280', flexShrink: 0 }} />
+                    <input
+                      type="text"
+                      value={profileSearch}
+                      onChange={e => setProfileSearch(e.target.value)}
+                      placeholder="Tìm hồ sơ..."
+                      style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', width: '100%', padding: '0.4rem 0' }}
+                    />
+                    {profileSearch && (
+                      <button onClick={() => setProfileSearch('')} style={{ color: '#6b7280', flexShrink: 0, lineHeight: 1 }}>✕</button>
+                    )}
+                  </div>
+
+                  {/* Profile list */}
+                  <div className="space-y-1 overflow-y-auto pr-0.5" style={{ maxHeight: 240 }}>
+                    {profiles
+                      .filter(p => {
+                        const q = profileSearch.toLowerCase()
+                        return p.name.toLowerCase().includes(q) || p.note.toLowerCase().includes(q)
+                      })
+                      .map(p => {
+                        const isSelected = selected === p.id
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => setSelected(p.id)}
+                            className="w-full text-left rounded-lg px-3 py-2.5"
+                            style={{
+                              background: isSelected ? 'rgba(200,148,63,0.12)' : 'rgba(255,255,255,0.03)',
+                              border: `1px solid ${isSelected ? 'rgba(200,148,63,0.32)' : 'rgba(255,255,255,0.05)'}`,
+                              transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
+                            onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)' }}
+                          >
+                            <p style={{ color: isSelected ? '#f0cc78' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
+                              {p.name}
+                            </p>
+                            <p style={{ color: '#8b8fa8', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontStyle: 'italic', minHeight: '1em', marginTop: '0.15rem' }}>
+                              {p.note || ''}
+                            </p>
+                          </button>
+                        )
+                      })}
+                  </div>
+
+                  {error && (
+                    <p style={{ color: '#c45252', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
+                      {error}
+                    </p>
+                  )}
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!selected}
+                    className="w-full py-3.5 font-bold text-sm"
+                    style={{
+                      background: selected ? 'linear-gradient(135deg,#c8943f,#f0cc78,#c8943f)' : 'rgba(200,148,63,0.15)',
+                      color: selected ? '#06060f' : '#4a4560',
+                      borderRadius: '4px', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.1em',
+                      transition: 'all 0.2s',
+                      boxShadow: selected ? '0 4px 24px rgba(200,148,63,0.25)' : 'none',
+                      cursor: selected ? 'pointer' : 'not-allowed',
+                    }}
+                  >
+                    Xem bản đồ sao ✦
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

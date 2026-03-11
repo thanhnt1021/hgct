@@ -46,6 +46,7 @@ function InputPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const forSynastry = searchParams.get('for') === 'synastry'
+  const forChart = searchParams.get('for') === 'chart'
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
 
@@ -64,7 +65,10 @@ function InputPageInner() {
       loc: form.loc,
     }
 
-    if (forSynastry) {
+    if (forChart) {
+      sessionStorage.setItem('chartInputData', JSON.stringify(data))
+      router.push('/chart')
+    } else if (forSynastry) {
       sessionStorage.setItem('inputDataB', JSON.stringify(data))
       router.push('/checkout')
     } else {
@@ -100,6 +104,8 @@ function InputPageInner() {
           <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
             {forSynastry
               ? 'Nhập thông tin của người bạn muốn so sánh bản đồ sao'
+              : forChart
+              ? 'Điền thông tin để xem bản đồ sao ngay, không cần lưu hồ sơ'
               : 'Điền đầy đủ để tạo bản đồ sao chính xác nhất'
             }
           </p>
@@ -271,7 +277,7 @@ function InputPageInner() {
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
-                {saving ? 'Đang xử lý...' : forSynastry ? 'Tiếp tục thanh toán →' : 'Tiếp tục →'}
+                {saving ? 'Đang xử lý...' : forChart ? 'Xem bản đồ sao ✦' : forSynastry ? 'Tiếp tục thanh toán →' : 'Tiếp tục →'}
               </button>
             </div>
 
