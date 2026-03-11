@@ -513,14 +513,16 @@ input[type="checkbox"] {
 /* ── Prevent auto-zoom on mobile touch devices ────────────────── */
 /*
   iOS Safari & Android Chrome tự động zoom khi input có font-size < 16px.
-  Fix: set font-size: 16px trên touch devices — user vẫn tự zoom tay được bình thường.
-  Dùng (hover: none) + (pointer: coarse) để detect touch devices chính xác hơn max-width.
-  !important để override cả inline styles (vd: LocationPicker inputStyle).
+  Trick: font-size: 16px !important → browser không zoom (computed style = 16px).
+         zoom: 0.75              → scale visual xuống 12px (= 0.75rem như cũ).
+  Browser kiểm tra computed font-size để quyết định zoom, không kiểm tra rendered size.
+  Kết quả: chữ nhỏ như cũ, không auto-zoom, user vẫn tự zoom tay bình thường.
+  !important để override cả CSS class (.form-compact) lẫn inline styles (LocationPicker).
 */
 @media (hover: none) and (pointer: coarse) {
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-  select,
-  textarea {
+  .form-compact input:not([type="checkbox"]):not([type="radio"]),
+  .form-compact select {
     font-size: 16px !important;
+    zoom: 0.75;
   }
 }
