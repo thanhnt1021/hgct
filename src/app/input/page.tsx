@@ -5,8 +5,10 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import Navbar from '@/components/layout/Navbar'
 import LocationPicker from '@/components/profile/LocationPicker'
+import { useAuth } from '@/contexts/AuthContext'
 
 const EMPTY_FORM = {
   ho: '', dem: '', ten: '', gender: 'Female',
@@ -45,14 +47,16 @@ const subLabelStyle: React.CSSProperties = {
 function InputPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user } = useAuth()
   const forSynastry = searchParams.get('for') === 'synastry'
   const forChart = searchParams.get('for') === 'chart'
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [saveProfile, setSaveProfile] = useState(false)
 
   const setF = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.ten.trim()) return alert('Vui lòng nhập tên')
     setSaving(true)
     const name = [form.ho, form.dem, form.ten].filter(Boolean).join(' ')
@@ -63,6 +67,28 @@ function InputPageInner() {
       dob: form.dob,
       tob: { hour: form.tob.unknown ? 12 : form.tob.hour, minute: form.tob.unknown ? 0 : form.tob.minute },
       loc: form.loc,
+    }
+
+    if (saveProfile && user) {
+      try {
+        await fetch('/api/profiles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            gender: form.gender,
+            data: {
+              ho: form.ho.trim(),
+              dem: form.dem.trim(),
+              ten: form.ten.trim(),
+              note: form.note.trim(),
+              dob: form.dob,
+              tob: form.tob,
+              loc: form.loc,
+            },
+          }),
+        })
+      } catch { /* non-blocking */ }
     }
 
     if (forChart) {
@@ -255,6 +281,29 @@ function InputPageInner() {
                 maxLength={120}
               />
             </div>
+
+            {/* Divider */}
+            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
+
+            {/* Save profile */}
+            {user ? (
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={saveProfile}
+                  onChange={e => setSaveProfile(e.target.checked)}
+                  style={{ width: 'auto', padding: 0, flexShrink: 0 }}
+                />
+                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+                  Lưu hồ sơ này vào tài khoản
+                </span>
+              </label>
+            ) : (
+              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', fontStyle: 'italic' }}>
+                <Link href="/auth/login" style={{ color: '#d9ab55', textDecoration: 'underline' }}>Đăng nhập</Link>
+                {' '}để lưu thông tin hồ sơ cho lần sau.
+              </p>
+            )}
 
             {/* Divider */}
             <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />

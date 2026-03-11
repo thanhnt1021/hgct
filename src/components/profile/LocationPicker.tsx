@@ -4,6 +4,7 @@
 // All search logic, API calls, and data flow untouched
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { Search } from 'lucide-react'
 
 interface LocationResult {
   display_name: string
@@ -117,35 +118,41 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
         </select>
       </div>
 
-      {/* Search input */}
-      <div className="relative">
+      {/* Search input + button */}
+      <div className="relative flex">
         <input
           type="text"
           value={query}
           onChange={e => handleInput(e.target.value)}
           placeholder="Nhập tên thành phố..."
-          className="w-full pr-16"
+          className="flex-1"
+          style={{ borderRadius: '4px 0 0 4px', borderRight: 'none' }}
         />
-
-        {loading && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div
-              className="w-4 h-4 border-2 rounded-full animate-spin"
-              style={{ borderColor: 'rgba(200,148,63,0.25)', borderTopColor: '#d9ab55' }}
-            />
-          </div>
-        )}
-
-        {!loading && query && (
-          <button
-            type="button"
-            onClick={() => search(query, cc)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold transition-colors"
-            style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.1em' }}
-          >
-            TÌM
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => search(query, cc)}
+          disabled={loading}
+          className="flex items-center justify-center flex-shrink-0"
+          style={{
+            width: '2.75rem',
+            background: 'rgba(200,148,63,0.1)',
+            border: '1px solid rgba(200,148,63,0.25)',
+            borderLeft: 'none',
+            borderRadius: '0 4px 4px 0',
+            color: '#d9ab55',
+            cursor: loading ? 'default' : 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.background = 'rgba(200,148,63,0.2)' }}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(200,148,63,0.1)'}
+        >
+          {loading ? (
+            <div className="w-4 h-4 border-2 rounded-full animate-spin"
+              style={{ borderColor: 'rgba(200,148,63,0.25)', borderTopColor: '#d9ab55' }} />
+          ) : (
+            <Search size={15} />
+          )}
+        </button>
 
         {/* Results dropdown */}
         {open && results.length > 0 && (
