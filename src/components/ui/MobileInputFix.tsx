@@ -24,7 +24,7 @@ export default function MobileInputFix() {
       ? original.replace(/maximum-scale=[^,]*/, 'maximum-scale=1')
       : original + ', maximum-scale=1'
 
-    const lock = (e: FocusEvent) => {
+    const lock = (e: TouchEvent | FocusEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
       if (tag && ['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) {
         meta.content = locked
@@ -38,11 +38,11 @@ export default function MobileInputFix() {
       }
     }
 
-    document.addEventListener('focusin', lock)
+    document.addEventListener('touchstart', lock as EventListener, { passive: true })
     document.addEventListener('focusout', unlock)
 
     return () => {
-      document.removeEventListener('focusin', lock)
+      document.removeEventListener('touchstart', lock as EventListener)
       document.removeEventListener('focusout', unlock)
     }
   }, [])
