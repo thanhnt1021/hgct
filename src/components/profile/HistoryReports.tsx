@@ -273,16 +273,33 @@ export default function HistoryReports() {
                 <p className="truncate mb-2" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>
                   {new Date(entry.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · {entry.email}
                 </p>
-                {/* Processing label / error */}
-                {isProcessing && st?.label && (
-                  <p className="text-xs mb-2" style={{ color: '#fbbf24', fontFamily: 'var(--font-vietnam)' }}>{st.label}</p>
+                {/* Progress bar for processing jobs */}
+                {isProcessing && (
+                  <div className="mb-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <span style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem' }}>
+                        {st?.label || 'Đang xử lý...'}
+                      </span>
+                      <span style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.75rem' }}>
+                        {st?.progress ?? 0}%
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(200,148,63,0.08)' }}>
+                      <div className="h-full rounded-full" style={{
+                        width: `${st?.progress ?? 0}%`,
+                        background: 'linear-gradient(90deg, #c8943f, #f0cc78)',
+                        boxShadow: '0 0 8px rgba(200,148,63,0.4)',
+                        transition: 'width 700ms cubic-bezier(0.4, 0, 0.2, 1)',
+                      }} />
+                    </div>
+                  </div>
                 )}
                 {isError && st.error && (
                   <p className="text-xs mb-2" style={{ color: '#ef4444', fontFamily: 'var(--font-vietnam)' }}>{st.error.slice(0, 120)}</p>
                 )}
                 {/* Row 3: status + actions */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <StatusBadge jobId={entry.jobId} />
+                  {!isProcessing && <StatusBadge jobId={entry.jobId} />}
                   <button
                     onClick={() => manualRefresh(entry.jobId)}
                     disabled={refreshing[entry.jobId]}
