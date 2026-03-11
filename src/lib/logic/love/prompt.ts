@@ -1,9 +1,9 @@
-// Love prompt builder (ported from love/essay_pdf.py)
+// Love prompt builder — matches /root/mo/app/logic/love/essay_pdf.py build_love_essay_prompt()
 import fs from 'fs'
 import path from 'path'
 import { getZodiac, getHouseOfPlanet, checkAspect } from '@/lib/astrology/calculations'
 import type { ChartData } from '@/lib/astrology/calculations'
-import { CORE_PLANETS, PLANET_NAMES_VN, PLANET_SYMBOLS } from '@/lib/astrology/constants'
+import { CORE_PLANETS, PLANET_NAMES_VN, RULER_MAP } from '@/lib/astrology/constants'
 
 function stripHtml(text: string): string {
   if (!text) return ''
@@ -14,141 +14,9 @@ function stripHtml(text: string): string {
   return t.split(/\s+/).join(' ').trim()
 }
 
-function txt(contentField: unknown): string {
-  if (typeof contentField === 'object' && contentField !== null) {
-    const d = contentField as Record<string, string>
-    return stripHtml(d.detail || d.short || '')
-  }
-  return stripHtml(String(contentField || ''))
-}
-
 function loadPromptTemplate(name: string): string {
   const promptPath = path.join(process.cwd(), 'src', 'prompts', `${name}.txt`)
   return fs.readFileSync(promptPath, 'utf-8')
-}
-
-function formatPlanetPositions(chartData: ChartData): string {
-  const lines: string[] = []
-  const pPos = chartData.planets
-  const cusps = chartData.cusps
-
-  for (const p of CORE_PLANETS) {
-    if (!(p in pPos)) continue
-    const lon = pPos[p].lon
-    const [, zName, , deg] = getZodiac(lon)
-    const house = getHouseOfPlanet(lon, cusps)
-    const sym = PLANET_SYMBOLS[p] || ''
-    const vnName = PLANET_NAMES_VN[p] || p
-    lines.push(`${sym} ${vnName} (${p}): ${Math.round(deg)}° ${zName} - Nhà ${house}`)
-  }
-
-  return lines.join('\n')
-}
-
-function formatLoveHouses(chartData: ChartData): string {
-  const loveHouses = [5, 7, 8, 11, 12]
-  const lines: string[] = []
-  const cusps = chartData.cusps
-  const pPos = chartData.planets
-
-  for (const h of loveHouses) {
-    const hLon = cusps.length === 13 ? cusps[h] : cusps[h - 1]
-    const [, zName] = getZodiac(hLon)
-    const planetsInH = CORE_PLANETS.filter(p => p in pPos && getHouseOfPlanet(pPos[p].lon, cusps) === h)
-    const pStr = planetsInH.length > 0
-      ? planetsInH.map(p => PLANET_NAMES_VN[p] || p).join(', ')
-      : 'Trống'
-    lines.push(`Nhà ${h} (${zName}): ${pStr}`)
-  }
-
-  return lines.join('\n')
-}
-
-function formatLoveAspects(chartData: ChartData): string {
-  const lovePlanets = ['Venus', 'Mars', 'Moon']
-  const lines: string[] = []
-  const pPos = chartData.planets
-
-  for (const p1 of lovePlanets) {
-    if (!(p1 in pPos)) continue
-    for (const p2 of CORE_PLANETS) {
-      if (p2 === p1 || !(p2 in pPos)) continue
-      const asp = checkAspect(pPos[p1].lon, pPos[p2].lon)
-      if (asp && asp.type !== 'Minor') {
-        const vn1 = PLANET_NAMES_VN[p1] || p1
-        const vn2 = PLANET_NAMES_VN[p2] || p2
-        lines.push(`${vn1} ${asp.symbol} ${vn2} (${asp.name_vn}, orb ${asp.orb_round}°) [${asp.type}]`)
-      }
-    }
-  }
-
-  return lines.join('\n')
-}
-
-function formatBlockData(loveBlocks: Record<string, unknown>): string {
-  const lines: string[] = []
-  const b1 = (loveBlocks.block1 || {}) as Record<string, unknown>
-  const b2 = (loveBlocks.block2 || {}) as Record<string, unknown>
-
-  // Block 1: Overview
-  lines.push('=== BLOCK 1: TỔNG QUAN TÌNH YÊU ===')
-
-  // Core data (Asc/Sun/Moon cho/yeu)
-  for (const item of (b1.coreData || []) as Record<string, string>[]) {
-    lines.push(`\n${item.label} - Cung ${item.zodiac}:`)
-    const cho = stripHtml(item.cho || '')
-    const yeu = stripHtml(item.yeu || '')
-    if (cho) lines.push(`  Cho đi: ${cho}`)
-    if (yeu) lines.push(`  Cần được yêu: ${yeu}`)
-  }
-
-  // Attraction
-  for (const attr of (b1.attraction || []) as Record<string, string>[]) {
-    const t = stripHtml(attr.content || '')
-    if (t) lines.push(`\n${attr.label}: ${t}`)
-  }
-
-  // Venus gu
-  const venusGu = stripHtml(String(b1.venusGu || ''))
-  if (venusGu) lines.push(`\nGu thẩm mỹ Venus: ${venusGu}`)
-
-  // Moon an toan
-  const moonAnToan = stripHtml(String(b1.moonAnToan || ''))
-  if (moonAnToan) lines.push(`\nNhu cầu an toàn Moon: ${moonAnToan}`)
-
-  // Block 2: H7 Details
-  lines.push('\n=== BLOCK 2: CHI TIẾT NHÀ 7 ===')
-
-  const peak = (b2.peak || {}) as Record<string, string>
-  const energy = stripHtml(peak.energy || '')
-  if (energy) lines.push(`\nĐỉnh Nhà 7 - Cung ${peak.zodiac}: ${energy}`)
-
-  // Roles
-  for (const role of (b2.roles || []) as Record<string, string>[]) {
-    const t = stripHtml(role.content || '')
-    if (t) lines.push(`${role.label} trong Nhà 7: ${t}`)
-  }
-
-  // Meeting
-  const meeting = (b2.meeting || {}) as Record<string, unknown>
-  const meetingContent = stripHtml(String(meeting.content || ''))
-  if (meetingContent) {
-    lines.push(`\nChủ tinh Nhà 7 (${meeting.rulerLabel}) ở Nhà ${meeting.rulerHouse}: ${meetingContent}`)
-  }
-
-  // Interactions
-  const interactions = (b2.interactions || []) as Record<string, unknown>[]
-  for (const imp of interactions) {
-    const t = txt(imp.content)
-    if (t) lines.push(`${imp.label || imp.description || ''}: ${t}`)
-  }
-
-  const isH7Empty = b2.isH7Empty as boolean
-  if (isH7Empty) {
-    lines.push('\n(Nhà 7 trống - phân tích dựa trên chủ tinh)')
-  }
-
-  return lines.join('\n')
 }
 
 export function buildLovePrompt(
@@ -162,24 +30,116 @@ export function buildLovePrompt(
   const pronoun = gender === 'Female' ? 'chị' : 'anh'
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
 
-  const planetPositions = formatPlanetPositions(chartData)
-  const loveHouses = formatLoveHouses(chartData)
-  const loveAspects = formatLoveAspects(chartData)
-  const blockData = formatBlockData(loveBlocks)
+  const planets = chartData.planets
+  const cusps = chartData.cusps
 
-  const dataText = [
-    '--- VỊ TRÍ HÀNH TINH ---',
-    planetPositions,
-    '',
-    '--- NHÀ TÌNH YÊU (5, 7, 8, 11, 12) ---',
-    loveHouses,
-    '',
-    '--- GÓC CHIẾU TÌNH YÊU (Venus/Mars/Moon) ---',
-    loveAspects,
-    '',
-    blockData,
-  ].join('\n')
+  function getZ(key: string): string {
+    const [, z] = getZodiac(planets[key].lon)
+    return z
+  }
+  function getH(key: string): number {
+    return getHouseOfPlanet(planets[key].lon, cusps)
+  }
+  function houseZ(hNum: number): string {
+    const idx = cusps.length === 13 ? hNum : hNum - 1
+    const [, z] = getZodiac(cusps[idx])
+    return z
+  }
+  function psIn(hNum: number): string[] {
+    return CORE_PLANETS
+      .filter(p => p in planets && getHouseOfPlanet(planets[p].lon, cusps) === hNum)
+      .map(p => PLANET_NAMES_VN[p] || p)
+  }
 
+  // ── Chart positions ─────────────────────────────────────────────
+  const ascZ   = getZ('Asc')
+  const sunZ   = getZ('Sun');   const sunH   = getH('Sun')
+  const moonZ  = getZ('Moon');  const moonH  = getH('Moon')
+  const venusZ = getZ('Venus'); const venusH = getH('Venus')
+  const marsZ  = getZ('Mars');  const marsH  = getH('Mars')
+
+  // Love houses
+  const h5Z   = houseZ(5); const h5Ps  = psIn(5)
+  const h7Z   = houseZ(7); const h7Ps  = psIn(7)
+  const h8Ps  = psIn(8)
+  const h11Ps = psIn(11)
+  const h12Ps = psIn(12)
+
+  const rulerH7 = RULER_MAP[h7Z]
+  const rulerH7H = rulerH7 && rulerH7 in planets ? getH(rulerH7) : 'N/A'
+
+  // Love aspects (Venus / Mars / Moon × all CORE_PLANETS, non-Minor)
+  const lovePlanets = ['Venus', 'Mars', 'Moon']
+  const aspLines: string[] = []
+  for (const lp of lovePlanets) {
+    if (!(lp in planets)) continue
+    for (const other of CORE_PLANETS) {
+      if (other === lp || !(other in planets)) continue
+      const asp = checkAspect(planets[lp].lon, planets[other].lon)
+      if (asp && asp.type !== 'Minor') {
+        const vn1 = PLANET_NAMES_VN[lp] || lp
+        const vn2 = PLANET_NAMES_VN[other] || other
+        aspLines.push(
+          `- ${vn1} ${asp.name_vn} ${vn2} (${asp.type}, orb ${asp.orb_round}°)`
+        )
+      }
+    }
+  }
+  const aspText = aspLines.length > 0 ? aspLines.join('\n') : 'Không có góc nổi bật'
+
+  // ── Block data ──────────────────────────────────────────────────
+  const b1 = (loveBlocks.block1 || {}) as Record<string, unknown>
+  const b2 = (loveBlocks.block2 || {}) as Record<string, unknown>
+
+  // Block 1A: Asc/Sun/Moon → cho đi + điểm yếu
+  const coreData = (b1.coreData || []) as { label: string; zodiac: string; cho: string; yeu: string }[]
+  const coreLines: string[] = []
+  for (const c of coreData) {
+    const cho = stripHtml(c.cho)
+    const yeu = stripHtml(c.yeu)
+    const label = `${c.label} (${c.zodiac})`
+    if (cho) coreLines.push(`  - ${label} — Cho đi / Cách yêu: ${cho}`)
+    if (yeu) coreLines.push(`  - ${label} — Điểm yếu tình cảm: ${yeu}`)
+  }
+  const coreText = coreLines.join('\n') || 'N/A'
+
+  // Block 1B: dom houses → nhận lại
+  const attraction = (b1.attraction || []) as { label: string; content: string }[]
+  const attLines = attraction
+    .filter(a => stripHtml(a.content))
+    .map(a => `  - ${a.label}: ${stripHtml(a.content)}`)
+  const attText = attLines.join('\n') || 'N/A'
+
+  // Block 1C: Venus gu đối tác
+  const venusGu = stripHtml(String(b1.venusGu || '')) || 'N/A'
+
+  // Block 1D: Moon nhu cầu an toàn
+  const moonNeed = stripHtml(String(b1.moonAnToan || '')) || 'N/A'
+
+  // Block 2A: H7 energy
+  const h7Peak = (b2.peak || {}) as { zodiac: string; energy: string }
+  const h7Energy = stripHtml(h7Peak.energy || '') || 'N/A'
+
+  // Block 2B: planet/ruler roles in H7
+  const roles = (b2.roles || []) as { label: string; content: string }[]
+  const roleLines = roles
+    .filter(r => stripHtml(r.content))
+    .map(r => `  - ${r.label}: ${stripHtml(r.content)}`)
+  const roleText = roleLines.join('\n') || 'N/A'
+
+  // Block 2C: where to meet partner
+  const meeting = (b2.meeting || {}) as { rulerLabel: string; rulerHouse: number; content: string }
+  const meetHouse = meeting.rulerHouse || 'N/A'
+  const meetLoc = stripHtml(meeting.content || '') || 'N/A'
+
+  // Block 2D: H7 interactions
+  const interactions = (b2.interactions || []) as { label: string; content: string }[]
+  const intLines = interactions
+    .filter(it => stripHtml(it.content))
+    .map(it => `  - ${it.label}: ${stripHtml(it.content)}`)
+  const intText = intLines.join('\n') || 'Không có tương tác nổi bật'
+
+  // ── Assemble prompt ──────────────────────────────────────────────
   const instructions = loadPromptTemplate('love')
     .replace(/{pronoun}/g, pronoun)
     .replace(/{full_name}/g, fullName)
@@ -187,9 +147,41 @@ export function buildLovePrompt(
     .replace(/{dob_str}/g, dobStr)
 
   return (
-    `=== DỮ LIỆU PHÂN TÍCH BẢN ĐỒ SAO ===\n` +
+    `=== DỮ LIỆU PHÂN TÍCH BẢN ĐỒ SAO TÌNH DUYÊN ===\n` +
     `Họ tên: ${fullName} | Ngày sinh: ${dobStr}\n` +
-    `\n${dataText}\n\n` +
+    `\n--- CÁC VỊ TRÍ HÀNH TINH CHÍNH ---\n` +
+    `- Cung Mọc: ${ascZ} (ấn tượng đầu tiên, cách tiếp cận quan hệ)\n` +
+    `- Mặt Trời: ${sunZ}, Nhà ${sunH} (bản ngã trong tình yêu)\n` +
+    `- Mặt Trăng: ${moonZ}, Nhà ${moonH} (nhu cầu cảm xúc sâu xa)\n` +
+    `- Sao Kim: ${venusZ}, Nhà ${venusH} (cách yêu, gu đối tác)\n` +
+    `- Sao Hỏa: ${marsZ}, Nhà ${marsH} (cách tiếp cận, năng lượng ham muốn)\n` +
+    `\n--- CÁC NHÀ TÌNH DUYÊN ---\n` +
+    `- Nhà 5 (lãng mạn, hẹn hò đầu): Đỉnh ${h5Z}, Hành tinh: ${h5Ps.length ? h5Ps.join(', ') : 'Trống'}\n` +
+    `- Nhà 7 (hôn nhân, đối tác lâu dài): Đỉnh ${h7Z}, Hành tinh: ${h7Ps.length ? h7Ps.join(', ') : 'Trống'}\n` +
+    `- Chủ tinh Nhà 7 (${rulerH7 ? (PLANET_NAMES_VN[rulerH7] || rulerH7) : 'N/A'}) ở Nhà ${rulerH7H}\n` +
+    `- Nhà 8 (gắn kết sâu, tình dục, tiền chung): ${h8Ps.length ? h8Ps.join(', ') : 'Trống'}\n` +
+    `- Nhà 11 (gặp gỡ qua bạn bè, cộng đồng): ${h11Ps.length ? h11Ps.join(', ') : 'Trống'}\n` +
+    `- Nhà 12 (mẫu tiềm thức, hy sinh): ${h12Ps.length ? h12Ps.join(', ') : 'Trống'}\n` +
+    `\n--- GÓC TÌNH CẢM (Sao Kim / Sao Hỏa / Mặt Trăng) ---\n` +
+    `${aspText}\n` +
+    `\n--- BLOCK 1A: CÁCH YÊU VÀ ĐIỂM YẾU TÌNH CẢM ---\n` +
+    `(Cung Mọc / Mặt Trời / Mặt Trăng — nguồn: hệ thống tri thức)\n` +
+    `${coreText}\n` +
+    `\n--- BLOCK 1B: KIỂU NGƯỜI THU HÚT (NHÀ TRỘI) ---\n` +
+    `(Loại người ${pronoun} ${name} vô thức bị thu hút, theo nhà trội bản đồ)\n` +
+    `${attText}\n` +
+    `\n--- BLOCK 1C: GU ĐỐI TÁC (SAO KIM ${venusZ}) ---\n` +
+    `${venusGu}\n` +
+    `\n--- BLOCK 1D: NHU CẦU CẢM XÚC SÂU XA (MẶT TRĂNG ${moonZ}) ---\n` +
+    `${moonNeed}\n` +
+    `\n--- BLOCK 2A: NĂNG LƯỢNG ĐỐI TÁC (ĐỈNH NHÀ 7 = ${h7Z}) ---\n` +
+    `${h7Energy}\n` +
+    `\n--- BLOCK 2B: VAI TRÒ HÀNH TINH / CHỦ TINH NHÀ 7 ---\n` +
+    `${roleText}\n` +
+    `\n--- BLOCK 2C: GẶP ĐỐI TÁC Ở ĐÂU (Chủ tinh Nhà 7 ở Nhà ${meetHouse}) ---\n` +
+    `${meetLoc}\n` +
+    `\n--- BLOCK 2D: TƯƠNG TÁC NHÀ 7 VỚI CÁC NHÀ KHÁC ---\n` +
+    `${intText}\n\n` +
     instructions
   )
 }
