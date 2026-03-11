@@ -280,11 +280,32 @@ Border:        rgba(200,148,63,0.14–0.38)
 
 ## 8. Mobile UX
 
-**`MobileInputFix.tsx`** (`src/components/ui/MobileInputFix.tsx`) — Client Component, render trong `layout.tsx`:
-- Lắng nghe `touchstart` (không phải `focusin` — vì focusin fire sau khi iOS đã zoom rồi)
-- Khi touch vào INPUT/SELECT/TEXTAREA: set `maximum-scale=1` trong viewport meta
-- Khi `focusout`: restore viewport meta về original
-- Kết quả: không auto-zoom, font giữ nguyên nhỏ, user vẫn pinch-zoom khi không focus input
+### iOS Auto-Zoom Fix (QUAN TRỌNG)
+
+iOS Safari tự động zoom khi tap vào input có `font-size < 16px`. Đã thử nhiều cách thất bại:
+
+| Cách | Kết quả |
+|---|---|
+| CSS `font-size: 16px` only | Chữ to, không dùng được |
+| CSS `font-size: 16px + zoom: 0.75` | Zoom vẫn xảy ra (iOS check visual size) |
+| JS `focusin` → set `maximum-scale=1` | Chỉ fix từ lần 2 trở đi |
+| JS `touchstart` → set `maximum-scale=1` | Vẫn zoom lần đầu |
+| Inline `<script>` trong `<head>` | Vẫn zoom lần đầu (iOS cache viewport khi parse HTML) |
+| **`maximumScale: 1` trong viewport config** | ✅ **Fix hoàn toàn** |
+
+**Fix cuối cùng — 1 dòng trong `src/app/layout.tsx`:**
+```ts
+export const viewport: Viewport = {
+  themeColor: '#06060f',
+  maximumScale: 1,  // ← ngăn iOS auto-zoom khi focus input
+}
+```
+
+**Tại sao hoạt động:** `maximum-scale=1` được nhúng thẳng vào HTML initial → iOS đọc giá trị này trước mọi interaction → không zoom. Trên iOS 10+ (tất cả iPhone từ 2016), Apple override `maximum-scale` cho user-initiated pinch-zoom → user vẫn zoom tay được bình thường.
+
+**ĐỪNG dùng JS** để thay đổi viewport meta cho mục đích này — iOS cache viewport lúc load trang, JS thay đổi sau đó không có tác dụng cho lần đầu tiên.
+
+---
 
 **Year dropdown** — 3 files (`/input`, `ProfileFormModal`, `/my-charts`):
 - Range: `CUR_YEAR - 100` đến `CUR_YEAR` (101 năm, không hardcode)

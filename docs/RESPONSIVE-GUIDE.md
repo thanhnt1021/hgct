@@ -48,6 +48,21 @@ The page uses a shared layout shell: sidebar + main content area.
 - **Mobile**: all inputs `w-full`, labels above inputs, submit buttons `w-full`
 - **Desktop**: inputs can be narrower, buttons auto-width
 
+## iOS Auto-Zoom Prevention (CRITICAL)
+
+iOS Safari auto-zooms khi tap input có `font-size < 16px`. **Fix duy nhất đáng tin cậy:**
+
+```ts
+// src/app/layout.tsx
+export const viewport: Viewport = {
+  maximumScale: 1,  // nhúng thẳng vào HTML initial
+}
+```
+
+**KHÔNG dùng JS** (useEffect, inline script, event listener) để set `maximum-scale` — iOS cache viewport khi parse HTML, thay đổi bằng JS sau đó không ngăn được zoom lần đầu.
+
+iOS 10+ (tất cả iPhone từ 2016+): Apple override `maximum-scale=1` cho user pinch-zoom → user vẫn zoom tay bình thường, chỉ auto-zoom khi focus input bị chặn.
+
 ## Modals
 
 - **Mobile**: bottom-sheet style (slide up, rounded top, `max-h-[90vh]`)
