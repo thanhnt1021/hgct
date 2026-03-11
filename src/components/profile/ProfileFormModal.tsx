@@ -9,6 +9,7 @@ export interface ProfileFormData {
   dob: { day: number; month: number; year: number }
   tob: { hour: number; minute: number; unknown: boolean }
   loc: { address: string; lat: number; lon: number; tz: string }
+  note?: string
 }
 
 export const EMPTY_PROFILE_FORM: ProfileFormData = {
@@ -16,6 +17,7 @@ export const EMPTY_PROFILE_FORM: ProfileFormData = {
   dob: { day: 0, month: 0, year: 0 },
   tob: { hour: -1, minute: -1, unknown: false },
   loc: { address: 'Hà Nội, Việt Nam', lat: 21.0245, lon: 105.8412, tz: 'Asia/Ho_Chi_Minh' },
+  note: '',
 }
 
 const CUR_YEAR = new Date().getFullYear()
@@ -225,6 +227,21 @@ export default function ProfileFormModal({ open, title, initialData, saving, onS
           </div>
 
           <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
+
+          {/* Note / nickname — optional */}
+          <div>
+            <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>
+              Biệt danh / Ghi chú{' '}
+              <span style={{ color: '#4a4560', fontSize: '0.78rem' }}>(tuỳ chọn)</span>
+            </label>
+            <input
+              type="text"
+              value={form.note || ''}
+              onChange={e => setF('note', e.target.value)}
+              placeholder="VD: Anh trai, bạn thân Mai, sinh năm 1990..."
+              maxLength={120}
+            />
+          </div>
 
           {formError && (
             <p style={{ color: '#ef4444', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>⚠ {formError}</p>

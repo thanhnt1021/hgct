@@ -11,6 +11,7 @@ interface Profile {
   dob: { day: number; month: number; year: number }
   tob: { hour: number; minute: number; unknown: boolean }
   loc: { address: string; lat: number; lon: number; tz: string }
+  note: string
   createdAt: string
 }
 
@@ -57,6 +58,7 @@ export default function ChartList() {
               dob: p.data?.dob || { day: 0, month: 0, year: 0 },
               tob: p.data?.tob || { hour: -1, minute: -1, unknown: false },
               loc: p.data?.loc || { address: 'Hà Nội', lat: 21.02, lon: 105.84, tz: 'Asia/Ho_Chi_Minh' },
+              note: p.data?.note || '',
               createdAt: p.createdAt || '',
             })))
           }
@@ -91,14 +93,14 @@ export default function ChartList() {
 
   const openEdit = (p: Profile) => {
     setEditingId(p.id)
-    setEditingData({ ho: p.ho, dem: p.dem, ten: p.ten, gender: p.gender, dob: p.dob, tob: p.tob, loc: p.loc })
+    setEditingData({ ho: p.ho, dem: p.dem, ten: p.ten, gender: p.gender, dob: p.dob, tob: p.tob, loc: p.loc, note: p.note })
     setModalOpen(true)
   }
 
   const handleSave = async (formData: ProfileFormData) => {
     setSaving(true)
     const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
-    const body = { name, gender: formData.gender, data: { ...formData, ho: formData.ho, dem: formData.dem, ten: formData.ten } }
+    const body = { name, gender: formData.gender, data: { ...formData, ho: formData.ho, dem: formData.dem, ten: formData.ten, note: formData.note || '' } }
 
     try {
       if (editingId) {
@@ -107,7 +109,7 @@ export default function ChartList() {
           body: JSON.stringify({ id: editingId, ...body }),
         })
         if (res.ok) {
-          setProfiles(prev => prev.map(p => p.id === editingId ? { ...p, ...formData, name } : p))
+          setProfiles(prev => prev.map(p => p.id === editingId ? { ...p, ...formData, name, note: formData.note || '' } : p))
           setModalOpen(false)
         }
       } else {
@@ -122,7 +124,8 @@ export default function ChartList() {
             id: String(p.id), ho: p.data?.ho || '', dem: p.data?.dem || '',
             ten: p.data?.ten || p.name, name: p.name, gender: p.gender || 'Female',
             dob: p.data?.dob || formData.dob, tob: p.data?.tob || formData.tob,
-            loc: p.data?.loc || formData.loc, createdAt: p.createdAt || '',
+            loc: p.data?.loc || formData.loc, note: p.data?.note || '',
+            createdAt: p.createdAt || '',
           }, ...prev])
           setModalOpen(false)
         }
@@ -287,6 +290,12 @@ export default function ChartList() {
                   </span>
                 )}
               </div>
+
+              {/* Row 1b: note / nickname — always rendered for consistent card height */}
+              <p className="truncate"
+                style={{ color: '#8b8fa8', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', fontStyle: 'italic', paddingLeft: '2.25rem', minHeight: '1.15em', marginBottom: '0.2rem' }}>
+                {p.note || ''}
+              </p>
 
               {/* Row 2: meta info */}
               <p className="truncate mb-2.5"
