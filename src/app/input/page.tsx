@@ -10,9 +10,9 @@ import { useAuth } from '@/contexts/AuthContext'
 const CUR_YEAR = new Date().getFullYear()
 
 const MONTHS = [
-  [1,'Tháng 1'],[2,'Tháng 2'],[3,'Tháng 3'],[4,'Tháng 4'],
-  [5,'Tháng 5'],[6,'Tháng 6'],[7,'Tháng 7'],[8,'Tháng 8'],
-  [9,'Tháng 9'],[10,'Tháng 10'],[11,'Tháng 11'],[12,'Tháng 12'],
+  [1,'1'],[2,'2'],[3,'3'],[4,'4'],
+  [5,'5'],[6,'6'],[7,'7'],[8,'8'],
+  [9,'9'],[10,'10'],[11,'11'],[12,'12'],
 ] as [number, string][]
 const DAYS = Array.from({length: 31}, (_, i) => i + 1)
 const YEARS = Array.from({length: 101}, (_, i) => CUR_YEAR - i)
