@@ -88,17 +88,24 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
     { code: '', label: 'Toàn cầu' },
   ]
 
+  const inputStyle = {
+    height: '2rem',
+    padding: '0 0.5rem',
+    fontSize: '0.75rem',
+    fontFamily: 'var(--font-vietnam)',
+  } as React.CSSProperties
+
   return (
     <div ref={containerRef}>
       {label && (
         <label
           style={{
             display: 'block',
-            marginBottom: '0.4rem',
+            marginBottom: '0.5rem',
             color: '#8a8399',
             fontFamily: 'var(--font-vietnam)',
-            fontSize: '0.62rem',
-            fontWeight: 700,
+            fontSize: '0.75rem',
+            fontWeight: 500,
             letterSpacing: '0.06em',
           }}
         >
@@ -106,22 +113,14 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
         </label>
       )}
 
-      {/* Single row: [Country] [Address input] [Search btn] */}
-      <div ref={containerRef as React.RefObject<HTMLDivElement>} style={{ position: 'relative', display: 'flex' }}>
+      {/* Single row: grid 12 cols — [Country col-3] [Address col-7] [Search col-2] */}
+      <div className="relative grid grid-cols-12 gap-2">
         {/* Country select */}
         <select
           value={cc}
           onChange={e => { setCc(e.target.value); if (query.length >= 2) search(query, e.target.value) }}
-          style={{
-            flexShrink: 0,
-            width: '6rem',
-            borderRadius: '4px 0 0 4px',
-            borderRight: 'none',
-            fontFamily: 'var(--font-vietnam)',
-            fontSize: '0.78rem',
-            paddingLeft: '0.5rem',
-            paddingRight: '0.25rem',
-          }}
+          className="col-span-3"
+          style={{ ...inputStyle, paddingLeft: '0.4rem', paddingRight: '0.15rem' }}
         >
           {COUNTRIES.map(c => (
             <option key={c.code} value={c.code}>{c.label}</option>
@@ -134,7 +133,8 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
           value={query}
           onChange={e => handleInput(e.target.value)}
           placeholder="Nhập tên thành phố..."
-          style={{ flex: 1, borderRadius: 0, borderLeft: 'none', borderRight: 'none', minWidth: 0 }}
+          className="col-span-7"
+          style={{ ...inputStyle, minWidth: 0 }}
         />
 
         {/* Search button */}
@@ -142,25 +142,28 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
           type="button"
           onClick={() => search(query, cc)}
           disabled={loading}
-          className="flex items-center justify-center flex-shrink-0"
+          className="col-span-2 h-8 flex items-center justify-center gap-1 flex-shrink-0"
           style={{
-            width: '2.75rem',
             background: 'rgba(200,148,63,0.1)',
             border: '1px solid rgba(200,148,63,0.25)',
-            borderLeft: 'none',
-            borderRadius: '0 4px 4px 0',
+            borderRadius: '0.5rem',
             color: '#d9ab55',
             cursor: loading ? 'default' : 'pointer',
+            fontSize: '0.72rem',
+            fontFamily: 'var(--font-vietnam)',
             transition: 'background 0.15s',
           }}
           onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.background = 'rgba(200,148,63,0.2)' }}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(200,148,63,0.1)'}
         >
           {loading ? (
-            <div className="w-4 h-4 border-2 rounded-full animate-spin"
+            <div className="w-3 h-3 border-2 rounded-full animate-spin"
               style={{ borderColor: 'rgba(200,148,63,0.25)', borderTopColor: '#d9ab55' }} />
           ) : (
-            <Search size={15} />
+            <>
+              <Search size={12} />
+              <span>Tìm</span>
+            </>
           )}
         </button>
 
@@ -214,8 +217,8 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
       {/* Selected location info */}
       {value.lat !== 0 && (
         <p
-          className="mt-1.5 text-xs"
-          style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontStyle: 'italic' }}
+          className="mt-1 text-xs"
+          style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}
         >
           ✦ {value.address} · {value.lat.toFixed(4)}, {value.lon.toFixed(4)} · {value.tz}
         </p>

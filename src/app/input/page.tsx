@@ -21,11 +21,11 @@ const YEARS = Array.from({length: 100}, (_, i) => String(2010 - i))
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  marginBottom: '0.3rem',
+  marginBottom: '0.5rem',
   color: '#8a8399',
   fontFamily: 'var(--font-vietnam)',
-  fontSize: '0.62rem',
-  fontWeight: 700,
+  fontSize: '0.75rem',
+  fontWeight: 500,
   letterSpacing: '0.06em',
 }
 
@@ -34,7 +34,7 @@ const subLabelStyle: React.CSSProperties = {
   marginBottom: '0.25rem',
   color: '#4a4560',
   fontFamily: 'var(--font-vietnam)',
-  fontSize: '0.58rem',
+  fontSize: '0.75rem',
   letterSpacing: '0.04em',
 }
 
@@ -106,8 +106,8 @@ function InputPageInner() {
 
       <div className="max-w-2xl mx-auto px-4 pt-24 pb-10">
 
-        {/* Header — compact */}
-        <div className="text-center mb-6">
+        {/* Header */}
+        <div className="text-center mb-8">
           <p className="section-eyebrow mb-2">
             {forSynastry ? 'Người thứ hai' : 'Bản đồ sao'}
           </p>
@@ -115,7 +115,7 @@ function InputPageInner() {
             style={{
               color: '#f4efe6',
               fontFamily: 'var(--font-vietnam)',
-              fontSize: 'clamp(1.2rem, 4vw, 1.6rem)',
+              fontSize: '1.5rem',
               fontWeight: 700,
               letterSpacing: '0.03em',
               marginBottom: '0.3rem',
@@ -123,7 +123,7 @@ function InputPageInner() {
           >
             {forSynastry ? 'Thông tin người thứ hai' : 'Nhập thông tin'}
           </h1>
-          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
+          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
             {forSynastry
               ? 'Nhập thông tin của người bạn muốn so sánh bản đồ sao'
               : forChart
@@ -135,17 +135,17 @@ function InputPageInner() {
 
         {/* Form card */}
         <div
-          className="rounded-2xl p-6"
+          className="rounded-2xl p-5 sm:p-6"
           style={{
             background: 'rgba(18,13,46,0.7)',
             border: '1px solid rgba(200,148,63,0.16)',
             backdropFilter: 'blur(20px)',
           }}
         >
-          <div className="space-y-4">
+          <div className="space-y-4 form-compact">
 
             {/* Row 1: Name + Gender side by side */}
-            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr auto' }}>
+            <div className="grid gap-3 items-end" style={{ gridTemplateColumns: '1fr auto' }}>
               {/* Name */}
               <div>
                 <label style={labelStyle}>Họ và tên</label>
@@ -177,12 +177,12 @@ function InputPageInner() {
 
             {divider}
 
-            {/* Row 2: Date + Time side by side */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Row 2: Date + Time — responsive stack on mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {/* Date */}
               <div>
                 <label style={labelStyle}>Ngày sinh</label>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label style={subLabelStyle}>Ngày</label>
                     <select value={form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
@@ -212,15 +212,15 @@ function InputPageInner() {
                       type="checkbox"
                       checked={form.tob.unknown}
                       onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
-                      style={{ width: 'auto', padding: 0 }}
+                      style={{ width: '1rem', height: '1rem', padding: 0 }}
                     />
-                    <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+                    <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
                       Không rõ
                     </span>
                   </label>
                 </div>
                 {!form.tob.unknown && (
-                  <div className="grid grid-cols-2 gap-1.5">
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label style={subLabelStyle}>Giờ (0–23)</label>
                       <input type="number" min={0} max={23} value={form.tob.hour}
@@ -238,7 +238,7 @@ function InputPageInner() {
 
             {divider}
 
-            {/* Row 3: Location — inline 3-field */}
+            {/* Row 3: Location */}
             <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
 
             {divider}
@@ -247,7 +247,7 @@ function InputPageInner() {
             <div>
               <label style={labelStyle}>
                 Biệt danh / Ghi chú{' '}
-                <span style={{ color: '#4a4560', fontSize: '0.6rem', fontWeight: 400 }}>(tuỳ chọn)</span>
+                <span style={{ color: '#4a4560', fontSize: '0.65rem', fontWeight: 400 }}>(tuỳ chọn)</span>
               </label>
               <input
                 type="text"
@@ -265,9 +265,9 @@ function InputPageInner() {
                   type="checkbox"
                   checked={saveProfile}
                   onChange={e => setSaveProfile(e.target.checked)}
-                  style={{ width: 'auto', padding: 0, flexShrink: 0 }}
+                  style={{ width: '1rem', height: '1rem', padding: 0, flexShrink: 0 }}
                 />
-                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
                   Lưu hồ sơ
                 </span>
               </label>
@@ -284,12 +284,12 @@ function InputPageInner() {
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                className="w-full py-3.5 font-bold text-sm tracking-wider"
+                className="w-full h-9 font-bold text-sm tracking-wider"
                 style={{
                   background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
                   backgroundSize: '200% 200%',
                   color: '#06060f',
-                  borderRadius: '4px',
+                  borderRadius: '0.5rem',
                   fontFamily: 'var(--font-vietnam)',
                   letterSpacing: '0.1em',
                   boxShadow: '0 4px 24px rgba(200,148,63,0.3)',

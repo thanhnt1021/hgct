@@ -34,6 +34,23 @@ const YEARS = Array.from({length: MAX_YEAR - MIN_YEAR + 1}, (_, i) => MAX_YEAR -
 const HOURS = Array.from({length: 24}, (_, i) => i)
 const MINUTES = Array.from({length: 60}, (_, i) => i)
 
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  marginBottom: '0.25rem',
+  color: '#94a3b8',
+  fontFamily: 'var(--font-vietnam)',
+  fontSize: '0.75rem',
+  fontWeight: 500,
+}
+
+const subLabelStyle: React.CSSProperties = {
+  display: 'block',
+  marginBottom: '0.25rem',
+  color: '#6b7280',
+  fontFamily: 'var(--font-vietnam)',
+  fontSize: '0.75rem',
+}
+
 interface Props {
   open: boolean
   title?: string
@@ -117,122 +134,128 @@ export default function ProfileFormModal({ open, title, initialData, saving, onS
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-5">
-          {/* Name */}
-          <div className="grid grid-cols-3 gap-2">
+        <div className="px-6 py-5 space-y-4 form-compact">
+
+          {/* Row 1: Name + Gender same row */}
+          <div className="grid gap-3 items-end" style={{ gridTemplateColumns: '1fr auto' }}>
             <div>
-              <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Họ</label>
-              <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
+              <label style={labelStyle}>Họ và tên</label>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label style={subLabelStyle}>Họ</label>
+                  <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
+                </div>
+                <div>
+                  <label style={subLabelStyle}>Đệm</label>
+                  <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
+                </div>
+                <div>
+                  <label style={subLabelStyle}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Đệm</label>
-              <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
-            </div>
-            <div>
-              <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>Tên <span style={{ color: '#ef4444' }}>*</span></label>
-              <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
+            <div style={{ width: '5.5rem' }}>
+              <label style={labelStyle}>Giới tính</label>
+              <select value={form.gender} onChange={e => setF('gender', e.target.value)}>
+                <option value="Female">Nữ</option>
+                <option value="Male">Nam</option>
+                <option value="Other">Khác</option>
+              </select>
             </div>
           </div>
 
-          {/* Gender */}
-          <div>
-            <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giới tính</label>
-            <div className="flex gap-2 flex-wrap">
-              {[{v:'Female',l:'♀ Nữ'},{v:'Male',l:'♂ Nam'},{v:'Other',l:'Khác'}].map(g => (
-                <button key={g.v} type="button" onClick={() => setF('gender', g.v)}
-                  className="px-3 py-2 rounded-xl text-sm transition-all"
-                  style={{ background: form.gender === g.v ? '#3d2b5e' : 'rgba(26,21,53,0.8)', color: form.gender === g.v ? '#c9a84c' : '#94a3b8', border: form.gender === g.v ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(201,168,76,0.1)' }}>
-                  {g.l}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Date of birth */}
-          <div>
-            <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Ngày sinh</label>
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Ngày</label>
-                <select value={form.dob.day === 0 ? '' : form.dob.day}
-                  onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
-                  <option value="">-</option>
-                  {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Tháng</label>
-                <select value={form.dob.month === 0 ? '' : form.dob.month}
-                  onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
-                  <option value="">-</option>
-                  {MONTHS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Năm</label>
-                {yearMode === 'select' ? (
-                  <select value={form.dob.year === 0 ? '' : form.dob.year}
-                    onChange={e => {
-                      if (e.target.value === '__custom__') { setYearMode('custom'); setCustomYearText('') }
-                      else setF('dob', { ...form.dob, year: +e.target.value })
-                    }}>
+          {/* Row 2: Date + Time same row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            {/* Date */}
+            <div>
+              <label style={labelStyle}>Ngày sinh</label>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label style={subLabelStyle}>Ngày</label>
+                  <select value={form.dob.day === 0 ? '' : form.dob.day}
+                    onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
                     <option value="">-</option>
-                    {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                    <option value="__custom__">Năm khác...</option>
+                    {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
-                ) : (
-                  <div className="flex gap-1">
-                    <input type="text" value={customYearText}
-                      onChange={e => { setCustomYearText(e.target.value); setYearError('') }}
-                      placeholder="VD: 1850" style={{ flex: 1, minWidth: 0 }} />
-                    <button type="button"
-                      onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
-                      style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
+                </div>
+                <div>
+                  <label style={subLabelStyle}>Tháng</label>
+                  <select value={form.dob.month === 0 ? '' : form.dob.month}
+                    onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
+                    <option value="">-</option>
+                    {MONTHS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={subLabelStyle}>Năm</label>
+                  {yearMode === 'select' ? (
+                    <select value={form.dob.year === 0 ? '' : form.dob.year}
+                      onChange={e => {
+                        if (e.target.value === '__custom__') { setYearMode('custom'); setCustomYearText('') }
+                        else setF('dob', { ...form.dob, year: +e.target.value })
+                      }}>
+                      <option value="">-</option>
+                      {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                      <option value="__custom__">Năm khác...</option>
+                    </select>
+                  ) : (
+                    <div className="flex gap-1">
+                      <input type="text" value={customYearText}
+                        onChange={e => { setCustomYearText(e.target.value); setYearError('') }}
+                        placeholder="VD: 1850" style={{ flex: 1, minWidth: 0 }} />
+                      <button type="button"
+                        onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
+                        style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
+                    </div>
+                  )}
+                  {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.2rem' }}>{yearError}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Time */}
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Giờ sinh</label>
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked={form.tob.unknown}
+                    onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
+                    style={{ width: '1rem', height: '1rem', padding: 0 }} />
+                  <span style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>Không rõ</span>
+                </label>
+              </div>
+              {!form.tob.unknown && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label style={subLabelStyle}>Giờ (0–23)</label>
+                    <select value={form.tob.hour === -1 ? '' : form.tob.hour}
+                      onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })}>
+                      <option value="">-</option>
+                      {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
+                    </select>
                   </div>
-                )}
-                {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.2rem' }}>{yearError}</p>}
-              </div>
+                  <div>
+                    <label style={subLabelStyle}>Phút</label>
+                    <select value={form.tob.minute === -1 ? '' : form.tob.minute}
+                      onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })}>
+                      <option value="">-</option>
+                      {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Time of birth */}
-          <div>
-            <label className="block text-sm mb-1.5" style={{ color: '#94a3b8' }}>Giờ sinh</label>
-            <label className="flex items-center gap-2 cursor-pointer mb-2">
-              <input type="checkbox" checked={form.tob.unknown}
-                onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
-                style={{ width: 'auto', padding: 0 }} />
-              <span className="text-sm" style={{ color: '#94a3b8' }}>Không rõ giờ sinh</span>
-            </label>
-            {!form.tob.unknown && (
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Giờ (0–23)</label>
-                  <select value={form.tob.hour === -1 ? '' : form.tob.hour}
-                    onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })}>
-                    <option value="">-</option>
-                    {HOURS.map(h => <option key={h} value={h}>{String(h).padStart(2,'0')}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Phút</label>
-                  <select value={form.tob.minute === -1 ? '' : form.tob.minute}
-                    onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })}>
-                    <option value="">-</option>
-                    {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2,'0')}</option>)}
-                  </select>
-                </div>
-              </div>
-            )}
-          </div>
-
+          {/* Location */}
           <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
 
-          {/* Note / nickname — optional */}
+          {/* Note / nickname */}
           <div>
-            <label className="block text-sm mb-1" style={{ color: '#94a3b8' }}>
+            <label style={labelStyle}>
               Biệt danh / Ghi chú{' '}
-              <span style={{ color: '#4a4560', fontSize: '0.78rem' }}>(tuỳ chọn)</span>
+              <span style={{ color: '#4a4560', fontSize: '0.7rem', fontWeight: 400 }}>(tuỳ chọn)</span>
             </label>
             <input
               type="text"
@@ -250,11 +273,11 @@ export default function ProfileFormModal({ open, title, initialData, saving, onS
 
         {/* Footer */}
         <div className="flex gap-3 px-6 pb-6">
-          <button onClick={handleSubmit} disabled={saving} className="flex-1 py-3 rounded-xl font-semibold"
+          <button onClick={handleSubmit} disabled={saving} className="flex-1 h-9 rounded-lg font-semibold"
             style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)', opacity: saving ? 0.7 : 1 }}>
             {saving ? 'Đang lưu...' : 'Lưu'}
           </button>
-          <button onClick={onClose} className="px-6 py-3 rounded-xl font-semibold"
+          <button onClick={onClose} className="px-6 h-9 rounded-lg font-semibold"
             style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
             Hủy
           </button>
