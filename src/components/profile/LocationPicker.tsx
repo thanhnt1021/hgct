@@ -82,52 +82,62 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
     { code: 'fr', label: 'Pháp' },
     { code: 'de', label: 'Đức' },
     { code: 'jp', label: 'Nhật' },
-    { code: 'kr', label: 'Hàn Quốc' },
-    { code: 'sg', label: 'Singapore' },
-    { code: 'th', label: 'Thái Lan' },
+    { code: 'kr', label: 'Hàn' },
+    { code: 'sg', label: 'S.pore' },
+    { code: 'th', label: 'Thái' },
     { code: '', label: 'Toàn cầu' },
   ]
 
   return (
     <div ref={containerRef}>
-      <label
-        style={{
-          display: 'block',
-          marginBottom: '0.4rem',
-          color: '#8a8399',
-          fontFamily: 'var(--font-vietnam)',
-          fontSize: '0.62rem',
-          fontWeight: 700,
-          letterSpacing: '0.06em',
-          
-        }}
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          style={{
+            display: 'block',
+            marginBottom: '0.4rem',
+            color: '#8a8399',
+            fontFamily: 'var(--font-vietnam)',
+            fontSize: '0.62rem',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+          }}
+        >
+          {label}
+        </label>
+      )}
 
-      {/* Country filter dropdown */}
-      <div className="mb-3">
+      {/* Single row: [Country] [Address input] [Search btn] */}
+      <div ref={containerRef as React.RefObject<HTMLDivElement>} style={{ position: 'relative', display: 'flex' }}>
+        {/* Country select */}
         <select
           value={cc}
           onChange={e => { setCc(e.target.value); if (query.length >= 2) search(query, e.target.value) }}
-          style={{ fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}
+          style={{
+            flexShrink: 0,
+            width: '6rem',
+            borderRadius: '4px 0 0 4px',
+            borderRight: 'none',
+            fontFamily: 'var(--font-vietnam)',
+            fontSize: '0.78rem',
+            paddingLeft: '0.5rem',
+            paddingRight: '0.25rem',
+          }}
         >
           {COUNTRIES.map(c => (
             <option key={c.code} value={c.code}>{c.label}</option>
           ))}
         </select>
-      </div>
 
-      {/* Search input + button */}
-      <div className="relative flex">
+        {/* Address text input */}
         <input
           type="text"
           value={query}
           onChange={e => handleInput(e.target.value)}
           placeholder="Nhập tên thành phố..."
-          className="flex-1"
-          style={{ borderRadius: '4px 0 0 4px', borderRight: 'none' }}
+          style={{ flex: 1, borderRadius: 0, borderLeft: 'none', borderRight: 'none', minWidth: 0 }}
         />
+
+        {/* Search button */}
         <button
           type="button"
           onClick={() => search(query, cc)}
@@ -154,15 +164,21 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
           )}
         </button>
 
-        {/* Results dropdown */}
+        {/* Results dropdown — positioned below the full row */}
         {open && results.length > 0 && (
           <div
-            className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden"
             style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              marginTop: '4px',
+              zIndex: 100,
               background: 'rgba(11,11,31,0.98)',
               border: '1px solid rgba(200,148,63,0.2)',
+              borderRadius: '0.75rem',
               boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
-              maxHeight: '240px',
+              maxHeight: '220px',
               overflowY: 'auto',
               backdropFilter: 'blur(20px)',
             }}
@@ -198,7 +214,7 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
       {/* Selected location info */}
       {value.lat !== 0 && (
         <p
-          className="mt-2 text-xs"
+          className="mt-1.5 text-xs"
           style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontStyle: 'italic' }}
         >
           ✦ {value.address} · {value.lat.toFixed(4)}, {value.lon.toFixed(4)} · {value.tz}

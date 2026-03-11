@@ -1,8 +1,5 @@
 'use client'
 
-// VISUAL ONLY — input page restyled to Celestial Sanctum design
-// All form logic, routing, and data flow untouched
-
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -22,27 +19,26 @@ const MONTHS = ['1','2','3','4','5','6','7','8','9','10','11','12']
 const DAYS = Array.from({length: 31}, (_, i) => String(i + 1))
 const YEARS = Array.from({length: 100}, (_, i) => String(2010 - i))
 
-// Shared label style
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  marginBottom: '0.4rem',
+  marginBottom: '0.3rem',
   color: '#8a8399',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.62rem',
   fontWeight: 700,
   letterSpacing: '0.06em',
-  
 }
 
 const subLabelStyle: React.CSSProperties = {
   display: 'block',
-  marginBottom: '0.35rem',
+  marginBottom: '0.25rem',
   color: '#4a4560',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.58rem',
   letterSpacing: '0.04em',
-  
 }
+
+const divider = <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
 
 function InputPageInner() {
   const router = useRouter()
@@ -108,30 +104,30 @@ function InputPageInner() {
     <div className="min-h-screen" style={{ background: '#06060f' }}>
       <Navbar />
 
-      <div className="max-w-2xl mx-auto px-4 pt-28 pb-16">
+      <div className="max-w-2xl mx-auto px-4 pt-24 pb-10">
 
-        {/* Header */}
-        <div className="text-center mb-10">
-          <p className="section-eyebrow mb-4">
+        {/* Header — compact */}
+        <div className="text-center mb-6">
+          <p className="section-eyebrow mb-2">
             {forSynastry ? 'Người thứ hai' : 'Bản đồ sao'}
           </p>
           <h1
             style={{
               color: '#f4efe6',
               fontFamily: 'var(--font-vietnam)',
-              fontSize: 'clamp(1.4rem, 4vw, 1.9rem)',
+              fontSize: 'clamp(1.2rem, 4vw, 1.6rem)',
               fontWeight: 700,
               letterSpacing: '0.03em',
-              marginBottom: '0.6rem',
+              marginBottom: '0.3rem',
             }}
           >
             {forSynastry ? 'Thông tin người thứ hai' : 'Nhập thông tin'}
           </h1>
-          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
             {forSynastry
               ? 'Nhập thông tin của người bạn muốn so sánh bản đồ sao'
               : forChart
-              ? 'Điền thông tin để xem bản đồ sao ngay, không cần lưu hồ sơ'
+              ? 'Điền thông tin để xem bản đồ sao ngay'
               : 'Điền đầy đủ để tạo bản đồ sao chính xác nhất'
             }
           </p>
@@ -139,181 +135,172 @@ function InputPageInner() {
 
         {/* Form card */}
         <div
-          className="rounded-2xl p-8"
+          className="rounded-2xl p-6"
           style={{
             background: 'rgba(18,13,46,0.7)',
             border: '1px solid rgba(200,148,63,0.16)',
             backdropFilter: 'blur(20px)',
           }}
         >
-          <div className="space-y-7">
+          <div className="space-y-4">
 
-            {/* Name row */}
-            <div>
-              <label style={labelStyle}>Họ và tên</label>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label style={subLabelStyle}>Họ</label>
-                  <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
-                </div>
-                <div>
-                  <label style={subLabelStyle}>Đệm</label>
-                  <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
-                </div>
-                <div>
-                  <label style={subLabelStyle}>
-                    Tên <span style={{ color: '#c45252' }}>*</span>
-                  </label>
-                  <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
-
-            {/* Gender */}
-            <div>
-              <label style={labelStyle}>Giới tính</label>
-              <div className="flex gap-3 flex-wrap">
-                {[{v:'Female',l:'Nữ'},{v:'Male',l:'Nam'},{v:'Other',l:'Khác'}].map(g => (
-                  <button
-                    key={g.v}
-                    type="button"
-                    onClick={() => setF('gender', g.v)}
-                    className="px-5 py-2.5 text-sm font-medium transition-all"
-                    style={{
-                      background: form.gender === g.v ? 'rgba(38,28,86,0.9)' : 'rgba(11,11,31,0.8)',
-                      color: form.gender === g.v ? '#d9ab55' : '#8a8399',
-                      border: form.gender === g.v ? '1px solid rgba(200,148,63,0.45)' : '1px solid rgba(200,148,63,0.12)',
-                      borderRadius: '4px',
-                      fontFamily: 'var(--font-vietnam)',
-                      boxShadow: form.gender === g.v ? '0 0 16px rgba(200,148,63,0.12)' : 'none',
-                    }}
-                  >
-                    {g.l}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
-
-            {/* Date of birth */}
-            <div>
-              <label style={labelStyle}>Ngày sinh</label>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label style={subLabelStyle}>Ngày</label>
-                  <select value={form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
-                    {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={subLabelStyle}>Tháng</label>
-                  <select value={form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
-                    {MONTHS.map(m => <option key={m} value={m}>Tháng {m}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={subLabelStyle}>Năm</label>
-                  <select value={form.dob.year} onChange={e => setF('dob', { ...form.dob, year: +e.target.value })}>
-                    {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
-
-            {/* Time of birth */}
-            <div>
-              <label style={labelStyle}>Giờ sinh</label>
-              <label className="flex items-center gap-2.5 cursor-pointer mb-3">
-                <input
-                  type="checkbox"
-                  checked={form.tob.unknown}
-                  onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
-                  style={{ width: 'auto', padding: 0 }}
-                />
-                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
-                  Không rõ giờ sinh
-                </span>
-              </label>
-              {!form.tob.unknown && (
-                <div className="grid grid-cols-2 gap-3">
+            {/* Row 1: Name + Gender side by side */}
+            <div className="grid gap-3" style={{ gridTemplateColumns: '3fr 2fr' }}>
+              {/* Name */}
+              <div>
+                <label style={labelStyle}>Họ và tên</label>
+                <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label style={subLabelStyle}>Giờ (0–23)</label>
-                    <input type="number" min={0} max={23} value={form.tob.hour}
-                      onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })} />
+                    <label style={subLabelStyle}>Họ</label>
+                    <input type="text" value={form.ho} onChange={e => setF('ho', e.target.value)} placeholder="Nguyễn" />
                   </div>
                   <div>
-                    <label style={subLabelStyle}>Phút</label>
-                    <input type="number" min={0} max={59} value={form.tob.minute}
-                      onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })} />
+                    <label style={subLabelStyle}>Đệm</label>
+                    <input type="text" value={form.dem} onChange={e => setF('dem', e.target.value)} placeholder="Văn" />
+                  </div>
+                  <div>
+                    <label style={subLabelStyle}>Tên <span style={{ color: '#c45252' }}>*</span></label>
+                    <input type="text" value={form.ten} onChange={e => setF('ten', e.target.value)} placeholder="An" />
                   </div>
                 </div>
-              )}
+              </div>
+              {/* Gender */}
+              <div>
+                <label style={labelStyle}>Giới tính</label>
+                <div className="flex gap-2 flex-wrap">
+                  {[{v:'Female',l:'Nữ'},{v:'Male',l:'Nam'},{v:'Other',l:'Khác'}].map(g => (
+                    <button
+                      key={g.v}
+                      type="button"
+                      onClick={() => setF('gender', g.v)}
+                      className="px-3 py-2 text-sm font-medium transition-all"
+                      style={{
+                        background: form.gender === g.v ? 'rgba(38,28,86,0.9)' : 'rgba(11,11,31,0.8)',
+                        color: form.gender === g.v ? '#d9ab55' : '#8a8399',
+                        border: form.gender === g.v ? '1px solid rgba(200,148,63,0.45)' : '1px solid rgba(200,148,63,0.12)',
+                        borderRadius: '4px',
+                        fontFamily: 'var(--font-vietnam)',
+                        fontSize: '0.82rem',
+                      }}
+                    >
+                      {g.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Divider */}
-            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
+            {divider}
 
-            {/* Location */}
+            {/* Row 2: Date + Time side by side */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Date */}
+              <div>
+                <label style={labelStyle}>Ngày sinh</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <div>
+                    <label style={subLabelStyle}>Ngày</label>
+                    <select value={form.dob.day} onChange={e => setF('dob', { ...form.dob, day: +e.target.value })}>
+                      {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={subLabelStyle}>Tháng</label>
+                    <select value={form.dob.month} onChange={e => setF('dob', { ...form.dob, month: +e.target.value })}>
+                      {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={subLabelStyle}>Năm</label>
+                    <select value={form.dob.year} onChange={e => setF('dob', { ...form.dob, year: +e.target.value })}>
+                      {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              {/* Time */}
+              <div>
+                <label style={labelStyle}>Giờ sinh</label>
+                <label className="flex items-center gap-2 cursor-pointer mb-2">
+                  <input
+                    type="checkbox"
+                    checked={form.tob.unknown}
+                    onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
+                    style={{ width: 'auto', padding: 0 }}
+                  />
+                  <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+                    Không rõ
+                  </span>
+                </label>
+                {!form.tob.unknown && (
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div>
+                      <label style={subLabelStyle}>Giờ (0–23)</label>
+                      <input type="number" min={0} max={23} value={form.tob.hour}
+                        onChange={e => setF('tob', { ...form.tob, hour: +e.target.value })} />
+                    </div>
+                    <div>
+                      <label style={subLabelStyle}>Phút</label>
+                      <input type="number" min={0} max={59} value={form.tob.minute}
+                        onChange={e => setF('tob', { ...form.tob, minute: +e.target.value })} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {divider}
+
+            {/* Row 3: Location — inline 3-field */}
             <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
 
-            {/* Divider */}
-            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
+            {divider}
 
-            {/* Note / nickname — optional */}
-            <div>
-              <label style={labelStyle}>
-                Biệt danh / Ghi chú{' '}
-                <span style={{ color: '#4a4560', fontSize: '0.6rem', letterSpacing: '0.04em', fontWeight: 400 }}>(tuỳ chọn)</span>
-              </label>
-              <input
-                type="text"
-                value={form.note}
-                onChange={e => setF('note', e.target.value)}
-                placeholder="VD: Anh trai, bạn thân Mai, sinh năm 1990..."
-                maxLength={120}
-              />
+            {/* Row 4: Note + Save profile in same row */}
+            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr auto' }}>
+              <div>
+                <label style={labelStyle}>
+                  Biệt danh / Ghi chú{' '}
+                  <span style={{ color: '#4a4560', fontSize: '0.6rem', fontWeight: 400 }}>(tuỳ chọn)</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.note}
+                  onChange={e => setF('note', e.target.value)}
+                  placeholder="VD: Anh trai, bạn thân Mai..."
+                  maxLength={120}
+                />
+              </div>
+              {/* Save profile — aligned to bottom of note field */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '2px' }}>
+                {user ? (
+                  <label className="flex items-center gap-2 cursor-pointer select-none whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={saveProfile}
+                      onChange={e => setSaveProfile(e.target.checked)}
+                      style={{ width: 'auto', padding: 0, flexShrink: 0 }}
+                    />
+                    <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+                      Lưu hồ sơ
+                    </span>
+                  </label>
+                ) : (
+                  <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
+                    <Link href="/auth/login" style={{ color: '#d9ab55' }}>Đăng nhập</Link> để lưu
+                  </p>
+                )}
+              </div>
             </div>
 
-            {/* Divider */}
-            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
-
-            {/* Save profile */}
-            {user ? (
-              <label className="flex items-center gap-3 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={saveProfile}
-                  onChange={e => setSaveProfile(e.target.checked)}
-                  style={{ width: 'auto', padding: 0, flexShrink: 0 }}
-                />
-                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
-                  Lưu hồ sơ này vào tài khoản
-                </span>
-              </label>
-            ) : (
-              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', fontStyle: 'italic' }}>
-                <Link href="/auth/login" style={{ color: '#d9ab55', textDecoration: 'underline' }}>Đăng nhập</Link>
-                {' '}để lưu thông tin hồ sơ cho lần sau.
-              </p>
-            )}
-
-            {/* Divider */}
-            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
+            {divider}
 
             {/* Submit */}
-            <div className="pt-1">
+            <div>
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                className="w-full py-4 font-bold text-sm tracking-wider"
+                className="w-full py-3.5 font-bold text-sm tracking-wider"
                 style={{
                   background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
                   backgroundSize: '200% 200%',
@@ -323,7 +310,7 @@ function InputPageInner() {
                   letterSpacing: '0.1em',
                   boxShadow: '0 4px 24px rgba(200,148,63,0.3)',
                   opacity: saving ? 0.7 : 1,
-                  transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
+                  transition: 'opacity 0.2s ease',
                 }}
               >
                 {saving ? 'Đang xử lý...' : forChart ? 'Xem bản đồ sao ✦' : forSynastry ? 'Tiếp tục thanh toán →' : 'Tiếp tục →'}
