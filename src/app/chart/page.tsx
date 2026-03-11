@@ -153,10 +153,17 @@ export default function ChartPage() {
             loc: p.data?.loc || { address: '', lat: 0, lon: 0, tz: 'Asia/Ho_Chi_Minh' },
           }))
           setProfiles(mapped)
-          // Pre-select from URL param ?id=
+          // Auto-submit if ?id= param is present
           const preId = new URLSearchParams(window.location.search).get('id')
-          if (preId && mapped.find((p: Profile) => p.id === preId)) {
-            setSelected(preId)
+          const preProfile = preId ? mapped.find((p: Profile) => p.id === preId) : null
+          if (preProfile) {
+            submitWithData({
+              name: preProfile.name, gender: preProfile.gender, dob: preProfile.dob,
+              tob: preProfile.tob.unknown ? { hour: 12, minute: 0 } : { hour: preProfile.tob.hour, minute: preProfile.tob.minute },
+              loc: preProfile.loc,
+            })
+          } else {
+            setSelected(preId || null)
           }
         }
       })
