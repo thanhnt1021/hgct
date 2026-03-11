@@ -509,3 +509,18 @@ input[type="checkbox"] {
   padding: 0 0.5rem;
   font-size: 0.75rem;
 }
+
+/* ── Prevent auto-zoom on mobile touch devices ────────────────── */
+/*
+  iOS Safari & Android Chrome tự động zoom khi input có font-size < 16px.
+  Fix: set font-size: 16px trên touch devices — user vẫn tự zoom tay được bình thường.
+  Dùng (hover: none) + (pointer: coarse) để detect touch devices chính xác hơn max-width.
+  !important để override cả inline styles (vd: LocationPicker inputStyle).
+*/
+@media (hover: none) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
