@@ -39,6 +39,11 @@ export default function ProfileInfo() {
   const [acLoading, setAcLoading] = useState(false)
   const [acError, setAcError] = useState('')
   const [acSuccess, setAcSuccess] = useState(false)
+  // Set account email (chỉ khi chưa có)
+  const [newAccountEmail, setNewAccountEmail] = useState('')
+  const [acEmailLoading, setAcEmailLoading] = useState(false)
+  const [acEmailError, setAcEmailError] = useState('')
+  const [acEmailSuccess, setAcEmailSuccess] = useState(false)
 
   // Change password
   const [showCp, setShowCp] = useState(false)
@@ -159,6 +164,22 @@ export default function ProfileInfo() {
     setTimeout(() => setAcSuccess(false), 3000)
   }
 
+  const handleSetAccountEmail = async () => {
+    setAcEmailLoading(true); setAcEmailError(''); setAcEmailSuccess(false)
+    const res = await fetch('/api/user/account', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accountEmail: newAccountEmail }),
+    })
+    const data = await res.json()
+    setAcEmailLoading(false)
+    if (!res.ok) { setAcEmailError(data.error || 'Lỗi'); return }
+    setAccountEmail(newAccountEmail.trim().toLowerCase())
+    setNewAccountEmail('')
+    setAcEmailSuccess(true)
+    setTimeout(() => setAcEmailSuccess(false), 3000)
+  }
+
   const handleAvatarCropped = async (blob: Blob) => {
     setAvatarUploading(true)
     const form = new FormData()
@@ -219,9 +240,9 @@ export default function ProfileInfo() {
       </h2>
 
       {/* No email warning */}
-      {!user.email && (
+      {!mainChartLoading && !accountEmail && (
         <div className="mb-5 p-4 rounded-xl text-sm" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', color: '#fbbf24', fontFamily: 'var(--font-vietnam)' }}>
-          ⚠️ Tài khoản chưa có email. Thêm email bên dưới để đăng nhập bằng email và khôi phục mật khẩu.
+          ⚠️ Tài khoản chưa có email. Thêm email trong mục <strong>Thông tin tài khoản</strong> bên dưới để đăng nhập bằng email và khôi phục mật khẩu.
         </div>
       )}
 
@@ -421,15 +442,37 @@ export default function ProfileInfo() {
               {user.username}
             </div>
           </div>
-          {/* Email tài khoản — readonly */}
+          {/* Email tài khoản — readonly nếu đã có, editable nếu chưa */}
           <div>
             <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL TÀI KHOẢN</label>
-            <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
-              {accountEmail || <span style={{ color: '#4a4560' }}>Chưa có email tài khoản</span>}
-            </div>
-            <p className="mt-1 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
-              Email đăng nhập hoặc email Google, không thể thay đổi.
-            </p>
+            {accountEmail ? (
+              <>
+                <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+                  {accountEmail}
+                </div>
+                <p className="mt-1 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+                  Email đăng nhập hoặc email Google, không thể thay đổi.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input type="email" value={newAccountEmail} onChange={e => setNewAccountEmail(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && newAccountEmail.trim() && handleSetAccountEmail()}
+                    placeholder="Nhập email của bạn..." className="flex-1" style={{ fontFamily: 'var(--font-vietnam)' }} />
+                  <button onClick={handleSetAccountEmail} disabled={acEmailLoading || !newAccountEmail.trim()}
+                    className="px-4 py-2 rounded-xl font-semibold text-sm"
+                    style={{ background: newAccountEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: newAccountEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap', minHeight: 44 }}>
+                    {acEmailLoading ? 'Đang lưu...' : 'Xác nhận'}
+                  </button>
+                </div>
+                {acEmailError && <p className="mt-1.5 text-xs" style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)' }}>{acEmailError}</p>}
+                {acEmailSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Đã thêm email tài khoản thành công!</p>}
+                <p className="mt-1 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+                  Dùng để đăng nhập bằng email và khôi phục mật khẩu.
+                </p>
+              </>
+            )}
           </div>
           {/* Email nhận PDF — editable */}
           <div>
