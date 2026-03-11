@@ -5,7 +5,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
 import { saveJobToHistory } from '@/lib/jobHistory'
@@ -45,8 +44,10 @@ const labelStyle: React.CSSProperties = {
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const isPremium = user?.isPremium ?? false
+  const planType = user?.planType ?? 'free'
+  const isPremiumOrLifetime = isPremium || planType === 'lifetime'
   const premiumToken = user?.premiumToken ?? ''
   const [service, setService] = useState('')
   const [inputData, setInputData] = useState<Record<string, unknown> | null>(null)
@@ -82,6 +83,12 @@ export default function CheckoutPage() {
   const nameB = (inputDataB?.name as string) || ''
   const displayName = service === 'synastry' && nameB ? `${nameA} & ${nameB}` : nameA
   const eta = SERVICE_ETA[service] || '5–8'
+
+  const handlePayment = () => {
+    if (!email.trim()) { alert('Vui lòng nhập email để nhận báo cáo'); return }
+    sessionStorage.setItem('paymentEmail', email.trim())
+    router.push('/payment')
+  }
 
   const handleConfirm = async () => {
     if (!email.trim()) { alert('Vui lòng nhập email để nhận báo cáo'); return }
@@ -122,75 +129,11 @@ export default function CheckoutPage() {
     }
   }
 
-  // Premium gate — shown when user is not logged in or not premium
-  if (!user || !isPremium) {
+  // Auth still resolving
+  if (authLoading) {
     return (
-      <div className="min-h-screen" style={{ background: '#06060f' }}>
-        <Navbar />
-        <div className="max-w-lg mx-auto px-4 pt-28 pb-16">
-          <div
-            className="rounded-2xl p-10 text-center"
-            style={{ background: 'rgba(18,13,46,0.7)', border: '1px solid rgba(200,148,63,0.2)', backdropFilter: 'blur(20px)' }}
-          >
-            {/* Icon */}
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8"
-              style={{ background: 'rgba(200,148,63,0.08)', border: '1px solid rgba(200,148,63,0.25)' }}
-            >
-              <span style={{ fontSize: '2.2rem' }}>✦</span>
-            </div>
-
-            <p className="section-eyebrow mb-3">Tài khoản Premium</p>
-            <h1
-              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}
-            >
-              Chỉ dành cho tài khoản nâng cấp
-            </h1>
-
-            <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.3), transparent)', margin: '1.5rem 0' }} />
-
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '1rem', lineHeight: 1.8, marginBottom: '2rem' }}>
-              {!user
-                ? 'Vui lòng đăng nhập và nâng cấp tài khoản để tạo báo cáo chiêm tinh.'
-                : 'Tài khoản của bạn chưa được nâng cấp. Vui lòng nâng cấp để tạo báo cáo.'}
-            </p>
-
-            <div className="flex flex-col gap-3">
-              {!user ? (
-                <>
-                  <Link
-                    href="/auth/login"
-                    className="block py-4 font-bold text-sm tracking-wider text-center"
-                    style={{ background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)', color: '#06060f', borderRadius: '4px', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.1em' }}
-                  >
-                    Đăng nhập
-                  </Link>
-                  <Link
-                    href="/auth/register"
-                    className="block py-3.5 font-semibold text-sm text-center"
-                    style={{ border: '1px solid rgba(200,148,63,0.3)', color: '#d9ab55', borderRadius: '4px', fontFamily: 'var(--font-vietnam)' }}
-                  >
-                    Tạo tài khoản
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  href="/profile"
-                  className="block py-4 font-bold text-sm tracking-wider text-center"
-                  style={{ background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)', color: '#06060f', borderRadius: '4px', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.1em' }}
-                >
-                  Nâng cấp tài khoản →
-                </Link>
-              )}
-              <button
-                onClick={() => router.back()}
-                style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem' }}
-              >
-                ← Quay lại
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#06060f' }}>
+        <div className="w-10 h-10 rounded-full animate-spin" style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
       </div>
     )
   }
@@ -317,29 +260,56 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Confirm button */}
-          <button
-            onClick={handleConfirm}
-            disabled={!email.trim()}
-            className="w-full py-4 font-bold text-sm tracking-wider"
-            style={{
-              background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
-              backgroundSize: '200% 200%',
-              color: '#06060f',
-              borderRadius: '4px',
-              fontFamily: 'var(--font-vietnam)',
-              letterSpacing: '0.1em',
-              opacity: !email.trim() ? 0.4 : 1,
-              boxShadow: email.trim() ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
-              transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
-            }}
-          >
-            Tạo báo cáo & Gửi Email
-          </button>
-
-          <p style={{ color: '#4a4560', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
-            Báo cáo PDF sẽ được gửi đến email trong {eta} phút
-          </p>
+          {/* CTA: Premium/Lifetime → create report directly; Free/Guest → go to payment */}
+          {isPremiumOrLifetime ? (
+            <>
+              <button
+                onClick={handleConfirm}
+                disabled={!email.trim()}
+                className="w-full py-4 font-bold text-sm tracking-wider"
+                style={{
+                  background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
+                  backgroundSize: '200% 200%',
+                  color: '#06060f',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-vietnam)',
+                  letterSpacing: '0.1em',
+                  opacity: !email.trim() ? 0.4 : 1,
+                  boxShadow: email.trim() ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
+                  transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
+                }}
+              >
+                Tạo báo cáo & Gửi Email
+              </button>
+              <p style={{ color: '#4a4560', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
+                Báo cáo PDF sẽ được gửi đến email trong {eta} phút
+              </p>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handlePayment}
+                disabled={!email.trim()}
+                className="w-full py-4 font-bold text-sm tracking-wider"
+                style={{
+                  background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
+                  backgroundSize: '200% 200%',
+                  color: '#06060f',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-vietnam)',
+                  letterSpacing: '0.1em',
+                  opacity: !email.trim() ? 0.4 : 1,
+                  boxShadow: email.trim() ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
+                  transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
+                }}
+              >
+                Sẵn sàng THANH TOÁN →
+              </button>
+              <p style={{ color: '#4a4560', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
+                Hoàn tất thanh toán để nhận báo cáo PDF qua email
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

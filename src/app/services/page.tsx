@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Search, Plus } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Profile {
   id: string
@@ -164,6 +165,7 @@ function ProfilePicker({
 
 export default function ServicesPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [selectedService, setSelectedService] = useState<ServiceDef | null>(null)
   const [profileA, setProfileA] = useState('')
@@ -381,9 +383,15 @@ export default function ServicesPage() {
                   </>
                 ) : (
                   <div className="py-6 text-center">
-                    <p className="mb-4" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
-                      Bạn chưa có hồ sơ nào.
+                    <p className="mb-1" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+                      {user ? 'Bạn chưa có hồ sơ nào.' : 'Không cần tài khoản — nhập thông tin trực tiếp.'}
                     </p>
+                    {!user && (
+                      <p className="mb-4" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+                        Điền thông tin → xác nhận → thanh toán → nhận PDF qua email.
+                      </p>
+                    )}
+                    {user && <div className="mb-4" />}
                     <button
                       onClick={handleNewA}
                       className="flex items-center gap-2 mx-auto"
