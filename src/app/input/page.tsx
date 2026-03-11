@@ -13,6 +13,7 @@ const EMPTY_FORM = {
   dob: { day: 1, month: 1, year: 1990 },
   tob: { hour: 12, minute: 0, unknown: false },
   loc: { address: 'Hà Nội, Việt Nam', lat: 21.0245, lon: 105.8412, tz: 'Asia/Ho_Chi_Minh' },
+  note: '',
 }
 
 const MONTHS = ['1','2','3','4','5','6','7','8','9','10','11','12']
@@ -230,6 +231,24 @@ function InputPageInner() {
 
             {/* Location */}
             <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
+
+            {/* Divider */}
+            <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
+
+            {/* Note / nickname — optional */}
+            <div>
+              <label style={labelStyle}>
+                Biệt danh / Ghi chú{' '}
+                <span style={{ color: '#4a4560', fontSize: '0.6rem', letterSpacing: '0.04em', fontWeight: 400 }}>(tuỳ chọn)</span>
+              </label>
+              <input
+                type="text"
+                value={form.note}
+                onChange={e => setF('note', e.target.value)}
+                placeholder="VD: Anh trai, bạn thân Mai, sinh năm 1990..."
+                maxLength={120}
+              />
+            </div>
 
             {/* Divider */}
             <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Search } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
 import NatalWheel from '@/components/chart/NatalWheel'
 import { PLANET_SYMBOLS, ASPECT_TABLE_OBJECTS } from '@/lib/astrology/symbols'
@@ -8,7 +9,7 @@ import { PLANET_SYMBOLS, ASPECT_TABLE_OBJECTS } from '@/lib/astrology/symbols'
 // ─── Types ─────────────────────────────────────────────────────────
 
 interface Profile {
-  id: string; name: string; gender: string
+  id: string; name: string; note: string; gender: string
   dob: { day: number; month: number; year: number }
   tob: { hour: number; minute: number; unknown: boolean }
   loc: { address: string; lat: number; lon: number; tz: string }
@@ -108,6 +109,7 @@ export default function ChartPage() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [profilesLoading, setProfilesLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)
+  const [profileSearch, setProfileSearch] = useState('')
   const [result, setResult] = useState<ChartResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -120,6 +122,7 @@ export default function ChartPage() {
           const mapped = data.profiles.map((p: any) => ({
             id: String(p.id),
             name: p.name,
+            note: p.data?.note || '',
             gender: p.gender || 'Female',
             dob: p.data?.dob || { day: 1, month: 1, year: 1990 },
             tob: p.data?.tob || { hour: 12, minute: 0, unknown: false },
@@ -208,23 +211,59 @@ export default function ChartPage() {
               </a>
             </div>
           ) : (
-            <div className="space-y-5">
-              <div>
-                <label className="block mb-2" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em' }}>
-                  CHỌN HỒ SƠ
-                </label>
-                <select
-                  value={selected ?? ''}
-                  onChange={e => setSelected(e.target.value || null)}
-                  style={{ fontFamily: 'var(--font-vietnam)', width: '100%' }}
-                >
-                  <option value="">— Chọn hồ sơ —</option>
-                  {profiles.map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} · {p.dob.day}/{p.dob.month}/{p.dob.year}{!p.tob.unknown ? ` · ${String(p.tob.hour).padStart(2,'0')}:${String(p.tob.minute).padStart(2,'0')}` : ''} · {p.loc.address}
-                    </option>
-                  ))}
-                </select>
+            <div className="space-y-4">
+              <label style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em', display: 'block', marginBottom: '0.25rem' }}>
+                CHỌN HỒ SƠ
+              </label>
+
+              {/* Search */}
+              <div className="flex items-center gap-2 rounded-lg px-3"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,148,63,0.1)', minHeight: 38 }}>
+                <Search size={13} style={{ color: '#6b7280', flexShrink: 0 }} />
+                <input
+                  type="text"
+                  value={profileSearch}
+                  onChange={e => setProfileSearch(e.target.value)}
+                  placeholder="Tìm hồ sơ..."
+                  style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', width: '100%', padding: '0.4rem 0' }}
+                />
+                {profileSearch && (
+                  <button onClick={() => setProfileSearch('')} style={{ color: '#6b7280', flexShrink: 0, lineHeight: 1 }}>✕</button>
+                )}
+              </div>
+
+              {/* Profile list */}
+              <div className="space-y-1 overflow-y-auto pr-0.5" style={{ maxHeight: 240 }}>
+                {profiles
+                  .filter(p => {
+                    const q = profileSearch.toLowerCase()
+                    return p.name.toLowerCase().includes(q) || p.note.toLowerCase().includes(q)
+                  })
+                  .map(p => {
+                    const isSelected = selected === p.id
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelected(p.id)}
+                        className="w-full text-left rounded-lg px-3 py-2.5"
+                        style={{
+                          background: isSelected ? 'rgba(200,148,63,0.12)' : 'rgba(255,255,255,0.03)',
+                          border: `1px solid ${isSelected ? 'rgba(200,148,63,0.32)' : 'rgba(255,255,255,0.05)'}`,
+                          transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
+                        onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)' }}
+                      >
+                        <p style={{ color: isSelected ? '#f0cc78' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
+                          {p.name}
+                        </p>
+                        <p style={{ color: '#8b8fa8', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontStyle: 'italic', minHeight: '1em', marginTop: '0.15rem' }}>
+                          {p.note || ''}
+                        </p>
+                      </button>
+                    )
+                  })}
               </div>
 
               {error && (
@@ -243,6 +282,7 @@ export default function ChartPage() {
                   borderRadius: '4px', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.1em',
                   transition: 'all 0.2s',
                   boxShadow: selected ? '0 4px 24px rgba(200,148,63,0.25)' : 'none',
+                  cursor: selected ? 'pointer' : 'not-allowed',
                 }}
               >
                 Xem bản đồ sao ✦
