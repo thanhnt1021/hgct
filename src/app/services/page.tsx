@@ -5,12 +5,14 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { Search, Plus } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
 
 interface Profile {
   id: string
   name: string
   ten?: string
+  note?: string
   dob: { day: number; month: number; year: number }
   tob: { hour: number; minute: number; unknown: boolean }
   loc: { address: string; lat: number; lon: number; tz: string }
@@ -46,25 +48,119 @@ function profileToInputData(p: Profile) {
   }
 }
 
-function ProfileDropdown({ profiles, selectedId, onChange, label }: { profiles: Profile[]; selectedId: string; onChange: (id: string) => void; label: string }) {
+// ── Custom profile picker ──────────────────────────────────────────
+
+function ProfilePicker({
+  profiles,
+  selectedId,
+  onChange,
+  label,
+  onNew,
+}: {
+  profiles: Profile[]
+  selectedId: string
+  onChange: (id: string) => void
+  label: string
+  onNew: () => void
+}) {
+  const [search, setSearch] = useState('')
+
+  const filtered = profiles.filter(p => {
+    const q = search.toLowerCase()
+    return p.name.toLowerCase().includes(q) || (p.note || '').toLowerCase().includes(q)
+  })
+
   return (
     <div>
       <label
-        className="block mb-1.5"
-        style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em',  }}
+        className="block mb-3"
+        style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em' }}
       >
         {label}
       </label>
-      <select value={selectedId} onChange={e => onChange(e.target.value)}>
-        <option value="">— Chọn hồ sơ —</option>
-        {profiles.map(p => (
-          <option key={p.id} value={p.id}>{p.name} ({p.dob.day}/{p.dob.month}/{p.dob.year})</option>
-        ))}
-        <option value="__new__">+ Nhập thông tin mới</option>
-      </select>
+
+      {/* Nút Nhập thông tin mới */}
+      <button
+        type="button"
+        onClick={onNew}
+        className="w-full flex items-center gap-2 mb-3"
+        style={{
+          background: 'transparent',
+          border: '1px solid rgba(200,148,63,0.28)',
+          color: '#d9ab55',
+          borderRadius: '6px',
+          padding: '0.55rem 0.875rem',
+          fontFamily: 'var(--font-vietnam)',
+          fontSize: '0.82rem',
+          cursor: 'pointer',
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(200,148,63,0.07)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+      >
+        <Plus size={14} /> Nhập thông tin mới
+      </button>
+
+      {/* Search */}
+      <div
+        className="flex items-center gap-2 rounded-lg px-3 mb-2"
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,148,63,0.1)', minHeight: 36 }}
+      >
+        <Search size={13} style={{ color: '#6b7280', flexShrink: 0 }} />
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Tìm hồ sơ..."
+          style={{
+            background: 'transparent', border: 'none', outline: 'none',
+            color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem',
+            width: '100%', padding: '0.4rem 0',
+          }}
+        />
+        {search && (
+          <button onClick={() => setSearch('')} style={{ color: '#6b7280', flexShrink: 0, lineHeight: 1 }}>✕</button>
+        )}
+      </div>
+
+      {/* Profile list */}
+      <div className="space-y-1 overflow-y-auto pr-0.5" style={{ maxHeight: 216 }}>
+        {filtered.length === 0 && (
+          <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', textAlign: 'center', padding: '0.875rem' }}>
+            Không tìm thấy hồ sơ
+          </p>
+        )}
+        {filtered.map(p => {
+          const isSelected = selectedId === p.id
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => onChange(p.id)}
+              className="w-full text-left rounded-lg px-3 py-2.5"
+              style={{
+                background: isSelected ? 'rgba(200,148,63,0.12)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isSelected ? 'rgba(200,148,63,0.32)' : 'rgba(255,255,255,0.05)'}`,
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
+              onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)' }}
+            >
+              <p style={{ color: isSelected ? '#f0cc78' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
+                {p.name}
+              </p>
+              <p style={{ color: '#8b8fa8', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontStyle: 'italic', minHeight: '1em', marginTop: '0.15rem' }}>
+                {p.note || ''}
+              </p>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
+
+// ── Main page ─────────────────────────────────────────────────────
 
 export default function ServicesPage() {
   const router = useRouter()
@@ -84,6 +180,7 @@ export default function ServicesPage() {
             dem: p.data?.dem || '',
             ten: p.data?.ten || (p.name.trim().split(/\s+/).pop() || p.name),
             name: p.name,
+            note: p.data?.note || '',
             gender: p.gender || 'Female',
             dob: p.data?.dob || { day: 1, month: 1, year: 1990 },
             tob: p.data?.tob || { hour: 12, minute: 0, unknown: false },
@@ -101,15 +198,26 @@ export default function ServicesPage() {
     setProfileB('')
   }
 
+  // Navigate to /input directly (no profile)
+  const handleNewA = () => {
+    if (!selectedService) return
+    sessionStorage.setItem('selectedService', selectedService.type)
+    router.push('/input')
+  }
+
+  // Navigate to /input?for=synastry directly (profile A data already set)
+  const handleNewB = () => {
+    if (!selectedService) return
+    const pa = profiles.find(p => p.id === profileA)
+    if (pa) {
+      sessionStorage.setItem('inputData', JSON.stringify(profileToInputData(pa)))
+    }
+    sessionStorage.setItem('selectedService', selectedService.type)
+    router.push('/input?for=synastry')
+  }
+
   const handleConfirm = () => {
     if (!selectedService) return
-
-    if (profileA === '__new__' || profiles.length === 0) {
-      sessionStorage.setItem('selectedService', selectedService.type)
-      router.push('/input')
-      return
-    }
-
     const pa = profiles.find(p => p.id === profileA)
     if (!pa) return
 
@@ -117,10 +225,6 @@ export default function ServicesPage() {
     sessionStorage.setItem('selectedService', selectedService.type)
 
     if (selectedService.needsTwo) {
-      if (profileB === '__new__') {
-        router.push('/input?for=synastry')
-        return
-      }
       const pb = profiles.find(p => p.id === profileB)
       if (!pb) return
       sessionStorage.setItem('inputDataB', JSON.stringify(profileToInputData(pb)))
@@ -128,6 +232,8 @@ export default function ServicesPage() {
 
     router.push('/checkout')
   }
+
+  const canConfirm = profileA !== '' && (!selectedService?.needsTwo || profileB !== '')
 
   return (
     <div className="min-h-screen" style={{ background: '#06060f' }}>
@@ -249,21 +355,29 @@ export default function ServicesPage() {
                 style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.2), transparent)' }}
               />
 
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {profiles.length > 0 ? (
                   <>
-                    <ProfileDropdown
+                    <ProfilePicker
                       profiles={profiles}
                       selectedId={profileA}
                       onChange={setProfileA}
-                      label={selectedService.needsTwo ? 'Người thứ nhất' : 'Chọn hồ sơ'}
+                      label={selectedService.needsTwo ? 'NGƯỜI THỨ NHẤT' : 'CHỌN HỒ SƠ'}
+                      onNew={handleNewA}
                     />
+
                     {selectedService.needsTwo && (
-                      <ProfileDropdown profiles={profiles} selectedId={profileB} onChange={setProfileB} label="Người thứ hai" />
+                      <>
+                        <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
+                        <ProfilePicker
+                          profiles={profiles}
+                          selectedId={profileB}
+                          onChange={setProfileB}
+                          label="NGƯỜI THỨ HAI"
+                          onNew={handleNewB}
+                        />
+                      </>
                     )}
-                    <p style={{ color: '#4a4560', fontSize: '0.8rem', fontFamily: 'var(--font-vietnam)' }}>
-                      Hoặc chọn &quot;Nhập thông tin mới&quot; để điền trực tiếp mà không cần lưu hồ sơ
-                    </p>
                   </>
                 ) : (
                   <div className="py-6 text-center">
@@ -271,32 +385,45 @@ export default function ServicesPage() {
                       Bạn chưa có hồ sơ nào.
                     </p>
                     <button
-                      onClick={() => router.push('/profile')}
-                      style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}
+                      onClick={handleNewA}
+                      className="flex items-center gap-2 mx-auto"
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid rgba(200,148,63,0.28)',
+                        color: '#d9ab55',
+                        borderRadius: '6px',
+                        padding: '0.6rem 1.25rem',
+                        fontFamily: 'var(--font-vietnam)',
+                        fontSize: '0.88rem',
+                        cursor: 'pointer',
+                      }}
                     >
-                      Tạo hồ sơ ngay →
+                      <Plus size={14} /> Nhập thông tin mới
                     </button>
                   </div>
                 )}
 
-                <button
-                  onClick={handleConfirm}
-                  disabled={profiles.length > 0 && (!profileA || (selectedService.needsTwo && !profileB))}
-                  className="w-full py-3.5 mt-2 font-bold text-sm tracking-wider"
-                  style={{
-                    background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
-                    backgroundSize: '200% 200%',
-                    color: '#06060f',
-                    borderRadius: '4px',
-                    fontFamily: 'var(--font-vietnam)',
-                    letterSpacing: '0.08em',
-                    opacity: (profiles.length > 0 && (!profileA || (selectedService.needsTwo && !profileB))) ? 0.45 : 1,
-                    boxShadow: '0 4px 20px rgba(200,148,63,0.25)',
-                    transition: 'opacity 0.2s ease',
-                  }}
-                >
-                  {profileA === '__new__' || profiles.length === 0 ? 'Điền thông tin mới →' : 'Tiếp tục →'}
-                </button>
+                {profiles.length > 0 && (
+                  <button
+                    onClick={handleConfirm}
+                    disabled={!canConfirm}
+                    className="w-full py-3.5 mt-2 font-bold text-sm tracking-wider"
+                    style={{
+                      background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
+                      backgroundSize: '200% 200%',
+                      color: '#06060f',
+                      borderRadius: '4px',
+                      fontFamily: 'var(--font-vietnam)',
+                      letterSpacing: '0.08em',
+                      opacity: canConfirm ? 1 : 0.35,
+                      boxShadow: canConfirm ? '0 4px 20px rgba(200,148,63,0.25)' : 'none',
+                      transition: 'opacity 0.2s ease',
+                      cursor: canConfirm ? 'pointer' : 'not-allowed',
+                    }}
+                  >
+                    Tiếp tục →
+                  </button>
+                )}
               </div>
             </div>
           </div>
