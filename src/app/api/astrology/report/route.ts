@@ -102,7 +102,7 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
 
   if (service === 'career') {
     const blocks = getCareerBlocks(chart, kb)
-    prompt = buildCareerPrompt(blocks, profile)
+    prompt = buildCareerPrompt(blocks, profile, chart)
     coverTitle = 'LUẬN GIẢI HƯỚNG NGHIỆP'
     sectionTitle = 'TỔNG HỢP LUẬN GIẢI HƯỚNG NGHIỆP'
 
