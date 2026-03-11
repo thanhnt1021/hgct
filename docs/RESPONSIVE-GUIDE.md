@@ -50,18 +50,28 @@ The page uses a shared layout shell: sidebar + main content area.
 
 ## iOS Auto-Zoom Prevention (CRITICAL)
 
-iOS Safari auto-zooms khi tap input có `font-size < 16px`. **Fix duy nhất đáng tin cậy:**
+> **BẮT BUỘC:** Mọi Next.js project có form/input đều PHẢI có `maximumScale: 1` trong viewport config. Thiếu cái này → iOS Safari tự động zoom vào text field khi user tap, gây trải nghiệm rất tệ.
+
+**Nguyên nhân:** iOS Safari auto-zoom khi focus vào input có `font-size < 16px` (để đảm bảo readability). Cách duy nhất ngăn nó là báo browser biết trước — qua `maximum-scale=1` trong HTML initial.
+
+**Fix — thêm `maximumScale: 1` vào viewport config (Next.js App Router):**
 
 ```ts
 // src/app/layout.tsx
 export const viewport: Viewport = {
-  maximumScale: 1,  // nhúng thẳng vào HTML initial
+  themeColor: '...',
+  maximumScale: 1,  // ← BẮT BUỘC — ngăn iOS auto-zoom khi tap vào input/select/textarea
 }
 ```
 
-**KHÔNG dùng JS** (useEffect, inline script, event listener) để set `maximum-scale` — iOS cache viewport khi parse HTML, thay đổi bằng JS sau đó không ngăn được zoom lần đầu.
+**Nếu không dùng Next.js**, thêm thẳng vào HTML:
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+```
 
-iOS 10+ (tất cả iPhone từ 2016+): Apple override `maximum-scale=1` cho user pinch-zoom → user vẫn zoom tay bình thường, chỉ auto-zoom khi focus input bị chặn.
+**Lưu ý quan trọng:**
+- iOS 10+ (tất cả iPhone từ 2016+): Apple override `maximum-scale=1` cho user-initiated pinch-zoom → user **vẫn zoom tay được** bình thường, chỉ auto-zoom khi focus input là bị chặn
+- **KHÔNG dùng JS** để set `maximum-scale` — iOS cache viewport lúc parse HTML, JS thay đổi sau không có tác dụng cho lần tap đầu tiên
 
 ## Modals
 
