@@ -11,7 +11,7 @@ Hướng dẫn viết bài
 - Tuân theo đánh dấu VIẾT/KHÔNG VIẾT: tiểu mục "→ VIẾT" thì viết, "→ KHÔNG VIẾT" = không xuất hiện trong bài — không nhắc, không giải thích vì sao không có.
 - Chỉ được sử dụng dữ liệu đã cung cấp bên trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
 - Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick.
-- Gọi người thứ nhất là "{pronoun_A} {name_A}", người thứ hai là "{pronoun_B} {name_B}" xuyên suốt bài viết. KHÔNG dùng họ hoặc đệm trong xưng hô và tiêu đề — chỉ dùng tên đơn.
+- Gọi người thứ nhất là "{pronoun_A} {name_A}", người thứ hai là "{pronoun_B} {name_B}" xuyên suốt bài viết.
 - Mỗi tiêu đề MỤC LỚN phải bắt đầu bằng số thứ tự (ví dụ: "1. Tổng Quan Mối Quan Hệ").
 - Mỗi tiểu mục có tiêu đề kết thúc bằng dấu hai chấm (ví dụ "Lõi Tính Cách Của {title_A} {name_A}:").
 - {gender_note}

@@ -883,16 +883,35 @@ export function sanitizeRelationshipOutput(text: string, brief: RelBrief): strin
     if (idx !== -1) text = text.substring(0, idx).trimEnd()
   }
 
-  // Replace aliases back to real names
+  // Replace aliases back to real names (onlyName)
   const meta = brief.meta
   const aliasA = meta._alias_A
   const aliasB = meta._alias_B
+  const realA = meta.name_A   // onlyName of A
+  const realB = meta.name_B   // onlyName of B
   if (aliasA && aliasB) {
-    const realA = meta.name_A
-    const realB = meta.name_B
     text = text.split(aliasA).join(realA).split(aliasB).join(realB)
     text = text.split(aliasA.toUpperCase()).join(realA.toUpperCase())
       .split(aliasB.toUpperCase()).join(realB.toUpperCase())
+  }
+
+  // Replace any full names the AI may have used in body/subtitles (picked up from greeting)
+  // Only preserve full names in greeting (Kính gửi) and sign-off (Chúc) lines
+  const fullNameA = meta.full_name_A
+  const fullNameB = meta.full_name_B
+  if (fullNameA && fullNameA !== realA) {
+    text = text.split('\n').map(line => {
+      const t = line.trim().toLowerCase()
+      if (t.startsWith('kính gửi') || t.startsWith('chúc ')) return line
+      return line.split(fullNameA).join(realA)
+    }).join('\n')
+  }
+  if (fullNameB && fullNameB !== realB) {
+    text = text.split('\n').map(line => {
+      const t = line.trim().toLowerCase()
+      if (t.startsWith('kính gửi') || t.startsWith('chúc ')) return line
+      return line.split(fullNameB).join(realB)
+    }).join('\n')
   }
 
   return text

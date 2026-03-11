@@ -97,6 +97,8 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
   let sectionTitle: string
   let nameB = ''
   let coverProfileB: { name: string; dob: { day: string; month: string; year: string } } | undefined
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let synBrief: any = undefined
 
   if (service === 'career') {
     const blocks = getCareerBlocks(chart, kb)
@@ -139,9 +141,12 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
     const blocks = getRelationshipBlocks(chart, chartB, kb)
     const result = buildRelationshipEssayPrompt(chart, chartB, blocks, profile, profileB)
     prompt = typeof result === 'string' ? result : result.prompt
+    synBrief = typeof result === 'string' ? undefined : result.brief
     coverTitle = 'LUẬN GIẢI BẢN ĐỒ CẶP ĐÔI'
     sectionTitle = 'TỔNG HỢP LUẬN GIẢI BẢN ĐỒ CẶP ĐÔI'
     coverProfileB = { name: fullNameB, dob: profileB.dob }
+    console.log(`[SYNASTRY] A: fullName="${fullName}" onlyName="${onlyName}" | B: fullName="${fullNameB}" onlyName="${onlyNameB}"`)
+    console.log(`[SYNASTRY] cover A="${fullName}", cover B="${fullNameB}"`)
 
   } else if (service === 'transit') {
     const { buildVanhanEssayPrompt } = await import('@/lib/logic/vanhan/prompt')
@@ -159,7 +164,7 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
   updateJob(jobId, { progress: 18, label: 'Vũ trụ đang kết nối...' })
   const expected = EXPECTED_CHARS[service] || 10000
 
-  const essayText = await generateEssayStreaming(
+  let essayText = await generateEssayStreaming(
     SYSTEM_PROMPT,
     prompt,
     (charsReceived) => {
@@ -169,6 +174,13 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
   )
 
   if (!essayText || essayText.length < 500) throw new Error('AI generation failed or too short')
+
+  // Sanitize synastry output: replace aliases → real names, clean up sections
+  if ((service === 'synastry' || service === 'relationship') && synBrief) {
+    const { sanitizeRelationshipOutput } = await import('@/lib/logic/relationship/prompt')
+    essayText = sanitizeRelationshipOutput(essayText, synBrief)
+    console.log(`[SYNASTRY] Sanitized — essay ${essayText.length} chars`)
+  }
 
   // Step 5: Generate PDF
   updateJob(jobId, { progress: 90, label: 'Đang tạo file PDF...' })
