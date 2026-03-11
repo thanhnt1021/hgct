@@ -27,6 +27,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export const viewport: Viewport = {
   themeColor: '#06060f',
+  maximumScale: 1,
 }
 
 export const metadata: Metadata = {
