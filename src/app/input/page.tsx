@@ -145,7 +145,7 @@ function InputPageInner() {
           <div className="space-y-4">
 
             {/* Row 1: Name + Gender side by side */}
-            <div className="grid gap-3" style={{ gridTemplateColumns: '3fr 2fr' }}>
+            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr auto' }}>
               {/* Name */}
               <div>
                 <label style={labelStyle}>Họ và tên</label>
@@ -165,28 +165,13 @@ function InputPageInner() {
                 </div>
               </div>
               {/* Gender */}
-              <div>
+              <div style={{ width: '5.5rem' }}>
                 <label style={labelStyle}>Giới tính</label>
-                <div className="flex gap-2 flex-wrap">
-                  {[{v:'Female',l:'Nữ'},{v:'Male',l:'Nam'},{v:'Other',l:'Khác'}].map(g => (
-                    <button
-                      key={g.v}
-                      type="button"
-                      onClick={() => setF('gender', g.v)}
-                      className="px-3 py-2 text-sm font-medium transition-all"
-                      style={{
-                        background: form.gender === g.v ? 'rgba(38,28,86,0.9)' : 'rgba(11,11,31,0.8)',
-                        color: form.gender === g.v ? '#d9ab55' : '#8a8399',
-                        border: form.gender === g.v ? '1px solid rgba(200,148,63,0.45)' : '1px solid rgba(200,148,63,0.12)',
-                        borderRadius: '4px',
-                        fontFamily: 'var(--font-vietnam)',
-                        fontSize: '0.82rem',
-                      }}
-                    >
-                      {g.l}
-                    </button>
-                  ))}
-                </div>
+                <select value={form.gender} onChange={e => setF('gender', e.target.value)}>
+                  <option value="Female">Nữ</option>
+                  <option value="Male">Nam</option>
+                  <option value="Other">Khác</option>
+                </select>
               </div>
             </div>
 
@@ -220,18 +205,20 @@ function InputPageInner() {
               </div>
               {/* Time */}
               <div>
-                <label style={labelStyle}>Giờ sinh</label>
-                <label className="flex items-center gap-2 cursor-pointer mb-2">
-                  <input
-                    type="checkbox"
-                    checked={form.tob.unknown}
-                    onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
-                    style={{ width: 'auto', padding: 0 }}
-                  />
-                  <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
-                    Không rõ
-                  </span>
-                </label>
+                <div className="flex items-center gap-3 mb-2">
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Giờ sinh</label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.tob.unknown}
+                      onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
+                      style={{ width: 'auto', padding: 0 }}
+                    />
+                    <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+                      Không rõ
+                    </span>
+                  </label>
+                </div>
                 {!form.tob.unknown && (
                   <div className="grid grid-cols-2 gap-1.5">
                     <div>
@@ -256,42 +243,39 @@ function InputPageInner() {
 
             {divider}
 
-            {/* Row 4: Note + Save profile in same row */}
-            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr auto' }}>
-              <div>
-                <label style={labelStyle}>
-                  Biệt danh / Ghi chú{' '}
-                  <span style={{ color: '#4a4560', fontSize: '0.6rem', fontWeight: 400 }}>(tuỳ chọn)</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.note}
-                  onChange={e => setF('note', e.target.value)}
-                  placeholder="VD: Anh trai, bạn thân Mai..."
-                  maxLength={120}
-                />
-              </div>
-              {/* Save profile — aligned to bottom of note field */}
-              <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '2px' }}>
-                {user ? (
-                  <label className="flex items-center gap-2 cursor-pointer select-none whitespace-nowrap">
-                    <input
-                      type="checkbox"
-                      checked={saveProfile}
-                      onChange={e => setSaveProfile(e.target.checked)}
-                      style={{ width: 'auto', padding: 0, flexShrink: 0 }}
-                    />
-                    <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
-                      Lưu hồ sơ
-                    </span>
-                  </label>
-                ) : (
-                  <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
-                    <Link href="/auth/login" style={{ color: '#d9ab55' }}>Đăng nhập</Link> để lưu
-                  </p>
-                )}
-              </div>
+            {/* Row 4: Note */}
+            <div>
+              <label style={labelStyle}>
+                Biệt danh / Ghi chú{' '}
+                <span style={{ color: '#4a4560', fontSize: '0.6rem', fontWeight: 400 }}>(tuỳ chọn)</span>
+              </label>
+              <input
+                type="text"
+                value={form.note}
+                onChange={e => setF('note', e.target.value)}
+                placeholder="VD: Anh trai, bạn thân Mai..."
+                maxLength={120}
+              />
             </div>
+
+            {/* Save profile row */}
+            {user ? (
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={saveProfile}
+                  onChange={e => setSaveProfile(e.target.checked)}
+                  style={{ width: 'auto', padding: 0, flexShrink: 0 }}
+                />
+                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+                  Lưu hồ sơ
+                </span>
+              </label>
+            ) : (
+              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                <Link href="/auth/login" style={{ color: '#d9ab55' }}>Đăng nhập</Link> để lưu hồ sơ
+              </p>
+            )}
 
             {divider}
 
