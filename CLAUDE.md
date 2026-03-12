@@ -23,7 +23,7 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 
 **Workflow:**
 - Làm việc trên nhánh `feature/...` → iterate nhanh với **quick deploy** (không cần commit) → khi OK thì commit + push
-- Khi commit: **phải update CLAUDE.md** (What's DONE / TODO) + MEMORY.md cho các tính năng mới
+- Khi commit: dựa vào `MD_FILES_TO_UPDATE.md` để update đúng các file MD liên quan, sau đó **clear file đó**
 - Khi OK → merge vào `main` → deploy production (MD files đã được commit cùng)
 
 **2 cách deploy demo:**
