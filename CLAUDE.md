@@ -33,11 +33,11 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
    - Pull từ GitHub, build từ đầu — dùng khi muốn share link demo hoặc sau khi commit
 
 **Shorthand commands (dùng trong chat):**
-- **"feature: [tên]"** → tạo branch `feature/tên`, code tính năng, quick deploy — chờ feedback
-- **"test demo"** hoặc **"quick deploy"** → build code hiện tại + deploy demo, KHÔNG commit/push
-- **"commit"** → commit lên nhánh hiện tại + push GitHub (dùng sau khi test xong)
+- **"feature: [tên]"** → tạo branch `feature/tên`, code tính năng, **quick deploy (KHÔNG commit/push)** — chờ feedback/fix thêm
+- **"test demo"** hoặc **"quick deploy"** → build code hiện tại + deploy demo, **KHÔNG commit/push**
+- **"commit"** → commit lên nhánh hiện tại + push GitHub (chỉ làm khi user bảo)
 - **"merge main"** hoặc **"lên production"** → merge branch hiện tại vào main, push, deploy production
-- **"deploy demo"** → full deploy (pull GitHub + build) lên demo
+- **"deploy demo"** → full deploy (pull GitHub + build) lên demo (dùng sau khi đã commit)
 - **"branch hiện tại là gì"** → `git branch --show-current`
 
 ## Cấu trúc thư mục chính

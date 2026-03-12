@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Download, Share2, ArrowLeft } from 'lucide-react'
+import { Eye, Download, Share2, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface ReportViewerProps {
@@ -151,7 +151,7 @@ export default function ReportViewer({ jobId, pdfUrl, pdfFilename, name, service
               <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>{dateStr}</p>
             </div>
             <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', textAlign: 'center', maxWidth: 280, lineHeight: 1.6 }}>
-              Nhấn <strong style={{ color: '#a78bfa' }}>Tải về</strong> để gửi file qua Messenger, Zalo hoặc lưu vào máy. Nhấn <strong style={{ color: '#d9ab55' }}>Xem báo cáo</strong> để mở và đọc PDF.
+              Nhấn <strong style={{ color: '#d9ab55' }}>Tải về</strong> để gửi file qua Messenger, Zalo hoặc lưu vào máy. Nhấn <strong style={{ color: '#38bdf8' }}>Xem</strong> để mở và đọc PDF.
             </p>
           </div>
         ) : (
@@ -189,13 +189,13 @@ export default function ReportViewer({ jobId, pdfUrl, pdfFilename, name, service
           style={{
             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             padding: '12px 16px', borderRadius: 12,
-            background: 'rgba(201,168,76,0.12)', color: '#d9ab55',
-            border: '1px solid rgba(201,168,76,0.2)',
+            background: 'rgba(56,189,248,0.1)', color: '#38bdf8',
+            border: '1px solid rgba(56,189,248,0.25)',
             fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem',
             cursor: 'pointer',
           }}
         >
-          <Download size={16} /> Xem báo cáo
+          <Eye size={16} /> Xem
         </button>
         <div style={{ flex: 1, position: 'relative' }}>
           <button
@@ -204,14 +204,14 @@ export default function ReportViewer({ jobId, pdfUrl, pdfFilename, name, service
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               padding: '12px 16px', borderRadius: 12,
-              background: 'rgba(61,43,94,0.5)', color: '#a78bfa',
-              border: '1px solid rgba(167,139,250,0.25)',
+              background: 'rgba(201,168,76,0.12)', color: '#d9ab55',
+              border: '1px solid rgba(201,168,76,0.2)',
               fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem',
               cursor: sharing ? 'not-allowed' : 'pointer',
               opacity: sharing ? 0.7 : 1,
             }}
           >
-            <Share2 size={16} /> {sharing ? 'Đang tải...' : 'Tải về'}
+            <Download size={16} /> {sharing ? 'Đang tải...' : 'Tải về'}
           </button>
           {shareMsg && (
             <span style={{
