@@ -76,25 +76,40 @@ Nhớ `setSidebarOpen(false)` khi navigate/tab change.
 
 ## Viewport & Zoom
 
+Có 2 cách kiểm soát zoom trên mobile — khác nhau về mức độ và trade-off:
+
+**Cách 1 — `maximumScale: 1`: chặn zoom toàn trang (đơn giản, nhưng ảnh hưởng accessibility)**
 ```typescript
-// Next.js — ngăn browser zoom toàn trang, cho phép zoom trên input
+// Next.js
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,   // ngăn double-tap zoom ngoài ý muốn
+  maximumScale: 1,  // user không pinch-zoom được gì cả
 }
 ```
+_Dùng khi nào: app mà zoom sẽ phá layout (ví dụ game, canvas). Không nên dùng cho content site — người mắt kém không zoom được._
 
-Nếu cần cho phép zoom trên input nhưng không cho phép nơi khác, dùng script chạy trước hydration:
-
+**Cách 2 — Inline script: chặn zoom chỗ không cần, cho phép zoom chỗ cần (thông minh hơn)**
 ```javascript
-// Chạy inline trước React mount — reset maximumScale khi blur input
-document.addEventListener('touchstart', (e) => {
-  if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-    // prevent zoom
+// Chạy trước React hydration (inline trong <head>)
+// iOS tự zoom vào input khi focus nếu font-size < 16px
+// Script này: khi focus input → cho phép zoom (maximumScale=5)
+//             khi blur input  → chặn zoom lại (maximumScale=1)
+const el = document.querySelector('meta[name=viewport]')
+document.addEventListener('focusin', (e) => {
+  if (['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) {
+    el.content = 'width=device-width, initial-scale=1, maximum-scale=5'
   }
-}, { passive: true });
+})
+document.addEventListener('focusout', () => {
+  el.content = 'width=device-width, initial-scale=1, maximum-scale=1'
+})
 ```
+_Dùng khi nào: app có form input mà muốn tránh iOS auto-zoom, nhưng vẫn muốn user có thể zoom thủ công khi cần._
+
+**Tóm tắt:**
+- Chỉ dùng `maximumScale: 1` → chặn tất cả zoom (xấu cho accessibility)
+- Inline script → kiểm soát zoom thông minh theo từng element (recommended)
 
 ## Platform Detection
 

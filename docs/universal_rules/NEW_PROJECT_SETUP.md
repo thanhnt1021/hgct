@@ -12,7 +12,7 @@ Chạy lệnh `check requirements` — Claude đọc file này và tự động:
 
 ### Files bắt buộc
 
-- [ ] `CLAUDE.md` ở root — nếu chưa có: tạo template cơ bản, hỏi user điền thông tin project. **KHÔNG overwrite nếu đã có.**
+- [ ] `CLAUDE.md` ở root — nếu chưa có: tạo template cơ bản, hỏi user điền thông tin project. **KHÔNG overwrite nếu đã có** (file chứa thông tin project-specific, overwrite = mất hết context).
 - [ ] Dòng trong `CLAUDE.md`: `Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.` — nếu chưa có: tự thêm vào (append). **KHÔNG sửa nội dung khác.**
 - [ ] `docs/universal_rules/` — folder này (đã copy vào là có)
 - [ ] `docs/MD_FILES_TO_UPDATE.md` — nếu chưa có: tự tạo với nội dung template trống
@@ -47,6 +47,7 @@ _(trống)_
 - [ ] Git repo khởi tạo: `git init`
 - [ ] Remote GitHub: `git remote add origin git@github.com:[user]/[repo].git`
 - [ ] SSH key cho GitHub — hỏi user: key đã có chưa? Ở đâu?
+  _Lý do dùng SSH thay HTTPS: server không có browser để auth HTTPS, SSH key không hết hạn và không cần nhập password mỗi lần push._
 - [ ] Branch mặc định là `main`: `git branch -M main`
 
 ### Environment
@@ -55,7 +56,8 @@ _(trống)_
   - `[WEB/Next.js]`: NEXTAUTH_URL, NEXTAUTH_SECRET, DATABASE_URL, API keys...
   - `[BOT]`: BOT_TOKEN, WEBHOOK_URL...
   - `[API]`: DATABASE_URL, SECRET_KEY, PORT...
-- [ ] `.gitignore` có chứa `.env*` — kiểm tra và thêm nếu thiếu
+- [ ] `.gitignore` có chứa `.env*` — kiểm tra và thêm nếu thiếu.
+  _Lý do: nếu `.env` bị commit vào repo (kể cả private), secrets (API keys, DB password, JWT secret) sẽ nằm trong git history mãi mãi — xóa file đi cũng không xóa được khỏi history. Một khi lộ là coi như đã lộ._
 
 ### Server (nếu self-hosted)
 
