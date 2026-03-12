@@ -8,7 +8,7 @@ NGUYÊN TẮC BẮT BUỘC:
 - Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick. Chỉ viết văn xuôi thuần túy tiếng Việt.
 - Xưng hô là "{pronoun} {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài).
 - Tiêu đề các mục PHẢI COPY NGUYÊN XI từ mẫu bên dưới — ví dụ "3. Cách Bạn Yêu và Thể Hiện Cảm Xúc" phải viết đúng y như vậy, KHÔNG ĐƯỢC thay "Bạn" bằng chị/anh/em hay bất kỳ từ nào khác. Vi phạm điều này là lỗi nghiêm trọng.
-- Cuối mỗi mục từ 1 đến 5, PHẢI có đúng 1 đoạn kết thúc bắt đầu bằng "Tóm lại, " — đây là khung tổng kết BẮT BUỘC, thiếu là sai. Không được dùng "Nhìn chung", "Tóm tắt", hay cách nói khác — phải là đúng "Tóm lại, ".
+- Cuối mỗi mục từ 1 đến 5, PHẢI có đúng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (2-3 câu, KHÔNG xuống dòng giữa chừng). Đây là khung tổng kết BẮT BUỘC — thiếu là sai. Không ghi nhãn "Tóm lại:", "Nhìn chung:" hay bất kỳ nhãn nào khác — chỉ [KTLUẬN] rồi nội dung ngay.
 - Độ dài NGHIÊM NGẶT 1400-1900 chữ tổng cộng cho toàn bài (không tính greeting/signoff). Viết súc tích, đừng lặp lại ý.
 
 CÁCH VIẾT ĐỂ BÀI SÂU SẮC VÀ HAY:
@@ -31,23 +31,23 @@ Kính gửi {pronoun} {full_name},
 
 1. Tổng Quan Năng Lượng Tình Yêu
 [Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành bức tranh về bản năng tình cảm: {pronoun} {name} cho đi gì và cần nhận lại gì. Tích hợp Venus (cách yêu, gu), Moon (nhu cầu an toàn cảm xúc), Mars (cách theo đuổi và hấp dẫn). Nêu nhà trội để giải thích điều {pronoun} vô thức mong muốn đối phương có.
-Tóm lại, [2-3 câu về năng lượng tình yêu đặc trưng của {name}].]
+[KTLUẬN] [2-3 câu về năng lượng tình yêu đặc trưng của {name}].]
 
 2. Kiểu Người Thu Hút Bạn
 [Dùng dữ liệu MỤC 1 + MỤC 2 trong brief. Giải thích từ nhu cầu gốc (AC/Sun/Moon) kiểu đối tác nào đáp ứng {pronoun} {name}. Luận chi tiết Sao Kim ở cung {venusZodiac} — gu đối tác cụ thể. Luận Sao Hỏa — cách thể hiện và hấp dẫn. Kết thúc bằng: cơ hội gặp đối tác ở đâu (chủ tinh Nhà 7).
-Tóm lại, [2-3 câu về kiểu người và nơi gặp đặc trưng của {name}].]
+[KTLUẬN] [2-3 câu về kiểu người và nơi gặp đặc trưng của {name}].]
 
 3. Cách Bạn Yêu và Thể Hiện Cảm Xúc
 [Dùng dữ liệu MỤC 1 + MỤC 3 trong brief. Luận AC/Sun/Moon về phẩm chất sẵn sàng cho đi trong tình yêu. Luận Sao Hỏa — cách theo đuổi và thể hiện ham muốn. Luận Đỉnh Nhà 7 — thái độ {pronoun} mang vào mối quan hệ. Nếu có hành tinh/chủ tinh Nhà 7, luận năng lượng và vai trò đó trong tình yêu.
-Tóm lại, [2-3 câu về phong cách yêu đặc trưng của {name}].]
+[KTLUẬN] [2-3 câu về phong cách yêu đặc trưng của {name}].]
 
 4. Những Khó Khăn và Mô Thức Lặp Lại
 [Dùng dữ liệu MỤC 4 trong brief. Đây là phần {pronoun} {name} rất muốn hiểu. Luận tương tác Nhà 7 với các nhà khác (ưu tiên góc cứng trước để giải thích vì sao tình yêu không suôn sẻ; đề cập góc mềm như điểm thuận lợi). Luận các góc cứng Sao Kim → từng mô thức lặp lại. Luận góc cứng Mặt Trăng → mô thức an toàn cảm xúc. Các mục → KHÔNG VIẾT trong brief thì bỏ qua hoàn toàn.
-Tóm lại, [2-3 câu về thách thức tình cảm lớn nhất của {name}].]
+[KTLUẬN] [2-3 câu về thách thức tình cảm lớn nhất của {name}].]
 
 5. Bài Học Tình Yêu
 [Dùng dữ liệu MỤC 5 trong brief. Chỉ viết những phần được đánh dấu → VIẾT. Luận Sao Thổ tạo góc với Moon/Venus/Mercury/Mars — mỗi góc là một bài học cụ thể. Luận La Hầu ở nhà — hướng tâm hồn cần đi để trưởng thành trong tình yêu. Luận Chiron ở nhà — vết thương tình cảm cũ cần được chữa lành. Kết bằng lời khuyên cụ thể tổng hợp từ tất cả bài học trên.
-Tóm lại, [2-3 câu về chìa khóa để tình yêu của {pronoun} thật sự nở rộ].]
+[KTLUẬN] [2-3 câu về chìa khóa để tình yêu của {pronoun} thật sự nở rộ].]
 
 6. Tổng Kết Hành Trình Tình Yêu
 [Tổng hợp từ tất cả các mục. Tóm tắt bản chất tình yêu của {name} — họ là ai trong tình yêu. Tiềm năng tương lai — điều tốt đẹp sẽ đến khi {pronoun} thực hành được các bài học. Sau đó viết đúng câu: "Để tình yêu thực sự nở rộ, {pronoun} {name} cần chú ý đến:" rồi liệt kê 3-4 gạch đầu dòng cụ thể, dễ thực hiện — mỗi dòng là một hành vi/thái độ rút trực tiếp từ dữ liệu. Kết bằng một câu triết lý về khi nào tình yêu của {pronoun} sẽ thật sự bền và sâu.]

@@ -8,7 +8,7 @@ NGUYÊN TẮC BẮT BUỘC:
 - Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick. Chỉ viết văn xuôi thuần túy tiếng Việt.
 - Xưng hô là "{pronoun} {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài).
 - Mỗi tiêu đề mục PHẢI bắt đầu bằng số thứ tự (ví dụ: "1. Tổng Quan Về...").
-- Cuối mỗi mục có một khung tổng kết ngắn (2-3 câu) tóm lại điểm cốt lõi của mục đó.
+- Cuối mỗi mục từ 1 đến 6, PHẢI có đúng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (2-3 câu, KHÔNG xuống dòng giữa chừng). Đây là khung tổng kết BẮT BUỘC — thiếu là sai. Không ghi nhãn "Kết luận:" hay "Tóm lại:" — chỉ [KTLUẬN] rồi nội dung ngay.
 
 CÁCH VIẾT ĐỂ BÀI SÂU SẮC VÀ HAY:
 - Tổng hợp, đừng liệt kê: Dệt nhiều yếu tố thành chân dung thống nhất — chỉ ra sự tương tác, bổ trợ và mâu thuẫn nội tâm.
@@ -29,22 +29,22 @@ Kính gửi {pronoun} {full_name},
 [Đoạn mở đầu 3-4 câu: vẽ chân dung tổng thể {name} từ bộ ba AC – Sun – Moon, nêu bật sự kết hợp đặc biệt và ý nghĩa của nó với hướng nghiệp]
 
 1. Tổng Quan Bản Chất Con Người
-[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành chân dung thống nhất — cách tiếp cận cuộc sống (AC), khát vọng cốt lõi (Sun), nhu cầu cảm xúc (Moon). Làm rõ xu hướng hành động từ nguyên tố/tính chất trội. Nêu các lĩnh vực cuộc sống {pronoun} {name} đặc biệt quan tâm (nhà trội). Cuối mục: khung tổng kết 2-3 câu về kiểu người và cách thức tiếp cận cuộc sống đặc trưng của {pronoun}.]
+[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành chân dung thống nhất — cách tiếp cận cuộc sống (AC), khát vọng cốt lõi (Sun), nhu cầu cảm xúc (Moon). Làm rõ xu hướng hành động từ nguyên tố/tính chất trội. Nêu các lĩnh vực cuộc sống {pronoun} {name} đặc biệt quan tâm (nhà trội). Cuối mục: [KTLUẬN] 2-3 câu về kiểu người và cách thức tiếp cận cuộc sống đặc trưng của {pronoun}.]
 
 2. Điểm Mạnh Bẩm Sinh và Năng Lực Tự Nhiên
-[Dùng dữ liệu MỤC 2 trong brief. Trả lời câu hỏi: "{pronoun} {name} thực sự giỏi điều gì?". Tổng hợp từ: ưu điểm của AC/Sun/Moon, nguyên tố/tính chất trội, lĩnh vực phát triển từ nhà trội, năng khiếu từ góc chặt và hành tinh nhiều góc. Kết luận bằng 3-5 điểm mạnh rõ ràng và 3-5 tính chất công việc / lĩnh vực công việc {pronoun} {name} nên ưu tiên. Cuối mục: khung tổng kết 2-3 câu nhấn mạnh năng lực đặc biệt nhất của {pronoun}.]
+[Dùng dữ liệu MỤC 2 trong brief. Trả lời câu hỏi: "{pronoun} {name} thực sự giỏi điều gì?". Tổng hợp từ: ưu điểm của AC/Sun/Moon, nguyên tố/tính chất trội, lĩnh vực phát triển từ nhà trội, năng khiếu từ góc chặt và hành tinh nhiều góc. Kết luận bằng 3-5 điểm mạnh rõ ràng và 3-5 tính chất công việc / lĩnh vực công việc {pronoun} {name} nên ưu tiên. Cuối mục: [KTLUẬN] 2-3 câu nhấn mạnh năng lực đặc biệt nhất của {pronoun}.]
 
 3. Những Điểm Yếu và Cần Phát Triển
-[Dùng dữ liệu MỤC 3 trong brief. Trả lời: "Vì sao {pronoun} {name} hay gặp khó khăn?". Luận về: nhược điểm của AC/Sun/Moon, nguyên tố/tính chất thiếu cần bù đắp. Nếu brief có dữ liệu Sao Thổ → luận về nhà/cung Thổ là nơi áp lực trách nhiệm và tự ti mặc cảm. Nếu brief có dữ liệu Diêm Vương → luận về nhà/cung Pluto là nơi cực đoan và biến động. Kết thúc bằng lời khuyên cụ thể để vượt qua và hoàn thiện bản thân. Cuối mục: khung tổng kết 2-3 câu về thách thức lớn nhất và chìa khóa vượt qua.]
+[Dùng dữ liệu MỤC 3 trong brief. Trả lời: "Vì sao {pronoun} {name} hay gặp khó khăn?". Luận về: nhược điểm của AC/Sun/Moon, nguyên tố/tính chất thiếu cần bù đắp. Nếu brief có dữ liệu Sao Thổ → luận về nhà/cung Thổ là nơi áp lực trách nhiệm và tự ti mặc cảm. Nếu brief có dữ liệu Diêm Vương → luận về nhà/cung Pluto là nơi cực đoan và biến động. Kết thúc bằng lời khuyên cụ thể để vượt qua và hoàn thiện bản thân. Cuối mục: [KTLUẬN] 2-3 câu về thách thức lớn nhất và chìa khóa vượt qua.]
 
 4. Định Hướng Sự Nghiệp Phù Hợp
-[Dùng dữ liệu MỤC 4 trong brief. Đây là phần khách quan tâm nhất — cần viết chi tiết và cụ thể nhất. Phân tích: (a) Vai trò sự nghiệp từ đỉnh và hành tinh Nhà 10 (hoặc chủ tinh H10 nếu H10 trống). (b) Sự nghiệp được hỗ trợ và gặp thách thức từ đâu qua tương tác mềm/cứng của Nhà 10. (c) Sao Hỏa ở cung/nhà nào → phong cách hành động và giải quyết vấn đề. (d) Môi trường làm việc phù hợp từ đỉnh H6, hành tinh trong H6 (nếu có), chủ tinh H6 và vị trí của nó. Kết luận: vai trò lý tưởng + ít nhất 3 tính chất công việc cụ thể + môi trường làm việc lý tưởng. Cuối mục: khung tổng kết 2-3 câu về con đường sự nghiệp tối ưu nhất.]
+[Dùng dữ liệu MỤC 4 trong brief. Đây là phần khách quan tâm nhất — cần viết chi tiết và cụ thể nhất. Phân tích: (a) Vai trò sự nghiệp từ đỉnh và hành tinh Nhà 10 (hoặc chủ tinh H10 nếu H10 trống). (b) Sự nghiệp được hỗ trợ và gặp thách thức từ đâu qua tương tác mềm/cứng của Nhà 10. (c) Sao Hỏa ở cung/nhà nào → phong cách hành động và giải quyết vấn đề. (d) Môi trường làm việc phù hợp từ đỉnh H6, hành tinh trong H6 (nếu có), chủ tinh H6 và vị trí của nó. Kết luận: vai trò lý tưởng + ít nhất 3 tính chất công việc cụ thể + môi trường làm việc lý tưởng. Cuối mục: [KTLUẬN] 2-3 câu về con đường sự nghiệp tối ưu nhất.]
 
 5. Mô Thức Tiền Bạc
-[Dùng dữ liệu MỤC 5 trong brief. Phân tích: (a) Cách kiếm tiền từ đỉnh H2 và hành tinh H2 (hoặc chủ tinh nếu H2 trống), lĩnh vực kiếm tiền từ vị trí chủ tinh H2. (b) Phong cách đầu tư từ đỉnh H8, hành tinh H8 (nếu có), lĩnh vực đầu tư từ chủ tinh H8. (c) Nếu brief có dữ liệu thách thức tiền bạc → luận về các cản trở tài chính, kỷ luật cần thiết. (d) Nếu brief có dấu hiệu thuận lợi → luận về cơ hội tài chính. (e) Nếu brief có lưu ý quản lý tài chính → đưa ra lời khuyên về xu hướng chi tiêu cần kiểm soát. Cuối mục: khung tổng kết 2-3 câu về mô thức tiền bạc đặc trưng và lời khuyên tài chính quan trọng nhất.]
+[Dùng dữ liệu MỤC 5 trong brief. Phân tích: (a) Cách kiếm tiền từ đỉnh H2 và hành tinh H2 (hoặc chủ tinh nếu H2 trống), lĩnh vực kiếm tiền từ vị trí chủ tinh H2. (b) Phong cách đầu tư từ đỉnh H8, hành tinh H8 (nếu có), lĩnh vực đầu tư từ chủ tinh H8. (c) Nếu brief có dữ liệu thách thức tiền bạc → luận về các cản trở tài chính, kỷ luật cần thiết. (d) Nếu brief có dấu hiệu thuận lợi → luận về cơ hội tài chính. (e) Nếu brief có lưu ý quản lý tài chính → đưa ra lời khuyên về xu hướng chi tiêu cần kiểm soát. Cuối mục: [KTLUẬN] 2-3 câu về mô thức tiền bạc đặc trưng và lời khuyên tài chính quan trọng nhất.]
 
 6. Chiến Lược Phát Triển Cá Nhân
-[Tổng hợp từ mục 2 (điểm mạnh), 3 (điểm yếu) và 4 (định hướng nghề). Hướng dẫn cụ thể: nên phát triển kỹ năng gì, nên tránh điều gì, cách phát huy đúng vai trò và khắc phục điểm yếu trong thực tế công việc. Không nhắc lại số liệu chiêm tinh — chỉ đưa ra lời khuyên hành động thực tế. Cuối mục: khung tổng kết 2-3 câu về chiến lược cốt lõi.]
+[Tổng hợp từ mục 2 (điểm mạnh), 3 (điểm yếu) và 4 (định hướng nghề). Hướng dẫn cụ thể: nên phát triển kỹ năng gì, nên tránh điều gì, cách phát huy đúng vai trò và khắc phục điểm yếu trong thực tế công việc. Không nhắc lại số liệu chiêm tinh — chỉ đưa ra lời khuyên hành động thực tế. Cuối mục: [KTLUẬN] 2-3 câu về chiến lược cốt lõi.]
 
 7. Tổng Kết Hành Trình Cuộc Đời
 [Đoạn kết. Gọi tên {name} và tóm tắt: bản chất con người, con đường sự nghiệp phù hợp nhất, tiềm năng tài chính. Sau đó viết đúng câu: "Để phát huy tối đa tiềm năng, {pronoun} {name} nên tập trung vào:" rồi liệt kê 3-4 gạch đầu dòng cụ thể, dễ thực hiện — mỗi dòng là một lĩnh vực/phong cách/vai trò rút từ dữ liệu. Kết bằng một câu triết lý về điều gì làm thành công của {pronoun} trở nên bền vững và có ý nghĩa thật sự.]

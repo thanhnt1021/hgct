@@ -143,6 +143,7 @@ src/
 - [x] PDF share via Web Share API — nút "Chia sẻ" trong `/profile?tab=history` gửi file PDF thật qua Messenger/Zalo
 - [x] `/report/[id]` — viewer page: Android iframe embed, iOS card UI; bottom bar [Xem] + [Tải về] (Web Share API)
 - [x] PDF download filename — `/api/pdf/[id]?filename=` dùng đúng tên từ query param (RFC 5987 UTF-8), khớp với tên file gửi email
+- [x] Khung kết luận đỏ `[KTLUẬN]` — career.txt + love.txt cập nhật rule, cuối mỗi mục đều có khung đóng viền đỏ như Vận Hạn + Cặp Đôi
 
 ## What's TODO
 - [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật
