@@ -6,6 +6,8 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 
 **Quy tắc file MD:** Mọi file `.md` mới (trừ `CLAUDE.md`) đều mặc định tạo trong `/docs/`. `CLAUDE.md` bắt buộc ở root (Claude Code CLI yêu cầu).
 
+> Đọc `docs/universal_rules/UNIVERSAL_WORKFLOW.md` để áp dụng universal workflow rules cho project này.
+
 ## Tech Stack
 - Next.js 15.2.3, React 19, App Router, Tailwind v4
 - Prisma v5 + PostgreSQL (db: zodiacdb)
@@ -49,6 +51,8 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 - **"merge main"** hoặc **"lên production"** → merge + push + deploy production (chỉ làm khi được lệnh)
 - **"deploy demo"** → full deploy từ GitHub (dùng sau khi đã commit)
 - **"branch hiện tại là gì"** → `git branch --show-current`
+- **"check requirements"** → đọc `docs/universal_rules/NEW_PROJECT_SETUP.md`, kiểm tra + tạo files còn thiếu
+- **"update workflow"** → review + đề xuất cải tiến các file trong `docs/universal_rules/`
 
 ## Cấu trúc thư mục chính
 ```
