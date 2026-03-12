@@ -40,3 +40,4 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 4. `CLAUDE.md` bắt buộc ở root project (Claude Code CLI yêu cầu)
 5. Khi commit: update MD files liên quan + clear `docs/MD_FILES_TO_UPDATE.md`
 6. Nếu thêm env var / service / dependency mới → update `docs/REQUIREMENTS_CHECK.md`
+7. Nếu có chỉnh sửa bất kỳ file nào trong `docs/universal_rules/` → **push lên repo `universal-workflow` ngay trong cùng session**, trước hoặc cùng lúc với commit project hiện tại
