@@ -22,13 +22,22 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 - Demo: demo.hatgiongchiemtinh.com → port 65500, hgct-demo.service, deploy with `sudo bash /root/hgct/deploy-demo.sh [branch]`
 
 **Workflow:**
-- Làm việc trên nhánh `feature/...` → push GitHub → deploy demo để test
+- Làm việc trên nhánh `feature/...` → iterate nhanh với **quick deploy** (không cần commit) → khi OK thì commit + push
 - Khi OK → merge vào `main` → deploy production
 
+**2 cách deploy demo:**
+1. **Quick deploy** (iterate nhanh, chưa commit): `sudo bash /root/hgct/deploy-demo-local.sh`
+   - Build từ code hiện tại tại `/root/hgct` (kể cả uncommitted changes)
+   - Sync build sang `/root/hgct-demo`, restart service — không cần git push
+2. **Full deploy** (sau khi commit + push): `sudo bash /root/hgct/deploy-demo.sh [branch]`
+   - Pull từ GitHub, build từ đầu — dùng khi muốn share link demo hoặc sau khi commit
+
 **Shorthand commands (dùng trong chat):**
-- **"feature: [tên]"** → tạo branch `feature/tên`, code tính năng, push, deploy demo — chờ feedback
+- **"feature: [tên]"** → tạo branch `feature/tên`, code tính năng, quick deploy — chờ feedback
+- **"test demo"** hoặc **"quick deploy"** → build code hiện tại + deploy demo, KHÔNG commit/push
+- **"commit"** → commit lên nhánh hiện tại + push GitHub (dùng sau khi test xong)
 - **"merge main"** hoặc **"lên production"** → merge branch hiện tại vào main, push, deploy production
-- **"deploy demo"** → chỉ deploy branch hiện tại lên demo (không tạo branch mới)
+- **"deploy demo"** → full deploy (pull GitHub + build) lên demo
 - **"branch hiện tại là gì"** → `git branch --show-current`
 
 ## Cấu trúc thư mục chính
