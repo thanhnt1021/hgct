@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { RefreshCw, Download, FileText } from 'lucide-react'
+import { RefreshCw, Download, FileText, Share2 } from 'lucide-react'
 
 interface HistoryEntry {
   jobId: string
@@ -46,6 +46,8 @@ export default function HistoryReports() {
   const [entries, setEntries] = useState<HistoryEntry[]>([])
   const [statuses, setStatuses] = useState<Record<string, JobStatus>>({})
   const [refreshing, setRefreshing] = useState<Record<string, boolean>>({})
+  const [sharing, setSharing] = useState<Record<string, boolean>>({})
+  const [shareMsg, setShareMsg] = useState<Record<string, string>>({})
   const [filterType, setFilterType] = useState<FilterType>('all')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [page, setPage] = useState(0)
@@ -123,10 +125,58 @@ export default function HistoryReports() {
   const handleDownload = (entry: HistoryEntry) => {
     const st = statuses[entry.jobId]
     if (!st?.result?.pdfUrl) return
+    const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    if (isMobile) {
+      router.push(`/report/${entry.jobId}`)
+      return
+    }
     const a = document.createElement('a')
     a.href = st.result.pdfUrl
     a.download = st.result.pdfFilename || `bao-cao-${entry.service}.pdf`
     a.click()
+  }
+
+  const handleShare = async (entry: HistoryEntry) => {
+    const st = statuses[entry.jobId]
+    if (!st?.result?.pdfUrl) return
+    const filename = st.result.pdfFilename || `bao-cao-${entry.service}.pdf`
+    const reportUrl = `${window.location.origin}/report/${entry.jobId}`
+
+    setSharing(prev => ({ ...prev, [entry.jobId]: true }))
+    setShareMsg(prev => ({ ...prev, [entry.jobId]: '' }))
+
+    try {
+      if (navigator.share) {
+        let shareData: ShareData = {
+          title: `Báo cáo chiêm tinh - ${entry.name}`,
+          text: `Xem báo cáo chiêm tinh ${SERVICE_LABELS[entry.service] || entry.service} của ${entry.name}`,
+          url: reportUrl,
+        }
+        // Try to attach actual PDF file if browser supports it
+        if (typeof navigator.canShare === 'function') {
+          try {
+            const res = await fetch(st.result.pdfUrl)
+            const blob = await res.blob()
+            const file = new File([blob], filename, { type: 'application/pdf' })
+            if (navigator.canShare({ files: [file] })) {
+              shareData = { title: shareData.title, text: shareData.text, files: [file] }
+            }
+          } catch { /* fallback to URL share */ }
+        }
+        await navigator.share(shareData)
+      } else {
+        await navigator.clipboard.writeText(reportUrl)
+        setShareMsg(prev => ({ ...prev, [entry.jobId]: 'Đã copy link!' }))
+        setTimeout(() => setShareMsg(prev => ({ ...prev, [entry.jobId]: '' })), 2500)
+      }
+    } catch (e) {
+      if ((e as Error).name !== 'AbortError') {
+        setShareMsg(prev => ({ ...prev, [entry.jobId]: 'Không thể chia sẻ' }))
+        setTimeout(() => setShareMsg(prev => ({ ...prev, [entry.jobId]: '' })), 2500)
+      }
+    } finally {
+      setSharing(prev => ({ ...prev, [entry.jobId]: false }))
+    }
   }
 
   // Filter and paginate
@@ -320,10 +370,38 @@ export default function HistoryReports() {
                       cursor: isDone && st?.result?.pdfUrl ? 'pointer' : 'not-allowed',
                       minHeight: 36,
                     }}
-                    title={isDone ? 'Tải PDF' : 'Báo cáo chưa hoàn thành'}
+                    title={isDone ? 'Xem PDF' : 'Báo cáo chưa hoàn thành'}
                   >
                     <Download size={12} /> Tải PDF
                   </button>
+                  {isDone && st?.result?.pdfUrl && (
+                    <div className="relative">
+                      <button
+                        onClick={() => handleShare(entry)}
+                        disabled={sharing[entry.jobId]}
+                        className="flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium"
+                        style={{
+                          background: 'rgba(61,43,94,0.4)',
+                          color: '#a78bfa',
+                          border: '1px solid rgba(167,139,250,0.2)',
+                          fontFamily: 'var(--font-vietnam)',
+                          cursor: 'pointer',
+                          minHeight: 36,
+                          opacity: sharing[entry.jobId] ? 0.6 : 1,
+                        }}
+                        title="Chia sẻ PDF"
+                      >
+                        <Share2 size={12} />
+                        {sharing[entry.jobId] ? 'Đang tải...' : 'Chia sẻ'}
+                      </button>
+                      {shareMsg[entry.jobId] && (
+                        <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs px-2 py-0.5 rounded"
+                          style={{ background: 'rgba(26,21,53,0.95)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.2)', fontFamily: 'var(--font-vietnam)' }}>
+                          {shareMsg[entry.jobId]}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )
