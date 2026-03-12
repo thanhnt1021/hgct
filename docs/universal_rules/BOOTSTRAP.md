@@ -1,50 +1,67 @@
 # Bootstrap — Universal Workflow Rules
 
-Repo này chứa bộ workflow rules universal dùng chung cho mọi project làm việc với Claude Code.
+Bộ workflow rules dùng chung cho mọi project làm việc với **Claude Code CLI**.
 
-## Dùng như thế nào?
+---
 
-### 1. Clone universal rules vào project mới
+## 3 cách để bootstrap project mới
+
+### Cách 1 — Nhanh nhất: chạy script (curl)
 
 ```bash
-# Tạo thư mục docs/universal_rules/ nếu chưa có
+curl -fsSL https://raw.githubusercontent.com/hentaiikidd/universal-workflow/main/bootstrap.sh | bash
+```
+
+Script tự động:
+- Copy toàn bộ rules vào `docs/universal_rules/`
+- Tạo hoặc cập nhật `CLAUDE.md`
+- Dọn dẹp file thừa
+
+> **SSH key khác mặc định?**
+> ```bash
+> curl -fsSL https://raw.githubusercontent.com/hentaiikidd/universal-workflow/main/bootstrap.sh \
+>   | BOOTSTRAP_SSH_KEY=~/.ssh/my_key bash
+> ```
+
+---
+
+### Cách 2 — Copy file này vào root project, rồi chạy từng bước
+
+Paste `BOOTSTRAP.md` vào root project → chạy từng lệnh bên dưới → script tự xóa file này sau khi xong.
+
+**Bước 1 — Copy rules:**
+
+```bash
 mkdir -p docs/universal_rules
 
-# Clone toàn bộ repo rồi copy files (dùng SSH — recommended cho server)
-GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa" git clone git@github.com:hentaiikidd/universal-workflow.git /tmp/_uw
+# SSH (recommended cho server)
+GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa" \
+  git clone git@github.com:hentaiikidd/universal-workflow.git /tmp/_uw
 cp /tmp/_uw/*.md docs/universal_rules/
 rm -rf /tmp/_uw
 ```
 
-> **SSH key khác?** Thay `~/.ssh/id_rsa` bằng path key của bạn. Ví dụ:
-> ```bash
-> GIT_SSH_COMMAND="ssh -i /home/hgct/.ssh/github_hgct" git clone git@github.com:hentaiikidd/universal-workflow.git /tmp/_uw
-> ```
-
-> **Máy local có GitHub credentials (HTTPS)?**
+> **SSH key khác?** Thay `~/.ssh/id_rsa` bằng path key của bạn.
+>
+> **Máy local / có HTTPS credentials?**
 > ```bash
 > git clone https://github.com/hentaiikidd/universal-workflow.git /tmp/_uw
 > cp /tmp/_uw/*.md docs/universal_rules/
 > rm -rf /tmp/_uw
 > ```
 
----
+**Bước 2 — Tạo hoặc cập nhật CLAUDE.md:**
 
-### 2. Tạo hoặc cập nhật CLAUDE.md
-
-`CLAUDE.md` là file bắt buộc của **Claude Code CLI** — Claude đọc file này khi mở project để biết context (tech stack, rules, conventions). Phải đặt ở **root của project**.
-
-**Không bao giờ overwrite CLAUDE.md nếu đã tồn tại.** File đó chứa thông tin project-specific của project đó.
-
-**Nếu CLAUDE.md chưa có** → tạo mới (chỉ khi file chưa tồn tại):
+`CLAUDE.md` là file bắt buộc của Claude Code CLI — phải đặt ở root project. **Không bao giờ overwrite nếu đã tồn tại.**
 
 ```bash
+# Nếu chưa có CLAUDE.md
 if [ ! -f CLAUDE.md ]; then
   cat > CLAUDE.md << 'EOF'
 # [Tên Project]
 
 ## Overview
-[Mô tả ngắn về project]
+[Mô tả ngắn]
 
 > Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.
 
@@ -59,34 +76,49 @@ if [ ! -f CLAUDE.md ]; then
 EOF
   echo "✅ Created CLAUDE.md"
 fi
-```
 
-**Nếu CLAUDE.md đã có** → chỉ thêm dòng reference nếu chưa có (không sửa gì khác):
-
-```bash
+# Nếu đã có CLAUDE.md — chỉ thêm reference line nếu chưa có
 if ! grep -q "UNIVERSAL_WORKFLOW" CLAUDE.md; then
   echo "" >> CLAUDE.md
   echo '> Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.' >> CLAUDE.md
-  echo "✅ Added reference line to CLAUDE.md"
+  echo "✅ Added reference line"
 else
   echo "✅ CLAUDE.md already has reference line"
 fi
 ```
 
+**Bước 3 — Dọn dẹp:** xóa file BOOTSTRAP.md ở root (canonical copy đã có trong `docs/universal_rules/`):
+
+```bash
+if [ -f "BOOTSTRAP.md" ] && [ -f "docs/universal_rules/BOOTSTRAP.md" ]; then
+  rm -f BOOTSTRAP.md
+  echo "✅ Removed BOOTSTRAP.md from project root"
+fi
+```
+
 ---
 
-### 3. Chạy `check requirements`
+### Cách 3 — 1 lệnh git clone (không cần curl)
 
-Sau khi Claude Code đang chạy trong project, gõ:
+```bash
+mkdir -p docs/universal_rules
+GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa" \
+  git clone git@github.com:hentaiikidd/universal-workflow.git /tmp/_uw \
+  && cp /tmp/_uw/*.md docs/universal_rules/ \
+  && rm -rf /tmp/_uw
+```
+
+Sau đó chạy bước 2 ở Cách 2 để setup CLAUDE.md.
+
+---
+
+### Bước cuối (mọi cách) — Trong Claude Code CLI
 
 ```
 check requirements
 ```
 
-Claude sẽ đọc `docs/universal_rules/NEW_PROJECT_SETUP.md` và tự động:
-- Kiểm tra + tạo các file còn thiếu (`docs/MD_FILES_TO_UPDATE.md`, `docs/REQUIREMENTS_CHECK.md`)
-- Hỏi user input cho những gì cần cấu hình thủ công
-- Báo cáo ✅ done / ⚠️ cần làm thêm
+Claude tự tạo các file còn thiếu (`docs/MD_FILES_TO_UPDATE.md`, `docs/REQUIREMENTS_CHECK.md`) và hướng dẫn cấu hình thủ công.
 
 ---
 
@@ -99,16 +131,10 @@ Claude sẽ đọc `docs/universal_rules/NEW_PROJECT_SETUP.md` và tự động:
 | `MD_SYSTEM.md` | Cấu trúc /docs, quy tắc MD files, templates |
 | `UI_MOBILE_RULES.md` | Mobile-first, touch targets, Web Share API, iOS quirks |
 | `QUALITY_GATES.md` | TypeScript check, build pass, commit format |
-| `NEW_PROJECT_SETUP.md` | check requirements logic + per-project-type checklist |
+| `NEW_PROJECT_SETUP.md` | Logic của lệnh `check requirements` |
 
 ---
 
 ## Cập nhật rules
 
-Khi rules trong repo này thay đổi, copy lại vào project:
-
-```bash
-git clone https://github.com/hentaiikidd/universal-workflow.git /tmp/_uw
-cp /tmp/_uw/*.md docs/universal_rules/
-rm -rf /tmp/_uw
-```
+Chạy lại Cách 1 hoặc Cách 3 — các file trong `docs/universal_rules/` sẽ được overwrite bằng version mới nhất.
