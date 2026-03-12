@@ -4,6 +4,8 @@
 Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc lập, hoàn chỉnh.
 **KHÔNG liên quan** đến bất kỳ source code cũ nào nữa. Chỉ làm việc trong `/root/hgct`.
 
+**Quy tắc file MD:** Mọi file `.md` mới (trừ `CLAUDE.md`) đều mặc định tạo trong `/docs/`. `CLAUDE.md` bắt buộc ở root (Claude Code CLI yêu cầu).
+
 ## Tech Stack
 - Next.js 15.2.3, React 19, App Router, Tailwind v4
 - Prisma v5 + PostgreSQL (db: zodiacdb)
@@ -23,8 +25,8 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 
 **Workflow:**
 - Làm việc trên nhánh `feature/...` → iterate nhanh với **quick deploy** (không cần commit) → **DỪNG, chờ user confirm**
-- Khi commit: dựa vào `MD_FILES_TO_UPDATE.md` để update đúng các file MD liên quan, sau đó **clear file đó**
-- Nếu tính năng mới có thêm env var / service / dependency mới → **phải update `REQUIREMENTS_CHECK.md`**
+- Khi commit: dựa vào `docs/MD_FILES_TO_UPDATE.md` để update đúng các file MD liên quan, sau đó **clear file đó**
+- Nếu tính năng mới có thêm env var / service / dependency mới → **phải update `docs/REQUIREMENTS_CHECK.md`**
 - Khi OK → merge vào `main` → deploy production (MD files đã được commit cùng)
 
 **⚠️ RULES — KHÔNG BAO GIỜ tự ý làm các việc sau khi chưa được lệnh:**
