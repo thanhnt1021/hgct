@@ -23,7 +23,8 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 
 **Workflow:**
 - Làm việc trên nhánh `feature/...` → iterate nhanh với **quick deploy** (không cần commit) → khi OK thì commit + push
-- Khi OK → merge vào `main` → deploy production
+- Khi commit: **phải update CLAUDE.md** (What's DONE / TODO) + MEMORY.md cho các tính năng mới
+- Khi OK → merge vào `main` → deploy production (MD files đã được commit cùng)
 
 **2 cách deploy demo:**
 1. **Quick deploy** (iterate nhanh, chưa commit): `sudo bash /root/hgct/deploy-demo-local.sh`
@@ -124,7 +125,7 @@ src/
 - [x] Profile selection flow — services page shows profile dropdown
 - [x] Job system — persisted to DB + in-memory cache; survives server restarts
 - [x] PDF storage — /var/hgct/pdfs (persistent, created by deploy.sh)
-- [x] Deploy scripts — deploy.sh (production), deploy-demo.sh (demo)
+- [x] Deploy scripts — deploy.sh (production), deploy-demo.sh (demo), deploy-demo-local.sh (quick local build, no git push)
 - [x] Demo environment — port 65500, hgct-demo.service
 - [x] Nginx + SSL — Certbot, HTTPS cho hatgiongchiemtinh.com + demo.hatgiongchiemtinh.com, HTTP→HTTPS redirect
 - [x] GitHub — private repo hentaiikidd/hgct, SSH via /home/hgct/.ssh/github_hgct
@@ -132,6 +133,8 @@ src/
 - [x] SubscriptionPlans component trong /profile
 - [x] Fonts: Cinzel, Cinzel Decorative, Cormorant Garamond, EB Garamond, Lora (next/font/google)
 - [x] Design: navy #0a0a1a + gold #c9a84c
+- [x] PDF share via Web Share API — nút "Chia sẻ" trong `/profile?tab=history` gửi file PDF thật qua Messenger/Zalo
+- [x] `/report/[id]` — viewer page: Android iframe embed, iOS card UI; bottom bar [Xem] + [Tải về] (Web Share API)
 
 ## What's TODO
 - [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật
