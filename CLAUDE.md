@@ -22,9 +22,15 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 - Demo: demo.hatgiongchiemtinh.com → port 65500, hgct-demo.service, deploy with `sudo bash /root/hgct/deploy-demo.sh [branch]`
 
 **Workflow:**
-- Làm việc trên nhánh `feature/...` → iterate nhanh với **quick deploy** (không cần commit) → khi OK thì commit + push
+- Làm việc trên nhánh `feature/...` → iterate nhanh với **quick deploy** (không cần commit) → **DỪNG, chờ user confirm**
 - Khi commit: dựa vào `MD_FILES_TO_UPDATE.md` để update đúng các file MD liên quan, sau đó **clear file đó**
 - Khi OK → merge vào `main` → deploy production (MD files đã được commit cùng)
+
+**⚠️ RULES — KHÔNG BAO GIỜ tự ý làm các việc sau khi chưa được lệnh:**
+- `git commit` — chỉ khi user nói **"commit"**
+- `git push` — chỉ khi user nói **"commit"** hoặc **"merge main"**
+- `git merge main` / deploy production — chỉ khi user nói **"merge main"** hoặc **"lên production"**
+- Sau khi quick deploy xong → **báo cáo kết quả rồi DỪNG**, không tự commit/merge/deploy thêm
 
 **2 cách deploy demo:**
 1. **Quick deploy** (iterate nhanh, chưa commit): `sudo bash /root/hgct/deploy-demo-local.sh`
@@ -34,11 +40,11 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
    - Pull từ GitHub, build từ đầu — dùng khi muốn share link demo hoặc sau khi commit
 
 **Shorthand commands (dùng trong chat):**
-- **"feature: [tên]"** → tạo branch `feature/tên`, code tính năng, **quick deploy (KHÔNG commit/push)** — chờ feedback/fix thêm
-- **"test demo"** hoặc **"quick deploy"** → build code hiện tại + deploy demo, **KHÔNG commit/push**
-- **"commit"** → commit lên nhánh hiện tại + push GitHub (chỉ làm khi user bảo)
-- **"merge main"** hoặc **"lên production"** → merge branch hiện tại vào main, push, deploy production
-- **"deploy demo"** → full deploy (pull GitHub + build) lên demo (dùng sau khi đã commit)
+- **"feature: [tên]"** → tạo branch `feature/tên`, code tính năng, quick deploy → **DỪNG chờ feedback**
+- **"test demo"** hoặc **"quick deploy"** → build + deploy demo → **DỪNG chờ feedback**
+- **"commit"** → commit + push nhánh hiện tại + update MD files (chỉ làm khi được lệnh)
+- **"merge main"** hoặc **"lên production"** → merge + push + deploy production (chỉ làm khi được lệnh)
+- **"deploy demo"** → full deploy từ GitHub (dùng sau khi đã commit)
 - **"branch hiện tại là gì"** → `git branch --show-current`
 
 ## Cấu trúc thư mục chính
