@@ -135,6 +135,7 @@ src/
 - [x] Design: navy #0a0a1a + gold #c9a84c
 - [x] PDF share via Web Share API — nút "Chia sẻ" trong `/profile?tab=history` gửi file PDF thật qua Messenger/Zalo
 - [x] `/report/[id]` — viewer page: Android iframe embed, iOS card UI; bottom bar [Xem] + [Tải về] (Web Share API)
+- [x] PDF download filename — `/api/pdf/[id]?filename=` dùng đúng tên từ query param (RFC 5987 UTF-8), khớp với tên file gửi email
 
 ## What's TODO
 - [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật
