@@ -12,8 +12,8 @@ Chạy lệnh `check requirements` — Claude đọc file này và tự động:
 
 ### Files bắt buộc
 
-- [ ] `CLAUDE.md` ở root — nếu chưa có: tạo template cơ bản, hỏi user điền thông tin project
-- [ ] Dòng trong `CLAUDE.md`: `Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.` — nếu chưa có: tự thêm vào
+- [ ] `CLAUDE.md` ở root — nếu chưa có: tạo template cơ bản, hỏi user điền thông tin project. **KHÔNG overwrite nếu đã có.**
+- [ ] Dòng trong `CLAUDE.md`: `Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.` — nếu chưa có: tự thêm vào (append). **KHÔNG sửa nội dung khác.**
 - [ ] `docs/universal_rules/` — folder này (đã copy vào là có)
 - [ ] `docs/MD_FILES_TO_UPDATE.md` — nếu chưa có: tự tạo với nội dung template trống
 - [ ] `docs/REQUIREMENTS_CHECK.md` — nếu chưa có: tự tạo template, hỏi user điền thông tin server
