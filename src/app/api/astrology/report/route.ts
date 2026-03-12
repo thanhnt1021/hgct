@@ -44,9 +44,9 @@ function aiLabel(pct: number): string {
   return lbl
 }
 
-function savePdf(buffer: Buffer): string {
+function savePdf(buffer: Buffer, profileUid?: string, service?: string): string {
   if (!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR, { recursive: true })
-  const id = randomUUID()
+  const id = profileUid && service ? `${profileUid}_${service}` : randomUUID()
   fs.writeFileSync(path.join(PDF_DIR, `${id}.pdf`), buffer)
   return id
 }
@@ -59,6 +59,7 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
     inputData: Record<string, unknown>
     email?: string
   }
+  const profileUid = body.profileUid as string | undefined
   const { dob, tob, loc, name, ten, gender } = inputData as {
     dob: { day: number; month: number; year: number }
     tob: { hour: number; minute: number }
@@ -191,7 +192,7 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
   let pdfUrl: string | null = null
   let pdfFilename: string | null = null
   if (pdfBuffer) {
-    const pdfId = savePdf(pdfBuffer)
+    const pdfId = savePdf(pdfBuffer, profileUid, service)
     pdfFilename = makePdfFilename(service, name, nameB || undefined)
     pdfUrl = `/api/pdf/${pdfId}?filename=${encodeURIComponent(pdfFilename)}`
   }

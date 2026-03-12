@@ -21,6 +21,10 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const origin = request.headers.get('origin')
+  const allowed = process.env.NEXT_PUBLIC_APP_URL
+  if (origin && allowed && origin !== allowed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const session = await getServerSession(authOptions)
   if (!session?.user) return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 })
   const uid = (session.user as any).uid

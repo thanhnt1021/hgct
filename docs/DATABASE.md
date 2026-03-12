@@ -56,21 +56,25 @@ CREATE TABLE users (
 
 ```sql
 CREATE TABLE profiles (
-  id         SERIAL PRIMARY KEY,
-  user_uid   VARCHAR NOT NULL REFERENCES users(user_uid),
-  name       VARCHAR NOT NULL,
-  gender     VARCHAR,
-  data       JSONB,
-  created_at VARCHAR DEFAULT ''
+  id          SERIAL PRIMARY KEY,
+  user_uid    VARCHAR NOT NULL REFERENCES users(user_uid),
+  profile_uid VARCHAR UNIQUE NOT NULL,
+  name        VARCHAR NOT NULL,
+  gender      VARCHAR,
+  data        JSONB,
+  created_at  VARCHAR DEFAULT ''
 );
 ```
 
 | Cột | Mô tả |
 |---|---|
 | `user_uid` | FK → users.user_uid |
+| `profile_uid` | UUID riêng cho profile — dùng làm tên file PDF (`{profileUid}_{service}.pdf`) |
 | `name` | Tên đầy đủ (họ đệm tên ghép) |
-| `gender` | 'Male'|'Female'|'Other' |
-| `data` | JSON: `{ ho, dem, ten, note, dob, tob, loc }` |
+| `gender` | 'Male'\|'Female'\|'Other' |
+| `data` | JSON encrypted AES-256-GCM: `{ ho, dem, ten, note, dob, tob, loc }` — format: `{ _enc: "iv:ct:tag" }` |
+
+**Encryption:** `data` được mã hóa bằng `PROFILE_ENCRYPTION_KEY` (env var). Decrypt tự động trong `/api/profiles` GET. Backup plaintext: `/var/hgct/backups/`.
 
 **Trạng thái:** **Đang dùng** — CRUD qua `/api/profiles` (GET/POST/PUT/DELETE). Hiển thị trong `/profile`, `/my-charts`, `/services`.
 
@@ -162,13 +166,14 @@ model User {
 }
 
 model Profile {
-  id        Int    @id @default(autoincrement())
-  userUid   String @map("user_uid")
-  name      String
-  gender    String?
-  data      Json
-  createdAt String @default("") @map("created_at")
-  user      User   @relation(fields: [userUid], references: [userUid])
+  id         Int    @id @default(autoincrement())
+  userUid    String @map("user_uid")
+  profileUid String @unique @map("profile_uid")
+  name       String
+  gender     String?
+  data       Json
+  createdAt  String @default("") @map("created_at")
+  user       User   @relation(fields: [userUid], references: [userUid])
   @@map("profiles")
 }
 

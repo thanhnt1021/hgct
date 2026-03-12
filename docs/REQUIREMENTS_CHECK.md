@@ -32,6 +32,7 @@ Sau khi `git clone`, mở Claude CLI và yêu cầu: **"check requirements"** �
 ## 3. Thư mục & Permissions
 
 - [ ] `/var/hgct/pdfs/` tồn tại và writable: `sudo mkdir -p /var/hgct/pdfs && sudo chmod 755 /var/hgct/pdfs`
+- [ ] `/var/hgct/backups/` tồn tại: `sudo mkdir -p /var/hgct/backups && sudo chown hgct:hgct /var/hgct/backups`
 - [ ] `/root/hgct/` — thư mục project (git clone về đây)
 - [ ] `/root/hgct-demo/` — sẽ được tạo tự động bởi `deploy-demo.sh` lần đầu
 
@@ -94,6 +95,9 @@ EMAIL_FROM=                      # tên hiển thị + email, vd: "Hạt Giống
 
 # Misc
 UPGRADE_CODE=                    # code bí mật để upgrade account thủ công
+
+# Security
+PROFILE_ENCRYPTION_KEY=          # AES-256-GCM key (64 hex chars) — tạo: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 Sau khi tạo `.env.local`, copy vào standalone:

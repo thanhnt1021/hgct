@@ -10,7 +10,7 @@ export async function GET(
 ) {
   const { id } = await params
   // Validate strict UUID format to prevent path traversal
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(_[a-z]+)?$/i.test(id)) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 

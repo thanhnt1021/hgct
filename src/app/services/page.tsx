@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 
 interface Profile {
   id: string
+  profileUid: string
   name: string
   ten?: string
   note?: string
@@ -178,6 +179,7 @@ export default function ServicesPage() {
         if (data.profiles) {
           setProfiles(data.profiles.map((p: any) => ({
             id: String(p.id),
+            profileUid: p.profileUid || '',
             ho: p.data?.ho || '',
             dem: p.data?.dem || '',
             ten: p.data?.ten || (p.name.trim().split(/\s+/).pop() || p.name),
@@ -225,11 +227,13 @@ export default function ServicesPage() {
 
     sessionStorage.setItem('inputData', JSON.stringify(profileToInputData(pa)))
     sessionStorage.setItem('selectedService', selectedService.type)
+    sessionStorage.setItem('profileUidA', pa.profileUid || '')
 
     if (selectedService.needsTwo) {
       const pb = profiles.find(p => p.id === profileB)
       if (!pb) return
       sessionStorage.setItem('inputDataB', JSON.stringify(profileToInputData(pb)))
+      sessionStorage.setItem('profileUidB', pb.profileUid || '')
     }
 
     router.push('/checkout')
