@@ -2,9 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { signOut } from 'next-auth/react'
-
-type Step = 'identifier' | 'newPassword' | 'success'
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
@@ -17,48 +14,31 @@ const labelStyle: React.CSSProperties = {
 }
 
 export default function ForgotPasswordPage() {
-  const [step, setStep] = useState<Step>('identifier')
-  const [identifier, setIdentifier] = useState('')
-  const [foundUsername, setFoundUsername] = useState('')
-  const [resetToken, setResetToken] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleFindAccount = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const res = await fetch('/api/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier: identifier.trim() }),
-    })
-    const data = await res.json()
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Có lỗi xảy ra, vui lòng thử lại')
+      } else {
+        setSent(true)
+      }
+    } catch {
+      setError('Không thể kết nối máy chủ, vui lòng thử lại')
+    }
     setLoading(false)
-    if (!res.ok) { setError(data.error || 'Không tìm thấy tài khoản'); return }
-    setFoundUsername(data.username)
-    setResetToken(data.token)
-    setStep('newPassword')
-  }
-
-  const handleSetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (newPassword !== confirm) { setError('Mật khẩu không khớp'); return }
-    setLoading(true)
-    setError('')
-    const res = await fetch('/api/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: resetToken, newPassword }),
-    })
-    const data = await res.json()
-    setLoading(false)
-    if (!res.ok) { setError(data.error || 'Đặt lại thất bại'); return }
-    // Hủy session cũ để tránh conflict khi đăng nhập lại
-    await signOut({ redirect: false })
-    setStep('success')
   }
 
   return (
@@ -133,16 +113,47 @@ export default function ForgotPasswordPage() {
             </div>
           )}
 
-          {step === 'identifier' && (
-            <form onSubmit={handleFindAccount} className="space-y-5">
+          {sent ? (
+            <div className="space-y-5">
+              <div
+                className="p-4 rounded-lg text-sm text-center"
+                style={{
+                  background: 'rgba(74,222,128,0.08)',
+                  border: '1px solid rgba(74,222,128,0.2)',
+                  color: '#4ade80',
+                  fontFamily: 'var(--font-vietnam)',
+                  lineHeight: 1.7,
+                }}
+              >
+                Nếu email tồn tại, bạn sẽ nhận được link trong vài phút.
+                <br />
+                <span style={{ color: '#6b7280', fontSize: '0.85em' }}>Kiểm tra cả hộp thư spam.</span>
+              </div>
+              <div
+                className="text-center"
+                style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
+              >
+                <Link
+                  href="/auth/login"
+                  className="font-semibold transition-colors"
+                  style={{ color: '#d9ab55' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#f0cc78')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#d9ab55')}
+                >
+                  Quay lại đăng nhập
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label style={labelStyle}>Email hoặc tên đăng nhập</label>
+                <label style={labelStyle}>Email tài khoản</label>
                 <input
-                  type="text"
-                  value={identifier}
-                  onChange={e => setIdentifier(e.target.value)}
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   required
-                  placeholder="email@example.com hoặc username"
+                  placeholder="email@example.com"
                 />
               </div>
               <button
@@ -161,7 +172,7 @@ export default function ForgotPasswordPage() {
                   transition: 'opacity 0.2s ease',
                 }}
               >
-                {loading ? 'Đang tìm kiếm...' : 'Tìm tài khoản'}
+                {loading ? 'Đang gửi...' : 'Gửi link đặt lại mật khẩu'}
               </button>
               <div
                 className="text-center"
@@ -178,91 +189,6 @@ export default function ForgotPasswordPage() {
                 </Link>
               </div>
             </form>
-          )}
-
-          {step === 'newPassword' && (
-            <form onSubmit={handleSetPassword} className="space-y-5">
-              <div
-                className="p-3 rounded-lg text-sm text-center"
-                style={{
-                  background: 'rgba(201,168,76,0.08)',
-                  border: '1px solid rgba(201,168,76,0.2)',
-                  color: '#d9ab55',
-                  fontFamily: 'var(--font-vietnam)',
-                }}
-              >
-                Đã tìm thấy tài khoản: <strong>{foundUsername}</strong>
-              </div>
-              <div>
-                <label style={labelStyle}>Mật khẩu mới</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  minLength={6}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>Xác nhận mật khẩu</label>
-                <input
-                  type="password"
-                  value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3.5 font-bold text-sm mt-2"
-                style={{
-                  background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
-                  backgroundSize: '200% 200%',
-                  color: '#06060f',
-                  borderRadius: '4px',
-                  fontFamily: 'var(--font-vietnam)',
-                  letterSpacing: '0.1em',
-                  boxShadow: '0 4px 20px rgba(200,148,63,0.25)',
-                  opacity: loading ? 0.7 : 1,
-                  transition: 'opacity 0.2s ease',
-                }}
-              >
-                {loading ? 'Đang lưu...' : 'Đặt mật khẩu mới'}
-              </button>
-            </form>
-          )}
-
-          {step === 'success' && (
-            <div className="text-center space-y-5">
-              <div
-                className="p-4 rounded-lg text-sm"
-                style={{
-                  background: 'rgba(74,222,128,0.08)',
-                  border: '1px solid rgba(74,222,128,0.2)',
-                  color: '#4ade80',
-                  fontFamily: 'var(--font-vietnam)',
-                }}
-              >
-                Mật khẩu đã được đặt lại thành công!
-              </div>
-              <Link
-                href="/auth/login"
-                className="inline-block w-full py-3.5 font-bold text-sm text-center"
-                style={{
-                  background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
-                  color: '#06060f',
-                  borderRadius: '4px',
-                  fontFamily: 'var(--font-vietnam)',
-                  letterSpacing: '0.1em',
-                  boxShadow: '0 4px 20px rgba(200,148,63,0.25)',
-                }}
-              >
-                Đăng nhập ngay
-              </Link>
-            </div>
           )}
         </div>
 

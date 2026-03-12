@@ -33,6 +33,8 @@ CREATE TABLE users (
   report_email  VARCHAR,
   avatar        TEXT,
   main_chart_data JSONB,
+  reset_token   TEXT,
+  reset_token_expiry TIMESTAMP,
   created_at    VARCHAR DEFAULT ''
 );
 ```
@@ -150,9 +152,11 @@ model User {
   planType      String    @default("free") @map("plan_type")
   isPremium     Boolean   @default(false) @map("is_premium")
   reportEmail   String?   @map("report_email")
-  avatar        String?
-  mainChartData Json?     @map("main_chart_data")
-  createdAt     String    @default("") @map("created_at")
+  avatar           String?
+  mainChartData    Json?     @map("main_chart_data")
+  resetToken       String?   @map("reset_token")
+  resetTokenExpiry DateTime? @map("reset_token_expiry")
+  createdAt        String    @default("") @map("created_at")
   profiles      Profile[]
   @@map("users")
 }

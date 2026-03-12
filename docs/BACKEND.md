@@ -130,6 +130,34 @@ Output: { token: sha256(code + ':hgct-premium') }
 
 ---
 
+### `POST /api/auth/forgot-password`
+
+- Nhận `{ email }`
+- Tìm user theo email → nếu không có: trả 200 (không leak existence)
+- Generate `crypto.randomBytes(32).toString('hex')` → lưu vào `user.resetToken` + `resetTokenExpiry` (now + 1h)
+- Gửi email chứa link `${APP_URL}/auth/reset-password?token=...`
+- Link có hiệu lực 1 giờ
+
+---
+
+### `POST /api/auth/reset-password`
+
+- Nhận `{ token, newPassword }`
+- Tìm user where `resetToken = token AND resetTokenExpiry > now`
+- Nếu không có: 400 "Link đã hết hạn hoặc không hợp lệ"
+- Hash newPassword → update passwordHash, xóa resetToken + resetTokenExpiry
+
+---
+
+### `POST /api/user/password` — Đổi Mật Khẩu
+
+- Yêu cầu session (NextAuth)
+- Nhận `{ currentPassword, newPassword }` (min 6 chars)
+- Verify currentPassword bằng sha256 → nếu sai: 400
+- Hash newPassword → `prisma.user.update({ passwordHash })`
+
+---
+
 ### `POST /api/auth/register`
 
 - Nhận `{ username, name, email, password }`

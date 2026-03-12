@@ -10,6 +10,7 @@ import { generateEssayStreaming } from '@/lib/openrouter'
 import { generatePdf } from '@/lib/pdf/generator'
 import { sendReportEmail, makePdfFilename } from '@/lib/email'
 import { createJob, updateJob } from '@/lib/jobs'
+import prisma from '@/lib/db'
 import fs from 'fs'
 import path from 'path'
 
@@ -52,7 +53,7 @@ function savePdf(buffer: Buffer): string {
 
 // ── Background processing ─────────────────────────────────────────
 
-async function processReport(jobId: string, body: Record<string, unknown>) {
+async function processReport(jobId: string, body: Record<string, unknown>, orderId?: number) {
   const { service, inputData, email } = body as {
     service: string
     inputData: Record<string, unknown>
@@ -216,6 +217,14 @@ async function processReport(jobId: string, body: Record<string, unknown>) {
     result: { pdfUrl: pdfUrl ?? undefined, pdfFilename: pdfFilename ?? undefined, emailSent, email: email || '' },
   })
 
+  // Update order status
+  if (orderId) {
+    prisma.order.update({
+      where: { id: orderId },
+      data: { status: 'completed', pdfUrl: pdfUrl ?? null },
+    }).catch(err => console.error(`[JOB ${jobId}] Order update failed:`, err))
+  }
+
   console.log(`[JOB ${jobId}] Done — ${service} for ${name}, essay ${essayText.length} chars`)
 }
 
@@ -251,8 +260,25 @@ export async function POST(request: Request) {
     }
     createJob(jobId, meta)
 
+    // Create order record in DB
+    let orderId: number | undefined
+    try {
+      const order = await prisma.order.create({
+        data: {
+          userUid: userUid ?? null,
+          service: typeof svc === 'string' ? svc : service,
+          profileData: (iData as object) ?? {},
+          email: typeof emailVal === 'string' ? emailVal : '',
+          status: 'pending',
+        },
+      })
+      orderId = order.id
+    } catch (err) {
+      console.error(`[JOB ${jobId}] Order create failed:`, err)
+    }
+
     // Fire and forget — background continues after response is sent
-    processReport(jobId, body).catch(err => {
+    processReport(jobId, body, orderId).catch(err => {
       console.error(`[JOB ${jobId}] Error:`, err)
       updateJob(jobId, {
         status: 'error',

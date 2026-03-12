@@ -106,7 +106,7 @@ src/
 ```
 
 ## Prisma Schema (models)
-- `User` — auth, planType (free/premium/lifetime), isPremium, avatar, reportEmail
+- `User` — auth, planType (free/premium/lifetime), isPremium, avatar, reportEmail, resetToken, resetTokenExpiry
 - `Profile` — hồ sơ người dùng (name, gender, data JSON)
 - `KnowledgeBase` — dữ liệu KB chiêm tinh từ DB
 - `Job` — job tracking (status, progress, label, result, error)
@@ -150,6 +150,10 @@ src/
 - [x] `/report/[id]` — viewer page: Android iframe embed, iOS card UI; bottom bar [Xem] + [Tải về] (Web Share API)
 - [x] PDF download filename — `/api/pdf/[id]?filename=` dùng đúng tên từ query param (RFC 5987 UTF-8), khớp với tên file gửi email
 - [x] Khung kết luận đỏ `[KTLUẬN]` — career.txt + love.txt cập nhật rule, cuối mỗi mục đều có khung đóng viền đỏ như Vận Hạn + Cặp Đôi
+- [x] PDF path traversal fix — validate UUID format trước khi đọc `/var/hgct/pdfs/{id}.pdf`
+- [x] Đổi mật khẩu — `/api/user/password` POST + UI trong /profile
+- [x] Forgot password — full flow: token DB + email link + `/auth/reset-password` page
+- [x] Lưu Order vào DB — `orders` table ghi khi tạo báo cáo (pending → completed)
 
 ## What's TODO
 - [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật

@@ -9,9 +9,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  // Sanitize: only allow UUID-like filenames
-  if (!/^[a-f0-9-]{36}$/.test(id)) {
-    return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+  // Validate strict UUID format to prevent path traversal
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
   const filePath = path.join(PDF_DIR, `${id}.pdf`)

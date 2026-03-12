@@ -1,19 +1,13 @@
 # Responsive Design Guidelines — Hạt Giống Chiêm Tinh
 
-## Breakpoints
+> Tài liệu này mô tả các pattern responsive **cụ thể của project hgct**.
+> Các quy tắc universal (breakpoints, touch targets, font size, mobile-first...) xem tại `docs/universal_rules/UI_MOBILE_RULES.md`.
 
-- Mobile: `< 768px`
-- Tablet: `768px – 1024px`
-- Desktop: `> 1024px`
+## Core Principles (hgct-specific)
 
-## Core Principles
-
-1. **Mobile-first**: base CSS targets mobile, scale up with `min-width` media queries or Tailwind `md:`/`lg:` prefixes.
-2. **Touch targets**: minimum `44×44px` for all interactive elements.
-3. **Font sizes**: base `16px`, never below `14px` for body text.
-4. **Spacing**: tighter on mobile (`p-3`, `gap-2`) vs desktop (`p-6`, `gap-4`).
-5. **No horizontal overflow**: every container must be `max-w-full`. Test at `320px` width.
-6. **No hardcoded pixel values** for layout positioning — use relative/flexible units.
+- **Spacing**: tighter on mobile (`p-3`, `gap-2`) vs desktop (`p-6`, `gap-4`).
+- **No horizontal overflow**: every container must be `max-w-full`. Test at `320px` width.
+- **No hardcoded pixel values** for layout positioning — use relative/flexible units.
 
 ## Layout Shell (applies to /profile and all future dashboard-style pages)
 

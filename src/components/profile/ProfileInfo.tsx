@@ -47,6 +47,7 @@ export default function ProfileInfo() {
 
   // Change password
   const [showCp, setShowCp] = useState(false)
+  const [cpCurrent, setCpCurrent] = useState('')
   const [cpNew, setCpNew] = useState('')
   const [cpConfirm, setCpConfirm] = useState('')
   const [cpLoading, setCpLoading] = useState(false)
@@ -196,19 +197,20 @@ export default function ProfileInfo() {
   }
 
   const handleChangePassword = async () => {
-    if (cpNew !== cpConfirm) { setCpError('Mật khẩu không khớp'); return }
-    if (cpNew.length < 6) { setCpError('Mật khẩu ít nhất 6 ký tự'); return }
+    if (!cpCurrent) { setCpError('Vui lòng nhập mật khẩu hiện tại'); return }
+    if (cpNew !== cpConfirm) { setCpError('Mật khẩu mới không khớp'); return }
+    if (cpNew.length < 6) { setCpError('Mật khẩu mới ít nhất 6 ký tự'); return }
     setCpLoading(true); setCpError(''); setCpSuccess(false)
-    const res = await fetch('/api/auth/change-password', {
+    const res = await fetch('/api/user/password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ newPassword: cpNew }),
+      body: JSON.stringify({ currentPassword: cpCurrent, newPassword: cpNew }),
     })
     const data = await res.json()
     setCpLoading(false)
     if (!res.ok) { setCpError(data.error || 'Lỗi'); return }
     setCpSuccess(true)
-    setCpNew(''); setCpConfirm('')
+    setCpCurrent(''); setCpNew(''); setCpConfirm('')
     setTimeout(() => { setCpSuccess(false); setShowCp(false) }, 2000)
   }
 
@@ -499,17 +501,18 @@ export default function ProfileInfo() {
       <div style={cardStyle}>
         <div className="flex items-center justify-between">
           <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Đổi mật khẩu</h3>
-          <button onClick={() => { setShowCp(v => !v); setCpError(''); setCpSuccess(false) }}
+          <button onClick={() => { setShowCp(v => !v); setCpError(''); setCpSuccess(false); setCpCurrent(''); setCpNew(''); setCpConfirm('') }}
             style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
             {showCp ? 'Hủy' : 'Đổi mật khẩu'}
           </button>
         </div>
         {showCp && (
           <div className="mt-4 space-y-3">
-            {cpError && <div className="text-sm" style={{ color: '#e87070' }}>{cpError}</div>}
-            {cpSuccess && <div className="text-sm" style={{ color: '#4ade80' }}>Đổi mật khẩu thành công!</div>}
-            <input type="password" value={cpNew} onChange={e => setCpNew(e.target.value)} placeholder="Mật khẩu mới" />
-            <input type="password" value={cpConfirm} onChange={e => setCpConfirm(e.target.value)} placeholder="Xác nhận mật khẩu mới" />
+            {cpError && <div className="text-sm" style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)' }}>{cpError}</div>}
+            {cpSuccess && <div className="text-sm" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Đổi mật khẩu thành công!</div>}
+            <input type="password" value={cpCurrent} onChange={e => setCpCurrent(e.target.value)} placeholder="Mật khẩu hiện tại" style={{ fontFamily: 'var(--font-vietnam)' }} />
+            <input type="password" value={cpNew} onChange={e => setCpNew(e.target.value)} placeholder="Mật khẩu mới" style={{ fontFamily: 'var(--font-vietnam)' }} />
+            <input type="password" value={cpConfirm} onChange={e => setCpConfirm(e.target.value)} placeholder="Xác nhận mật khẩu mới" style={{ fontFamily: 'var(--font-vietnam)' }} />
             <button onClick={handleChangePassword} disabled={cpLoading}
               style={{ background: 'linear-gradient(135deg,#c8943f,#f0cc78)', color: '#06060f', padding: '0.6rem 1.5rem', borderRadius: '4px', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem', opacity: cpLoading ? 0.7 : 1 }}>
               {cpLoading ? 'Đang lưu...' : 'Lưu mật khẩu mới'}
