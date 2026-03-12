@@ -151,7 +151,7 @@ export default function ReportViewer({ jobId, pdfUrl, pdfFilename, name, service
               <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>{dateStr}</p>
             </div>
             <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', textAlign: 'center', maxWidth: 280, lineHeight: 1.6 }}>
-              Nhấn <strong style={{ color: '#a78bfa' }}>Chia sẻ</strong> để gửi file PDF qua Messenger hoặc ứng dụng khác, hoặc nhấn <strong style={{ color: '#d9ab55' }}>Tải về</strong> để lưu vào máy.
+              Nhấn <strong style={{ color: '#a78bfa' }}>Tải về</strong> để gửi file qua Messenger, Zalo hoặc lưu vào máy. Nhấn <strong style={{ color: '#d9ab55' }}>Xem báo cáo</strong> để mở và đọc PDF.
             </p>
           </div>
         ) : (
@@ -195,7 +195,7 @@ export default function ReportViewer({ jobId, pdfUrl, pdfFilename, name, service
             cursor: 'pointer',
           }}
         >
-          <Download size={16} /> Tải về
+          <Download size={16} /> Xem báo cáo
         </button>
         <div style={{ flex: 1, position: 'relative' }}>
           <button
@@ -211,7 +211,7 @@ export default function ReportViewer({ jobId, pdfUrl, pdfFilename, name, service
               opacity: sharing ? 0.7 : 1,
             }}
           >
-            <Share2 size={16} /> {sharing ? 'Đang tải...' : 'Chia sẻ'}
+            <Share2 size={16} /> {sharing ? 'Đang tải...' : 'Tải về'}
           </button>
           {shareMsg && (
             <span style={{

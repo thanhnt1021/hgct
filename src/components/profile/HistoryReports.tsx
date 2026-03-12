@@ -370,7 +370,7 @@ export default function HistoryReports() {
                       cursor: isDone && st?.result?.pdfUrl ? 'pointer' : 'not-allowed',
                       minHeight: 36,
                     }}
-                    title={isDone ? 'Xem PDF' : 'Báo cáo chưa hoàn thành'}
+                    title={isDone ? 'Tải PDF' : 'Báo cáo chưa hoàn thành'}
                   >
                     <Download size={12} /> Tải PDF
                   </button>
