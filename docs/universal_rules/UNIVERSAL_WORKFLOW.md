@@ -23,7 +23,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 | Lệnh | Hành động |
 |---|---|
-| `feature: [tên]` | Tạo branch `feature/tên`, code, quick deploy → **DỪNG chờ feedback** |
+| `feature: [tên]` | Tạo branch `feature/tên`, re-read context → Q&A → implement + test từng bước → quick deploy → **DỪNG chờ feedback** (xem **`feature:` Workflow** bên dưới) |
 | `test demo` / `quick deploy` | Build + deploy demo từ code hiện tại, **KHÔNG commit/push** |
 | `commit` | Commit + push nhánh hiện tại (update MD files trước) |
 | `merge main` / `lên production` | Merge vào main + deploy production |
@@ -60,6 +60,37 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 8. Khi backup DB hoặc file quan trọng: **luôn lưu 2 nơi** — `/tmp/` (nhanh) + một thư mục persistent (`/var/[project]/backups/` hoặc tương đương) ngay trong cùng lệnh.
    _Lý do: `/tmp/` bị xóa khi server reboot. Backup trong `/tmp/` thôi là không có backup — mất dữ liệu khi cần nhất._
+
+---
+
+## feature: Workflow
+
+Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy thẳng vào code**.
+
+### Phase 1 — Hiểu rõ trước khi làm
+
+1. Đọc plan/prompt từ user.
+2. **Re-read context project** — đọc các file liên quan đến feature (schema, API routes, components, types...) để đối chiếu với plan.
+3. **Identify blind spots** — liệt kê những điểm chưa rõ: quyết định kỹ thuật còn mở, edge cases chưa được cover, rủi ro, dependency giữa các bước.
+4. **Gom tất cả câu hỏi vào 1 message duy nhất** — hỏi user để làm rõ, bao gồm:
+   - Những quyết định kỹ thuật cần xác nhận
+   - Edge cases cần biết cách xử lý
+   - Chiến lược test cho từng thay đổi (xác định trước để sau khi làm xong mỗi bước có thể verify ngay)
+5. Nếu câu trả lời vẫn còn điểm mù — hỏi tiếp, **nhưng luôn gom thành 1 batch**, không hỏi lẻ từng câu.
+6. **Bắt đầu implement khi**: user đã trả lời đủ, hoặc user nói `make it` / `làm đi` / tương tự.
+
+> **Mục tiêu của Phase 1:** Sau khi Q&A xong, có thể implement một mạch từ đầu đến cuối mà không cần dừng lại hỏi thêm.
+
+### Phase 2 — Implement từng bước, test ngay
+
+1. **Implement từng function/fix một** theo thứ tự đã thống nhất — không làm hết rồi mới test.
+2. **Test kỹ sau mỗi bước** bằng chiến lược đã thống nhất trong Phase 1:
+   - Quick deploy → verify trên browser/app
+   - Hoặc test endpoint trực tiếp (curl, server log, DB state...)
+3. **Confirm works** → mới chuyển sang bước tiếp theo.
+4. Khi tất cả xong → quick deploy lần cuối → **báo cáo tổng kết** → **DỪNG chờ feedback**.
+
+> **Exception:** Nếu gặp vấn đề không giải quyết được hoặc loop >2 lần → **dừng, tham vấn user ngay** — không tự thử mãi.
 
 ---
 

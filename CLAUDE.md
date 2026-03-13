@@ -45,7 +45,7 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
    - Pull từ GitHub, build từ đầu — dùng khi muốn share link demo hoặc sau khi commit
 
 **Shorthand commands (dùng trong chat):**
-- **"feature: [tên]"** → tạo branch `feature/tên`, code tính năng, quick deploy → **DỪNG chờ feedback**
+- **"feature: [tên]"** → tạo branch `feature/tên` → re-read context → Q&A làm rõ (1 batch/round) → implement + test từng bước → quick deploy → **DỪNG chờ feedback** (xem chi tiết: `docs/universal_rules/UNIVERSAL_WORKFLOW.md` mục **`feature:` Workflow**)
 - **"test demo"** hoặc **"quick deploy"** → build + deploy demo → **DỪNG chờ feedback**
 - **"commit"** → commit + push nhánh hiện tại + update MD files (chỉ làm khi được lệnh)
 - **"merge main"** hoặc **"lên production"** → merge + push + deploy production (chỉ làm khi được lệnh)
