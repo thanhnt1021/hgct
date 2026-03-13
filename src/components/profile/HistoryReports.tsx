@@ -19,6 +19,8 @@ interface JobStatus {
   label: string
   result?: { pdfUrl?: string; pdfFilename?: string; emailSent?: boolean }
   error?: string
+  pdfNote?: string
+  pdfExpiresAt?: string | null  // ISO string — set when PDF moved to soon_delete
 }
 
 const SERVICE_LABELS: Record<string, string> = {
@@ -70,6 +72,8 @@ export default function HistoryReports() {
         label: string
         result: unknown
         error: string | null
+        pdfNote: string | null
+        pdfExpiresAt: string | null
       }>) => {
         setEntries(jobs.map(j => ({
           jobId: j.id,
@@ -86,6 +90,8 @@ export default function HistoryReports() {
             label: j.label,
             result: j.result as JobStatus['result'],
             error: j.error || undefined,
+            pdfNote: j.pdfNote || undefined,
+            pdfExpiresAt: j.pdfExpiresAt || undefined,
           }
         }
         setStatuses(initStatuses)
@@ -305,20 +311,41 @@ export default function HistoryReports() {
             const isDone = st?.status === 'done'
             const isError = st?.status === 'error'
             const isProcessing = !st || st.status === 'processing'
+            const pdfExpiresAt = st?.pdfExpiresAt ? new Date(st.pdfExpiresAt) : null
+            const isSoftDeleted = !!pdfExpiresAt
+            const isExpired = isSoftDeleted && pdfExpiresAt! <= new Date()
+            // Buttons are disabled if PDF is expired or soft-deleted (either state = unavailable for new dl)
+            const pdfAvailable = isDone && st?.result?.pdfUrl && !isExpired
             return (
               <div key={entry.jobId} className="rounded-xl px-4 py-3"
-                style={{ background: 'rgba(26,21,53,0.6)', border: '1px solid rgba(201,168,76,0.08)' }}>
-                {/* Row 1: service badge + name */}
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                style={{
+                  background: 'rgba(26,21,53,0.6)',
+                  border: `1px solid ${isSoftDeleted ? 'rgba(239,68,68,0.15)' : 'rgba(201,168,76,0.08)'}`,
+                  opacity: isSoftDeleted ? 0.72 : 1,
+                }}>
+                {/* Row 1: service badge + name + deleted badge */}
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                   <span className="px-2 py-0.5 rounded text-xs flex-shrink-0"
                     style={{ background: `${SERVICE_COLORS[entry.service] || '#6b7280'}22`, color: SERVICE_COLORS[entry.service] || '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
                     {SERVICE_LABELS[entry.service] || entry.service}
                   </span>
                   <p className="font-semibold truncate flex-1 min-w-0"
-                    style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
+                    style={{ color: isSoftDeleted ? '#94a3b8' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
                     {entry.name}
                   </p>
+                  {isExpired && (
+                    <span className="px-2 py-0.5 rounded text-xs flex-shrink-0"
+                      style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444', fontFamily: 'var(--font-vietnam)' }}>
+                      Đã Xóa
+                    </span>
+                  )}
                 </div>
+                {/* Note under report name */}
+                {st?.pdfNote && (
+                  <p className="mb-1" style={{ color: isExpired ? '#ef4444' : '#f59e0b', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem' }}>
+                    {st.pdfNote}
+                  </p>
+                )}
                 {/* Row 2: date + email */}
                 <p className="truncate mb-2" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>
                   {new Date(entry.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · {entry.email}
@@ -360,21 +387,21 @@ export default function HistoryReports() {
                   </button>
                   <button
                     onClick={() => handleDownload(entry)}
-                    disabled={!isDone || !st?.result?.pdfUrl}
+                    disabled={!pdfAvailable}
                     className="flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium"
                     style={{
-                      background: isDone && st?.result?.pdfUrl ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.03)',
-                      color: isDone && st?.result?.pdfUrl ? '#d9ab55' : '#4a4560',
-                      border: `1px solid ${isDone && st?.result?.pdfUrl ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)'}`,
+                      background: pdfAvailable ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.03)',
+                      color: pdfAvailable ? '#d9ab55' : '#4a4560',
+                      border: `1px solid ${pdfAvailable ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)'}`,
                       fontFamily: 'var(--font-vietnam)',
-                      cursor: isDone && st?.result?.pdfUrl ? 'pointer' : 'not-allowed',
+                      cursor: pdfAvailable ? 'pointer' : 'not-allowed',
                       minHeight: 36,
                     }}
-                    title={isDone ? 'Tải PDF' : 'Báo cáo chưa hoàn thành'}
+                    title={isExpired ? 'PDF đã hết hạn' : isDone ? 'Tải PDF' : 'Báo cáo chưa hoàn thành'}
                   >
                     <Download size={12} /> Tải PDF
                   </button>
-                  {isDone && st?.result?.pdfUrl && (
+                  {pdfAvailable && (
                     <div className="relative">
                       <button
                         onClick={() => handleShare(entry)}

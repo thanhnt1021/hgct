@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/db'
+import { randomUUID } from 'crypto'
+import { encryptProfileData, decryptProfileData } from '@/lib/profileCrypto'
+import { updateJob } from '@/lib/jobs'
+import fs from 'fs'
+import path from 'path'
+
+const PDF_DIR = '/var/hgct/pdfs'
+const SOON_DELETE_DIR = '/var/hgct/pdfs/soon_delete'
+const EXPIRY_DAYS = 30
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -12,15 +21,14 @@ export async function GET() {
   const uid = (session.user as Record<string, unknown>).uid as string
   const user = await prisma.user.findUnique({ where: { userUid: uid } })
   if (!user) {
-    // Try by email/name
     const byName = await prisma.user.findUnique({ where: { username: session.user.name || '' } })
     if (!byName) return NextResponse.json({ profiles: [] })
     const profiles = await prisma.profile.findMany({ where: { userUid: byName.userUid }, orderBy: { id: 'desc' } })
-    return NextResponse.json({ profiles })
+    return NextResponse.json({ profiles: profiles.map(p => ({ ...p, data: decryptProfileData(p.data) })) })
   }
 
   const profiles = await prisma.profile.findMany({ where: { userUid: uid }, orderBy: { id: 'desc' } })
-  return NextResponse.json({ profiles })
+  return NextResponse.json({ profiles: profiles.map(p => ({ ...p, data: decryptProfileData(p.data) })) })
 }
 
 export async function POST(request: Request) {
@@ -35,14 +43,15 @@ export async function POST(request: Request) {
   const profile = await prisma.profile.create({
     data: {
       userUid: uid,
+      profileUid: randomUUID(),
       name: body.name,
       gender: body.gender || 'Female',
-      data: body.data || {},
+      data: encryptProfileData(body.data || {}) as object,
       createdAt: new Date().toISOString(),
     },
   })
 
-  return NextResponse.json({ profile })
+  return NextResponse.json({ profile: { ...profile, data: decryptProfileData(profile.data) } })
 }
 
 export async function PUT(request: Request) {
@@ -60,10 +69,10 @@ export async function PUT(request: Request) {
 
   const profile = await prisma.profile.update({
     where: { id: parseInt(id) },
-    data: { name, gender, data },
+    data: { name, gender, data: encryptProfileData(data) as object },
   })
 
-  return NextResponse.json({ profile })
+  return NextResponse.json({ profile: { ...profile, data: decryptProfileData(profile.data) } })
 }
 
 export async function DELETE(request: Request) {
@@ -76,6 +85,67 @@ export async function DELETE(request: Request) {
   const id = parseInt(searchParams.get('id') || '0')
 
   if (id) {
+    const profile = await prisma.profile.findUnique({ where: { id }, select: { profileUid: true, name: true } })
+    if (profile?.profileUid) {
+      const deletedUid = profile.profileUid
+      const deletedName = profile.name
+      if (!fs.existsSync(SOON_DELETE_DIR)) fs.mkdirSync(SOON_DELETE_DIR, { recursive: true })
+
+      // Find all jobs linked to this profile
+      const linkedJobs = await prisma.job.findMany({
+        where: { OR: [{ profileUidA: deletedUid }, { profileUidB: deletedUid }] },
+        select: { id: true, service: true, profileUidA: true, profileUidB: true, pdfExpiresAt: true },
+      })
+
+      for (const job of linkedJobs) {
+        if (job.pdfExpiresAt) continue  // already soft-deleted
+
+        const isSynastry = job.service === 'synastry' || job.service === 'relationship'
+        const expiresAt = new Date(Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+        const expiresStr = expiresAt.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+        if (!isSynastry) {
+          // Career / love / transit — move PDF to soon_delete
+          const pdfName = `${deletedUid}_${job.service}.pdf`
+          const srcPath = path.join(PDF_DIR, pdfName)
+          const dstPath = path.join(SOON_DELETE_DIR, pdfName)
+          if (fs.existsSync(srcPath)) {
+            try { fs.renameSync(srcPath, dstPath) } catch {}
+          }
+          const note = `Hồ sơ đã bị xóa — PDF hết hạn ${expiresStr}`
+          await prisma.job.update({ where: { id: job.id }, data: { pdfExpiresAt: expiresAt, pdfNote: note } })
+          updateJob(job.id, { pdfExpiresAt: expiresAt.toISOString(), pdfNote: note })
+        } else {
+          // Synastry — check if the other profile still exists
+          const otherUid = job.profileUidA === deletedUid ? job.profileUidB : job.profileUidA
+          const otherExists = otherUid
+            ? !!(await prisma.profile.findUnique({ where: { profileUid: otherUid }, select: { id: true } }))
+            : false
+
+          if (otherExists) {
+            // Other profile still exists — keep PDF, just note which profile was deleted
+            const note = `Hồ sơ ${deletedName} đã bị xóa`
+            await prisma.job.update({ where: { id: job.id }, data: { pdfNote: note } })
+            updateJob(job.id, { pdfNote: note })
+          } else {
+            // Both profiles gone — move PDF to soon_delete
+            const pdfName = job.profileUidB
+              ? `${job.profileUidA}_${job.profileUidB}_synastry.pdf`
+              : `${job.profileUidA}_synastry.pdf`
+            const srcPath = path.join(PDF_DIR, pdfName)
+            const dstPath = path.join(SOON_DELETE_DIR, pdfName)
+            if (fs.existsSync(srcPath)) {
+              try { fs.renameSync(srcPath, dstPath) } catch {}
+            }
+            const note = otherUid
+              ? `Cả hai hồ sơ đã bị xóa — PDF hết hạn ${expiresStr}`
+              : `Hồ sơ đã bị xóa — PDF hết hạn ${expiresStr}`
+            await prisma.job.update({ where: { id: job.id }, data: { pdfExpiresAt: expiresAt, pdfNote: note } })
+            updateJob(job.id, { pdfExpiresAt: expiresAt.toISOString(), pdfNote: note })
+          }
+        }
+      }
+    }
     await prisma.profile.delete({ where: { id } })
   }
 

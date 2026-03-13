@@ -54,3 +54,6 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 7. Nếu có chỉnh sửa bất kỳ file nào trong `docs/universal_rules/` → **push lên repo `universal-workflow` ngay trong cùng session**, trước hoặc cùng lúc với commit project hiện tại.
    _Lý do: universal-workflow repo là nguồn gốc của rules, dùng chung nhiều project. Nếu chỉ update local mà không push, các project khác sẽ dùng rules cũ khi bootstrap — rules bị phân kỳ._
+
+8. Khi backup DB hoặc file quan trọng: **luôn lưu 2 nơi** — `/tmp/` (nhanh) + một thư mục persistent (`/var/[project]/backups/` hoặc tương đương) ngay trong cùng lệnh.
+   _Lý do: `/tmp/` bị xóa khi server reboot. Backup trong `/tmp/` thôi là không có backup — mất dữ liệu khi cần nhất._

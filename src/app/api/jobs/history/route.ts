@@ -26,6 +26,8 @@ export async function GET() {
       name: true,
       email: true,
       createdAt: true,
+      pdfNote: true,
+      pdfExpiresAt: true,
     },
   })
 

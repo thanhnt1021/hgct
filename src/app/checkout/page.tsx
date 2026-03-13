@@ -54,11 +54,15 @@ export default function CheckoutPage() {
   const [inputDataB, setInputDataB] = useState<Record<string, unknown> | null>(null)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [profileUidA, setProfileUidA] = useState('')
+  const [profileUidB, setProfileUidB] = useState('')
 
   useEffect(() => {
     const svc = sessionStorage.getItem('selectedService') || ''
     const data = sessionStorage.getItem('inputData')
     const dataB = sessionStorage.getItem('inputDataB')
+    setProfileUidA(sessionStorage.getItem('profileUidA') || '')
+    setProfileUidB(sessionStorage.getItem('profileUidB') || '')
 
     if (!svc || !data) {
       router.push('/services')
@@ -103,7 +107,8 @@ export default function CheckoutPage() {
           email: email.trim(),
           premiumToken,
           name: displayName,
-          ...(service === 'synastry' && inputDataB ? { inputDataB } : {}),
+          ...(profileUidA ? { profileUid: profileUidA } : {}),
+          ...(service === 'synastry' && inputDataB ? { inputDataB, ...(profileUidB ? { profileUidB } : {}) } : {}),
         }),
       })
       const result = await res.json()

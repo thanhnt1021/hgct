@@ -4,6 +4,10 @@ import { find as findTz } from 'geo-tz'
 // Country code to default timezone overrides (where geo-tz may be inaccurate)
 const COUNTRY_TZ_OVERRIDE: Record<string, string> = {
   vn: 'Asia/Ho_Chi_Minh',
+  th: 'Asia/Bangkok',
+  kh: 'Asia/Phnom_Penh',
+  la: 'Asia/Vientiane',
+  my: 'Asia/Kuala_Lumpur',
 }
 
 interface NominatimResult {
