@@ -10,6 +10,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 | Tình huống | File cần đọc |
 |---|---|
+| Cần nắm toàn bộ context | `CLAUDE.md` + tất cả files trong `docs/` — dùng lệnh `read context` |
 | Bắt đầu bất kỳ việc gì | `GIT_WORKFLOW.md` |
 | Có liên quan đến file MD | `MD_SYSTEM.md` |
 | Trước khi commit | `QUALITY_GATES.md` |
@@ -29,6 +30,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `deploy demo` | Full deploy từ GitHub (sau khi đã commit) |
 | `check requirements` | Kiểm tra và setup mọi thứ còn thiếu theo `NEW_PROJECT_SETUP.md` |
 | `update workflow` | Review + đề xuất cải tiến các file trong `universal_rules/` |
+| `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) để nắm đầy đủ context project. Xem CLAUDE.md để biết thêm file source nào nên đọc thêm tuỳ task. |
 
 ---
 
@@ -54,6 +56,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 7. Nếu có chỉnh sửa bất kỳ file nào trong `docs/universal_rules/` → **push lên repo `universal-workflow` ngay trong cùng session**, trước hoặc cùng lúc với commit project hiện tại.
    _Lý do: universal-workflow repo là nguồn gốc của rules, dùng chung nhiều project. Nếu chỉ update local mà không push, các project khác sẽ dùng rules cũ khi bootstrap — rules bị phân kỳ._
+   → Xem `GIT_WORKFLOW.md` mục **"Push lên universal-workflow repo"** để biết cách thực hiện.
 
 8. Khi backup DB hoặc file quan trọng: **luôn lưu 2 nơi** — `/tmp/` (nhanh) + một thư mục persistent (`/var/[project]/backups/` hoặc tương đương) ngay trong cùng lệnh.
    _Lý do: `/tmp/` bị xóa khi server reboot. Backup trong `/tmp/` thôi là không có backup — mất dữ liệu khi cần nhất._

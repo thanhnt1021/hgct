@@ -47,6 +47,40 @@ merge main / lên production
 - Chỉ khi user nói "merge main" hoặc "lên production"
 - Script: `sudo bash deploy.sh`
 
+## Push lên universal-workflow repo
+
+Khi sửa bất kỳ file nào trong `docs/universal_rules/`, phải push lên repo `universal-workflow` (Rule 7).
+
+**Tại sao cần một clone riêng?**
+`docs/universal_rules/` là thư mục thông thường bên trong project, không phải git repo của `universal-workflow`. Không thể push lên `github.com/[user]/universal-workflow` từ đó — cần có một git clone thật của repo đó.
+
+**Quy trình:**
+
+```bash
+# 1. Kiểm tra clone còn tồn tại không (/tmp/ bị xóa khi reboot)
+ls /tmp/universal-workflow/ 2>/dev/null || echo "cần clone lại"
+
+# 2. Nếu không có → clone on-demand
+GIT_SSH_COMMAND="ssh -i [SSH_KEY]" \
+  git clone git@github.com:[user]/universal-workflow.git /tmp/universal-workflow
+
+# 3. Copy các file đã sửa từ project vào clone
+cp docs/universal_rules/*.md /tmp/universal-workflow/
+
+# 4. Commit + push từ clone
+cd /tmp/universal-workflow
+git add [files đã thay đổi]
+git commit -m "docs: ..."
+GIT_SSH_COMMAND="ssh -i [SSH_KEY]" git push origin main
+```
+
+**Lưu ý:**
+- `/tmp/` bị xóa khi reboot — luôn kiểm tra trước khi dùng, clone lại nếu cần
+- Clone trong `/tmp/` chỉ là công cụ tạm để push — bản làm việc thật là `docs/universal_rules/` trong project
+- SSH key path và GitHub user là project-specific — xem `CLAUDE.md` của project hiện tại
+
+---
+
 ## Git Rules
 
 - **KHÔNG dùng `git add -A` hay `git add .` blindly** — stage từng file cụ thể.
