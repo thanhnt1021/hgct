@@ -30,7 +30,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `deploy demo` | Full deploy từ GitHub (sau khi đã commit) |
 | `check requirements` | Kiểm tra và setup mọi thứ còn thiếu theo `NEW_PROJECT_SETUP.md` |
 | `update workflow` | Review + đề xuất cải tiến các file trong `universal_rules/` |
-| `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) để nắm đầy đủ context project. Xem CLAUDE.md để biết thêm file source nào nên đọc thêm tuỳ task. |
+| `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) + source files project-specific (xem CLAUDE.md). **Sau khi đọc xong → bắt buộc output structured summary** theo format định nghĩa trong mục "read context — Output Format" bên dưới. |
 
 ---
 
@@ -60,3 +60,29 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 8. Khi backup DB hoặc file quan trọng: **luôn lưu 2 nơi** — `/tmp/` (nhanh) + một thư mục persistent (`/var/[project]/backups/` hoặc tương đương) ngay trong cùng lệnh.
    _Lý do: `/tmp/` bị xóa khi server reboot. Backup trong `/tmp/` thôi là không có backup — mất dữ liệu khi cần nhất._
+
+---
+
+## read context — Output Format
+
+Sau khi đọc xong tất cả files, **bắt buộc output** một summary có cấu trúc như sau. Không được chỉ im lặng sau khi đọc — output này là mục đích chính của lệnh `read context`.
+
+### 1. Tech Stack
+Liệt kê ngắn: framework, DB, auth, AI/external services, deploy, port/domain.
+
+### 2. Architecture Overview
+Mô tả ngắn cách hệ thống hoạt động tổng thể: các lớp chính, data flow cốt lõi.
+Nếu có background job / async processing → mô tả rõ pattern đó.
+
+### 3. Key Flows
+Các luồng người dùng / nghiệp vụ chính — mỗi flow 3–5 bước, dạng bullet ngắn gọn.
+Chỉ list các flow quan trọng, không cần list hết.
+
+### 4. Current Status
+- **Done:** các tính năng đã hoàn chỉnh và tested (chỉ list những cái quan trọng)
+- **TODO / In Progress:** những gì còn cần làm hoặc đang dở
+
+### 5. Workflow Quick Ref
+- Branch hiện tại + strategy
+- Deploy commands (demo / production)
+- Các rules cứng cần nhắc lại (KHÔNG tự commit/push/merge/deploy)
