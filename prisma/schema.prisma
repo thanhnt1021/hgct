@@ -27,14 +27,16 @@ model User {
 }
 
 model Profile {
-  id         Int    @id @default(autoincrement())
-  userUid    String @map("user_uid")
-  profileUid String @unique @default("") @map("profile_uid")
+  id         Int       @id @default(autoincrement())
+  userUid    String    @map("user_uid")
+  profileUid String    @unique @default("") @map("profile_uid")
   name       String
   gender     String?
   data       Json
-  createdAt  String @default("") @map("created_at")
-  user       User   @relation(fields: [userUid], references: [userUid])
+  createdAt  String    @default("") @map("created_at")
+  isTemp     Boolean   @default(false) @map("is_temp")
+  tempExpiry DateTime? @map("temp_expiry")
+  user       User      @relation(fields: [userUid], references: [userUid])
 
   @@map("profiles")
 }

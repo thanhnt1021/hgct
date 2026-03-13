@@ -28,8 +28,37 @@ export async function GET() {
       createdAt: true,
       pdfNote: true,
       pdfExpiresAt: true,
+      profileUidA: true,
+      profileUidB: true,
     },
   })
 
-  return NextResponse.json(jobs)
+  // Batch-fetch temp status for all referenced profile UIDs
+  const allUids = [
+    ...jobs.map(j => j.profileUidA).filter(Boolean),
+    ...jobs.map(j => j.profileUidB).filter(Boolean),
+  ] as string[]
+
+  const tempMap = new Map<string, { isTemp: boolean; tempExpiry: Date | null }>()
+  if (allUids.length > 0) {
+    const profiles = await prisma.profile.findMany({
+      where: { profileUid: { in: allUids } },
+      select: { profileUid: true, isTemp: true, tempExpiry: true },
+    })
+    for (const p of profiles) {
+      tempMap.set(p.profileUid, { isTemp: p.isTemp, tempExpiry: p.tempExpiry })
+    }
+  }
+
+  const enriched = jobs.map(j => {
+    const tA = j.profileUidA ? tempMap.get(j.profileUidA) : undefined
+    const tB = j.profileUidB ? tempMap.get(j.profileUidB) : undefined
+    return {
+      ...j,
+      profileTempA: tA?.isTemp ? { uid: j.profileUidA!, expiry: tA.tempExpiry?.toISOString() ?? null } : null,
+      profileTempB: tB?.isTemp ? { uid: j.profileUidB!, expiry: tB.tempExpiry?.toISOString() ?? null } : null,
+    }
+  })
+
+  return NextResponse.json(enriched)
 }

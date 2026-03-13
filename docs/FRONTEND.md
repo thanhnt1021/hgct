@@ -152,7 +152,18 @@
 - Footer: [Lưu] [Hủy]
 
 **`AvatarCropModal.tsx`** — Upload + crop avatar
-**`ChartList.tsx`**, **`HistoryReports.tsx`**, **`ProfileInfo.tsx`**, **`SubscriptionPlans.tsx`**
+**`ChartList.tsx`**, **`ProfileInfo.tsx`**, **`SubscriptionPlans.tsx`**
+
+**`HistoryReports.tsx`** — Lịch sử báo cáo + PDF actions
+
+3 trạng thái thẻ báo cáo:
+- **Normal** — profile còn tồn tại, nút Tải/Chia sẻ sáng
+- **isWarning** (`pdfExpiresAt` set nhưng chưa tới ngày) — profile đã xóa nhưng PDF còn trong grace period: thẻ không mờ, nút vẫn sáng, note amber (pdfNote)
+- **isExpired** (`pdfExpiresAt <= now`) — PDF đã hết hạn: thẻ mờ 72%, nút disable, badge "Đã Xóa"
+
+**Temp profile note:** Khi job có `profileTempA/B` (từ `/api/jobs/history` join), hiển thị note amber: "Hồ sơ chưa lưu — PDF hết hạn {date}" + nút [Lưu ngay]. Click mở confirm modal → `POST /api/profiles/confirm` → note biến mất (optimistic update).
+
+**Confirm modal** — xác nhận lưu vĩnh viễn: hiện tên profile, nút [Lưu] gọi API, [Hủy] đóng. Synastry 2 temp → confirm cả 2 profileUid cùng 1 call.
 
 ### 2.4 Chart
 

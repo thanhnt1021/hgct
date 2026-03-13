@@ -11,6 +11,8 @@ interface HistoryEntry {
   name: string
   email: string
   createdAt: string
+  profileTempA: { uid: string; expiry: string | null } | null
+  profileTempB: { uid: string; expiry: string | null } | null
 }
 
 interface JobStatus {
@@ -54,6 +56,8 @@ export default function HistoryReports() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [confirmModal, setConfirmModal] = useState<{ jobId: string; uids: string[]; names: string } | null>(null)
+  const [confirming, setConfirming] = useState(false)
 
   // Load history from DB
   useEffect(() => {
@@ -74,6 +78,8 @@ export default function HistoryReports() {
         error: string | null
         pdfNote: string | null
         pdfExpiresAt: string | null
+        profileTempA: { uid: string; expiry: string | null } | null
+        profileTempB: { uid: string; expiry: string | null } | null
       }>) => {
         setEntries(jobs.map(j => ({
           jobId: j.id,
@@ -81,6 +87,8 @@ export default function HistoryReports() {
           name: j.name || '',
           email: j.email || '',
           createdAt: j.createdAt,
+          profileTempA: j.profileTempA ?? null,
+          profileTempB: j.profileTempB ?? null,
         })))
         const initStatuses: Record<string, JobStatus> = {}
         for (const j of jobs) {
@@ -183,6 +191,28 @@ export default function HistoryReports() {
     } finally {
       setSharing(prev => ({ ...prev, [entry.jobId]: false }))
     }
+  }
+
+  const handleConfirmSave = async () => {
+    if (!confirmModal) return
+    setConfirming(true)
+    try {
+      const res = await fetch('/api/profiles/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileUids: confirmModal.uids }),
+      })
+      if (res.ok) {
+        // Optimistically clear temp flags from local state
+        setEntries(prev => prev.map(e =>
+          e.jobId === confirmModal.jobId
+            ? { ...e, profileTempA: null, profileTempB: null }
+            : e
+        ))
+        setConfirmModal(null)
+      }
+    } catch { /* ignore */ }
+    setConfirming(false)
   }
 
   // Filter and paginate
@@ -314,14 +344,25 @@ export default function HistoryReports() {
             const pdfExpiresAt = st?.pdfExpiresAt ? new Date(st.pdfExpiresAt) : null
             const isSoftDeleted = !!pdfExpiresAt
             const isExpired = isSoftDeleted && pdfExpiresAt! <= new Date()
-            // Buttons are disabled if PDF is expired or soft-deleted (either state = unavailable for new dl)
             const pdfAvailable = isDone && st?.result?.pdfUrl && !isExpired
+
+            // Temp profile note
+            const tempA = entry.profileTempA
+            const tempB = entry.profileTempB
+            const hasTemp = !!(tempA || tempB)
+            const tempExpiryDate = (tempA?.expiry || tempB?.expiry)
+              ? new Date((tempA?.expiry || tempB?.expiry)!)
+              : null
+            const tempExpiryStr = tempExpiryDate
+              ? tempExpiryDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+              : null
+
             return (
               <div key={entry.jobId} className="rounded-xl px-4 py-3"
                 style={{
                   background: 'rgba(26,21,53,0.6)',
-                  border: `1px solid ${isSoftDeleted ? 'rgba(239,68,68,0.15)' : 'rgba(201,168,76,0.08)'}`,
-                  opacity: isSoftDeleted ? 0.72 : 1,
+                  border: `1px solid ${isExpired ? 'rgba(239,68,68,0.15)' : 'rgba(201,168,76,0.08)'}`,
+                  opacity: isExpired ? 0.72 : 1,
                 }}>
                 {/* Row 1: service badge + name + deleted badge */}
                 <div className="flex items-center gap-2 mb-0.5 flex-wrap">
@@ -330,7 +371,7 @@ export default function HistoryReports() {
                     {SERVICE_LABELS[entry.service] || entry.service}
                   </span>
                   <p className="font-semibold truncate flex-1 min-w-0"
-                    style={{ color: isSoftDeleted ? '#94a3b8' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
+                    style={{ color: isExpired ? '#94a3b8' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
                     {entry.name}
                   </p>
                   {isExpired && (
@@ -340,11 +381,33 @@ export default function HistoryReports() {
                     </span>
                   )}
                 </div>
-                {/* Note under report name */}
+                {/* Soft-delete warning note (profile deleted, PDF still in grace period) */}
                 {st?.pdfNote && (
                   <p className="mb-1" style={{ color: isExpired ? '#ef4444' : '#f59e0b', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem' }}>
                     {st.pdfNote}
                   </p>
+                )}
+                {/* Temp profile note */}
+                {hasTemp && !isExpired && (
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <p style={{ color: '#f59e0b', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem' }}>
+                      Hồ sơ chưa lưu{tempExpiryStr ? ` — PDF hết hạn ${tempExpiryStr}` : ''}
+                    </p>
+                    <button
+                      onClick={() => {
+                        const uids = [tempA?.uid, tempB?.uid].filter(Boolean) as string[]
+                        const names = entry.name
+                        setConfirmModal({ jobId: entry.jobId, uids, names })
+                      }}
+                      style={{
+                        color: '#4ade80', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem',
+                        background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)',
+                        borderRadius: '0.375rem', padding: '0.1rem 0.5rem', cursor: 'pointer',
+                      }}
+                    >
+                      Lưu ngay
+                    </button>
+                  </div>
                 )}
                 {/* Row 2: date + email */}
                 <p className="truncate mb-2" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>
@@ -433,6 +496,48 @@ export default function HistoryReports() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Confirm save modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(6,6,15,0.85)', backdropFilter: 'blur(4px)' }}>
+          <div className="rounded-2xl p-6 w-full max-w-sm"
+            style={{ background: 'rgba(18,13,46,0.98)', border: '1px solid rgba(74,222,128,0.2)' }}>
+            <h3 className="font-bold mb-2" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+              Lưu hồ sơ vĩnh viễn
+            </h3>
+            <p className="mb-5" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+              Lưu hồ sơ <span style={{ color: '#f4efe6', fontWeight: 600 }}>{confirmModal.names}</span> để giữ PDF mãi mãi?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleConfirmSave}
+                disabled={confirming}
+                className="flex-1 py-2.5 rounded-xl font-semibold text-sm"
+                style={{
+                  background: confirming ? 'rgba(74,222,128,0.3)' : 'rgba(74,222,128,0.15)',
+                  color: '#4ade80', border: '1px solid rgba(74,222,128,0.3)',
+                  fontFamily: 'var(--font-vietnam)', cursor: confirming ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {confirming ? 'Đang lưu...' : 'Lưu'}
+              </button>
+              <button
+                onClick={() => setConfirmModal(null)}
+                disabled={confirming}
+                className="flex-1 py-2.5 rounded-xl text-sm"
+                style={{
+                  background: 'rgba(255,255,255,0.04)', color: '#6b7280',
+                  border: '1px solid rgba(255,255,255,0.06)', fontFamily: 'var(--font-vietnam)',
+                  cursor: 'pointer',
+                }}
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -95,6 +95,7 @@ EMAIL_FROM=                      # tên hiển thị + email, vd: "Hạt Giống
 
 # Misc
 UPGRADE_CODE=                    # code bí mật để upgrade account thủ công
+CRON_SECRET=                     # secret cho /api/cron/cleanup — tạo: openssl rand -hex 32
 
 # Security
 PROFILE_ENCRYPTION_KEY=          # AES-256-GCM key (64 hex chars) — tạo: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"

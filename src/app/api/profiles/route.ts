@@ -23,11 +23,11 @@ export async function GET() {
   if (!user) {
     const byName = await prisma.user.findUnique({ where: { username: session.user.name || '' } })
     if (!byName) return NextResponse.json({ profiles: [] })
-    const profiles = await prisma.profile.findMany({ where: { userUid: byName.userUid }, orderBy: { id: 'desc' } })
+    const profiles = await prisma.profile.findMany({ where: { userUid: byName.userUid, isTemp: false }, orderBy: { id: 'desc' } })
     return NextResponse.json({ profiles: profiles.map(p => ({ ...p, data: decryptProfileData(p.data) })) })
   }
 
-  const profiles = await prisma.profile.findMany({ where: { userUid: uid }, orderBy: { id: 'desc' } })
+  const profiles = await prisma.profile.findMany({ where: { userUid: uid, isTemp: false }, orderBy: { id: 'desc' } })
   return NextResponse.json({ profiles: profiles.map(p => ({ ...p, data: decryptProfileData(p.data) })) })
 }
 
@@ -40,6 +40,9 @@ export async function POST(request: Request) {
   const uid = (session.user as Record<string, unknown>).uid as string
   const body = await request.json()
 
+  const isTemp = body.isTemp === true
+  const tempExpiry = isTemp ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null
+
   const profile = await prisma.profile.create({
     data: {
       userUid: uid,
@@ -48,6 +51,8 @@ export async function POST(request: Request) {
       gender: body.gender || 'Female',
       data: encryptProfileData(body.data || {}) as object,
       createdAt: new Date().toISOString(),
+      isTemp,
+      ...(tempExpiry ? { tempExpiry } : {}),
     },
   })
 

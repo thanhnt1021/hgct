@@ -62,7 +62,9 @@ CREATE TABLE profiles (
   name        VARCHAR NOT NULL,
   gender      VARCHAR,
   data        JSONB,
-  created_at  VARCHAR DEFAULT ''
+  created_at  VARCHAR DEFAULT '',
+  is_temp     BOOLEAN NOT NULL DEFAULT false,
+  temp_expiry TIMESTAMP
 );
 ```
 
@@ -73,10 +75,14 @@ CREATE TABLE profiles (
 | `name` | Tên đầy đủ (họ đệm tên ghép) |
 | `gender` | 'Male'\|'Female'\|'Other' |
 | `data` | JSON encrypted AES-256-GCM: `{ ho, dem, ten, note, dob, tob, loc }` — format: `{ _enc: "iv:ct:tag" }` |
+| `is_temp` | true = profile tạm thời (user không tick Lưu hồ sơ khi submit /input) |
+| `temp_expiry` | Thời điểm profile tự xóa (now + 30 ngày khi tạo temp) |
 
 **Encryption:** `data` được mã hóa bằng `PROFILE_ENCRYPTION_KEY` (env var). Decrypt tự động trong `/api/profiles` GET. Backup plaintext: `/var/hgct/backups/`.
 
-**Trạng thái:** **Đang dùng** — CRUD qua `/api/profiles` (GET/POST/PUT/DELETE). Hiển thị trong `/profile`, `/my-charts`, `/services`.
+**Temp Profile flow:** User đăng nhập + submit /input mà không tick "Lưu hồ sơ" → tạo profile với `isTemp=true`, `tempExpiry=now+30d`. PDF đặt tên đầy đủ như permanent. Cron 01:00 AM dọn dẹp expired temp profiles. User có thể nâng cấp temp → permanent qua `POST /api/profiles/confirm`.
+
+**Trạng thái:** **Đang dùng** — CRUD qua `/api/profiles` (GET/POST/PUT/DELETE). GET chỉ trả `isTemp=false`. Hiển thị trong `/profile`, `/my-charts`, `/services`.
 
 ---
 
@@ -166,14 +172,16 @@ model User {
 }
 
 model Profile {
-  id         Int    @id @default(autoincrement())
-  userUid    String @map("user_uid")
-  profileUid String @unique @map("profile_uid")
+  id         Int       @id @default(autoincrement())
+  userUid    String    @map("user_uid")
+  profileUid String    @unique @map("profile_uid")
   name       String
   gender     String?
   data       Json
-  createdAt  String @default("") @map("created_at")
-  user       User   @relation(fields: [userUid], references: [userUid])
+  createdAt  String    @default("") @map("created_at")
+  isTemp     Boolean   @default(false) @map("is_temp")
+  tempExpiry DateTime? @map("temp_expiry")
+  user       User      @relation(fields: [userUid], references: [userUid])
   @@map("profiles")
 }
 

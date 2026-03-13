@@ -100,14 +100,17 @@ function InputPageInner() {
       loc: form.loc,
     }
 
-    if (saveProfile && user) {
+    // When logged in: always create profile (temp if not saving, permanent if saving)
+    // forChart mode skipped — no report generated, no profileUid needed
+    if (user && !forChart) {
       try {
-        await fetch('/api/profiles', {
+        const res = await fetch('/api/profiles', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name,
             gender: form.gender,
+            isTemp: !saveProfile,
             data: {
               ho: form.ho.trim(),
               dem: form.dem.trim(),
@@ -119,6 +122,16 @@ function InputPageInner() {
             },
           }),
         })
+        if (res.ok) {
+          const { profile } = await res.json()
+          if (profile?.profileUid) {
+            if (forSynastry) {
+              sessionStorage.setItem('profileUidB', profile.profileUid)
+            } else {
+              sessionStorage.setItem('profileUidA', profile.profileUid)
+            }
+          }
+        }
       } catch { /* non-blocking */ }
     }
 

@@ -87,13 +87,48 @@ Response:
 **File:** `src/app/api/profiles/route.ts`
 
 ```
-GET    → prisma.profile.findMany({ where: { userUid: session.uid } })
-POST   { name, gender, data } → prisma.profile.create()
+GET    → prisma.profile.findMany({ where: { userUid, isTemp: false } })  ← chỉ trả permanent profiles
+POST   { name, gender, data, isTemp? } → prisma.profile.create()
+         isTemp=true → tempExpiry = now + 30 ngày (tự xóa sau 30 ngày)
 PUT    { id, name, gender, data } → prisma.profile.update()
-DELETE ?id=... → prisma.profile.delete()
+DELETE ?id=... → soft-delete linked jobs + move PDF → soon_delete → prisma.profile.delete()
 ```
 
 Yêu cầu session (NextAuth). `data` là JSON: `{ ho, dem, ten, note, dob, tob, loc }`.
+
+---
+
+### `POST /api/profiles/confirm` — Nâng Cấp Temp Profile
+
+**File:** `src/app/api/profiles/confirm/route.ts`
+
+```
+Input:  { profileUids: string[] }
+Logic:  prisma.profile.updateMany({ where: { profileUid in uids, userUid, isTemp: true }, data: { isTemp: false, tempExpiry: null } })
+Output: { success: true }
+```
+
+Dùng khi user click [Lưu ngay] trong HistoryReports. Nhận array để xử lý synastry (2 temp profiles 1 lúc).
+
+---
+
+### `GET /api/cron/cleanup` — Dọn Dẹp Temp & PDF Hết Hạn
+
+**File:** `src/app/api/cron/cleanup/route.ts`
+
+Auth: `Authorization: Bearer {CRON_SECRET}` (env var).
+
+**Phase 1 — expired temp profiles:**
+- Tìm profiles WHERE `isTemp=true AND tempExpiry <= now`
+- Move PDF sang `/var/hgct/pdfs/soon_delete/`
+- Update linked jobs: `pdfExpiresAt = now + 7 ngày`, `pdfNote = "..."`
+- Xóa profile khỏi DB
+
+**Phase 2 — xóa PDF khỏi disk:**
+- Tìm jobs WHERE `pdfExpiresAt <= now`
+- Xóa file tương ứng trong `soon_delete/`
+
+Chạy hằng ngày: `0 1 * * * curl -H "Authorization: Bearer {secret}" https://hatgiongchiemtinh.com/api/cron/cleanup`
 
 ---
 
