@@ -97,7 +97,7 @@ export default function ChartList() {
     setModalOpen(true)
   }
 
-  const handleSave = async (formData: ProfileFormData) => {
+  const handleSave = async (formData: ProfileFormData, _saveProfile?: boolean) => {
     setSaving(true)
     const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
     const body = { name, gender: formData.gender, data: { ...formData, ho: formData.ho, dem: formData.dem, ten: formData.ten, note: formData.note || '' } }
@@ -154,8 +154,13 @@ export default function ChartList() {
       case 'date_newest': list.sort((a, b) => b.createdAt.localeCompare(a.createdAt)); break
       case 'date_oldest': list.sort((a, b) => a.createdAt.localeCompare(b.createdAt)); break
     }
+    // Pin "Bạn" lên đầu luôn, bất kể sort
+    if (mainProfileId) {
+      const idx = list.findIndex(p => p.id === mainProfileId)
+      if (idx > 0) list = [list[idx], ...list.slice(0, idx), ...list.slice(idx + 1)]
+    }
     return list
-  }, [profiles, search, sort])
+  }, [profiles, search, sort, mainProfileId])
 
   const totalPages = Math.ceil(filtered.length / pageSize)
   const paginated = filtered.slice(page * pageSize, (page + 1) * pageSize)

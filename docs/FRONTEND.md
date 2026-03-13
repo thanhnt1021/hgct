@@ -149,10 +149,26 @@
   - LocationPicker
   - Ghi chú (tuỳ chọn)
 - Validation: tên*, ngày*, tháng*, năm*, giờ/phút* (nếu không tick Không rõ)
-- Footer: [Lưu] [Hủy]
+- **Props mới:** `showSaveCheckbox?: boolean` — hiện checkbox "Lưu hồ sơ vào danh sách"; `submitLabel?: string` — tùy text nút submit; `onSave(data, saveProfile: boolean)` — arg thứ 2 là trạng thái checkbox
+- `/profile` → ChartList/ProfileInfo: dùng modal **không có** checkbox (luôn lưu)
+- `/services`, `/chart`: dùng modal **có** checkbox, default unchecked
 
 **`AvatarCropModal.tsx`** — Upload + crop avatar
 **`ChartList.tsx`**, **`ProfileInfo.tsx`**, **`SubscriptionPlans.tsx`**
+
+**`ChartList.tsx`** — Bản đồ sao tab trong `/profile`
+- Hồ sơ "Bạn" (`mainProfileId`) luôn pin lên đầu list, bất kể sort/search
+
+**`/services` (ServicesPage)**
+- "Nhập thông tin mới" → mở `ProfileFormModal` (có checkbox "Lưu hồ sơ") thay vì navigate sang `/input`
+- Temp profiles (chưa lưu) hiện riêng bên dưới nút "Nhập", màu amber, badge "Chưa lưu" — KHÔNG lẫn vào search list
+- Non-logged-in: thử POST, nếu fail vẫn tạo local profile và flow tiếp tục
+- Synastry: nếu B chưa chọn → submit label modal = "Chọn người tiếp theo →"; nếu đã chọn → "Tiếp tục →"
+
+**`/chart` (ChartPage)**
+- "Nhập thông tin mới" → mở `ProfileFormModal` (có checkbox, submit label "Xem bản đồ sao ✦")
+- Nếu tick lưu → POST permanent profile, thêm vào danh sách
+- Sau submit → tính chart trực tiếp (không navigate)
 
 **`HistoryReports.tsx`** — Lịch sử báo cáo + PDF actions
 

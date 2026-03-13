@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { Search, Plus } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
+import ProfileFormModal, { ProfileFormData, EMPTY_PROFILE_FORM } from '@/components/profile/ProfileFormModal'
 
 interface Profile {
   id: string
@@ -19,6 +20,7 @@ interface Profile {
   tob: { hour: number; minute: number; unknown: boolean }
   loc: { address: string; lat: number; lon: number; tz: string }
   gender: string
+  isTemp?: boolean  // true = nhập mới qua modal nhưng chưa lưu
 }
 
 interface ServiceDef {
@@ -67,10 +69,16 @@ function ProfilePicker({
 }) {
   const [search, setSearch] = useState('')
 
-  const filtered = profiles.filter(p => {
+  // Chỉ hiện permanent profiles trong search list
+  const permanentProfiles = profiles.filter(p => !p.isTemp)
+  const filteredList = permanentProfiles.filter(p => {
     const q = search.toLowerCase()
     return p.name.toLowerCase().includes(q) || (p.note || '').toLowerCase().includes(q)
   })
+
+  // Profile tạm thời đang được chọn (nếu có)
+  const selectedProfile = profiles.find(p => p.id === selectedId)
+  const tempSelected = selectedProfile?.isTemp ? selectedProfile : null
 
   return (
     <div>
@@ -85,7 +93,7 @@ function ProfilePicker({
       <button
         type="button"
         onClick={onNew}
-        className="w-full flex items-center gap-2 mb-3"
+        className="w-full flex items-center gap-2 mb-2"
         style={{
           background: 'transparent',
           border: '1px solid rgba(200,148,63,0.28)',
@@ -103,61 +111,88 @@ function ProfilePicker({
         <Plus size={14} /> Nhập thông tin mới
       </button>
 
-      {/* Search */}
-      <div
-        className="flex items-center gap-2 rounded-lg px-3 mb-2"
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,148,63,0.1)', minHeight: 36 }}
-      >
-        <Search size={13} style={{ color: '#6b7280', flexShrink: 0 }} />
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Tìm hồ sơ..."
+      {/* Hiển thị hồ sơ tạm (chưa lưu) nếu đang được chọn */}
+      {tempSelected && (
+        <div
+          className="flex items-center justify-between rounded-lg px-3 py-2.5 mb-2"
           style={{
-            background: 'transparent', border: 'none', outline: 'none',
-            color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem',
-            width: '100%', padding: '0.4rem 0',
+            background: 'rgba(245,158,11,0.08)',
+            border: '1px solid rgba(245,158,11,0.3)',
           }}
-        />
-        {search && (
-          <button onClick={() => setSearch('')} style={{ color: '#6b7280', flexShrink: 0, lineHeight: 1 }}>✕</button>
-        )}
-      </div>
+        >
+          <div>
+            <p style={{ color: '#f59e0b', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
+              {tempSelected.name}
+            </p>
+            <p style={{ color: '#92400e', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.1rem' }}>
+              Chưa lưu vào danh sách
+            </p>
+          </div>
+          <span style={{ color: '#f59e0b', fontSize: '0.72rem', fontFamily: 'var(--font-vietnam)', background: 'rgba(245,158,11,0.15)', padding: '2px 8px', borderRadius: '4px' }}>
+            ✦ Đã chọn
+          </span>
+        </div>
+      )}
 
-      {/* Profile list */}
-      <div className="space-y-1 overflow-y-auto pr-0.5" style={{ maxHeight: 216 }}>
-        {filtered.length === 0 && (
-          <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', textAlign: 'center', padding: '0.875rem' }}>
-            Không tìm thấy hồ sơ
-          </p>
-        )}
-        {filtered.map(p => {
-          const isSelected = selectedId === p.id
-          return (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => onChange(p.id)}
-              className="w-full text-left rounded-lg px-3 py-2.5"
+      {/* Search */}
+      {permanentProfiles.length > 0 && (
+        <>
+          <div
+            className="flex items-center gap-2 rounded-lg px-3 mb-2"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,148,63,0.1)', minHeight: 36 }}
+          >
+            <Search size={13} style={{ color: '#6b7280', flexShrink: 0 }} />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Tìm hồ sơ đã lưu..."
               style={{
-                background: isSelected ? 'rgba(200,148,63,0.12)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${isSelected ? 'rgba(200,148,63,0.32)' : 'rgba(255,255,255,0.05)'}`,
-                transition: 'all 0.15s',
+                background: 'transparent', border: 'none', outline: 'none',
+                color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem',
+                width: '100%', padding: '0.4rem 0',
               }}
-              onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
-              onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)' }}
-            >
-              <p style={{ color: isSelected ? '#f0cc78' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
-                {p.name}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} style={{ color: '#6b7280', flexShrink: 0, lineHeight: 1 }}>✕</button>
+            )}
+          </div>
+
+          {/* Profile list — chỉ permanent */}
+          <div className="space-y-1 overflow-y-auto pr-0.5" style={{ maxHeight: 180 }}>
+            {filteredList.length === 0 && (
+              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', textAlign: 'center', padding: '0.875rem' }}>
+                Không tìm thấy hồ sơ
               </p>
-              <p style={{ color: '#8b8fa8', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontStyle: 'italic', minHeight: '1em', marginTop: '0.15rem' }}>
-                {p.note || ''}
-              </p>
-            </button>
-          )
-        })}
-      </div>
+            )}
+            {filteredList.map(p => {
+              const isSelected = selectedId === p.id
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onChange(p.id)}
+                  className="w-full text-left rounded-lg px-3 py-2.5"
+                  style={{
+                    background: isSelected ? 'rgba(200,148,63,0.12)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${isSelected ? 'rgba(200,148,63,0.32)' : 'rgba(255,255,255,0.05)'}`,
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
+                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)' }}
+                >
+                  <p style={{ color: isSelected ? '#f0cc78' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
+                    {p.name}
+                  </p>
+                  <p style={{ color: '#8b8fa8', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontStyle: 'italic', minHeight: '1em', marginTop: '0.15rem' }}>
+                    {p.note || ''}
+                  </p>
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -171,6 +206,11 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<ServiceDef | null>(null)
   const [profileA, setProfileA] = useState('')
   const [profileB, setProfileB] = useState('')
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalTarget, setModalTarget] = useState<'A' | 'B'>('A')
+  const [modalSaving, setModalSaving] = useState(false)
 
   useEffect(() => {
     fetch('/api/profiles')
@@ -190,6 +230,7 @@ export default function ServicesPage() {
             tob: p.data?.tob || { hour: 12, minute: 0, unknown: false },
             loc: p.data?.loc || { address: 'Hà Nội', lat: 21.02, lon: 105.84, tz: 'Asia/Ho_Chi_Minh' },
             createdAt: p.createdAt || '',
+            isTemp: false,
           })))
         }
       })
@@ -202,22 +243,76 @@ export default function ServicesPage() {
     setProfileB('')
   }
 
-  // Navigate to /input directly (no profile)
-  const handleNewA = () => {
-    if (!selectedService) return
-    sessionStorage.setItem('selectedService', selectedService.type)
-    router.push('/input')
+  // Mở modal để nhập thông tin mới
+  const openModalFor = (target: 'A' | 'B') => {
+    setModalTarget(target)
+    setModalOpen(true)
   }
 
-  // Navigate to /input?for=synastry directly (profile A data already set)
-  const handleNewB = () => {
-    if (!selectedService) return
-    const pa = profiles.find(p => p.id === profileA)
-    if (pa) {
-      sessionStorage.setItem('inputData', JSON.stringify(profileToInputData(pa)))
+  // Tính label nút submit modal theo context
+  const getModalSubmitLabel = () => {
+    if (!selectedService?.needsTwo) return 'Xác nhận'
+    if (modalTarget === 'B') return 'Tiếp tục →'
+    // Target = A: kiểm tra B đã chọn chưa
+    return profileB !== '' ? 'Tiếp tục →' : 'Chọn người tiếp theo →'
+  }
+
+  const handleModalSave = async (formData: ProfileFormData, saveProfile: boolean) => {
+    setModalSaving(true)
+    const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
+
+    let profileId = `local_${Date.now()}`
+    let profileUid = ''
+    let savedPermanently = false
+
+    // Thử POST lên server (cần đăng nhập)
+    try {
+      const res = await fetch('/api/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          gender: formData.gender,
+          isTemp: !saveProfile,
+          data: formData,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.profile) {
+          profileId = String(data.profile.id)
+          profileUid = data.profile.profileUid || ''
+          savedPermanently = saveProfile
+        }
+      }
+    } catch { /* non-logged-in hoặc lỗi mạng: dùng local data */ }
+
+    const newProfile: Profile = {
+      id: profileId,
+      profileUid,
+      name,
+      ten: formData.ten,
+      note: formData.note || '',
+      gender: formData.gender,
+      dob: formData.dob,
+      tob: formData.tob,
+      loc: formData.loc,
+      isTemp: !savedPermanently,
     }
-    sessionStorage.setItem('selectedService', selectedService.type)
-    router.push('/input?for=synastry')
+
+    // Thêm vào danh sách profiles (bao gồm cả temp — sẽ được filter trong picker)
+    setProfiles(prev => [newProfile, ...prev])
+
+    if (modalTarget === 'A') {
+      setProfileA(profileId)
+      sessionStorage.setItem('profileUidA', profileUid)
+    } else {
+      setProfileB(profileId)
+      sessionStorage.setItem('profileUidB', profileUid)
+    }
+
+    setModalOpen(false)
+    setModalSaving(false)
   }
 
   const handleConfirm = () => {
@@ -240,6 +335,7 @@ export default function ServicesPage() {
   }
 
   const canConfirm = profileA !== '' && (!selectedService?.needsTwo || profileB !== '')
+  const hasAnyProfile = profiles.length > 0
 
   return (
     <div className="min-h-screen" style={{ background: '#06060f' }}>
@@ -362,14 +458,14 @@ export default function ServicesPage() {
               />
 
               <div className="space-y-6">
-                {profiles.length > 0 ? (
+                {hasAnyProfile ? (
                   <>
                     <ProfilePicker
                       profiles={profiles}
                       selectedId={profileA}
-                      onChange={setProfileA}
+                      onChange={id => { setProfileA(id); sessionStorage.setItem('profileUidA', profiles.find(p => p.id === id)?.profileUid || '') }}
                       label={selectedService.needsTwo ? 'NGƯỜI THỨ NHẤT' : 'CHỌN HỒ SƠ'}
-                      onNew={handleNewA}
+                      onNew={() => openModalFor('A')}
                     />
 
                     {selectedService.needsTwo && (
@@ -378,9 +474,9 @@ export default function ServicesPage() {
                         <ProfilePicker
                           profiles={profiles}
                           selectedId={profileB}
-                          onChange={setProfileB}
+                          onChange={id => { setProfileB(id); sessionStorage.setItem('profileUidB', profiles.find(p => p.id === id)?.profileUid || '') }}
                           label="NGƯỜI THỨ HAI"
-                          onNew={handleNewB}
+                          onNew={() => openModalFor('B')}
                         />
                       </>
                     )}
@@ -397,7 +493,7 @@ export default function ServicesPage() {
                     )}
                     {user && <div className="mb-4" />}
                     <button
-                      onClick={handleNewA}
+                      onClick={() => openModalFor('A')}
                       className="flex items-center gap-2 mx-auto"
                       style={{
                         background: 'transparent',
@@ -415,7 +511,7 @@ export default function ServicesPage() {
                   </div>
                 )}
 
-                {profiles.length > 0 && (
+                {(hasAnyProfile || profileA !== '') && (
                   <button
                     onClick={handleConfirm}
                     disabled={!canConfirm}
@@ -441,6 +537,22 @@ export default function ServicesPage() {
           </div>
         )}
       </div>
+
+      {/* Modal nhập thông tin mới */}
+      <ProfileFormModal
+        open={modalOpen}
+        title={
+          selectedService?.needsTwo
+            ? (modalTarget === 'A' ? 'Người thứ nhất' : 'Người thứ hai')
+            : 'Nhập thông tin'
+        }
+        initialData={EMPTY_PROFILE_FORM}
+        saving={modalSaving}
+        showSaveCheckbox
+        submitLabel={getModalSubmitLabel()}
+        onSave={handleModalSave}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   )
 }

@@ -67,6 +67,13 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy thẳng vào code**.
 
+> **⚠️ RULE CỨNG — KHÔNG BAO GIỜ bỏ qua Phase 1, dù user đính kèm plan chi tiết đến đâu.**
+> Plan là input để Claude đối chiếu với codebase — **KHÔNG phải lệnh implement.**
+> Vẫn phải đọc context, hỏi Q&A, và **chờ user confirm rõ ràng** trước khi viết bất kỳ dòng code nào.
+>
+> - **SAI:** `feature: [tên]` + plan → tạo branch → implement ngay.
+> - **ĐÚNG:** `feature: [tên]` + plan → tạo branch → đọc context → hỏi Q&A → **chờ user trả lời** → implement.
+
 ### Phase 1 — Hiểu rõ trước khi làm
 
 1. Đọc plan/prompt từ user.
@@ -77,7 +84,10 @@ Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy 
    - Edge cases cần biết cách xử lý
    - Chiến lược test cho từng thay đổi (xác định trước để sau khi làm xong mỗi bước có thể verify ngay)
 5. Nếu câu trả lời vẫn còn điểm mù — hỏi tiếp, **nhưng luôn gom thành 1 batch**, không hỏi lẻ từng câu.
-6. **Bắt đầu implement khi**: user đã trả lời đủ, hoặc user nói `make it` / `làm đi` / tương tự.
+6. **Bắt đầu implement khi — phải thỏa MỌI điều kiện sau:**
+   - User đã **trả lời batch Q&A** (không phải chỉ đính kèm plan)
+   - User xác nhận rõ ràng bằng tín hiệu như `làm đi`, `make it`, `go ahead`, `proceed`, `ok làm`, hoặc tương đương
+   - **Lưu ý:** "tương đương" ở đây nghĩa là câu chủ động ra lệnh — **KHÔNG phải** chỉ đính kèm plan chi tiết, KHÔNG phải im lặng sau Q&A.
 
 > **Mục tiêu của Phase 1:** Sau khi Q&A xong, có thể implement một mạch từ đầu đến cuối mà không cần dừng lại hỏi thêm.
 

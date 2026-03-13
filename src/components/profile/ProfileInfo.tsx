@@ -130,7 +130,7 @@ export default function ProfileInfo() {
     setMainChartSaving(false)
   }
 
-  const handleSaveMainChart = async (formData: ProfileFormData) => {
+  const handleSaveMainChart = async (formData: ProfileFormData, _saveProfile?: boolean) => {
     const newName = [formData.ho.trim(), formData.dem.trim(), formData.ten.trim()].filter(Boolean).join(' ')
     try {
       const res = await fetch('/api/profiles')

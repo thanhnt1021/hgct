@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { Search, Plus } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
 import NatalWheel from '@/components/chart/NatalWheel'
 import { PLANET_SYMBOLS, ASPECT_TABLE_OBJECTS } from '@/lib/astrology/symbols'
+import ProfileFormModal, { ProfileFormData, EMPTY_PROFILE_FORM } from '@/components/profile/ProfileFormModal'
 
 // ─── Types ─────────────────────────────────────────────────────────
 
@@ -107,7 +107,6 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 // ─── Main page ─────────────────────────────────────────────────────
 
 export default function ChartPage() {
-  const router = useRouter()
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [profilesLoading, setProfilesLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)
@@ -115,6 +114,8 @@ export default function ChartPage() {
   const [result, setResult] = useState<ChartResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [chartModalOpen, setChartModalOpen] = useState(false)
+  const [chartModalSaving, setChartModalSaving] = useState(false)
 
   const submitWithData = useCallback(async (inputData: object) => {
     setLoading(true); setError('')
@@ -183,6 +184,46 @@ export default function ChartPage() {
 
   const resetResult = () => { setResult(null); setError('') }
 
+  const handleChartModalSave = async (formData: ProfileFormData, saveProfile: boolean) => {
+    setChartModalSaving(true)
+    const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
+    const inputData = {
+      name,
+      gender: formData.gender,
+      dob: formData.dob,
+      tob: formData.tob.unknown ? { hour: 12, minute: 0 } : { hour: formData.tob.hour, minute: formData.tob.minute },
+      loc: formData.loc,
+    }
+    // Nếu tick "Lưu hồ sơ" → POST lên server
+    if (saveProfile) {
+      try {
+        const res = await fetch('/api/profiles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, gender: formData.gender, isTemp: false, data: formData }),
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.profile) {
+            const p = data.profile
+            setProfiles(prev => [{
+              id: String(p.id),
+              name: p.name || name,
+              note: formData.note || '',
+              gender: formData.gender,
+              dob: formData.dob,
+              tob: formData.tob,
+              loc: formData.loc,
+            }, ...prev])
+          }
+        }
+      } catch { /* ignore save error, vẫn tính chart */ }
+    }
+    setChartModalOpen(false)
+    setChartModalSaving(false)
+    await submitWithData(inputData)
+  }
+
   // ── Loading ──────────────────────────────────────────────────────
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#06060f' }}>
@@ -227,10 +268,10 @@ export default function ChartPage() {
                 CHỌN HỒ SƠ
               </label>
 
-              {/* Nút Nhập thông tin mới */}
+              {/* Nút Nhập thông tin mới — mở modal */}
               <button
                 type="button"
-                onClick={() => router.push('/input?for=chart')}
+                onClick={() => setChartModalOpen(true)}
                 className="w-full flex items-center gap-2"
                 style={{
                   background: 'transparent',
@@ -328,6 +369,18 @@ export default function ChartPage() {
           )}
         </div>
       </div>
+
+      {/* Modal nhập thông tin mới cho chart */}
+      <ProfileFormModal
+        open={chartModalOpen}
+        title="Nhập thông tin"
+        initialData={EMPTY_PROFILE_FORM}
+        saving={chartModalSaving}
+        showSaveCheckbox
+        submitLabel="Xem bản đồ sao ✦"
+        onSave={handleChartModalSave}
+        onClose={() => setChartModalOpen(false)}
+      />
     </div>
   )
 

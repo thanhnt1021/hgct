@@ -54,16 +54,20 @@ interface Props {
   title?: string
   initialData?: ProfileFormData | null
   saving?: boolean
-  onSave: (data: ProfileFormData) => void
+  showSaveCheckbox?: boolean
+  defaultSaveChecked?: boolean
+  submitLabel?: string
+  onSave: (data: ProfileFormData, saveProfile: boolean) => void
   onClose: () => void
 }
 
-export default function ProfileFormModal({ open, title, initialData, saving, onSave, onClose }: Props) {
+export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, onSave, onClose }: Props) {
   const [form, setForm] = useState<ProfileFormData>(initialData ?? EMPTY_PROFILE_FORM)
   const [yearMode, setYearMode] = useState<'select' | 'custom'>('select')
   const [customYearText, setCustomYearText] = useState('')
   const [yearError, setYearError] = useState('')
   const [formError, setFormError] = useState('')
+  const [saveProfile, setSaveProfile] = useState(defaultSaveChecked ?? false)
 
   // Sync form when initialData or open changes
   useEffect(() => {
@@ -75,7 +79,8 @@ export default function ProfileFormModal({ open, title, initialData, saving, onS
     setCustomYearText(inRange || data.dob.year === 0 ? '' : String(data.dob.year))
     setYearError('')
     setFormError('')
-  }, [open, initialData])
+    setSaveProfile(defaultSaveChecked ?? false)
+  }, [open, initialData, defaultSaveChecked])
 
   // Lock body scroll
   useEffect(() => {
@@ -108,7 +113,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, onS
       setFormError('Vui lòng chọn giờ và phút sinh (hoặc tích "Không rõ giờ sinh")'); return
     }
 
-    onSave({ ...form, dob: { ...form.dob, year: finalYear } })
+    onSave({ ...form, dob: { ...form.dob, year: finalYear } }, saveProfile)
   }
 
   return (
@@ -264,6 +269,20 @@ export default function ProfileFormModal({ open, title, initialData, saving, onS
             />
           </div>
 
+          {showSaveCheckbox && (
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={saveProfile}
+                onChange={e => setSaveProfile(e.target.checked)}
+                style={{ width: '1rem', height: '1rem', padding: 0, accentColor: '#c9a84c' }}
+              />
+              <span style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+                Lưu hồ sơ vào danh sách
+              </span>
+            </label>
+          )}
+
           {formError && (
             <p style={{ color: '#ef4444', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>⚠ {formError}</p>
           )}
@@ -273,7 +292,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, onS
         <div className="flex gap-3 px-6 pb-6">
           <button onClick={handleSubmit} disabled={saving} className="flex-1 h-9 rounded-lg font-semibold"
             style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)', opacity: saving ? 0.7 : 1 }}>
-            {saving ? 'Đang lưu...' : 'Lưu'}
+            {saving ? 'Đang lưu...' : (submitLabel ?? 'Lưu')}
           </button>
           <button onClick={onClose} className="px-6 h-9 rounded-lg font-semibold"
             style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
