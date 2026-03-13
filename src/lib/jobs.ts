@@ -18,6 +18,10 @@ export interface Job {
   result?: JobResult
   error?: string
   createdAt: number
+  profileUidA?: string
+  profileUidB?: string
+  pdfExpiresAt?: string  // ISO string — set when PDF moved to soon_delete
+  pdfNote?: string       // shown in HistoryReports under report name
 }
 
 // Declare on global to ensure single instance across all Next.js route bundles
@@ -33,6 +37,8 @@ export interface JobMeta {
   service?: string
   name?: string
   email?: string
+  profileUidA?: string
+  profileUidB?: string
 }
 
 export function createJob(id: string, meta?: JobMeta): Job {
@@ -42,23 +48,35 @@ export function createJob(id: string, meta?: JobMeta): Job {
     progress: 0,
     label: 'Đang khởi tạo...',
     createdAt: Date.now(),
+    profileUidA: meta?.profileUidA,
+    profileUidB: meta?.profileUidB,
   }
   jobs.set(id, job)
-  // Persist to DB (fire and forget)
-  prisma.job.create({ data: { id, status: 'processing', progress: 0, label: 'Đang khởi tạo...', ...meta } }).catch(console.error)
+  prisma.job.create({
+    data: {
+      id, status: 'processing', progress: 0, label: 'Đang khởi tạo...',
+      userUid: meta?.userUid,
+      service: meta?.service,
+      name: meta?.name,
+      email: meta?.email,
+      profileUidA: meta?.profileUidA,
+      profileUidB: meta?.profileUidB,
+    }
+  }).catch(console.error)
   return job
 }
 
 export function updateJob(id: string, updates: Partial<Omit<Job, 'id' | 'createdAt'>>) {
   const job = jobs.get(id)
   if (job) Object.assign(job, updates)
-  // Persist to DB (fire and forget)
   const dbUpdates: Record<string, unknown> = {}
   if (updates.status !== undefined) dbUpdates.status = updates.status
   if (updates.progress !== undefined) dbUpdates.progress = updates.progress
   if (updates.label !== undefined) dbUpdates.label = updates.label
   if (updates.result !== undefined) dbUpdates.result = updates.result as object
   if (updates.error !== undefined) dbUpdates.error = updates.error
+  if (updates.pdfNote !== undefined) dbUpdates.pdfNote = updates.pdfNote
+  if (updates.pdfExpiresAt !== undefined) dbUpdates.pdfExpiresAt = updates.pdfExpiresAt ? new Date(updates.pdfExpiresAt) : null
   if (Object.keys(dbUpdates).length > 0) {
     prisma.job.update({ where: { id }, data: dbUpdates }).catch(console.error)
   }
@@ -78,6 +96,10 @@ export async function getJobFromDb(id: string): Promise<Job | undefined> {
       result: dbJob.result as JobResult | undefined,
       error: dbJob.error ?? undefined,
       createdAt: dbJob.createdAt.getTime(),
+      profileUidA: dbJob.profileUidA ?? undefined,
+      profileUidB: dbJob.profileUidB ?? undefined,
+      pdfExpiresAt: dbJob.pdfExpiresAt?.toISOString(),
+      pdfNote: dbJob.pdfNote ?? undefined,
     }
     jobs.set(id, job)
     return job

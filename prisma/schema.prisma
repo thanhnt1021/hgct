@@ -48,17 +48,21 @@ model KnowledgeBase {
 }
 
 model Job {
-  id        String   @id
-  status    String   @default("processing")
-  progress  Int      @default(0)
-  label     String   @default("")
-  result    Json?
-  error     String?
-  userUid   String?  @map("user_uid")
-  service   String?
-  name      String?
-  email     String?
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String    @id
+  status       String    @default("processing")
+  progress     Int       @default(0)
+  label        String    @default("")
+  result       Json?
+  error        String?
+  userUid      String?   @map("user_uid")
+  service      String?
+  name         String?
+  email        String?
+  profileUidA  String?   @map("profile_uid_a")
+  profileUidB  String?   @map("profile_uid_b")
+  pdfExpiresAt DateTime? @map("pdf_expires_at")
+  pdfNote      String?   @map("pdf_note")
+  createdAt    DateTime  @default(now()) @map("created_at")
 
   @@map("jobs")
 }

@@ -44,9 +44,14 @@ function aiLabel(pct: number): string {
   return lbl
 }
 
-function savePdf(buffer: Buffer, profileUid?: string, service?: string): string {
+function savePdf(buffer: Buffer, profileUidA?: string, profileUidB?: string, service?: string): string {
   if (!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR, { recursive: true })
-  const id = profileUid && service ? `${profileUid}_${service}` : randomUUID()
+  let id: string
+  if (profileUidA && service) {
+    id = profileUidB ? `${profileUidA}_${profileUidB}_${service}` : `${profileUidA}_${service}`
+  } else {
+    id = randomUUID()
+  }
   fs.writeFileSync(path.join(PDF_DIR, `${id}.pdf`), buffer)
   return id
 }
@@ -59,7 +64,8 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
     inputData: Record<string, unknown>
     email?: string
   }
-  const profileUid = body.profileUid as string | undefined
+  const profileUidA = body.profileUid as string | undefined
+  const profileUidBBody = body.profileUidB as string | undefined
   const { dob, tob, loc, name, ten, gender } = inputData as {
     dob: { day: number; month: number; year: number }
     tob: { hour: number; minute: number }
@@ -192,7 +198,10 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
   let pdfUrl: string | null = null
   let pdfFilename: string | null = null
   if (pdfBuffer) {
-    const pdfId = savePdf(pdfBuffer, profileUid, service)
+    const isSynastry = service === 'synastry' || service === 'relationship'
+    const pdfId = isSynastry
+      ? savePdf(pdfBuffer, profileUidA, profileUidBBody, 'synastry')
+      : savePdf(pdfBuffer, profileUidA, undefined, service)
     pdfFilename = makePdfFilename(service, name, nameB || undefined)
     pdfUrl = `/api/pdf/${pdfId}?filename=${encodeURIComponent(pdfFilename)}`
   }
@@ -252,12 +261,14 @@ export async function POST(request: Request) {
 
     const jobId = randomUUID()
     const userUid = (session?.user as any)?.uid as string | undefined
-    const { service: svc, inputData: iData, email: emailVal, name: displayName } = body as Record<string, unknown>
+    const { service: svc, inputData: iData, email: emailVal, name: displayName, profileUid: pUidA, profileUidB: pUidB } = body as Record<string, unknown>
     const meta = {
       userUid: userUid || undefined,
       service: typeof svc === 'string' ? svc : undefined,
       name: typeof displayName === 'string' ? displayName : (typeof (iData as any)?.name === 'string' ? (iData as any).name : undefined),
       email: typeof emailVal === 'string' ? emailVal : undefined,
+      profileUidA: typeof pUidA === 'string' ? pUidA : undefined,
+      profileUidB: typeof pUidB === 'string' ? pUidB : undefined,
     }
     createJob(jobId, meta)
 
