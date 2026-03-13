@@ -146,7 +146,7 @@ export default function ChartList() {
     let list = [...profiles]
     if (search.trim()) {
       const q = search.trim().toLowerCase()
-      list = list.filter(p => p.name.toLowerCase().includes(q))
+      list = list.filter(p => p.name.toLowerCase().includes(q) || (p.note || '').toLowerCase().includes(q))
     }
     switch (sort) {
       case 'name_asc':    list.sort((a, b) => a.name.localeCompare(b.name, 'vi')); break
