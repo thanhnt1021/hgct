@@ -22,6 +22,7 @@ commit
   → update docs/MD_FILES_TO_UPDATE.md trước
   → update tất cả MD files trong list
   → clear docs/MD_FILES_TO_UPDATE.md
+  → nếu có sửa docs/universal_rules/* → push lên universal-workflow repo trước
   → git commit + push nhánh feature
 
 merge main / lên production
