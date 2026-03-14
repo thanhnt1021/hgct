@@ -146,34 +146,49 @@ function buildHtml(essayText: string, options: PdfOptions): string {
   const lines = cleaned.split('\n')
   const dobStr = `${options.profile.dob.day}/${options.profile.dob.month}/${options.profile.dob.year}`
 
-  let contentHtml = ''
+  // Group content into section groups.
+  // Group 0 = intro content (opener + paragraphs before first numbered section heading).
+  // Groups 1+ = each numbered section heading and its following content.
+  const groupHtmlLines: string[][] = [[]]
+
   for (const line of lines) {
     const s = line.trim()
-    if (!s) { contentHtml += '<div class="spacer"></div>'; continue }
+    if (!s) {
+      groupHtmlLines[groupHtmlLines.length - 1].push('<div class="spacer"></div>')
+      continue
+    }
     const kind = classifyLine(line)
     const safe = escapeHtml(s)
 
+    if (kind === 'section_heading') {
+      groupHtmlLines.push([])
+    }
+
+    let html = ''
     switch (kind) {
-      case 'section_heading':
-        contentHtml += `<h2 class="section">${safe}</h2>`; break
-      case 'subheading':
-        contentHtml += `<h3 class="subheading">${safe}</h3>`; break
-      case 'opener':
-        contentHtml += `<p class="opener">${safe}</p>`; break
-      case 'signature':
-        contentHtml += `<p class="signature">${safe}</p>`; break
-      case 'bullet':
-        contentHtml += `<p class="bullet">${safe}</p>`; break
-      case 'bullet_indent':
-        contentHtml += `<p class="bullet-indent">${safe}</p>`; break
+      case 'section_heading':  html = `<h2 class="section">${safe}</h2>`; break
+      case 'subheading':       html = `<h3 class="subheading">${safe}</h3>`; break
+      case 'opener':           html = `<p class="opener">${safe}</p>`; break
+      case 'signature':        html = `<p class="signature">${safe}</p>`; break
+      case 'bullet':           html = `<p class="bullet">${safe}</p>`; break
+      case 'bullet_indent':    html = `<p class="bullet-indent">${safe}</p>`; break
       case 'red_box': {
         const content = s.slice('[KTLUẬN]'.length).trim()
-        contentHtml += `<div class="red-box">${escapeHtml(content)}</div>`; break
+        html = `<div class="red-box">${escapeHtml(content)}</div>`; break
       }
-      default:
-        contentHtml += `<p class="body">${safe}</p>`
+      default:                 html = `<p class="body">${safe}</p>`
     }
+    groupHtmlLines[groupHtmlLines.length - 1].push(html)
   }
+
+  const contentHtml = groupHtmlLines.map((htmlLines, i) => {
+    const inner = i === 0
+      ? `<h2 class="section section-first">${escapeHtml(options.sectionTitle)}</h2>
+<hr style="border:none;border-top:1pt solid #dc2626;margin-bottom:8pt;">${htmlLines.join('')}`
+      : htmlLines.join('')
+    const cls = i === 0 ? 'section-group' : 'section-group is-section'
+    return `<div class="${cls}">${inner}</div>`
+  }).join('')
 
   const coverName = options.profileB
     ? `<div class="cover-name-sm">${escapeHtml(options.profile.name)}</div>
@@ -189,33 +204,37 @@ function buildHtml(essayText: string, options: PdfOptions): string {
 <style>
 ${buildFontFaces()}
 
-@page { size: A4; margin: 25mm 20mm 20mm 20mm; }
-body { font-family: 'Nunito', sans-serif; font-size: 11pt; color: #1f2937; line-height: 1.55; }
+/* @page: size only — margins are set via page.pdf() to avoid conflicts */
+@page { size: A4; }
+/* margin:0 on body ensures clientWidth in screen mode = viewport width = print content width (642px) */
+body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #1f2937; line-height: 1.55; }
 
 .cover { page-break-after: always; text-align: center; padding-top: 50mm; }
 .cover-line { width: 55%; height: 1.5px; background: #dc2626; margin: 7mm auto; }
-.cover-title { font-family: 'MontserratBold'; font-size: 22pt; color: #dc2626; margin: 0; }
-.cover-name { font-family: 'GreatVibes'; font-size: 34pt; color: #1f2937; margin: 10mm 0 4mm; }
-.cover-name-sm { font-family: 'GreatVibes'; font-size: 26pt; color: #1f2937; margin: 4mm 0; }
-.cover-and { font-family: 'NunitoItalic'; font-size: 16pt; color: #6b7280; margin: 4mm 0; }
-.cover-sub { font-family: 'Nunito'; font-size: 12pt; color: #6b7280; }
-.cover-footer { font-family: 'Nunito'; font-size: 12pt; color: #6b7280; margin-top: 60mm; }
+.cover-title { font-family: 'MontserratBold'; font-size: 32.9pt; color: #dc2626; margin: 0; }
+.cover-name { font-family: 'GreatVibes'; font-size: 50.8pt; color: #1f2937; margin: 10mm 0 4mm; }
+.cover-name-sm { font-family: 'GreatVibes'; font-size: 38.9pt; color: #1f2937; margin: 4mm 0; }
+.cover-and { font-family: 'NunitoItalic'; font-size: 23.9pt; color: #6b7280; margin: 4mm 0; }
+.cover-sub { font-family: 'Nunito'; font-size: 17.9pt; color: #6b7280; }
+.cover-footer { font-family: 'Nunito'; font-size: 17.9pt; color: #6b7280; margin-top: 60mm; }
 
-.section { font-family: 'MontserratBold'; font-size: 13pt; color: #dc2626; margin: 14pt 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid #dc2626; }
-.subheading { font-family: 'MontserratBold'; font-size: 11pt; color: #1f2937; margin: 8pt 0 4pt; }
-.opener { font-family: 'NunitoItalic'; font-size: 11pt; margin: 4pt 0 6pt; }
+.section { font-family: 'MontserratBold'; font-size: 19.5pt; color: #dc2626; margin: 14pt 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid #dc2626; }
+.section-first { margin-top: 0; }
+.subheading { font-family: 'MontserratBold'; font-size: 16.5pt; color: #1f2937; margin: 8pt 0 4pt; page-break-after: avoid; break-after: avoid; }
+.opener { font-family: 'NunitoItalic'; font-size: 14.9pt; margin: 4pt 0 6pt; }
 .body { text-align: justify; margin: 2pt 0 5pt; }
 .bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; }
-.bullet-indent { font-family: 'NunitoItalic'; font-size: 10pt; color: #dc2626; margin: 1pt 0 2pt; padding-left: 28pt; text-indent: -12pt; }
-.signature { font-family: 'NunitoItalic'; color: #6b7280; margin: 8pt 0 3pt; }
+.bullet-indent { font-family: 'NunitoItalic'; font-size: 13.5pt; color: #dc2626; margin: 1pt 0 2pt; padding-left: 28pt; text-indent: -12pt; }
+.signature { font-family: 'NunitoItalic'; font-size: 11pt; color: #6b7280; margin: 8pt 0 3pt; }
 .spacer { height: 4pt; }
-.red-box { font-family: 'MontserratBold'; font-size: 11pt; border: 1.5pt solid #dc2626; background: #fff5f5; padding: 8pt 10pt; margin: 6pt 0 8pt; text-align: justify; }
+.red-box { font-family: 'MontserratBold'; font-size: 16.5pt; border: 1.5pt solid #dc2626; background: #fff5f5; padding: 8pt 10pt; margin: 6pt 0 8pt; text-align: justify; page-break-inside: avoid; break-inside: avoid; }
 
-@media print {
-  .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; color: #6b7280; border-top: 0.8pt solid #E8AAAA; padding-top: 2mm; }
-}
+/* Signature: fixed orphans/widows (typically 1-line, just a safety floor). */
+.signature { orphans: 4; widows: 4; }
+
+.section-group { }
+.section-group.is-section { page-break-before: always; break-before: always; }
 </style></head><body>
-<div class="footer">Hạt Giống Chiêm Tinh</div>
 <div class="cover">
   <div class="cover-line"></div>
   <h1 class="cover-title">${escapeHtml(options.coverTitle)}</h1>
@@ -223,11 +242,22 @@ body { font-family: 'Nunito', sans-serif; font-size: 11pt; color: #1f2937; line-
   ${coverName}
   <div class="cover-footer">Hạt Giống Chiêm Tinh</div>
 </div>
-<h2 class="section">${escapeHtml(options.sectionTitle)}</h2>
-<hr style="border:none;border-top:1pt solid #dc2626;margin-bottom:8pt;">
 ${contentHtml}
 </body></html>`
 }
+
+// Footer template for Puppeteer's native displayHeaderFooter.
+// Renders INSIDE the bottom margin area — never overlaps with page content.
+const FOOTER_TEMPLATE = `<div style="
+  box-sizing: border-box;
+  width: 100%;
+  padding: 3mm 20mm 0 20mm;
+  border-top: 0.8pt solid #fca5a5;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10pt;
+  color: #9ca3af;
+  text-align: center;
+">Hạt Giống Chiêm Tinh</div>`
 
 export async function generatePdf(essayText: string, options: PdfOptions): Promise<Buffer | null> {
   try {
@@ -240,11 +270,156 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       headless: true,
     })
     const page = await browser.newPage()
+
+    // Fix 1: viewport width = 642px = A4 print content width (170mm @ 96dpi).
+    // This makes screen layout match print layout so heading overflow detection is accurate.
+    await page.setViewport({ width: 642, height: 1123 })
+
+    // Capture browser console logs for debugging JS evaluations
+    page.on('console', msg => console.log('[PDF-JS]', msg.text()))
+
     const html = buildHtml(essayText, options)
     await page.setContent(html, { waitUntil: 'networkidle0' })
+
+    // Heading resize + orphan compression in one evaluate.
+    // await document.fonts.ready ensures font metrics are accurate before any measurement.
+    await page.evaluate(async () => {
+      // Wait for all embedded fonts to be fully loaded before measuring text widths
+      await document.fonts.ready
+
+      // ── STRIP TRAILING SPACERS ───────────────────────────────────────────────────
+      // Trailing .spacer divs (from blank lines in essay) can push a section-group's
+      // height past a page boundary. Combined with page-break-before:always on the
+      // next group, this creates a completely blank page. Remove them proactively.
+      for (const group of Array.from(document.querySelectorAll('.section-group')) as HTMLElement[]) {
+        let last = group.lastElementChild as Element | null
+        while (last) {
+          const isEmpty = last.classList.contains('spacer') ||
+            (last.textContent?.trim() === '' && (last as HTMLElement).offsetHeight <= 8)
+          if (isEmpty) {
+            const prev = last.previousElementSibling
+            last.remove()
+            last = prev
+          } else {
+            break
+          }
+        }
+      }
+      void document.body.offsetHeight // force layout flush after removal
+
+      // ── HEADING RESIZE ──────────────────────────────────────────────────────────
+      // Reduce all h2.section font-sizes together until every heading fits in 1 line.
+      // viewport=642px ensures clientWidth = A4 print content area (170mm).
+      const sections = Array.from(document.querySelectorAll('h2.section')) as HTMLElement[]
+      if (sections.length) {
+        let tries = 0
+        let anyWraps = true
+        while (anyWraps && tries < 40) {
+          tries++
+          anyWraps = false
+          for (const el of sections) {
+            const saved = el.style.whiteSpace
+            el.style.whiteSpace = 'nowrap'
+            void el.offsetWidth // force layout flush
+            const wraps = el.scrollWidth > el.clientWidth
+            el.style.whiteSpace = saved
+            if (wraps) {
+              anyWraps = true
+              console.log(`[heading-wrap] "${el.textContent?.slice(0, 40)}" scrollW=${el.scrollWidth} clientW=${el.clientWidth}`)
+              break
+            }
+          }
+          if (anyWraps) {
+            const curPx = parseFloat(window.getComputedStyle(sections[0]).fontSize)
+            if (curPx <= 10) break
+            const newPx = Math.round((curPx - 0.5) * 10) / 10
+            sections.forEach(el => { el.style.fontSize = newPx + 'px' })
+            console.log(`[heading-resize] → ${newPx}px`)
+          }
+        }
+        sections.forEach(el => {
+          el.style.whiteSpace = 'nowrap'
+          console.log(`[heading-final] "${el.textContent?.slice(0, 40)}" fs=${window.getComputedStyle(el).fontSize} scrollW=${el.scrollWidth} clientW=${el.clientWidth}`)
+          el.style.whiteSpace = ''
+        })
+      }
+
+      // ── GLOBAL ORPHAN COMPRESSION ────────────────────────────────────────────────
+      // Detects paragraphs with ≤3 orphan lines overflowing onto the next print page.
+      // When found, reduces line-height GLOBALLY for ALL body content and re-checks
+      // from scratch — guaranteeing no orphan is ever missed (no bug hole).
+      //
+      // Positions measured relative to each section-group's top, because .is-section
+      // groups always start at the top of a new print page (page-break-before: always).
+      //
+      // PAGE_H = A4(297mm) - top(25mm) - bottom(20mm) = 252mm ≈ 952px at 96dpi
+      const PAGE_H = 252 * (96 / 25.4)
+      const BODY_SEL = 'p.body, p.opener, p.bullet, p.bullet-indent, p.signature'
+
+      function hasOrphans(): boolean {
+        for (const group of Array.from(document.querySelectorAll('.section-group')) as HTMLElement[]) {
+          const groupTop = group.getBoundingClientRect().top
+          for (const el of Array.from(group.querySelectorAll(BODY_SEL)) as HTMLElement[]) {
+            const relBottom = el.getBoundingClientRect().bottom - groupTop
+            const overflow = relBottom % PAGE_H
+            if (overflow < 1) continue
+            const lhPx = parseFloat(window.getComputedStyle(el).lineHeight)
+            if (!lhPx || isNaN(lhPx)) continue
+            if (overflow < lhPx * 3.5) {
+              console.log(`[orphan-found] overflow=${overflow.toFixed(0)}px / threshold=${(lhPx * 3.5).toFixed(0)}px / "${el.textContent?.slice(0, 30)}"`)
+              return true
+            }
+          }
+        }
+        return false
+      }
+
+      let lh = 1.55
+      for (let iter = 0; iter < 15 && lh >= 1.30; iter++) {
+        if (!hasOrphans()) {
+          console.log(`[orphan-done] stable at lh=${lh} after ${iter} iter`)
+          break
+        }
+        lh = Math.round((lh - 0.02) * 100) / 100
+        ;(document.querySelectorAll(BODY_SEL) as NodeListOf<HTMLElement>).forEach(el => {
+          el.style.lineHeight = String(lh)
+        })
+        void document.body.offsetHeight // force full layout flush
+        console.log(`[orphan-compress] iter=${iter + 1} lh=${lh}`)
+      }
+
+      // ── PER-ELEMENT ORPHANS/WIDOWS ────────────────────────────────────────────────
+      // Set CSS orphans/widows per paragraph based on its actual line count AFTER
+      // compression. This prevents widows from cascading into new orphans:
+      //   lines 1-5 or >8 → widows=4, orphans=4  (standard rule)
+      //   lines 6-8       → widows=floor(n/2), orphans=ceil(n/2)
+      //     e.g. 6→3+3, 7→3+4 (widow=3,orphan=4), 8→4+4
+      // Applied as inline styles (override CSS) so print engine uses per-para values.
+      const OW_SEL = 'p.body, p.opener, p.bullet, p.bullet-indent'
+      ;(document.querySelectorAll(OW_SEL) as NodeListOf<HTMLElement>).forEach(el => {
+        const lhPx = parseFloat(window.getComputedStyle(el).lineHeight)
+        if (!lhPx || isNaN(lhPx) || lhPx <= 0) return
+        const lineCount = Math.round(el.offsetHeight / lhPx)
+        let w: number, o: number
+        if (lineCount >= 6 && lineCount <= 8) {
+          w = Math.floor(lineCount / 2)  // widow  (smaller half → top of next page)
+          o = Math.ceil(lineCount / 2)   // orphan (larger half  → bottom of current page)
+        } else {
+          w = 4; o = 4
+        }
+        el.style.widows = String(w)
+        el.style.orphans = String(o)
+        console.log(`[ow] lines=${lineCount} w=${w} o=${o} "${el.textContent?.slice(0, 25)}"`)
+      })
+    })
+
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
+      // Fix 2: Use Puppeteer native footer — renders inside bottom margin, never overlaps content.
+      displayHeaderFooter: true,
+      headerTemplate: '<div></div>',
+      footerTemplate: FOOTER_TEMPLATE,
       margin: { top: '25mm', right: '20mm', bottom: '20mm', left: '20mm' },
     })
     await browser.close()
