@@ -22,7 +22,7 @@ export async function generateEssay(systemPrompt: string, userPrompt: string): P
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      max_tokens: 16000,
+      max_tokens: 32000,
       temperature: 0.75,
     }),
   })
@@ -36,7 +36,15 @@ export async function generateEssay(systemPrompt: string, userPrompt: string): P
   return data.choices?.[0]?.message?.content || ''
 }
 
+class StreamInterruptedError extends Error {
+  constructor(charsSoFar: number) {
+    super(`Stream ended without [DONE] marker (${charsSoFar} chars received)`)
+    this.name = 'StreamInterruptedError'
+  }
+}
+
 function isRetryableError(err: unknown): boolean {
+  if (err instanceof StreamInterruptedError) return true
   if (!(err instanceof TypeError)) return false
   if (err.message === 'terminated' || err.message.includes('terminated')) return true
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +58,7 @@ export async function generateEssayStreaming(
   systemPrompt: string,
   userPrompt: string,
   onProgress: (charsReceived: number) => void,
+  onRetry?: (attempt: number, reason: string) => void,
 ): Promise<string> {
   if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not configured')
 
@@ -59,7 +68,9 @@ export async function generateEssayStreaming(
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     if (attempt > 0) {
       const delay = attempt * 3000 // 3s, 6s
+      const reason = lastError instanceof StreamInterruptedError ? 'stream bị ngắt' : 'lỗi kết nối'
       console.log(`[OpenRouter] Retry attempt ${attempt}/${MAX_RETRIES - 1} after ${delay}ms`)
+      onRetry?.(attempt, reason)
       await new Promise(r => setTimeout(r, delay))
     }
 
@@ -73,7 +84,7 @@ export async function generateEssayStreaming(
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt },
           ],
-          max_tokens: 16000,
+          max_tokens: 32000,
           temperature: 0.75,
           stream: true,
         }),
@@ -119,13 +130,19 @@ export async function generateEssayStreaming(
         }
       }
 
+      // Stream ended without [DONE] — treat as interrupted, retry
+      if (!finished) {
+        throw new StreamInterruptedError(fullText.length)
+      }
+
       return fullText
     } catch (err) {
       lastError = err
       if (!isRetryableError(err)) throw err
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const cause = (err as any).cause
-      console.error(`[OpenRouter] ECONNRESET/terminated on attempt ${attempt + 1}:`, cause?.code || err)
+      const code = err instanceof StreamInterruptedError ? 'STREAM_INTERRUPTED' : (cause?.code || String(err))
+      console.error(`[OpenRouter] Retryable error on attempt ${attempt + 1}:`, code)
     }
   }
 

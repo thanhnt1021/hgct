@@ -26,6 +26,14 @@ const EXPECTED_CHARS: Record<string, number> = {
   transit: 28000,
 }
 
+// Minimum acceptable chars to consider AI output complete (not interrupted)
+const MIN_CHARS: Record<string, number> = {
+  career: 4000,
+  love: 4000,
+  synastry: 10000,
+  transit: 12000,
+}
+
 // AI writing labels by progress %
 const AI_LABELS = [
   { at: 18, label: 'Vũ trụ đang kết nối...' },
@@ -170,21 +178,46 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
     throw new Error(`Invalid service: ${service}`)
   }
 
-  // Step 4: AI generation with real streaming progress
+  // Step 4: AI generation with real streaming progress + retry on short output
   if (isJobCancelled(jobId)) return
   updateJob(jobId, { progress: 18, label: 'Vũ trụ đang kết nối...' })
   const expected = EXPECTED_CHARS[service] || 10000
+  const minChars = MIN_CHARS[service] || 2000
 
-  let essayText = await generateEssayStreaming(
-    SYSTEM_PROMPT,
-    prompt,
-    (charsReceived) => {
-      const aiPct = Math.min(Math.floor(18 + (charsReceived / expected) * 67), 85)
-      updateJob(jobId, { progress: aiPct, label: aiLabel(aiPct) })
-    },
-  )
+  const AI_MAX_RETRIES = 3
+  let essayText = ''
+  let totalAttempt = 0  // across all outer + inner retries for display
+  for (let aiAttempt = 0; aiAttempt < AI_MAX_RETRIES; aiAttempt++) {
+    if (aiAttempt > 0) {
+      const delay = aiAttempt * 4000
+      totalAttempt++
+      console.log(`[JOB ${jobId}] AI retry ${aiAttempt}/${AI_MAX_RETRIES - 1} (got ${essayText.length} chars, need ${minChars}) — waiting ${delay}ms`)
+      updateJob(jobId, { progress: 15, label: `Kết nối bị gián đoạn — đang thử lại lần ${totalAttempt}...` })
+      await new Promise(r => setTimeout(r, delay))
+      if (isJobCancelled(jobId)) return
+    }
 
-  if (!essayText || essayText.length < 500) throw new Error('AI generation failed or too short')
+    essayText = await generateEssayStreaming(
+      SYSTEM_PROMPT,
+      prompt,
+      (charsReceived) => {
+        const aiPct = Math.min(Math.floor(18 + (charsReceived / expected) * 67), 85)
+        updateJob(jobId, { progress: aiPct, label: aiLabel(aiPct) })
+      },
+      (innerAttempt) => {
+        totalAttempt++
+        updateJob(jobId, { progress: 15, label: `Kết nối bị gián đoạn — đang thử lại lần ${totalAttempt}...` })
+        console.log(`[JOB ${jobId}] OpenRouter inner retry ${innerAttempt}`)
+      },
+    )
+
+    if (essayText && essayText.length >= minChars) break
+    console.warn(`[JOB ${jobId}] AI output too short: ${essayText.length} chars (min ${minChars}) on attempt ${aiAttempt + 1}`)
+  }
+
+  if (!essayText || essayText.length < minChars) {
+    throw new Error(`AI generation incomplete after ${AI_MAX_RETRIES} attempts (${essayText.length} chars, min ${minChars})`)
+  }
 
   // Sanitize synastry output: replace aliases → real names, clean up sections
   if ((service === 'synastry' || service === 'relationship') && synBrief) {
