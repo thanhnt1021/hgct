@@ -12,7 +12,7 @@ export async function GET() {
   }
 
   const jobs = await prisma.job.findMany({
-    where: { userUid },
+    where: { userUid, status: { not: 'cancelled' } },
     orderBy: { createdAt: 'desc' },
     take: 100,
     select: {

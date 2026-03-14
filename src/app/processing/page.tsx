@@ -31,6 +31,8 @@ function ProcessingInner() {
   const [label, setLabel] = useState('Đang khởi tạo...')
   const [status, setStatus] = useState<'processing' | 'done' | 'error'>('processing')
   const [errorMsg, setErrorMsg] = useState('')
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const eta = SERVICE_ETA[service] || '5–8'
@@ -59,7 +61,7 @@ function ProcessingInner() {
             ...job.result,
             email: job.result?.email,
           }))
-          setTimeout(() => router.push('/success'), 2000)
+          setTimeout(() => router.replace('/success'), 2000)
         } else if (job.status === 'error') {
           if (intervalRef.current) clearInterval(intervalRef.current)
           setErrorMsg(job.error || 'Có lỗi xảy ra khi tạo báo cáo.')
@@ -69,10 +71,39 @@ function ProcessingInner() {
       }
     }
 
+    const pollWithRedirectOn404 = async () => {
+      const res = await fetch(`/api/job/${jobId}`)
+      if (res.status === 404) {
+        if (intervalRef.current) clearInterval(intervalRef.current)
+        router.replace('/services')
+        return
+      }
+      if (!res.ok) return
+      const job = await res.json()
+      setProgress(job.progress ?? 0)
+      setLabel(job.label ?? '')
+      setStatus(job.status)
+      if (job.status === 'done') {
+        if (intervalRef.current) clearInterval(intervalRef.current)
+        sessionStorage.setItem('reportResult', JSON.stringify({ ...job.result, email: job.result?.email }))
+        setTimeout(() => router.replace('/success'), 2000)
+      } else if (job.status === 'error') {
+        if (intervalRef.current) clearInterval(intervalRef.current)
+        setErrorMsg(job.error || 'Có lỗi xảy ra khi tạo báo cáo.')
+      }
+    }
+
     poll()
-    intervalRef.current = setInterval(poll, 2000)
+    intervalRef.current = setInterval(pollWithRedirectOn404, 2000)
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
   }, [jobId, router])
+
+  const handleCancel = async () => {
+    setCancelling(true)
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    await fetch(`/api/job/${jobId}`, { method: 'DELETE' }).catch(() => {})
+    router.replace('/services')
+  }
 
   // ── Error state ──
   if (status === 'error') {
@@ -317,7 +348,76 @@ function ProcessingInner() {
           Dự kiến hoàn thành trong khoảng{' '}
           <strong style={{ color: '#8a8399' }}>{eta} phút</strong>
         </p>
+
+        {/* Cancel button */}
+        <button
+          onClick={() => setShowCancelConfirm(true)}
+          style={{
+            marginTop: '1rem',
+            background: 'rgba(239,68,68,0.07)',
+            border: '1px solid rgba(239,68,68,0.2)',
+            color: '#ef4444',
+            fontFamily: 'var(--font-vietnam)',
+            fontSize: '0.8rem',
+            fontWeight: 500,
+            padding: '0.5rem 1.25rem',
+            borderRadius: '8px',
+            cursor: 'pointer',
+          }}
+        >
+          Hủy báo cáo
+        </button>
       </div>
+
+      {/* Cancel confirm modal */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(6,6,15,0.85)', backdropFilter: 'blur(4px)' }}>
+          <div className="rounded-2xl p-6 w-full max-w-sm"
+            style={{ background: 'rgba(18,13,46,0.98)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <p style={{ fontSize: '1.75rem', marginBottom: '0.75rem', textAlign: 'center' }}>⚠</p>
+            <h3 className="font-bold mb-2 text-center"
+              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+              Hủy báo cáo?
+            </h3>
+            <p className="mb-5 text-center"
+              style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.7 }}>
+              Báo cáo sẽ không được tạo và sẽ không lưu vào lịch sử.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="flex-1 py-2.5 rounded-xl font-semibold text-sm"
+                style={{
+                  background: cancelling ? 'rgba(239,68,68,0.1)' : 'rgba(239,68,68,0.15)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239,68,68,0.3)',
+                  fontFamily: 'var(--font-vietnam)',
+                  cursor: cancelling ? 'not-allowed' : 'pointer',
+                  opacity: cancelling ? 0.7 : 1,
+                }}
+              >
+                {cancelling ? 'Đang hủy...' : 'Xác nhận hủy'}
+              </button>
+              <button
+                onClick={() => setShowCancelConfirm(false)}
+                disabled={cancelling}
+                className="flex-1 py-2.5 rounded-xl text-sm"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  color: '#8a8399',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  fontFamily: 'var(--font-vietnam)',
+                  cursor: 'pointer',
+                }}
+              >
+                Tiếp tục chờ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

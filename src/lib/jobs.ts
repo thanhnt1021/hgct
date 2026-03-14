@@ -12,7 +12,7 @@ export interface JobResult {
 
 export interface Job {
   id: string
-  status: 'processing' | 'done' | 'error'
+  status: 'processing' | 'done' | 'error' | 'cancelled'
   progress: number   // 0–100
   label: string
   result?: JobResult
@@ -82,9 +82,24 @@ export function updateJob(id: string, updates: Partial<Omit<Job, 'id' | 'created
   }
 }
 
+const STUCK_TIMEOUT_MS = 15 * 60 * 1000
+const STUCK_ERROR = 'Đơn hàng gặp lỗi. Vui lòng thử lại.'
+
+function markStuckIfNeeded(job: Job): void {
+  if (job.status === 'processing' && Date.now() - job.createdAt > STUCK_TIMEOUT_MS) {
+    job.status = 'error'
+    job.label = 'Lỗi'
+    job.error = STUCK_ERROR
+    prisma.job.update({ where: { id: job.id }, data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR } }).catch(console.error)
+  }
+}
+
 export async function getJobFromDb(id: string): Promise<Job | undefined> {
   const cached = jobs.get(id)
-  if (cached) return cached
+  if (cached) {
+    markStuckIfNeeded(cached)
+    return cached
+  }
   try {
     const dbJob = await prisma.job.findUnique({ where: { id } })
     if (!dbJob) return undefined
@@ -101,6 +116,7 @@ export async function getJobFromDb(id: string): Promise<Job | undefined> {
       pdfExpiresAt: dbJob.pdfExpiresAt?.toISOString(),
       pdfNote: dbJob.pdfNote ?? undefined,
     }
+    markStuckIfNeeded(job)
     jobs.set(id, job)
     return job
   } catch {
@@ -112,7 +128,34 @@ export function getJob(id: string): Job | undefined {
   return jobs.get(id)
 }
 
-// Clean up jobs older than 1 hour
+export function isJobCancelled(id: string): boolean {
+  return jobs.get(id)?.status === 'cancelled'
+}
+
+export async function cancelJob(id: string): Promise<void> {
+  const job = jobs.get(id)
+  if (job) job.status = 'cancelled'
+  // Delete from DB so it never appears in history
+  await prisma.job.delete({ where: { id } }).catch(() => {})
+}
+
+// Startup sweep: fix any stuck jobs from previous server run
+async function sweepStuckJobsOnce() {
+  const cutoff = new Date(Date.now() - STUCK_TIMEOUT_MS)
+  try {
+    const { count } = await prisma.job.updateMany({
+      where: { status: 'processing', createdAt: { lt: cutoff } },
+      data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR },
+    })
+    if (count > 0) console.log(`[jobs] Startup sweep: marked ${count} stuck job(s) as error`)
+  } catch (err) {
+    console.error('[jobs] sweepStuckJobsOnce error:', err)
+  }
+}
+
+sweepStuckJobsOnce()
+
+// Clean up in-memory jobs older than 1 hour
 setInterval(() => {
   const cutoff = Date.now() - 60 * 60 * 1000
   for (const [id, job] of jobs) {

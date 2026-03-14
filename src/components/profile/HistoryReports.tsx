@@ -58,6 +58,8 @@ export default function HistoryReports() {
   const [loading, setLoading] = useState(true)
   const [confirmModal, setConfirmModal] = useState<{ jobId: string; uids: string[]; names: string } | null>(null)
   const [confirming, setConfirming] = useState(false)
+  const [cancelModal, setCancelModal] = useState<{ jobId: string; name: string } | null>(null)
+  const [cancelling, setCancelling] = useState(false)
 
   // Load history from DB
   useEffect(() => {
@@ -213,6 +215,18 @@ export default function HistoryReports() {
       }
     } catch { /* ignore */ }
     setConfirming(false)
+  }
+
+  const handleCancelJob = async () => {
+    if (!cancelModal) return
+    setCancelling(true)
+    try {
+      await fetch(`/api/job/${cancelModal.jobId}`, { method: 'DELETE' })
+      setEntries(prev => prev.filter(e => e.jobId !== cancelModal.jobId))
+      setStatuses(prev => { const n = { ...prev }; delete n[cancelModal.jobId]; return n })
+      setCancelModal(null)
+    } catch { /* ignore */ }
+    setCancelling(false)
   }
 
   // Filter and paginate
@@ -420,9 +434,26 @@ export default function HistoryReports() {
                       <span style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem' }}>
                         {st?.label || 'Đang xử lý...'}
                       </span>
-                      <span style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.75rem' }}>
-                        {st?.progress ?? 0}%
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.75rem' }}>
+                          {st?.progress ?? 0}%
+                        </span>
+                        <button
+                          onClick={() => setCancelModal({ jobId: entry.jobId, name: entry.name })}
+                          style={{
+                            background: 'rgba(239,68,68,0.08)',
+                            border: '1px solid rgba(239,68,68,0.2)',
+                            color: '#ef4444',
+                            fontFamily: 'var(--font-vietnam)',
+                            fontSize: '0.68rem',
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Hủy
+                        </button>
+                      </div>
                     </div>
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(200,148,63,0.08)' }}>
                       <div className="h-full rounded-full" style={{
@@ -496,6 +527,57 @@ export default function HistoryReports() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Cancel job modal */}
+      {cancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(6,6,15,0.85)', backdropFilter: 'blur(4px)' }}>
+          <div className="rounded-2xl p-6 w-full max-w-sm"
+            style={{ background: 'rgba(18,13,46,0.98)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <p style={{ fontSize: '1.75rem', marginBottom: '0.75rem', textAlign: 'center' }}>⚠</p>
+            <h3 className="font-bold mb-2 text-center"
+              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+              Hủy báo cáo?
+            </h3>
+            <p className="mb-5 text-center"
+              style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.7 }}>
+              Hủy báo cáo <span style={{ color: '#f4efe6', fontWeight: 600 }}>{cancelModal.name}</span>?{' '}
+              Đơn hàng sẽ bị xóa khỏi lịch sử.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelJob}
+                disabled={cancelling}
+                className="flex-1 py-2.5 rounded-xl font-semibold text-sm"
+                style={{
+                  background: 'rgba(239,68,68,0.15)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239,68,68,0.3)',
+                  fontFamily: 'var(--font-vietnam)',
+                  cursor: cancelling ? 'not-allowed' : 'pointer',
+                  opacity: cancelling ? 0.7 : 1,
+                }}
+              >
+                {cancelling ? 'Đang hủy...' : 'Xác nhận hủy'}
+              </button>
+              <button
+                onClick={() => setCancelModal(null)}
+                disabled={cancelling}
+                className="flex-1 py-2.5 rounded-xl text-sm"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  color: '#8a8399',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  fontFamily: 'var(--font-vietnam)',
+                  cursor: 'pointer',
+                }}
+              >
+                Tiếp tục chờ
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -9,7 +9,7 @@ import { buildCareerPrompt } from '@/lib/logic/career/prompt'
 import { generateEssayStreaming } from '@/lib/openrouter'
 import { generatePdf } from '@/lib/pdf/generator'
 import { sendReportEmail, makePdfFilename } from '@/lib/email'
-import { createJob, updateJob } from '@/lib/jobs'
+import { createJob, updateJob, isJobCancelled } from '@/lib/jobs'
 import prisma from '@/lib/db'
 import fs from 'fs'
 import path from 'path'
@@ -91,6 +91,7 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
     onlyName,
     gender: gender || 'Female',
     dob: { day: String(dob.day), month: String(dob.month), year: String(dob.year) },
+    tob: tobStr,
   }
 
   // Step 2: Load knowledge base
@@ -104,7 +105,7 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
   let coverTitle: string
   let sectionTitle: string
   let nameB = ''
-  let coverProfileB: { name: string; dob: { day: string; month: string; year: string } } | undefined
+  let coverProfileB: { name: string; dob: { day: string; month: string; year: string }; tob?: string } | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let synBrief: any = undefined
 
@@ -152,7 +153,8 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
     synBrief = typeof result === 'string' ? undefined : result.brief
     coverTitle = 'LUẬN GIẢI BẢN ĐỒ CẶP ĐÔI'
     sectionTitle = 'TỔNG HỢP LUẬN GIẢI BẢN ĐỒ CẶP ĐÔI'
-    coverProfileB = { name: fullNameB, dob: profileB.dob }
+    const tobBStr = `${tobB.hour}:${String(tobB.minute).padStart(2, '0')}`
+    coverProfileB = { name: fullNameB, dob: profileB.dob, tob: tobBStr }
     console.log(`[SYNASTRY] A: fullName="${fullName}" onlyName="${onlyName}" | B: fullName="${fullNameB}" onlyName="${onlyNameB}"`)
     console.log(`[SYNASTRY] cover A="${fullName}", cover B="${fullNameB}"`)
 
@@ -169,6 +171,7 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
   }
 
   // Step 4: AI generation with real streaming progress
+  if (isJobCancelled(jobId)) return
   updateJob(jobId, { progress: 18, label: 'Vũ trụ đang kết nối...' })
   const expected = EXPECTED_CHARS[service] || 10000
 
@@ -191,6 +194,7 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
   }
 
   // Step 5: Generate PDF
+  if (isJobCancelled(jobId)) return
   updateJob(jobId, { progress: 90, label: 'Đang tạo file PDF...' })
   const pdfBuffer = await generatePdf(essayText, { coverTitle, sectionTitle, profile, profileB: coverProfileB })
 
