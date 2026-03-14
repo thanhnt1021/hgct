@@ -335,6 +335,7 @@ export function getDominantHousesSorted(chartData: ChartData): { house: number; 
   const cusps = chartData.cusps
 
   for (const [pName, pts] of Object.entries(PLANET_POINTS)) {
+    if (pName === 'Asc') continue
     if (!(pName in chartData.planets)) continue
     const lon = chartData.planets[pName].lon
     const h = getHouseOfPlanet(lon, cusps)
@@ -343,6 +344,7 @@ export function getDominantHousesSorted(chartData: ChartData): { house: number; 
 
   return Object.entries(scores)
     .map(([h, score]) => ({ house: parseInt(h), score }))
+    .filter(({ score }) => score >= 4)
     .sort((a, b) => b.score - a.score)
 }
 
