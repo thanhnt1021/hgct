@@ -110,7 +110,7 @@ function classifyLine(line: string): string {
   if (s.toLowerCase().startsWith('kính gửi')) return 'opener'
   if (SIGN_KEYS.some(k => s.startsWith(k))) return 'signature'
   if (s.endsWith(':') && s.length < 90) return 'subheading'
-  if (isVnTitleHeading(s)) return 'section_heading'
+  if (isVnTitleHeading(s)) return 'title_heading'
   return 'body'
 }
 
@@ -121,8 +121,8 @@ function escapeHtml(text: string): string {
 interface PdfOptions {
   coverTitle: string
   sectionTitle: string
-  profile: { name: string; dob: { day: string; month: string; year: string } }
-  profileB?: { name: string; dob: { day: string; month: string; year: string } }
+  profile: { name: string; dob: { day: string; month: string; year: string }; tob?: string }
+  profileB?: { name: string; dob: { day: string; month: string; year: string }; tob?: string }
 }
 
 function buildFontFaces(): string {
@@ -150,15 +150,32 @@ function buildHtml(essayText: string, options: PdfOptions): string {
   // Group 0 = intro content (opener + paragraphs before first numbered section heading).
   // Groups 1+ = each numbered section heading and its following content.
   const groupHtmlLines: string[][] = [[]]
+  const sigBuffer: string[] = []
+  function flushSigs() {
+    if (!sigBuffer.length) return
+    const wrapped = `<div style="page-break-inside:avoid;break-inside:avoid">${sigBuffer.join('')}</div>`
+    groupHtmlLines[groupHtmlLines.length - 1].push(wrapped)
+    sigBuffer.length = 0
+  }
 
   for (const line of lines) {
     const s = line.trim()
     if (!s) {
-      groupHtmlLines[groupHtmlLines.length - 1].push('<div class="spacer"></div>')
+      if (sigBuffer.length > 0) {
+        sigBuffer.push('<div class="spacer"></div>')
+      } else {
+        groupHtmlLines[groupHtmlLines.length - 1].push('<div class="spacer"></div>')
+      }
       continue
     }
     const kind = classifyLine(line)
     const safe = escapeHtml(s)
+
+    if (kind === 'signature') {
+      sigBuffer.push(`<p class="signature">${safe}</p>`)
+      continue
+    }
+    flushSigs()
 
     if (kind === 'section_heading') {
       groupHtmlLines.push([])
@@ -167,9 +184,9 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     let html = ''
     switch (kind) {
       case 'section_heading':  html = `<h2 class="section">${safe}</h2>`; break
+      case 'title_heading':    html = `<h2 class="section">${safe}</h2>`; break
       case 'subheading':       html = `<h3 class="subheading">${safe}</h3>`; break
       case 'opener':           html = `<p class="opener">${safe}</p>`; break
-      case 'signature':        html = `<p class="signature">${safe}</p>`; break
       case 'bullet':           html = `<p class="bullet">${safe}</p>`; break
       case 'bullet_indent':    html = `<p class="bullet-indent">${safe}</p>`; break
       case 'red_box': {
@@ -180,6 +197,7 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     }
     groupHtmlLines[groupHtmlLines.length - 1].push(html)
   }
+  flushSigs()
 
   const contentHtml = groupHtmlLines.map((htmlLines, i) => {
     const inner = i === 0
@@ -190,14 +208,16 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     return `<div class="${cls}">${inner}</div>`
   }).join('')
 
+  const tobLine = options.profile.tob ? `\n       <div class="cover-sub">Giờ sinh: ${escapeHtml(options.profile.tob)}</div>` : ''
+  const tobBLine = options.profileB?.tob ? `\n       <div class="cover-sub">Giờ sinh: ${escapeHtml(options.profileB.tob)}</div>` : ''
   const coverName = options.profileB
     ? `<div class="cover-name-sm">${escapeHtml(options.profile.name)}</div>
-       <div class="cover-sub">Ngày sinh: ${dobStr}</div>
+       <div class="cover-sub">Ngày sinh: ${dobStr}</div>${tobLine}
        <div class="cover-and">&amp;</div>
        <div class="cover-name-sm">${escapeHtml(options.profileB.name)}</div>
-       <div class="cover-sub">Ngày sinh: ${options.profileB.dob.day}/${options.profileB.dob.month}/${options.profileB.dob.year}</div>`
+       <div class="cover-sub">Ngày sinh: ${options.profileB.dob.day}/${options.profileB.dob.month}/${options.profileB.dob.year}</div>${tobBLine}`
     : `<div class="cover-name">${escapeHtml(options.profile.name)}</div>
-       <div class="cover-sub">Ngày sinh: ${dobStr}</div>`
+       <div class="cover-sub">Ngày sinh: ${dobStr}</div>${tobLine}`
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8">
@@ -209,14 +229,16 @@ ${buildFontFaces()}
 /* margin:0 on body ensures clientWidth in screen mode = viewport width = print content width (642px) */
 body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #1f2937; line-height: 1.55; }
 
-.cover { page-break-after: always; text-align: center; padding-top: 50mm; }
+.cover { page-break-after: always; text-align: center; height: 252mm; display: flex; flex-direction: column; box-sizing: border-box; }
 .cover-line { width: 55%; height: 1.5px; background: #dc2626; margin: 7mm auto; }
 .cover-title { font-family: 'MontserratBold'; font-size: 32.9pt; color: #dc2626; margin: 0; }
 .cover-name { font-family: 'GreatVibes'; font-size: 50.8pt; color: #1f2937; margin: 10mm 0 4mm; }
 .cover-name-sm { font-family: 'GreatVibes'; font-size: 38.9pt; color: #1f2937; margin: 4mm 0; }
 .cover-and { font-family: 'NunitoItalic'; font-size: 23.9pt; color: #6b7280; margin: 4mm 0; }
 .cover-sub { font-family: 'Nunito'; font-size: 17.9pt; color: #6b7280; }
-.cover-footer { font-family: 'Nunito'; font-size: 17.9pt; color: #6b7280; margin-top: 60mm; }
+.cover-footer { font-family: 'Nunito'; font-size: 17.9pt; color: #6b7280; padding-bottom: 5mm; }
+.cover-spacer { flex: 1; min-height: 0; }
+.cover-main { width: 100%; }
 
 .section { font-family: 'MontserratBold'; font-size: 19.5pt; color: #dc2626; margin: 14pt 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid #dc2626; }
 .section-first { margin-top: 0; }
@@ -236,10 +258,14 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 .section-group.is-section { page-break-before: always; break-before: always; }
 </style></head><body>
 <div class="cover">
-  <div class="cover-line"></div>
-  <h1 class="cover-title">${escapeHtml(options.coverTitle)}</h1>
-  <div class="cover-line"></div>
-  ${coverName}
+  <div class="cover-spacer"></div>
+  <div class="cover-main">
+    <div class="cover-line"></div>
+    <h1 class="cover-title">${escapeHtml(options.coverTitle)}</h1>
+    <div class="cover-line"></div>
+    ${coverName}
+  </div>
+  <div class="cover-spacer"></div>
   <div class="cover-footer">Hạt Giống Chiêm Tinh</div>
 </div>
 ${contentHtml}
@@ -251,13 +277,12 @@ ${contentHtml}
 const FOOTER_TEMPLATE = `<div style="
   box-sizing: border-box;
   width: 100%;
-  padding: 3mm 20mm 0 20mm;
-  border-top: 0.8pt solid #fca5a5;
+  padding: 0 25mm;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 10pt;
   color: #9ca3af;
   text-align: center;
-">Hạt Giống Chiêm Tinh</div>`
+"><div style="border-top: 0.8pt solid #fca5a5; padding-top: 3mm;">Hạt Giống Chiêm Tinh</div></div>`
 
 export async function generatePdf(essayText: string, options: PdfOptions): Promise<Buffer | null> {
   try {
@@ -410,6 +435,40 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         el.style.widows = String(w)
         el.style.orphans = String(o)
         console.log(`[ow] lines=${lineCount} w=${w} o=${o} "${el.textContent?.slice(0, 25)}"`)
+      })
+
+      // ── SUBHEADING ORPHAN FIX ─────────────────────────────────────────────────────
+      // A subheading alone at the bottom of a page must move to the next page.
+      // Decision: compare space available on current page for the next paragraph
+      // vs the minimum space it needs (orphans × lineHeight). If not enough room,
+      // the print engine will push the paragraph to the next page, leaving the
+      // subheading alone — so we move the subheading to the next page proactively.
+      ;(Array.from(document.querySelectorAll('h3.subheading')) as HTMLElement[]).forEach(sh => {
+        const group = sh.closest('.section-group') as HTMLElement | null
+        if (!group) return
+        const groupTop = group.getBoundingClientRect().top
+        const shBottom = sh.getBoundingClientRect().bottom - groupTop
+        const shPageNum = Math.ceil(shBottom / PAGE_H)
+        const pageEndPx = shPageNum * PAGE_H
+        let next = sh.nextElementSibling as HTMLElement | null
+        while (next && (next.classList.contains('spacer') || (next.textContent?.trim() === '' && (next as HTMLElement).offsetHeight <= 8))) {
+          next = next.nextElementSibling as HTMLElement | null
+        }
+        if (!next) return
+        const nextEl = next as HTMLElement
+        const nextTop = nextEl.getBoundingClientRect().top - groupTop
+        const nextLh = parseFloat(window.getComputedStyle(nextEl).lineHeight) || 22
+        const nextOrphans = parseInt(nextEl.style.orphans || '4') || 4
+        const nextLineCount = Math.round(nextEl.offsetHeight / nextLh) || 1
+        const spaceNeeded = Math.min(nextOrphans, nextLineCount) * nextLh
+        const spaceAvailable = pageEndPx - nextTop
+        if (spaceAvailable < spaceNeeded) {
+          sh.style.pageBreakBefore = 'always'
+          sh.style.breakBefore = 'always'
+          console.log(`[sh-orphan] moved: "${sh.textContent?.slice(0, 30)}" avail=${spaceAvailable.toFixed(0)} needed=${spaceNeeded.toFixed(0)}`)
+        } else {
+          console.log(`[sh-ok] stays: "${sh.textContent?.slice(0, 30)}" avail=${spaceAvailable.toFixed(0)} needed=${spaceNeeded.toFixed(0)}`)
+        }
       })
     })
 
