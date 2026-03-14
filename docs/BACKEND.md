@@ -280,12 +280,22 @@ getHouseMeaning(kb, houseNum)
 **Model:** `anthropic/claude-sonnet-4-6` qua OpenRouter
 
 ```ts
-generateEssayStreaming(systemPrompt, userPrompt, onProgress)
+generateEssayStreaming(systemPrompt, userPrompt, onProgress, onRetry?)
 ```
 - SSE stream → parse `data: {...}` lines
-- `max_tokens: 16000`, `temperature: 0.75`
-- Expected: career/love ~9k chars, synastry ~22k, transit ~28k
+- `max_tokens: 32000`, `temperature: 0.75`
+- Expected: career/love ~9k chars, synastry ~22k, transit ~28k (~22900 tokens)
 - Progress mapping: `18% + (chars/expected) * 67%` → cap 85%
+- **Retry logic:** 3 lần tự động cho ECONNRESET, terminated, hoặc `StreamInterruptedError` (stream kết thúc mà không có `[DONE]` marker)
+- `onRetry(attempt, reason)` callback → route.ts update label user "Kết nối bị gián đoạn — đang thử lại lần N..."
+
+**MIN_CHARS per service** (trong route.ts) — nếu output quá ngắn sau stream thì retry toàn bộ:
+```
+transit:  12000 chars
+synastry: 10000 chars
+career:    4000 chars
+love:      4000 chars
+```
 
 ---
 
@@ -330,15 +340,26 @@ auth: SMTP_USER / SMTP_PASS
 
 ```ts
 interface Job {
-  id, status, progress, label, result, error, createdAt, userUid?, service?
+  id, status, progress, label, result, error, createdAt,
+  profileUidA?, profileUidB?, pdfExpiresAt?, pdfNote?
 }
-createJob(id, userUid?, service?)  → ghi DB + cache
-updateJob(id, data)                → update DB + cache
-getJob(id)                         → đọc cache trước, fallback DB (async)
-getJobFromDb(id)                   → đọc DB trực tiếp (dùng sau restart)
+createJob(id, meta?)   → ghi DB + cache
+updateJob(id, data)    → update DB + cache
+getJob(id)             → đọc cache only (sync)
+getJobFromDb(id)       → cache trước, fallback DB (async) + markStuckIfNeeded
+cancelJob(id)          → xóa khỏi DB, set status cancelled trong cache
+isJobCancelled(id)     → check cache
 ```
 
-In-memory cache auto-cleanup sau 1 giờ. DB records giữ lâu hơn.
+**Auto-timeout stuck jobs:**
+- `STUCK_TIMEOUT_MS = 15 phút`
+- `sweepStuckJobsOnce()` chạy khi server khởi động — mark tất cả jobs processing > 15 phút thành error
+- `markStuckIfNeeded(job)` chạy mỗi lần `getJobFromDb` được gọi
+- In-memory cache auto-cleanup sau 1 giờ
+
+**Hủy báo cáo:**
+- Nút Hủy trên `/processing` → `DELETE /api/job/:id` → `cancelJob()` → xóa DB, set cancelled in memory
+- `isJobCancelled(jobId)` được check tại các checkpoint trong `processReport()`
 
 ---
 

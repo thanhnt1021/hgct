@@ -162,6 +162,12 @@ src/
 - [x] Đổi mật khẩu — `/api/user/password` POST + UI trong /profile
 - [x] Forgot password — full flow: token DB + email link + `/auth/reset-password` page
 - [x] Lưu Order vào DB — `orders` table ghi khi tạo báo cáo (pending → completed)
+- [x] PDF cải thiện — tăng font size, footer native puppeteer, orphan/widow control, fix blank page
+- [x] Auto-timeout stuck jobs — sweep 15 phút khi restart + `markStuckIfNeeded` khi poll; nút Hủy báo cáo trên `/processing`
+- [x] OpenRouter retry — ECONNRESET/terminated tự retry 3 lần; `StreamInterruptedError` khi stream kết thúc không có `[DONE]`
+- [x] `max_tokens` tăng 16000 → 32000 — Vận Hạn cần ~22900 tokens, 16000 gây cắt giữa Phần 5
+- [x] MIN_CHARS per service — transit: 12000, synastry: 10000, career/love: 4000; tự retry nếu output quá ngắn
+- [x] Email template — greeting block lớn hơn, layout fixes, synastry text left-align
 
 ## What's TODO
 - [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật
@@ -173,6 +179,8 @@ src/
 - Vanhan route calls `buildVanhanEssayPrompt(chart, startDate, endDate, profile)` trực tiếp (không cần blocks)
 - `geo-tz` sai TZ cho Việt Nam → hardcode `Asia/Ho_Chi_Minh` trong `/api/location/search`
 - `.next/standalone/` owned by root sau deploy → luôn deploy qua `sudo bash deploy.sh`
+- `max_tokens: 16000` cắt Vận Hạn giữa Phần 5 (`finish_reason: length`) → tăng lên 32000
+- Stream OpenRouter kết thúc mà không có `[DONE]` marker → `StreamInterruptedError` → retry tự động
 
 ## Important Notes
 - Run dev server: `PORT=65498 npm run dev`
