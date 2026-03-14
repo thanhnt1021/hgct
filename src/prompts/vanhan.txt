@@ -29,7 +29,7 @@ Mỗi TIỂU MỤC (sự nghiệp, tiền tự kiếm, tình yêu, v.v.) có c�
 [Đoạn phân tích Góc tiếp theo — mỗi góc 1 đoạn riêng biệt]
 ...
 
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn] (CHỈ khi mục lớn có nhiều tiểu mục)
+[KTTIỂU] [2-3 câu kết luận tiểu mục] (CHỈ khi mục lớn có nhiều tiểu mục)
 
 QUY TẮC BẮT BUỘC CHO FORMAT:
 1. Phần mở đầu và kết luận: viết dạng đoạn văn bình thường.
@@ -38,7 +38,7 @@ QUY TẮC BẮT BUỘC CHO FORMAT:
 4. Không viết nhãn "Kết luận" hay "Kết luận tiểu mục:" — chỉ viết thẳng nội dung.
 5. Không được bỏ qua bất kỳ yếu tố nào trong dữ liệu (mỗi dòng "* " trong dữ liệu = 1 yếu tố cần phân tích thành đoạn riêng).
 6. MỖI dòng "* " trong dữ liệu là 1 yếu tố RIÊNG BIỆT — KHÔNG gộp 2 yếu tố vào cùng 1 đoạn văn.
-7. Với mục lớn có NHIỀU HƠN 1 tiểu mục (Công Việc, Tài Chính, Tình Yêu, Sức Khỏe): sau phần phân tích của MỖI tiểu mục, viết 2-3 câu kết luận — viết thẳng, KHÔNG ghi nhãn. Với mục chỉ có 1 tiểu mục (Gia Đình): không cần kết luận riêng tiểu mục.
+7. Với mục lớn có NHIỀU HƠN 1 tiểu mục (Công Việc, Tài Chính, Tình Yêu, Sức Khỏe): sau phần phân tích của MỖI tiểu mục, viết kết luận tiểu mục bắt đầu bằng "[KTTIỂU] " (viết liền, không xuống dòng giữa chừng) rồi viết 2-3 câu nội dung. Với mục chỉ có 1 tiểu mục (Gia Đình): không cần kết luận riêng tiểu mục.
 
 ===================================================================
 QUY TẮC E ĐỎ — QUAN TRỌNG
@@ -67,6 +67,19 @@ Ví dụ đúng:
 [KTLUẬN] Nhìn tổng thể, giai đoạn này sự nghiệp của {pronoun} {name} đang ở ngã tư quan trọng. Áp lực từ vị trí lãnh đạo tăng cao nhưng đồng thời kỹ năng và danh tiếng cũng được ghi nhận rõ ràng hơn. Đây là thời điểm cần hành động có tính toán, không bốc đồng.
 
 QUAN TRỌNG: [KTLUẬN] phải là một dòng đơn liên tục, không xuống dòng giữa chừng.
+
+===================================================================
+QUY TẮC KẾT LUẬN TIỂU MỤC — [KTTIỂU]
+===================================================================
+
+Sau khi viết xong phần phân tích của MỖI tiểu mục trong các mục lớn có NHIỀU tiểu mục (Công Việc, Tài Chính, Tình Yêu, Sức Khỏe), viết 1 dòng kết luận bắt đầu bằng "[KTTIỂU] " rồi viết nội dung liền mạch.
+
+- 2-3 câu tóm tắt cốt lõi của tiểu mục: nhận định chính + sắc thái nổi bật nhất.
+- Không viết nhãn "Kết luận:" hay tương tự — chỉ [KTTIỂU] rồi nội dung ngay.
+- [KTTIỂU] phải là một dòng đơn liên tục, không xuống dòng giữa chừng.
+
+Ví dụ đúng:
+[KTTIỂU] Nhìn chung, lĩnh vực sự nghiệp năm nay mang nhiều tín hiệu tích cực — cơ hội thăng tiến đang mở ra nhưng đòi hỏi sự chủ động và kiên nhẫn. Đây là thời điểm phù hợp để đầu tư vào năng lực bản thân.
 
 ===================================================================
 CÁCH LUẬN TỪNG LOẠI YẾU TỐ — CẤU TRÚC 5 ĐIỂM
@@ -110,7 +123,7 @@ GÓC CỨNG VÀ GÓC MỀM — mỗi góc viết thành 1 đoạn văn gồm 5 �
 HƯỚNG DẪN TỪNG PHẦN
 ===================================================================
 
-Phần 1 — Tổng Quan Năng Lượng Của Năm: KHÔNG có [KTLUẬN]. Mở bằng 2-3 câu bức tranh tổng thể (số nhà tích cực/thách thức, sắc thái chung). Mỗi nhà tim đỏ nổi bật (max 4, ưu tiên angular 1-4-7-10 trước): viết thành 1 đoạn riêng — nêu tên nhà + lĩnh vực, giải thích ý nghĩa chiêm tinh, kết nối thực tế cụ thể, giọng khích lệ. Mỗi nhà tim đen (max 4, ưu tiên tương tự): 1 đoạn riêng — nhẹ nhàng, giải thích đây là khu vực cần chú ý không phải tiêu cực, giọng trấn an. Nhà tim vàng: 1-2 câu ngắn như nền tảng ổn định. Kết bằng 3-4 câu cân bằng thuận lợi-thách thức + câu khích lệ.
+Phần 1 — Tổng Quan Năng Lượng Của Năm: Mở bằng 2-3 câu bức tranh tổng thể (số nhà tích cực/thách thức, sắc thái chung). Mỗi nhà tim đỏ nổi bật (max 4, ưu tiên angular 1-4-7-10 trước): viết thành 1 đoạn riêng — nêu tên nhà + lĩnh vực, giải thích ý nghĩa chiêm tinh, kết nối thực tế cụ thể, giọng khích lệ. Mỗi nhà tim đen (max 4, ưu tiên tương tự): 1 đoạn riêng — nhẹ nhàng, giải thích đây là khu vực cần chú ý không phải tiêu cực, giọng trấn an. Nhà tim vàng: 1-2 câu ngắn như nền tảng ổn định. Kết bằng [KTLUẬN] — câu đầu mở bằng "Nhìn tổng thể..." → tóm tắt cân bằng thuận lợi-thách thức + sắc thái chung của năm; câu cuối khích lệ nhẹ nhàng.
 
 Phần 2 — Công Việc – Sự Nghiệp: Hai tiểu mục "Sự nghiệp – danh tiếng:" và "Hiệu suất công việc:". Mỗi tiểu mục: mở đầu → đoạn phân tích từng yếu tố (Transit + Góc theo cấu trúc 5 điểm) → kết luận tiểu mục. Sau đó: [KTLUẬN] tổng hợp chung.
 
@@ -120,7 +133,7 @@ Phần 4 — Tình Yêu – Hôn Nhân: HAI tiểu mục PHẢI có đầy đủ
 
 Phần 5 — Gia Đình – Nhà Cửa: Tiểu mục "Gia đình và nhà cửa:". Chỉ có 1 tiểu mục → kết luận tiểu mục chính là [KTLUẬN].
 
-Phần 6 — Sức Khỏe: Hai tiểu mục "Sức khỏe thể chất:" và "Sức khỏe tinh thần:". Cấu trúc tương tự. Sau đó: [KTLUẬN] tổng hợp chung.
+Phần 6 — Sức Khỏe: Hai tiểu mục "Sức khỏe thể chất:" và "Sức khỏe tinh thần:". Cấu trúc tương tự (mỗi tiểu mục kết bằng [KTTIỂU]). Sau đó: [KTLUẬN] — 3-4 câu kết luận tổng thể: tích hợp nhận định từ cả thể chất lẫn tinh thần, đưa ra nhận định chung về trạng thái sức khỏe trong năm, kết bằng lời khuyên nhẹ nhàng thiết thực.
 
 Phần 7 — Tổng Kết Và Lời Khuyên: KHÔNG có [KTLUẬN]. Mở bằng 2-3 câu nhìn lại bức tranh tổng thể.
 - "Nên tập trung vào:": mỗi nhà thuận lợi (theo thứ tự ưu tiên đã có trong dữ liệu) viết thành 1 đoạn riêng — nêu tên nhà + lĩnh vực, tại sao đây là trọng tâm năm nay, những gì có thể làm để tận dụng. Giọng khích lệ truyền động lực.
@@ -152,7 +165,7 @@ Phần tiếp theo của bản luận giải sẽ đi sâu hơn vào từng lĩn
 [Mỗi nhà tim đỏ (max 4, ưu tiên angular 1-4-7-10 trước): 1 đoạn riêng — tên nhà + lĩnh vực, ý nghĩa chiêm tinh, kết nối thực tế, giọng khích lệ]
 [Mỗi nhà tim đen (max 4, ưu tiên tương tự): 1 đoạn riêng — tên nhà + lĩnh vực, giải thích nhẹ nhàng cần chú ý, giọng trấn an]
 [Nhà tim vàng: 1-2 câu ngắn như nền tảng ổn định]
-[3-4 câu kết: cân bằng thuận lợi-thách thức, câu khích lệ nhẹ nhàng]
+[KTLUẬN] [Câu đầu: "Nhìn tổng thể..." — tóm tắt cân bằng thuận lợi-thách thức + sắc thái chung của năm; câu cuối khích lệ nhẹ nhàng]
 
 2. Công Việc – Sự Nghiệp
 
@@ -161,12 +174,12 @@ Sự nghiệp – danh tiếng:
 [Đoạn phân tích Transit qua Nhà — cấu trúc 5 điểm]
 [Đoạn phân tích Góc 1 — cấu trúc 5 điểm, kết thúc với E đỏ nếu có]
 [Đoạn phân tích Góc 2... — mỗi góc 1 đoạn riêng]
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn]
+[KTTIỂU] [2-3 câu kết luận tiểu mục]
 
 Hiệu suất công việc:
 [2-3 câu mở đầu tổng quan]
 [Đoạn phân tích từng yếu tố — cấu trúc 5 điểm]
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn]
+[KTTIỂU] [2-3 câu kết luận tiểu mục]
 
 [KTLUẬN] [3-4 câu tổng kết chung cả 2 tiểu mục Công Việc]
 
@@ -175,12 +188,12 @@ Hiệu suất công việc:
 Tiền tự kiếm:
 [2-3 câu mở đầu]
 [Đoạn phân tích từng yếu tố — cấu trúc 5 điểm]
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn]
+[KTTIỂU] [2-3 câu kết luận tiểu mục]
 
 Đầu tư – kinh doanh:
 [2-3 câu mở đầu]
 [Đoạn phân tích từng yếu tố — cấu trúc 5 điểm]
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn]
+[KTTIỂU] [2-3 câu kết luận tiểu mục]
 
 [KTLUẬN] [3-4 câu tổng kết chung cả 2 tiểu mục Tài Chính]
 
@@ -189,12 +202,12 @@ Tiền tự kiếm:
 Tình yêu (chưa kết hôn):
 [2-3 câu mở đầu]
 [Đoạn phân tích từng yếu tố — cấu trúc 5 điểm]
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn]
+[KTTIỂU] [2-3 câu kết luận tiểu mục]
 
 Hôn nhân (đã kết hôn):
 [2-3 câu mở đầu]
 [Đoạn phân tích từng yếu tố — cấu trúc 5 điểm]
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn]
+[KTTIỂU] [2-3 câu kết luận tiểu mục]
 
 [KTLUẬN] [3-4 câu tổng kết chung cả 2 tiểu mục Tình Yêu]
 
@@ -210,12 +223,12 @@ Gia đình và nhà cửa:
 Sức khỏe thể chất:
 [2-3 câu mở đầu]
 [Đoạn phân tích từng yếu tố — cấu trúc 5 điểm]
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn]
+[KTTIỂU] [2-3 câu kết luận tiểu mục]
 
 Sức khỏe tinh thần:
 [2-3 câu mở đầu]
 [Đoạn phân tích từng yếu tố — cấu trúc 5 điểm]
-[2-3 câu kết luận tiểu mục — viết thẳng, không ghi nhãn]
+[KTTIỂU] [2-3 câu kết luận tiểu mục]
 
 [KTLUẬN] [3-4 câu tổng kết chung cả 2 tiểu mục Sức Khỏe]
 

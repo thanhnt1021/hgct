@@ -32,7 +32,7 @@ function isAbsenceLine(s: string): boolean {
 }
 
 function isBracketNote(s: string): boolean {
-  return s.startsWith('[') && s.endsWith(']') && !s.startsWith('[KTLUẬN]') && s.length > 2
+  return s.startsWith('[') && s.endsWith(']') && !s.startsWith('[KTLUẬN]') && !s.startsWith('[KTTIỂU]') && s.length > 2
 }
 
 export function cleanForPdf(text: string): string {
@@ -104,6 +104,7 @@ function classifyLine(line: string): string {
   const s = line.trim()
   if (!s) return 'empty'
   if (s.startsWith('[KTLUẬN]')) return 'red_box'
+  if (s.startsWith('[KTTIỂU]')) return 'mini_box'
   if (/^\s{3,}\*\s/.test(line)) return 'bullet_indent'
   if (s.startsWith('* ')) return 'bullet'
   if (/^\d+\.\s+\S/.test(s) && s.length < 120) return 'section_heading'
@@ -193,6 +194,10 @@ function buildHtml(essayText: string, options: PdfOptions): string {
         const content = s.slice('[KTLUẬN]'.length).trim()
         html = `<div class="red-box">${escapeHtml(content)}</div>`; break
       }
+      case 'mini_box': {
+        const content = s.slice('[KTTIỂU]'.length).trim()
+        html = `<div class="mini-box">${escapeHtml(content)}</div>`; break
+      }
       default:                 html = `<p class="body">${safe}</p>`
     }
     groupHtmlLines[groupHtmlLines.length - 1].push(html)
@@ -250,6 +255,7 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 .signature { font-family: 'NunitoItalic'; font-size: 11pt; color: #6b7280; margin: 8pt 0 3pt; }
 .spacer { height: 4pt; }
 .red-box { font-family: 'MontserratBold'; font-size: 16.5pt; border: 1.5pt solid #dc2626; background: #fff5f5; padding: 8pt 10pt; margin: 6pt 0 8pt; text-align: justify; page-break-inside: avoid; break-inside: avoid; }
+.mini-box { font-family: 'Nunito'; font-size: 15.5pt; border: 1.2pt solid #dc2626; background: #fef9f9; padding: 7pt 10pt; margin: 5pt 0 7pt; text-align: justify; page-break-inside: avoid; break-inside: avoid; }
 
 /* Signature: fixed orphans/widows (typically 1-line, just a safety floor). */
 .signature { orphans: 4; widows: 4; }
@@ -437,37 +443,85 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         console.log(`[ow] lines=${lineCount} w=${w} o=${o} "${el.textContent?.slice(0, 25)}"`)
       })
 
-      // ── SUBHEADING ORPHAN FIX ─────────────────────────────────────────────────────
-      // A subheading alone at the bottom of a page must move to the next page.
-      // Decision: compare space available on current page for the next paragraph
-      // vs the minimum space it needs (orphans × lineHeight). If not enough room,
-      // the print engine will push the paragraph to the next page, leaving the
-      // subheading alone — so we move the subheading to the next page proactively.
-      ;(Array.from(document.querySelectorAll('h3.subheading')) as HTMLElement[]).forEach(sh => {
-        const group = sh.closest('.section-group') as HTMLElement | null
-        if (!group) return
-        const groupTop = group.getBoundingClientRect().top
-        const shBottom = sh.getBoundingClientRect().bottom - groupTop
-        const shPageNum = Math.ceil(shBottom / PAGE_H)
-        const pageEndPx = shPageNum * PAGE_H
-        let next = sh.nextElementSibling as HTMLElement | null
-        while (next && (next.classList.contains('spacer') || (next.textContent?.trim() === '' && (next as HTMLElement).offsetHeight <= 8))) {
+      // ── SUBHEADING WIDOW HELPERS ──────────────────────────────────────────────────
+      // Shared helpers used by both the XUNG ĐỘT fix and the general subheading fix.
+
+      // Skip spacers and invisible elements to find the real next content sibling.
+      function findNextContent(el: HTMLElement): HTMLElement | null {
+        let next = el.nextElementSibling as HTMLElement | null
+        while (next && (next.classList.contains('spacer') || (next.textContent?.trim() === '' && next.offsetHeight <= 8))) {
           next = next.nextElementSibling as HTMLElement | null
         }
-        if (!next) return
-        const nextEl = next as HTMLElement
+        return next
+      }
+
+      // How much space does nextEl need to not trigger a page break before it?
+      // Elements with page-break-inside:avoid (red-box, mini-box) need full height.
+      // Regular paragraphs need orphans × lineHeight.
+      function spaceNeededFor(nextEl: HTMLElement): number {
+        const breakAvoid = nextEl.classList.contains('red-box') || nextEl.classList.contains('mini-box')
+        if (breakAvoid) return nextEl.offsetHeight
+        const lh = parseFloat(window.getComputedStyle(nextEl).lineHeight) || 22
+        const orphans = parseInt(nextEl.style.orphans || '4') || 4
+        const lines = Math.round(nextEl.offsetHeight / lh) || 1
+        return Math.min(orphans, lines) * lh
+      }
+
+      // Returns true if placing sh on its current page would leave it as a widow
+      // (i.e. the print engine would push the following content to the next page).
+      function wouldBeWidow(sh: HTMLElement, group: HTMLElement): boolean {
+        const groupTop = group.getBoundingClientRect().top
+        const shBottom = sh.getBoundingClientRect().bottom - groupTop
+        const pageEndPx = Math.ceil(shBottom / PAGE_H) * PAGE_H
+        const nextEl = findNextContent(sh)
+        if (!nextEl) return false
         const nextTop = nextEl.getBoundingClientRect().top - groupTop
-        const nextLh = parseFloat(window.getComputedStyle(nextEl).lineHeight) || 22
-        const nextOrphans = parseInt(nextEl.style.orphans || '4') || 4
-        const nextLineCount = Math.round(nextEl.offsetHeight / nextLh) || 1
-        const spaceNeeded = Math.min(nextOrphans, nextLineCount) * nextLh
-        const spaceAvailable = pageEndPx - nextTop
-        if (spaceAvailable < spaceNeeded) {
+        return (pageEndPx - nextTop) < spaceNeededFor(nextEl)
+      }
+
+      // ── XUNG ĐỘT / HÒA HỢP WIDOW FIX ────────────────────────────────────────────
+      // These title-headings sit inside a section-group without page-break-before,
+      // so they can land near a page bottom. When the first subheading after them
+      // would be a widow, move the heading itself to the next page — pulling the
+      // subheading along. Do NOT also move the subheading independently.
+      const xdHandledSubheadings = new Set<HTMLElement>()
+      ;(Array.from(document.querySelectorAll('h2.section')) as HTMLElement[]).forEach(h2 => {
+        const txt = h2.textContent?.trim() || ''
+        if (txt !== 'XUNG ĐỘT' && txt !== 'HÒA HỢP') return
+        // Find the first h3.subheading that follows this heading
+        let firstSh: HTMLElement | null = null
+        let sib = h2.nextElementSibling as HTMLElement | null
+        while (sib) {
+          if (sib.tagName === 'H3' && sib.classList.contains('subheading')) { firstSh = sib; break }
+          sib = sib.nextElementSibling as HTMLElement | null
+        }
+        if (!firstSh) return
+        xdHandledSubheadings.add(firstSh)
+        const group = h2.closest('.section-group') as HTMLElement | null
+        if (!group) return
+        if (wouldBeWidow(firstSh, group)) {
+          h2.style.pageBreakBefore = 'always'
+          h2.style.breakBefore = 'always'
+          console.log(`[xd-widow] moved "${txt}" to next page`)
+        } else {
+          console.log(`[xd-ok] "${txt}" stays`)
+        }
+      })
+
+      // ── SUBHEADING ORPHAN FIX ─────────────────────────────────────────────────────
+      // A subheading alone at the bottom of a page must move to the next page.
+      // Skips subheadings already handled by the XUNG ĐỘT/HÒA HỢP fix above.
+      // Uses improved spaceNeededFor() that handles page-break-inside:avoid elements.
+      ;(Array.from(document.querySelectorAll('h3.subheading')) as HTMLElement[]).forEach(sh => {
+        if (xdHandledSubheadings.has(sh)) return
+        const group = sh.closest('.section-group') as HTMLElement | null
+        if (!group) return
+        if (wouldBeWidow(sh, group)) {
           sh.style.pageBreakBefore = 'always'
           sh.style.breakBefore = 'always'
-          console.log(`[sh-orphan] moved: "${sh.textContent?.slice(0, 30)}" avail=${spaceAvailable.toFixed(0)} needed=${spaceNeeded.toFixed(0)}`)
+          console.log(`[sh-orphan] moved: "${sh.textContent?.slice(0, 30)}"`)
         } else {
-          console.log(`[sh-ok] stays: "${sh.textContent?.slice(0, 30)}" avail=${spaceAvailable.toFixed(0)} needed=${spaceNeeded.toFixed(0)}`)
+          console.log(`[sh-ok] stays: "${sh.textContent?.slice(0, 30)}"`)
         }
       })
     })
