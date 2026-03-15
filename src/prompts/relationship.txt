@@ -45,7 +45,7 @@ Cách xử lý:
 - Cả 2 loại đều tạo ra sự thu hút, góc mềm thuận lợi tự nhiên, góc cứng thách thức nhưng thúc đẩy phát triển.
 
 ===================================================================
-GIỌNG VĂN, CHIÊM TINH TÂM LÝ HỌC
+GIỌNG VĂN / CHIÊM TINH TÂM LÝ HỌC
 ===================================================================
 
 - Viết như người bạn đồng hành đang soi sáng, không phải thầy bói phán bệnh.
@@ -57,7 +57,7 @@ GIỌNG VĂN, CHIÊM TINH TÂM LÝ HỌC
 - Dùng từ ngữ tinh tế, tránh lặp cùng một cấu trúc câu liên tiếp. Đa dạng cách mở đầu câu, không bắt đầu quá nhiều câu bằng "Chị/Anh" hay tên người.
 
 ===================================================================
-QUY TẮC KẾT LUẬN ĐÓNG KHUNG ĐỎ, [KTLUẬN]
+QUY TẮC KẾT LUẬN ĐÓNG KHUNG ĐỎ / [KTLUẬN]
 ===================================================================
 
 Sau khi viết xong TẤT CẢ các tiểu mục của một MỤC LỚN, viết 1 dòng tổng kết bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (không xuống dòng giữa chừng).
@@ -75,12 +75,12 @@ Kính gửi {pronoun_A} {full_name_A} và {pronoun_B} {full_name_B},
 1. Tổng Quan Mối Quan Hệ
 
 Lõi Tính Cách Của {title_A} {name_A}:
-[Đoạn 1 (3-4 câu), AC/Sun/Moon: AC cho biết vẻ ngoài và cách tiếp cận cuộc sống, Mặt Trời cho biết bản chất cốt lõi, Mặt Trăng cho biết nhu cầu cảm xúc. Tổng hợp: {pronoun_A} {name_A} là người như thế nào, cho đi điều gì trong mối quan hệ.]
-[Đoạn 2 (2-3 câu), Nhà trội cá nhân: từ danh sách nhà trội Natal, tóm gọn {pronoun_A} {name_A} quan tâm và cần nhận lại điều gì (ví dụ: trội Nhà 7 = cần cam kết, trội Nhà 10 = cần được tôn trọng sự nghiệp...). Viết văn xuôi tự nhiên, KHÔNG liệt kê, KHÔNG nhắc điểm số.]
+[Đoạn 1 (3-4 câu) / AC/Sun/Moon: AC cho biết vẻ ngoài và cách tiếp cận cuộc sống, Mặt Trời cho biết bản chất cốt lõi, Mặt Trăng cho biết nhu cầu cảm xúc. Tổng hợp: {pronoun_A} {name_A} là người như thế nào, cho đi điều gì trong mối quan hệ.]
+[Đoạn 2 (2-3 câu) / Nhà trội cá nhân: từ danh sách nhà trội Natal, tóm gọn {pronoun_A} {name_A} quan tâm và cần nhận lại điều gì (ví dụ: trội Nhà 7 = cần cam kết, trội Nhà 10 = cần được tôn trọng sự nghiệp...). Viết văn xuôi tự nhiên, KHÔNG liệt kê, KHÔNG nhắc điểm số.]
 [KHÔNG viết về Venus, Mars ở đây, những thứ đó nằm ở Mục 3.]
 
 Lõi Tính Cách Của {title_B} {name_B}:
-[Tương tự, 2 đoạn như trên]
+[Tương tự / 2 đoạn như trên]
 
 Điểm Gặp Nhau Và Khác Biệt Ngầm:
 [1 đoạn: Xét lõi tính cách (AC/Sun/Moon) của 2 người, có gì tự nhiên hòa hợp không? Ví dụ: cùng nguyên tố, năng lượng bổ trợ, nhu cầu cảm xúc tương đồng... Hoặc có điểm nào tự nhiên xung đột? Ví dụ: một người cần tự do, người kia cần kiểm soát; một người phản ứng nhanh, người kia cần thời gian...]
@@ -88,8 +88,8 @@ Lõi Tính Cách Của {title_B} {name_B}:
 [1 đoạn: Chỉ ra điểm lệch, điều một người cần mà người kia chưa cho được, hoặc cách thể hiện khác nhau. Luận hướng xây dựng: đây là điều cần hiểu và tôn trọng, không phải điểm yếu.]
 
 Nhà Được Kích Hoạt:
-[Chiều 1, Nhà của {name_A} được {name_B} kích hoạt: Liệt kê ĐẦY ĐỦ tất cả các nhà có trong dữ liệu, không bỏ sót nhà nào. Với từng nhà: viết 1 đoạn riêng giải thích sự hiện diện của {pronoun_B} {name_B} khiến lĩnh vực đó trong cuộc đời {pronoun_A} {name_A} trở nên sống động, có bài học, hoặc quan trọng hơn như thế nào.]
-[Chiều 2, Nhà của {name_B} được {name_A} kích hoạt: Liệt kê ĐẦY ĐỦ tất cả các nhà có trong dữ liệu, không bỏ sót nhà nào. Với từng nhà: viết 1 đoạn riêng giải thích sự hiện diện của {pronoun_A} {name_A} khiến lĩnh vực đó trong cuộc đời {pronoun_B} {name_B} trở nên sống động, có bài học, hoặc quan trọng hơn như thế nào.]
+[Chiều 1 / Nhà của {name_A} được {name_B} kích hoạt: Liệt kê ĐẦY ĐỦ tất cả các nhà có trong dữ liệu, không bỏ sót nhà nào. Với từng nhà: viết 1 đoạn riêng giải thích sự hiện diện của {pronoun_B} {name_B} khiến lĩnh vực đó trong cuộc đời {pronoun_A} {name_A} trở nên sống động, có bài học, hoặc quan trọng hơn như thế nào.]
+[Chiều 2 / Nhà của {name_B} được {name_A} kích hoạt: Liệt kê ĐẦY ĐỦ tất cả các nhà có trong dữ liệu, không bỏ sót nhà nào. Với từng nhà: viết 1 đoạn riêng giải thích sự hiện diện của {pronoun_A} {name_A} khiến lĩnh vực đó trong cuộc đời {pronoun_B} {name_B} trở nên sống động, có bài học, hoặc quan trọng hơn như thế nào.]
 [Lưu ý: kích hoạt KHÔNG có nghĩa là đòi hỏi, mà là sự hiện diện của đối phương khiến lĩnh vực đó trong mình trở nên sống động hơn]
 
 [KTLUẬN] [2-3 câu tổng kết: màu sắc đặc trưng nhất của mối quan hệ này dựa trên lõi tính cách và sự kích hoạt lẫn nhau]
@@ -144,9 +144,9 @@ Không thêm tiểu mục nào khác ngoài 6 tiểu mục trên.
 3. Ngôn Ngữ Tình Yêu Và Cách Thể Hiện Cảm Xúc
 
 Cách {title_A} {name_A} Yêu:
-[Đoạn 1, Lõi AC/Sun/Moon + Cho Đi – Nhận Lại: luận chi tiết AC, Mặt Trời, Mặt Trăng của {name_A} từ bản đồ sao cá nhân + kết hợp dữ liệu "Cho Đi – Nhận Lại" → tổng hợp: khi yêu, {pronoun_A} {name_A} thường cho đi điều gì và cần nhận lại điều gì, nhu cầu cảm xúc cốt lõi trong mối quan hệ là gì]
-[Đoạn 2, Sao Hỏa cung: Sao Hỏa của {name_A} ở cung nào → cách {pronoun_A} thể hiện năng lượng khi yêu (chủ động, bảo vệ, chinh phục, dịu dàng...?), cách {pronoun_A} hành động và phản ứng khi có xung đột hoặc căng thẳng trong mối quan hệ]
-[Đoạn 3, Sao Kim cung: Sao Kim của {name_A} ở cung nào → gu đối tác của {pronoun_A} là gì, {pronoun_A} thể hiện tình yêu theo cách nào, điều gì khiến {pronoun_A} rung động và cảm thấy được yêu thật sự]
+[Đoạn 1 / Lõi AC/Sun/Moon + Cho Đi – Nhận Lại: luận chi tiết AC, Mặt Trời, Mặt Trăng của {name_A} từ bản đồ sao cá nhân + kết hợp dữ liệu "Cho Đi – Nhận Lại" → tổng hợp: khi yêu, {pronoun_A} {name_A} thường cho đi điều gì và cần nhận lại điều gì, nhu cầu cảm xúc cốt lõi trong mối quan hệ là gì]
+[Đoạn 2 / Sao Hỏa cung: Sao Hỏa của {name_A} ở cung nào → cách {pronoun_A} thể hiện năng lượng khi yêu (chủ động, bảo vệ, chinh phục, dịu dàng...?), cách {pronoun_A} hành động và phản ứng khi có xung đột hoặc căng thẳng trong mối quan hệ]
+[Đoạn 3 / Sao Kim cung: Sao Kim của {name_A} ở cung nào → gu đối tác của {pronoun_A} là gì, {pronoun_A} thể hiện tình yêu theo cách nào, điều gì khiến {pronoun_A} rung động và cảm thấy được yêu thật sự]
 
 Cách {title_B} {name_B} Yêu:
 [Đầy đủ 3 đoạn như trên cho {pronoun_B} {name_B}]
@@ -162,13 +162,13 @@ Vai Trò Trong Mối Quan Hệ Này:
 
 Mục 4 có CẤU TRÚC CỐ ĐỊNH gồm 10 tiểu mục, chia 2 nhóm. Code sẽ tự chèn nhãn "HÒA HỢP" và "XUNG ĐỘT" vào output, bạn KHÔNG cần viết chúng. Chỉ cần viết đúng 10 tiểu mục theo thứ tự sau. KHÔNG thêm tiểu mục khác.
 
-QUAN TRỌNG, TÁCH BIỆT MỀM VÀ CỨNG:
+QUAN TRỌNG / TÁCH BIỆT MỀM VÀ CỨNG:
 Dữ liệu phần Hòa Hợp CHỈ chứa các chiều GÓC MỀM. Dữ liệu phần Xung Đột CHỈ chứa các chiều GÓC CỨNG.
 → Trong phần Hòa Hợp: CHỈ luận về những chiều góc mềm có trong dữ liệu. KHÔNG nhắc bất kỳ chiều cứng nào.
 → Trong phần Xung Đột: CHỈ luận về những chiều góc cứng có trong dữ liệu. KHÔNG nhắc bất kỳ chiều mềm nào.
 Ví dụ: nếu Kim A→Trăng B là Góc Mềm nhưng Kim B→Trăng A là Góc Cứng → phần Hòa Hợp chỉ viết về chiều A→B, phần Xung Đột chỉ viết về chiều B→A. TUYỆT ĐỐI KHÔNG trộn lẫn.
 
-Nhóm 1, Hòa Hợp (5 tiểu mục, viết trước):
+Nhóm 1 / Hòa Hợp (5 tiểu mục, viết trước):
 
 Lõi tính cách hòa hợp:
 [LUÔN VIẾT. Xét AC, Mặt Trời, Mặt Trăng của từng người từ bản đồ sao cá nhân. Chỉ ra các điểm đồng điệu hoặc bổ trợ lẫn nhau, ví dụ: cùng nguyên tố, năng lượng tương thích, nhu cầu cảm xúc hỗ trợ nhau. Luận chi tiết, cụ thể.]
@@ -187,7 +187,7 @@ Sao Kim – Mặt Trăng góc mềm (CHỈ viết nếu dữ liệu đánh dấu
 
 === HẾT NHÓM HÒA HỢP. Tất cả tiểu mục phía trên PHẢI nằm TRƯỚC phần Xung Đột. ===
 
-Nhóm 2, Xung Đột (5 tiểu mục, viết sau):
+Nhóm 2 / Xung Đột (5 tiểu mục, viết sau):
 KHÔNG đánh số trước tên tiểu mục.
 QUAN TRỌNG: Nhóm 2 chỉ viết về GÓC CỨNG. Nếu một tiểu mục (ví dụ Kim-Trăng) đã được viết ở Nhóm 1 (góc mềm), KHÔNG viết lại ở Nhóm 2 trừ khi dữ liệu Nhóm 2 cũng đánh dấu VIẾT cho phiên bản góc cứng. Hai nhóm HOÀN TOÀN TÁCH BIỆT.
 

@@ -168,12 +168,12 @@ function buildLoveBrief(
   // ── Format brief ─────────────────────────────────────────────────
   const lines: string[] = []
 
-  lines.push(`=== DỮ LIỆU ĐÃ TÍNH TOÁN, BẢN ĐỒ TÌNH DUYÊN ===`)
+  lines.push(`=== DỮ LIỆU ĐÃ TÍNH TOÁN / BẢN ĐỒ TÌNH DUYÊN ===`)
   lines.push(`Họ tên: ${fullName} | Ngày sinh: ${dobStr}`)
   lines.push(`Xưng hô: ${pronoun}`)
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`[THÔNG TIN CƠ BẢN, HỆ THAM CHIẾU]`)
+  lines.push(`[THÔNG TIN CƠ BẢN / HỆ THAM CHIẾU]`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`- Cung Mọc: ${ascZ}`)
   lines.push(`- Mặt Trời: ${sunZ}, Nhà ${sunH}`)
@@ -184,28 +184,28 @@ function buildLoveBrief(
   lines.push(`- Chủ tinh Nhà 7 (${rulerH7Vn}) ở Nhà ${rulerH7H}`)
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 1, TỔNG QUAN NĂNG LƯỢNG TÌNH YÊU`)
+  lines.push(`MỤC 1 / TỔNG QUAN NĂNG LƯỢNG TÌNH YÊU`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`(Dùng cho Mục 1: AC-Sun-Moon, Venus, Moon, Mars, Nhà trội)`)
 
   for (const c of coreData) {
-    lines.push(`\n  ${c.label}, Cung ${c.zodiac}:`)
+    lines.push(`\n  ${c.label} / Cung ${c.zodiac}:`)
     const cho = stripHtml(c.cho)
     const yeu = stripHtml(c.yeu)
     if (cho) lines.push(`    Cho đi / Cách yêu: ${cho}`)
     if (yeu) lines.push(`    Điểm yếu tình cảm: ${yeu}`)
   }
 
-  lines.push(`\n  Sao Kim (${venusZ}, Nhà ${venusH}), gu đối tác:`)
+  lines.push(`\n  Sao Kim (${venusZ}, Nhà ${venusH}) / gu đối tác:`)
   lines.push(`    ${venusGu || '(không có dữ liệu)'}`)
 
-  lines.push(`\n  Mặt Trăng (${moonZ}), nhu cầu cảm xúc sâu xa:`)
+  lines.push(`\n  Mặt Trăng (${moonZ}) / nhu cầu cảm xúc sâu xa:`)
   lines.push(`    ${moonAnToan || '(không có dữ liệu)'}`)
 
   lines.push(`\n  Sao Hỏa (${marsZ}, Nhà ${marsH}):`)
   lines.push(`    (Luận cách theo đuổi, hấp dẫn và giải quyết xung đột từ cung ${marsZ}, nhà ${marsH})`)
 
-  lines.push(`\n  Nhà trội, điều ${pronoun} mong muốn đối phương có:`)
+  lines.push(`\n  Nhà trội / điều ${pronoun} mong muốn đối phương có:`)
   if (attraction.length > 0) {
     for (const a of attraction.slice(0, 5)) {
       const content = stripHtml(a.content)
@@ -216,33 +216,33 @@ function buildLoveBrief(
   }
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 2, KIỂU NGƯỜI THU HÚT BẠN`)
+  lines.push(`MỤC 2 / KIỂU NGƯỜI THU HÚT BẠN`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`(Dùng dữ liệu MỤC 1 + thêm gặp ở đâu)`)
 
   const meetContent = stripHtml(h7Meeting.content || '')
-  lines.push(`\n  Gặp đối tác ở đâu, Chủ tinh Nhà 7 (${h7Meeting.rulerLabel || rulerH7Vn}) ở Nhà ${h7Meeting.rulerHouse || rulerH7H}:`)
+  lines.push(`\n  Gặp đối tác ở đâu / Chủ tinh Nhà 7 (${h7Meeting.rulerLabel || rulerH7Vn}) ở Nhà ${h7Meeting.rulerHouse || rulerH7H}:`)
   lines.push(`    ${meetContent || '(không có dữ liệu)'}`)
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 3, CÁCH BẠN YÊU VÀ THỂ HIỆN CẢM XÚC`)
+  lines.push(`MỤC 3 / CÁCH BẠN YÊU VÀ THỂ HIỆN CẢM XÚC`)
   lines.push(`${'═'.repeat(60)}`)
 
-  lines.push(`\n  Đỉnh Nhà 7 (${h7Peak.zodiac || h7Z}), thái độ trong tình yêu:`)
+  lines.push(`\n  Đỉnh Nhà 7 (${h7Peak.zodiac || h7Z}) / thái độ trong tình yêu:`)
   lines.push(`    ${stripHtml(h7Peak.energy || '') || '(không có dữ liệu)'}`)
 
-  lines.push(`\n  Hành tinh/Chủ tinh trong Nhà 7, năng lượng đặt vào tình yêu:`)
+  lines.push(`\n  Hành tinh/Chủ tinh trong Nhà 7 / năng lượng đặt vào tình yêu:`)
   if (h7Roles.length > 0) {
     for (const r of h7Roles) {
       const content = stripHtml(r.content)
       if (content) lines.push(`    ${r.label}: ${content}`)
     }
   } else {
-    lines.push(`    (Nhà 7 trống, dùng energy đỉnh để phân tích)`)
+    lines.push(`    (Nhà 7 trống / dùng energy đỉnh để phân tích)`)
   }
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 4, KHÓ KHĂN VÀ MÔ THỨC LẶP LẠI`)
+  lines.push(`MỤC 4 / KHÓ KHĂN VÀ MÔ THỨC LẶP LẠI`)
   lines.push(`${'═'.repeat(60)}`)
 
   lines.push(`\n  Nhà 7 tương tác CỨNG với:`)
@@ -265,14 +265,14 @@ function buildLoveBrief(
     lines.push(`    (không có tương tác mềm) → KHÔNG VIẾT`)
   }
 
-  lines.push(`\n  Góc cứng Sao Kim, mô thức lặp lại trong tình yêu:`)
+  lines.push(`\n  Góc cứng Sao Kim / mô thức lặp lại trong tình yêu:`)
   lines.push(venusHardLines.join('\n'))
 
-  lines.push(`\n  Góc cứng Mặt Trăng, mô thức an toàn cảm xúc:`)
+  lines.push(`\n  Góc cứng Mặt Trăng / mô thức an toàn cảm xúc:`)
   lines.push(moonHardLines.join('\n'))
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 5, BÀI HỌC TÌNH YÊU (conditional, chỉ VIẾT phần có dữ liệu)`)
+  lines.push(`MỤC 5 / BÀI HỌC TÌNH YÊU (conditional / chỉ VIẾT phần có dữ liệu)`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`LƯU Ý: Các dòng → KHÔNG VIẾT thì TUYỆT ĐỐI không nhắc tới trong bài.`)
 
@@ -286,7 +286,7 @@ function buildLoveBrief(
   lines.push(chironLine)
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 6, TỔNG KẾT HÀNH TRÌNH TÌNH YÊU`)
+  lines.push(`MỤC 6 / TỔNG KẾT HÀNH TRÌNH TÌNH YÊU`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`(Tổng hợp từ tất cả các mục trên để viết phần kết luận)`)
 

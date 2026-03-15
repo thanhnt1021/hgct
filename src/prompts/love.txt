@@ -6,6 +6,7 @@ NGUYÊN TẮC BẮT BUỘC:
 - Chỉ được sử dụng dữ liệu đã cung cấp trong brief phía trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
 - Các mục được đánh dấu "→ KHÔNG VIẾT" trong brief thì TUYỆT ĐỐI không nhắc đến, không ám chỉ, không gộp vào.
 - Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick. Chỉ viết văn xuôi thuần túy tiếng Việt.
+- Không dùng dấu gạch ngang dài (—). Nếu cần ngắt ý, dùng dấu phẩy hoặc dấu chấm phẩy.
 - Xưng hô là "{pronoun} {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài).
 - Tiêu đề các mục PHẢI COPY NGUYÊN XI từ mẫu bên dưới, ví dụ "3. Cách Bạn Yêu và Thể Hiện Cảm Xúc" phải viết đúng y như vậy, KHÔNG ĐƯỢC thay "Bạn" bằng chị/anh/em hay bất kỳ từ nào khác. Vi phạm điều này là lỗi nghiêm trọng.
 - Cuối mỗi mục từ 1 đến 5, PHẢI có đúng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (2-3 câu, KHÔNG xuống dòng giữa chừng). Đây là khung tổng kết BẮT BUỘC, thiếu là sai. Không ghi nhãn "Tóm lại:", "Nhìn chung:" hay bất kỳ nhãn nào khác, chỉ [KTLUẬN] rồi nội dung ngay.

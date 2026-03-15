@@ -91,6 +91,9 @@ export function cleanForPdf(text: string): string {
   text = text.replace(/`+/g, '')
   text = text.replace(/<br\s*\/?>/gi, '\n')
   text = text.replace(/<[^>]+>/g, '')
+  // Strip em dashes from AI output (AI sometimes generates them regardless of prompt)
+  text = text.replace(/ — /g, ', ')
+  text = text.replace(/—/g, ', ')
 
   // Split inline dash-bullet lists into separate lines
   text = splitInlineDashBullets(text)
@@ -437,7 +440,7 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       //
       // PAGE_H = A4(297mm) - top(25mm) - bottom(20mm) = 252mm ≈ 952px at 96dpi
       const PAGE_H = 252 * (96 / 25.4)
-      const BODY_SEL = 'p.body, p.opener, p.bullet, p.bullet-indent, p.signature'
+      const BODY_SEL = 'p.body, p.opener, p.bullet, p.bullet-indent, p.dash-bullet, p.signature'
 
       function hasOrphans(): boolean {
         for (const group of Array.from(document.querySelectorAll('.section-group')) as HTMLElement[]) {
@@ -478,13 +481,18 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       //   lines 6-8       → widows=floor(n/2), orphans=ceil(n/2)
       //     e.g. 6→3+3, 7→3+4 (widow=3,orphan=4), 8→4+4
       // Applied as inline styles (override CSS) so print engine uses per-para values.
-      const OW_SEL = 'p.body, p.opener, p.bullet, p.bullet-indent'
+      const OW_SEL = 'p.body, p.opener, p.bullet, p.bullet-indent, p.dash-bullet'
       ;(document.querySelectorAll(OW_SEL) as NodeListOf<HTMLElement>).forEach(el => {
         const lhPx = parseFloat(window.getComputedStyle(el).lineHeight)
         if (!lhPx || isNaN(lhPx) || lhPx <= 0) return
         const lineCount = Math.round(el.offsetHeight / lhPx)
         let w: number, o: number
-        if (lineCount >= 6 && lineCount <= 8) {
+        if (lineCount <= 5) {
+          // Short paragraphs: keep on one page (current or next), never split
+          el.style.pageBreakInside = 'avoid'
+          el.style.breakInside = 'avoid'
+          w = lineCount; o = lineCount
+        } else if (lineCount <= 8) {
           w = Math.floor(lineCount / 2)  // widow  (smaller half → top of next page)
           o = Math.ceil(lineCount / 2)   // orphan (larger half  → bottom of current page)
         } else {

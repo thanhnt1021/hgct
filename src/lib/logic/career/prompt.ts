@@ -1,4 +1,4 @@
-// Career prompt builder — Brief pattern (7-section new template)
+// Career prompt builder /Brief pattern (7-section new template)
 import fs from 'fs'
 import path from 'path'
 import { getZodiac, getHouseOfPlanet } from '@/lib/astrology/calculations'
@@ -317,16 +317,16 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
   const { name, fullName, pronoun, dobStr } = meta
   const L: string[] = []
 
-  L.push(`=== DỮ LIỆU ĐÃ TÍNH TOÁN — BẢN ĐỒ HƯỚNG NGHIỆP ===`)
+  L.push(`=== DỮ LIỆU ĐÃ TÍNH TOÁN /BẢN ĐỒ HƯỚNG NGHIỆP ===`)
   L.push(`Họ tên: ${fullName} | Ngày sinh: ${dobStr}`)
 
   // ══ MỤC 1: Tổng quan bản chất ══
   L.push(`\n${'═'.repeat(60)}`)
-  L.push('MỤC 1 — TỔNG QUAN BẢN CHẤT CON NGƯỜI')
+  L.push('MỤC 1 /TỔNG QUAN BẢN CHẤT CON NGƯỜI')
   L.push('═'.repeat(60))
 
   for (const c of muc1.core) {
-    L.push(`\n  ${c.label} — Cung ${c.zodiac}:`)
+    L.push(`\n  ${c.label} /Cung ${c.zodiac}:`)
     if (c.strength) L.push(`    Thế mạnh / Cách tiếp cận: ${c.strength}`)
     if (c.weakness) L.push(`    Điểm yếu / Cần chú ý: ${c.weakness}`)
   }
@@ -352,7 +352,7 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
 
   // ══ MỤC 2: Điểm mạnh bẩm sinh ══
   L.push(`\n${'═'.repeat(60)}`)
-  L.push('MỤC 2 — ĐIỂM MẠNH BẨM SINH VÀ NĂNG LỰC TỰ NHIÊN')
+  L.push('MỤC 2 /ĐIỂM MẠNH BẨM SINH VÀ NĂNG LỰC TỰ NHIÊN')
   L.push('═'.repeat(60))
 
   if (muc2.zodiacs.length) {
@@ -386,12 +386,12 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
     }
   }
   if (muc2.ruler.content) {
-    L.push(`\n  Công cụ bẩm sinh — Chủ lá số (${muc2.ruler.label}): ${muc2.ruler.content}`)
+    L.push(`\n  Công cụ bẩm sinh /Chủ lá số (${muc2.ruler.label}): ${muc2.ruler.content}`)
   }
 
   // ══ MỤC 3: Điểm yếu ══
   L.push(`\n${'═'.repeat(60)}`)
-  L.push('MỤC 3 — NHỮNG ĐIỂM YẾU VÀ CẦN PHÁT TRIỂN')
+  L.push('MỤC 3 /NHỮNG ĐIỂM YẾU VÀ CẦN PHÁT TRIỂN')
   L.push('═'.repeat(60))
 
   if (muc3.zodiacs.length) {
@@ -431,12 +431,12 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
 
   // ══ MỤC 4: Định hướng sự nghiệp ══
   L.push(`\n${'═'.repeat(60)}`)
-  L.push('MỤC 4 — ĐỊNH HƯỚNG SỰ NGHIỆP PHÙ HỢP')
+  L.push('MỤC 4 /ĐỊNH HƯỚNG SỰ NGHIỆP PHÙ HỢP')
   L.push('═'.repeat(60))
 
   // H10
   if (muc4.h10Energy) {
-    L.push(`\n  Năng lượng sự nghiệp — Đỉnh Nhà 10 (${muc4.h10Zodiac}): ${muc4.h10Energy}`)
+    L.push(`\n  Năng lượng sự nghiệp /Đỉnh Nhà 10 (${muc4.h10Zodiac}): ${muc4.h10Energy}`)
   }
 
   if (muc4.h10Planets.length) {
@@ -445,7 +445,7 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
       if (r.content) L.push(`    ${r.label}: ${r.content}`)
     }
   } else if (muc4.isH10Empty) {
-    L.push('\n  Nhà 10 trống — luận theo chủ tinh Nhà 10 bên dưới.')
+    L.push('\n  Nhà 10 trống /luận theo chủ tinh Nhà 10 bên dưới.')
   }
 
   // H10 interactions
@@ -478,14 +478,14 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
   }
 
   // H6
-  L.push(`\n  Môi trường làm việc phù hợp — Đỉnh Nhà 6: ${muc4.h6Zodiac}`)
+  L.push(`\n  Môi trường làm việc phù hợp /Đỉnh Nhà 6: ${muc4.h6Zodiac}`)
   if (muc4.h6Planets.length) {
     L.push(`  Hành tinh trong Nhà 6: ${muc4.h6Planets.join(', ')} → luận về thái độ với công việc hàng ngày`)
   } else {
-    L.push('  Nhà 6 trống — luận theo chủ tinh bên dưới.')
+    L.push('  Nhà 6 trống /luận theo chủ tinh bên dưới.')
   }
   if (muc4.h6RulerContent) {
-    L.push(`  Chủ tinh Nhà 6 (${muc4.h6Ruler}) — Môi trường phù hợp: ${muc4.h6RulerContent}`)
+    L.push(`  Chủ tinh Nhà 6 (${muc4.h6Ruler}) /Môi trường phù hợp: ${muc4.h6RulerContent}`)
   }
   if (muc4.h6RulerLocContent) {
     L.push(`  ${muc4.h6RulerLoc}: ${muc4.h6RulerLocContent}`)
@@ -493,12 +493,12 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
 
   // ══ MỤC 5: Tiền bạc ══
   L.push(`\n${'═'.repeat(60)}`)
-  L.push('MỤC 5 — MÔ THỨC TIỀN BẠC')
+  L.push('MỤC 5 /MÔ THỨC TIỀN BẠC')
   L.push('═'.repeat(60))
 
   // H2
   if (muc5.h2EarnContent) {
-    L.push(`\n  Cách kiếm tiền — Đỉnh Nhà 2 (${muc5.h2Zodiac}): ${muc5.h2EarnContent}`)
+    L.push(`\n  Cách kiếm tiền /Đỉnh Nhà 2 (${muc5.h2Zodiac}): ${muc5.h2EarnContent}`)
   }
   if (muc5.h2Planets.length) {
     L.push('\n  Hành tinh trong Nhà 2 (thái độ & năng lượng với tiền bạc):')
@@ -506,7 +506,7 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
       if (p.content) L.push(`    ${p.label}: ${p.content}`)
     }
   } else if (muc5.isH2Empty) {
-    L.push('  Nhà 2 trống — luận theo chủ tinh Nhà 2.')
+    L.push('  Nhà 2 trống /luận theo chủ tinh Nhà 2.')
   }
   if (muc5.h2RulerLocContent) {
     L.push(`  ${muc5.h2RulerLoc} (lĩnh vực tạo ra tiền): ${muc5.h2RulerLocContent}`)
@@ -514,12 +514,12 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
 
   // H8
   if (muc5.h8InvestContent) {
-    L.push(`\n  Phong cách đầu tư — Đỉnh Nhà 8 (${muc5.h8Zodiac}): ${muc5.h8InvestContent}`)
+    L.push(`\n  Phong cách đầu tư /Đỉnh Nhà 8 (${muc5.h8Zodiac}): ${muc5.h8InvestContent}`)
   }
   if (muc5.h8Planets.length) {
     L.push(`  Hành tinh trong Nhà 8: ${muc5.h8Planets.join(', ')} → luận về thái độ, năng lượng khi đầu tư`)
   } else {
-    L.push('  Nhà 8 trống — luận theo chủ tinh Nhà 8.')
+    L.push('  Nhà 8 trống /luận theo chủ tinh Nhà 8.')
   }
   if (muc5.h8RulerLocContent) {
     L.push(`  ${muc5.h8RulerLoc} (lĩnh vực nên đầu tư): ${muc5.h8RulerLocContent}`)

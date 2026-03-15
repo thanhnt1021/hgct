@@ -290,7 +290,7 @@ function formatHouseBlock(hs: HouseScore): string {
     hs.classification === 'TIM_DO' ? 'THUẬN LỢI' :
     hs.classification === 'TIM_DEN' ? 'THÁCH THỨC' : 'ỔN ĐỊNH'
 
-  lines.push(`\n--- Nhà ${hs.house} (${theme}) — ${classLabel} (điểm: ${hs.score}) ---`)
+  lines.push(`\n--- Nhà ${hs.house} (${theme}) /${classLabel} (điểm: ${hs.score}) ---`)
 
   // Transits through this house
   if (hs.transits.length > 0) {
@@ -390,14 +390,14 @@ function formatTongQuan(houseScores: HouseScore[]): string {
   if (timDo.length > 0) {
     lines.push('CÁC NHÀ THUẬN LỢI (ưu tiên):')
     for (const hs of timDo.slice(0, 4)) {
-      lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) — điểm ${hs.score}`)
+      lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
     }
   }
 
   if (timDen.length > 0) {
     lines.push('\nCÁC NHÀ THÁCH THỨC (cần lưu ý):')
     for (const hs of timDen.slice(0, 4)) {
-      lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) — điểm ${hs.score}`)
+      lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
     }
   }
 
@@ -422,12 +422,12 @@ function formatTongKet(houseScores: HouseScore[]): string {
 
   lines.push('NÊN TẬP TRUNG VÀO:')
   for (const hs of timDo) {
-    lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) — điểm ${hs.score}`)
+    lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
   }
 
   lines.push('\nĐẶC BIỆT LƯU Ý:')
   for (const hs of timDen) {
-    lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) — điểm ${hs.score}`)
+    lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
   }
 
   return lines.join('\n')
@@ -459,7 +459,7 @@ export function buildVanhanEssayPrompt(
   dataLines.push(`Họ tên: ${fullName}`)
   dataLines.push(`Giới tính: ${gender === 'Female' ? 'Nữ' : 'Nam'}`)
   dataLines.push(`Ngày sinh: ${dobStr}`)
-  dataLines.push(`Giai đoạn: ${startStr} — ${endStr}`)
+  dataLines.push(`Giai đoạn: ${startStr} /${endStr}`)
   dataLines.push('')
 
   // Section 1: Tổng quan
