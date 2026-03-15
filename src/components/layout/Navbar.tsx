@@ -90,6 +90,8 @@ export default function Navbar() {
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(200,148,63,0.1)',
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
       }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -194,11 +196,12 @@ export default function Navbar() {
 
           {/* ── Mobile hamburger ── */}
           <button
-            className="md:hidden p-1"
-            style={{ color: '#8a8399' }}
+            className="md:hidden"
+            style={{ color: '#8a8399', padding: '10px', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
             aria-expanded={menuOpen}
+            type="button"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {menuOpen
