@@ -168,8 +168,13 @@ async function processReport(jobId: string, body: Record<string, unknown>, order
 
   } else if (service === 'transit') {
     const { buildVanhanEssayPrompt } = await import('@/lib/logic/vanhan/prompt')
-    const startDate = (body.startDate as string) || new Date().toISOString().split('T')[0]
-    const endDate = (body.endDate as string) || new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0]
+    let startDate = (body.startDate as string) || new Date().toISOString().split('T')[0]
+    let endDate = (body.endDate as string) || new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0]
+    // Safety: nếu endDate <= startDate hoặc > 366 ngày, reset về default 1 năm từ startDate
+    const diffDays = Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000)
+    if (diffDays <= 0 || diffDays > 366) {
+      endDate = new Date(new Date(startDate).getTime() + 365 * 86400000).toISOString().split('T')[0]
+    }
     prompt = buildVanhanEssayPrompt(chart, startDate, endDate, profile)
     coverTitle = 'LUẬN GIẢI VẬN HẠN'
     sectionTitle = 'TỔNG HỢP LUẬN GIẢI VẬN HẠN'

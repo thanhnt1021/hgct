@@ -206,6 +206,8 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<ServiceDef | null>(null)
   const [profileA, setProfileA] = useState('')
   const [profileB, setProfileB] = useState('')
+  const [transitStartDate, setTransitStartDate] = useState('')
+  const [transitEndDate, setTransitEndDate] = useState('')
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false)
@@ -236,6 +238,17 @@ export default function ServicesPage() {
       })
       .catch(() => setProfiles([]))
   }, [])
+
+  // Set default transit dates khi chọn dịch vụ Vận Hạn
+  useEffect(() => {
+    if (selectedService?.type === 'transit') {
+      const today = new Date()
+      const oneYearLater = new Date(today)
+      oneYearLater.setFullYear(oneYearLater.getFullYear() + 1)
+      setTransitStartDate(today.toISOString().split('T')[0])
+      setTransitEndDate(oneYearLater.toISOString().split('T')[0])
+    }
+  }, [selectedService?.type])
 
   const handleServiceClick = (s: ServiceDef) => {
     setSelectedService(s)
@@ -331,10 +344,24 @@ export default function ServicesPage() {
       sessionStorage.setItem('profileUidB', pb.profileUid || '')
     }
 
+    if (selectedService.type === 'transit') {
+      sessionStorage.setItem('transitStartDate', transitStartDate)
+      sessionStorage.setItem('transitEndDate', transitEndDate)
+    } else {
+      sessionStorage.removeItem('transitStartDate')
+      sessionStorage.removeItem('transitEndDate')
+    }
+
     router.push('/checkout')
   }
 
-  const canConfirm = profileA !== '' && (!selectedService?.needsTwo || profileB !== '')
+  const transitDaysApart = transitStartDate && transitEndDate
+    ? Math.round((new Date(transitEndDate).getTime() - new Date(transitStartDate).getTime()) / 86400000)
+    : 0
+  const transitDatesValid = selectedService?.type !== 'transit' || (
+    transitStartDate !== '' && transitEndDate !== '' && transitDaysApart > 0 && transitDaysApart <= 365
+  )
+  const canConfirm = profileA !== '' && (!selectedService?.needsTwo || profileB !== '') && transitDatesValid
   const hasAnyProfile = profiles.length > 0
 
   return (
@@ -508,6 +535,61 @@ export default function ServicesPage() {
                     >
                       <Plus size={14} /> Nhập thông tin mới
                     </button>
+                  </div>
+                )}
+
+                {/* ── Transit date range picker ─────────────────────── */}
+                {selectedService?.type === 'transit' && (
+                  <div>
+                    <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)', marginBottom: '1.25rem' }} />
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '0.4rem', color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.06em' }}>
+                          TỪ NGÀY
+                        </label>
+                        <input
+                          type="date"
+                          value={transitStartDate}
+                          onChange={e => setTransitStartDate(e.target.value)}
+                          style={{
+                            width: '100%', background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(200,148,63,0.22)', borderRadius: '6px',
+                            padding: '0.52rem 0.7rem', color: '#f4efe6',
+                            fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem',
+                            outline: 'none', colorScheme: 'dark',
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '0.4rem', color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.06em' }}>
+                          ĐẾN NGÀY
+                        </label>
+                        <input
+                          type="date"
+                          value={transitEndDate}
+                          onChange={e => setTransitEndDate(e.target.value)}
+                          style={{
+                            width: '100%', background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(200,148,63,0.22)', borderRadius: '6px',
+                            padding: '0.52rem 0.7rem', color: '#f4efe6',
+                            fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem',
+                            outline: 'none', colorScheme: 'dark',
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {transitStartDate && transitEndDate && transitDaysApart <= 0 && (
+                      <p style={{ color: '#f87171', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', marginBottom: '0.5rem' }}>
+                        ⚠ Ngày kết thúc phải sau ngày bắt đầu
+                      </p>
+                    )}
+                    {transitDaysApart > 365 && (
+                      <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: '6px', padding: '0.55rem 0.8rem' }}>
+                        <p style={{ color: '#d4a017', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', margin: 0 }}>
+                          ⚠ Vui lòng chọn khoảng thời gian tối đa 1 năm
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 

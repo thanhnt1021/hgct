@@ -56,6 +56,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [profileUidA, setProfileUidA] = useState('')
   const [profileUidB, setProfileUidB] = useState('')
+  const [transitStartDate, setTransitStartDate] = useState('')
+  const [transitEndDate, setTransitEndDate] = useState('')
 
   useEffect(() => {
     const svc = sessionStorage.getItem('selectedService') || ''
@@ -63,6 +65,10 @@ export default function CheckoutPage() {
     const dataB = sessionStorage.getItem('inputDataB')
     setProfileUidA(sessionStorage.getItem('profileUidA') || '')
     setProfileUidB(sessionStorage.getItem('profileUidB') || '')
+    if (svc === 'transit') {
+      setTransitStartDate(sessionStorage.getItem('transitStartDate') || '')
+      setTransitEndDate(sessionStorage.getItem('transitEndDate') || '')
+    }
 
     if (!svc || !data) {
       router.push('/services')
@@ -82,6 +88,8 @@ export default function CheckoutPage() {
       })
       .catch(() => { if (user?.email) setEmail(user.email) })
   }, [user, router])
+
+  const fmtDate = (s: string) => { if (!s) return ''; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}` }
 
   const nameA = (inputData?.name as string) || ''
   const nameB = (inputDataB?.name as string) || ''
@@ -109,6 +117,7 @@ export default function CheckoutPage() {
           name: displayName,
           ...(profileUidA ? { profileUid: profileUidA } : {}),
           ...(service === 'synastry' && inputDataB ? { inputDataB, ...(profileUidB ? { profileUidB } : {}) } : {}),
+          ...(service === 'transit' && transitStartDate && transitEndDate ? { startDate: transitStartDate, endDate: transitEndDate } : {}),
         }),
       })
       const result = await res.json()
@@ -202,6 +211,9 @@ export default function CheckoutPage() {
             {[
               { label: 'Dịch vụ', value: `Luận giải ${SERVICE_NAMES[service] || service}`, valueColor: '#f4efe6' },
               { label: 'Khách hàng', value: displayName, valueColor: '#f4efe6' },
+              ...(service === 'transit' && transitStartDate && transitEndDate
+                ? [{ label: 'Giai đoạn', value: `${fmtDate(transitStartDate)} → ${fmtDate(transitEndDate)}`, valueColor: '#f4efe6' }]
+                : []),
               { label: 'Thời gian tạo', value: `~ ${eta} phút`, valueColor: '#d9ab55' },
             ].map(row => (
               <div key={row.label} className="flex justify-between items-baseline">
