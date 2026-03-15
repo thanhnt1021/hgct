@@ -35,6 +35,52 @@ function isBracketNote(s: string): boolean {
   return s.startsWith('[') && s.endsWith(']') && !s.startsWith('[KTLUẬN]') && !s.startsWith('[KTTIỂU]') && s.length > 2
 }
 
+/**
+ * Split inline dash-bullet lists into separate lines.
+ * "text: - item1; - item2; - item3." → "text:\n- Item1\n- Item2\n- Item3."
+ */
+function splitInlineDashBullets(text: string): string {
+  return text.split('\n').flatMap(line => {
+    const s = line.trim()
+    if (!s.includes('; - ')) return [line]
+
+    const segments = s.split(/;\s+- /)
+    if (segments.length < 2) return [line]
+
+    const result: string[] = []
+    const first = segments[0]
+
+    // First segment may contain "intro: - first_item"
+    const colonDash = first.match(/^(.+?):\s*- (.+)$/)
+    if (colonDash) {
+      result.push(colonDash[1].trim() + ':')
+      const item = colonDash[2].trim()
+      result.push('- ' + item.charAt(0).toUpperCase() + item.slice(1))
+    } else if (first.startsWith('- ')) {
+      const item = first.slice(2).trim()
+      result.push('- ' + item.charAt(0).toUpperCase() + item.slice(1))
+    } else {
+      const idx = first.lastIndexOf(' - ')
+      if (idx > 0 && idx < first.length - 3) {
+        result.push(first.substring(0, idx).trim())
+        const item = first.substring(idx + 3).trim()
+        result.push('- ' + item.charAt(0).toUpperCase() + item.slice(1))
+      } else {
+        result.push(first)
+      }
+    }
+
+    for (let i = 1; i < segments.length; i++) {
+      const item = segments[i].trim()
+      if (item) {
+        result.push('- ' + item.charAt(0).toUpperCase() + item.slice(1))
+      }
+    }
+
+    return result
+  }).join('\n')
+}
+
 export function cleanForPdf(text: string): string {
   if (!text) return ''
   // Remove markdown
@@ -45,6 +91,9 @@ export function cleanForPdf(text: string): string {
   text = text.replace(/`+/g, '')
   text = text.replace(/<br\s*\/?>/gi, '\n')
   text = text.replace(/<[^>]+>/g, '')
+
+  // Split inline dash-bullet lists into separate lines
+  text = splitInlineDashBullets(text)
 
   // Filter absence and bracket lines
   const filtered = text.split('\n').filter(line => {
@@ -107,6 +156,7 @@ function classifyLine(line: string): string {
   if (s.startsWith('[KTTIỂU]')) return 'mini_box'
   if (/^\s{3,}\*\s/.test(line)) return 'bullet_indent'
   if (s.startsWith('* ')) return 'bullet'
+  if (s.startsWith('- ') && s.length > 2) return 'dash_bullet'
   if (/^\d+\.\s+\S/.test(s) && s.length < 120) return 'section_heading'
   if (s.toLowerCase().startsWith('kính gửi')) return 'opener'
   if (SIGN_KEYS.some(k => s.startsWith(k))) return 'signature'
@@ -190,6 +240,7 @@ function buildHtml(essayText: string, options: PdfOptions): string {
       case 'opener':           html = `<p class="opener">${safe}</p>`; break
       case 'bullet':           html = `<p class="bullet">${safe}</p>`; break
       case 'bullet_indent':    html = `<p class="bullet-indent">${safe}</p>`; break
+      case 'dash_bullet':      html = `<p class="dash-bullet">${safe}</p>`; break
       case 'red_box': {
         const content = s.slice('[KTLUẬN]'.length).trim()
         html = `<div class="red-box">${escapeHtml(content)}</div>`; break
@@ -252,6 +303,7 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 .body { text-align: justify; margin: 2pt 0 5pt; }
 .bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; }
 .bullet-indent { font-family: 'NunitoItalic'; font-size: 13.5pt; color: #dc2626; margin: 1pt 0 2pt; padding-left: 28pt; text-indent: -12pt; }
+.dash-bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; }
 .signature { font-family: 'NunitoItalic'; font-size: 11pt; color: #6b7280; margin: 8pt 0 3pt; }
 .spacer { height: 4pt; }
 .red-box { font-family: 'MontserratBold'; font-size: 16.5pt; border: 1.5pt solid #dc2626; background: #fff5f5; padding: 8pt 10pt; margin: 6pt 0 8pt; text-align: justify; page-break-inside: avoid; break-inside: avoid; }

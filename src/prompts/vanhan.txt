@@ -33,7 +33,7 @@ Mỗi TIỂU MỤC (sự nghiệp, tiền tự kiếm, tình yêu, v.v.) có c�
 
 QUY TẮC BẮT BUỘC CHO FORMAT:
 1. Phần mở đầu và kết luận: viết dạng đoạn văn bình thường.
-2. Phân tích Transit qua Nhà và Góc Cứng/Mềm: viết thành ĐOẠN VĂN riêng cho từng yếu tố, KHÔNG dùng "* " bullet. Trong đoạn, có thể dùng "- " để liệt kê biểu hiện cụ thể trong đời thực.
+2. Phân tích Transit qua Nhà và Góc Cứng/Mềm: viết thành ĐOẠN VĂN riêng cho từng yếu tố, KHÔNG dùng "* " bullet. Trong đoạn, có thể dùng "- " để liệt kê biểu hiện cụ thể trong đời thực. MỖI "- " item PHẢI XUỐNG DÒNG RIÊNG và viết HOA chữ cái đầu. KHÔNG viết liền các item trên cùng 1 dòng.
 3. Thông tin E đỏ ("Đặc biệt vào ngày...") phải nằm trong CÙNG ĐOẠN VĂN của góc đó, như điểm thứ 5 trong cấu trúc 5 điểm.
 4. Không viết nhãn "Kết luận" hay "Kết luận tiểu mục:", chỉ viết thẳng nội dung.
 5. Không được bỏ qua bất kỳ yếu tố nào trong dữ liệu (mỗi dòng "* " trong dữ liệu = 1 yếu tố cần phân tích thành đoạn riêng).
@@ -95,7 +95,7 @@ TRANSIT QUA NHÀ, viết thành 1 đoạn văn gồm 5 ý liền mạch:
    - Sao Thiên Vương: năng lượng của đột phá và đổi mới bất ngờ, khi đi qua, thường có những biến chuyển không theo kế hoạch nhưng mở ra hướng mới thú vị
    - Sao Hải Vương: liên quan đến trực giác, cảm hứng và sự kết nối sâu sắc, khi đi qua, cảm xúc và trực giác thường nhạy bén hơn, nhưng ranh giới đôi khi không rõ ràng
    - Sao Diêm Vương: năng lượng của biến đổi sâu và tái sinh, khi đi qua, thường có thay đổi triệt để, đôi khi căng thẳng nhưng cần thiết để loại bỏ điều không còn phù hợp
-4. Kết nối thực tế: "Với {pronoun} {name}, điều này có thể biểu hiện qua:" + dùng "- " liệt kê 2-3 ví dụ cụ thể, gần gũi đời sống
+4. Kết nối thực tế: "Với {pronoun} {name}, điều này có thể biểu hiện qua:" rồi XUỐNG DÒNG, dùng "- " liệt kê 2-3 ví dụ cụ thể, gần gũi đời sống, MỖI "- " item nằm trên DÒNG RIÊNG, viết HOA chữ cái đầu
 5. Kết bằng 1 câu khích lệ nhẹ nhàng hoặc gợi ý hướng hành động
 
 Nhà THUẬN LỢI: giọng tích cực, nhấn mạnh cơ hội và khích lệ chủ động

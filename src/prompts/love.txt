@@ -50,4 +50,4 @@ Kính gửi {pronoun} {full_name},
 [KTLUẬN] [2-3 câu về chìa khóa để tình yêu của {pronoun} thật sự nở rộ].]
 
 6. Tổng Kết Hành Trình Tình Yêu
-[Tổng hợp từ tất cả các mục. Tóm tắt bản chất tình yêu của {name}, họ là ai trong tình yêu. Tiềm năng tương lai, điều tốt đẹp sẽ đến khi {pronoun} thực hành được các bài học. Sau đó viết đúng câu: "Để tình yêu thực sự nở rộ, {pronoun} {name} cần chú ý đến:" rồi liệt kê 3-4 gạch đầu dòng cụ thể, dễ thực hiện, mỗi dòng là một hành vi/thái độ rút trực tiếp từ dữ liệu. Kết bằng một câu triết lý về khi nào tình yêu của {pronoun} sẽ thật sự bền và sâu.]
+[Tổng hợp từ tất cả các mục. Tóm tắt bản chất tình yêu của {name}, họ là ai trong tình yêu. Tiềm năng tương lai, điều tốt đẹp sẽ đến khi {pronoun} thực hành được các bài học. Sau đó viết đúng câu: "Để tình yêu thực sự nở rộ, {pronoun} {name} cần chú ý đến:" rồi liệt kê 3-4 gạch đầu dòng (dùng "- ") cụ thể, dễ thực hiện, MỖI gạch đầu dòng XUỐNG DÒNG RIÊNG, viết HOA chữ cái đầu, mỗi dòng là một hành vi/thái độ rút trực tiếp từ dữ liệu. Kết bằng một câu triết lý về khi nào tình yêu của {pronoun} sẽ thật sự bền và sâu.]
