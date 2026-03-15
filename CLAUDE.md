@@ -172,6 +172,7 @@ src/
 - [x] PDF `[KTTIỂU]` mini-box — kết luận tiểu mục Vận Hạn (sections 2/3/4/6): border đỏ 1.2pt `#dc2626`, nền `#fef9f9`, 15.5pt, `page-break-inside:avoid`
 - [x] Vận Hạn prompt — `[KTLUẬN]` bổ sung cho section 1 (Tổng Quan) + section 6 (Sức Khỏe); rule `[KTTIỂU]` cho tất cả sections đa tiểu mục (2/3/4/6)
 - [x] PDF subheading widow fix — XUNG ĐỘT/HÒA HỢP: detect h2.section → move h2 (không phải subheading); `spaceNeededFor()` dùng `offsetHeight` cho red-box/mini-box (page-break-inside:avoid)
+- [x] Em dash (—) fix — Love/Synastry/Vanhan output sạch không còn dấu gạch dài: xóa ` — ` trong prompt templates (love.txt, relationship.txt, vanhan.txt) + data brief labels trong love/prompt.ts và relationship/prompt.ts
 
 ## What's TODO
 - [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật
