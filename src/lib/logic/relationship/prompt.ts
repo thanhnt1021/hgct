@@ -1,4 +1,4 @@
-// Relationship prompt builder — ported from relationship/essay_pdf.py
+// Relationship prompt builder, ported from relationship/essay_pdf.py
 // Steps: build_relationship_brief → format_brief_for_prompt → build prompt → sanitize output
 import fs from 'fs'
 import path from 'path'
@@ -50,7 +50,7 @@ function aspLabel(asp: AspectResult | null): string {
   if (!asp || asp.type === 'Minor') return 'Không có góc'
   const typeVn = asp.type === 'Soft' ? 'Góc Mềm' : 'Góc Cứng'
   const angle = ANGLE_LABEL[asp.aspect] || '?'
-  return `${typeVn} — ${asp.name_vn} (${angle})`
+  return `${typeVn}, ${asp.name_vn} (${angle})`
 }
 
 function aspType(asp: AspectResult | null): 'soft' | 'hard' | null {
@@ -231,8 +231,8 @@ export function buildRelationshipBrief(
   }
 
   const genderNote = isMaleFemale
-    ? 'Cặp Nam-Nữ — luận theo vai trò giới tính như hướng dẫn chi tiết từng phần.'
-    : 'Cặp đồng giới / giới tính khác — luận linh hoạt theo năng lượng hành tinh, KHÔNG gán vai trò \'nam tính\' hay \'nữ tính\' cho bất kỳ ai.'
+    ? 'Cặp Nam-Nữ, luận theo vai trò giới tính như hướng dẫn chi tiết từng phần.'
+    : 'Cặp đồng giới / giới tính khác, luận linh hoạt theo năng lượng hành tinh, KHÔNG gán vai trò \'nam tính\' hay \'nữ tính\' cho bất kỳ ai.'
 
   // ── Planet position lines ──────────────────────────────────────────────────
 
@@ -592,9 +592,9 @@ export function formatBriefForPrompt(brief: RelBrief): string {
   const lines: string[] = []
   const L = (s: string) => lines.push(s)
 
-  L('=== DỮ LIỆU ĐÃ TÍNH TOÁN — BẢN ĐỒ MỐI QUAN HỆ ===\n')
-  L(`NGƯỜI THỨ NHẤT: ${nameA.toUpperCase()} — Gọi là: ${m.title_A}`)
-  L(`NGƯỜI THỨ HAI:  ${nameB.toUpperCase()} — Gọi là: ${m.title_B}\n`)
+  L('=== DỮ LIỆU ĐÃ TÍNH TOÁN, BẢN ĐỒ MỐI QUAN HỆ ===\n')
+  L(`NGƯỜI THỨ NHẤT: ${nameA.toUpperCase()}, Gọi là: ${m.title_A}`)
+  L(`NGƯỜI THỨ HAI:  ${nameB.toUpperCase()}, Gọi là: ${m.title_B}\n`)
 
   // Personal chart A
   L('─'.repeat(60))
@@ -632,8 +632,8 @@ export function formatBriefForPrompt(brief: RelBrief): string {
 
   // Muc 2
   L(`\n${'═'.repeat(60)}`)
-  L('MỤC 2 — VÌ SAO HAI NGƯỜI GẶP VÀ THU HÚT NHAU')
-  L('Kết quả tính toán — DANH SÁCH ĐÓNG, chỉ viết mục có VIẾT:')
+  L('MỤC 2, VÌ SAO HAI NGƯỜI GẶP VÀ THU HÚT NHAU')
+  L('Kết quả tính toán, DANH SÁCH ĐÓNG, chỉ viết mục có VIẾT:')
   L('═'.repeat(60))
 
   const muc2 = brief.muc2
@@ -661,7 +661,7 @@ export function formatBriefForPrompt(brief: RelBrief): string {
   } else {
     const houseList = ds.houses.join(', ')
     L('\n  Duyên số: → VIẾT')
-    L(`  Danh sách nhà duyên số (ĐÓNG — CHỈ CÓ ${ds.houses.length} nhà): Nhà ${houseList}`)
+    L(`  Danh sách nhà duyên số (ĐÓNG, CHỈ CÓ ${ds.houses.length} nhà): Nhà ${houseList}`)
     for (const item of ds.items) {
       L(`  - Nhà ${item.house}: ${item.content.substring(0, 300)}`)
     }
@@ -672,23 +672,23 @@ export function formatBriefForPrompt(brief: RelBrief): string {
 
   // Muc 4
   L(`\n${'═'.repeat(60)}`)
-  L('MỤC 4 — HÒA HỢP VÀ XUNG ĐỘT')
+  L('MỤC 4, HÒA HỢP VÀ XUNG ĐỘT')
   L('═'.repeat(60))
 
   const hh = brief.muc4.hoa_hop
   const pA = brief.personal_A
   const pB = brief.personal_B
 
-  // Loi tinh cach hoa hop — always write
+  // Loi tinh cach hoa hop, always write
   L("\n  Tiểu mục 'Lõi tính cách hòa hợp': → VIẾT (luôn viết)")
   L('  Dữ liệu AC/Sun/Moon:')
   L(brief.meta.core_signs_A)
   L(brief.meta.core_signs_B)
   L('  (Luận điểm đồng điệu, bổ trợ từ lõi tính cách của 2 người)')
 
-  // Dom personal common — conditional
+  // Dom personal common, conditional
   if (hh.dom_personal_common) {
-    L('\n  Hòa hợp — Nhà trội cá nhân trùng nhau: → VIẾT')
+    L('\n  Hòa hợp, Nhà trội cá nhân trùng nhau: → VIẾT')
     L(`  ${nameA} trội riêng: ${pA.dom_houses_full}`)
     L(`  ${nameB} trội riêng: ${pB.dom_houses_full}`)
     L(`  Nhà trùng: ${hh.dom_personal_common}`)
@@ -697,13 +697,13 @@ export function formatBriefForPrompt(brief: RelBrief): string {
     L('\n  Nhà trội cá nhân trùng nhau: → KHÔNG VIẾT (không trùng)')
   }
 
-  briefSection('Hòa hợp — Kim-Thủy góc mềm', hh.kim_thuy_mem ? { data: hh.kim_thuy_mem } : null)
-  briefSection('Hòa hợp — Kim-Hỏa góc mềm', hh.kim_hoa_mem ? { data: hh.kim_hoa_mem } : null)
-  briefSection('Hòa hợp — Kim-Mặt Trăng góc mềm', hh.kim_moon_mem ? { data: hh.kim_moon_mem } : null)
+  briefSection('Hòa hợp, Kim-Thủy góc mềm', hh.kim_thuy_mem ? { data: hh.kim_thuy_mem } : null)
+  briefSection('Hòa hợp, Kim-Hỏa góc mềm', hh.kim_hoa_mem ? { data: hh.kim_hoa_mem } : null)
+  briefSection('Hòa hợp, Kim-Mặt Trăng góc mềm', hh.kim_moon_mem ? { data: hh.kim_moon_mem } : null)
 
   const xd = brief.muc4.xung_dot
 
-  // Loi tinh cach xung dot — always write
+  // Loi tinh cach xung dot, always write
   L("\n  Tiểu mục 'Lõi tính cách xung đột': → VIẾT (luôn viết)")
   L('  Dữ liệu AC/Sun/Moon (dùng lại dữ liệu đã cung cấp ở Hòa hợp):')
   L(brief.meta.core_signs_A)
@@ -722,13 +722,13 @@ export function formatBriefForPrompt(brief: RelBrief): string {
     L('\n  Nhà trống cần chú ý: → KHÔNG VIẾT (không có)')
   }
 
-  briefSection('Xung đột — Kim-Thủy góc cứng', xd.kim_thuy_cung ? { data: xd.kim_thuy_cung } : null)
-  briefSection('Xung đột — Kim-Hỏa góc cứng', xd.kim_hoa_cung ? { data: xd.kim_hoa_cung } : null)
-  briefSection('Xung đột — Kim-Mặt Trăng góc cứng', xd.kim_moon_cung ? { data: xd.kim_moon_cung } : null)
+  briefSection('Xung đột, Kim-Thủy góc cứng', xd.kim_thuy_cung ? { data: xd.kim_thuy_cung } : null)
+  briefSection('Xung đột, Kim-Hỏa góc cứng', xd.kim_hoa_cung ? { data: xd.kim_hoa_cung } : null)
+  briefSection('Xung đột, Kim-Mặt Trăng góc cứng', xd.kim_moon_cung ? { data: xd.kim_moon_cung } : null)
 
   // Muc 5
   L(`\n${'═'.repeat(60)}`)
-  L('MỤC 5 — BÀI HỌC VÀ CHÌA KHÓA')
+  L('MỤC 5, BÀI HỌC VÀ CHÌA KHÓA')
   L('═'.repeat(60))
 
   const m5 = brief.muc5
@@ -740,7 +740,7 @@ export function formatBriefForPrompt(brief: RelBrief): string {
   // Muc 6
   const m6 = brief.muc6
   L(`\n${'═'.repeat(60)}`)
-  L('MỤC 6 — TỔNG KẾT')
+  L('MỤC 6, TỔNG KẾT')
   L('═'.repeat(60))
   L(`Tổng nhà trống cần chú ý: ${m6.n_empty_sp} nhà (${m6.assessment})`)
 
@@ -767,7 +767,7 @@ export function buildRelationshipEssayPrompt(
   const aliasB = m._alias_B || m.name_B
 
   let instructions = loadPromptTemplate('relationship')
-  // Replace template variables — full_name first (before name_A/B alias replacement)
+  // Replace template variables, full_name first (before name_A/B alias replacement)
   const replacements: Record<string, string> = {
     '{full_name_A}': m.full_name_A,
     '{full_name_B}': m.full_name_B,
