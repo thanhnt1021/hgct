@@ -469,10 +469,14 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
 
       // Returns true if placing sh on its current page would leave it as a widow
       // (i.e. the print engine would push the following content to the next page).
+      // Uses shTop (not shBottom) to determine which page the subheading belongs to —
+      // a subheading is "on" a page based on where it STARTS, not where it ends.
+      // Using shBottom caused Math.ceil to round up to the wrong page when the bottom
+      // overflowed by even 1px, making pageEndPx point to page N+1 and the check always fail.
       function wouldBeWidow(sh: HTMLElement, group: HTMLElement): boolean {
         const groupTop = group.getBoundingClientRect().top
-        const shBottom = sh.getBoundingClientRect().bottom - groupTop
-        const pageEndPx = Math.ceil(shBottom / PAGE_H) * PAGE_H
+        const shTop = sh.getBoundingClientRect().top - groupTop
+        const pageEndPx = (Math.floor(shTop / PAGE_H) + 1) * PAGE_H
         const nextEl = findNextContent(sh)
         if (!nextEl) return false
         const nextTop = nextEl.getBoundingClientRect().top - groupTop
@@ -499,10 +503,15 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         xdHandledSubheadings.add(firstSh)
         const group = h2.closest('.section-group') as HTMLElement | null
         if (!group) return
-        if (wouldBeWidow(firstSh, group)) {
+        const groupTop = group.getBoundingClientRect().top
+        const h2Bottom = h2.getBoundingClientRect().bottom - groupTop
+        const h2PageEnd = Math.ceil(h2Bottom / PAGE_H) * PAGE_H
+        const firstShTop = firstSh.getBoundingClientRect().top - groupTop
+        const h2Isolated = firstShTop >= h2PageEnd  // firstSh đã bị CSS đẩy sang trang khác
+        if (wouldBeWidow(firstSh, group) || h2Isolated) {
           h2.style.pageBreakBefore = 'always'
           h2.style.breakBefore = 'always'
-          console.log(`[xd-widow] moved "${txt}" to next page`)
+          console.log(`[xd-widow] moved "${txt}" to next page (isolated=${h2Isolated})`)
         } else {
           console.log(`[xd-ok] "${txt}" stays`)
         }
