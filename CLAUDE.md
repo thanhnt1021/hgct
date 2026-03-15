@@ -168,6 +168,10 @@ src/
 - [x] `max_tokens` tăng 16000 → 32000 — Vận Hạn cần ~22900 tokens, 16000 gây cắt giữa Phần 5
 - [x] MIN_CHARS per service — transit: 12000, synastry: 10000, career/love: 4000; tự retry nếu output quá ngắn
 - [x] Email template — greeting block lớn hơn, layout fixes, synastry text left-align
+- [x] Email template round 2 — name adaptive sizing (≤8→42px, ≤12→38px, ≤18→32px, ≤24→26px, >24→22px); header brand 22px/domain 16px; body padding 36px 16px (mobile width); support line: "Liên hệ hỗ trợ:`<br>`link email"; synastry: 2 tên tách dòng, left-align, sync font-size
+- [x] PDF `[KTTIỂU]` mini-box — kết luận tiểu mục Vận Hạn (sections 2/3/4/6): border đỏ 1.2pt `#dc2626`, nền `#fef9f9`, 15.5pt, `page-break-inside:avoid`
+- [x] Vận Hạn prompt — `[KTLUẬN]` bổ sung cho section 1 (Tổng Quan) + section 6 (Sức Khỏe); rule `[KTTIỂU]` cho tất cả sections đa tiểu mục (2/3/4/6)
+- [x] PDF subheading widow fix — XUNG ĐỘT/HÒA HỢP: detect h2.section → move h2 (không phải subheading); `spaceNeededFor()` dùng `offsetHeight` cho red-box/mini-box (page-break-inside:avoid)
 
 ## What's TODO
 - [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật
