@@ -340,50 +340,39 @@ ${contentHtml}
 </body></html>`
 }
 
-async function imageFileToPdf(imagePath: string): Promise<Buffer> {
-  const { PDFDocument } = await import('pdf-lib')
-  const imgBytes = fs.readFileSync(imagePath)
-  const pdfDoc = await PDFDocument.create()
-  const img = await pdfDoc.embedJpg(imgBytes)
-  // A4 in points (72dpi): 595.28 × 841.89
-  const page = pdfDoc.addPage([595.28, 841.89])
-  page.drawImage(img, { x: 0, y: 0, width: 595.28, height: 841.89 })
-  return Buffer.from(await pdfDoc.save())
-}
-
 /**
  * Vanhan PDF assembly:
  * cover (01) + each content page with bg-02 overlaid under text + end (03)
+ *
+ * All 3 JPEGs embedded directly in finalDoc (no intermediate docs).
+ * bgImg embedded ONCE, reused across all content pages — pdf-lib
+ * references the same XObject, so bg is stored only once regardless of page count.
  */
 async function buildVanhanPdf(contentPdfBuffer: Buffer): Promise<Buffer> {
   const { PDFDocument } = await import('pdf-lib')
   const W = 595.28, H = 841.89  // A4 in points
 
-  const coverBuf = await imageFileToPdf(`${VANHAN_IMGS_DIR}/pdf-VanHan-01.jpg`)
-  const endBuf   = await imageFileToPdf(`${VANHAN_IMGS_DIR}/pdf-VanHan-03.jpg`)
-  const bgImgBytes = fs.readFileSync(`${VANHAN_IMGS_DIR}/pdf-VanHan-02.jpg`)
-
   const finalDoc = await PDFDocument.create()
 
-  // ── Page 1: cover ─────────────────────────────────────────────────────────
-  const coverDoc = await PDFDocument.load(coverBuf)
-  const [coverPage] = await finalDoc.copyPages(coverDoc, [0])
-  finalDoc.addPage(coverPage)
+  // Embed all 3 JPEGs once into finalDoc
+  const coverImg = await finalDoc.embedJpg(fs.readFileSync(`${VANHAN_IMGS_DIR}/pdf-VanHan-01.jpg`))
+  const bgImg    = await finalDoc.embedJpg(fs.readFileSync(`${VANHAN_IMGS_DIR}/pdf-VanHan-02.jpg`))
+  const endImg   = await finalDoc.embedJpg(fs.readFileSync(`${VANHAN_IMGS_DIR}/pdf-VanHan-03.jpg`))
 
-  // ── Content pages: bg-02 under each content page ──────────────────────────
-  const bgImg = await finalDoc.embedJpg(bgImgBytes)
+  // ── Page 1: cover ─────────────────────────────────────────────────────────
+  finalDoc.addPage([W, H]).drawImage(coverImg, { x: 0, y: 0, width: W, height: H })
+
+  // ── Content pages: bgImg (bottom) + embedded content page (top) ───────────
   const contentDoc = await PDFDocument.load(contentPdfBuffer)
-  const embeddedContent = await finalDoc.embedPdf(contentPdfBuffer, contentDoc.getPageIndices())
-  for (const embedded of embeddedContent) {
+  for (const pageIndex of contentDoc.getPageIndices()) {
+    const [embeddedPage] = await finalDoc.embedPages([contentDoc.getPage(pageIndex)])
     const p = finalDoc.addPage([W, H])
-    p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })
-    p.drawPage(embedded, { x: 0, y: 0, width: W, height: H })
+    p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })     // layer 1: background
+    p.drawPage(embeddedPage, { x: 0, y: 0, width: W, height: H }) // layer 2: text content
   }
 
   // ── Last page: end ─────────────────────────────────────────────────────────
-  const endDoc = await PDFDocument.load(endBuf)
-  const [endPage] = await finalDoc.copyPages(endDoc, [0])
-  finalDoc.addPage(endPage)
+  finalDoc.addPage([W, H]).drawImage(endImg, { x: 0, y: 0, width: W, height: H })
 
   return Buffer.from(await finalDoc.save())
 }
