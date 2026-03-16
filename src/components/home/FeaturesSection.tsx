@@ -28,16 +28,10 @@ export default function FeaturesSection() {
         <div className="text-center mb-20 flex flex-col items-center">
           <p className="section-eyebrow mb-4">Tại sao lựa chọn chúng tôi?</p>
           <h2 className="mb-6 leading-tight flex flex-col items-center">
-            <span
-              className="block"
-              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: 'clamp(2rem, 5vw, 3.4rem)', letterSpacing: '0.04em', textTransform: 'uppercase' }}
-            >
+            <span className="block font-vietnam font-bold text-[clamp(1.3rem,5.5vw,2rem)] sm:text-[clamp(2rem,5vw,3.4rem)] uppercase tracking-[0.04em] text-lunar-bright leading-tight whitespace-nowrap">
               Hạt giống chiêm tinh
             </span>
-            <span
-              className="block mt-2"
-              style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', textTransform: 'uppercase', color: '#d9ab55' }}
-            >
+            <span className="block mt-2 font-playfair italic text-[clamp(1.1rem,4vw,2.5rem)] sm:text-[clamp(1.5rem,4vw,2.5rem)] uppercase text-gold-warm text-center">
               hiểu mình - đánh thức - phát triển
             </span>
           </h2>

@@ -9,25 +9,8 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header
-      className="fixed top-0 left-0 right-0 z-50 h-16"
-      style={{
-        background: 'rgba(6,6,15,0.88)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(200,148,63,0.1)',
-      }}
-    >
-      {/* Micro bar */}
-      <div className="absolute top-0 left-0 right-0 h-4 border-b border-[#c8943f]/5 flex items-center justify-center gap-2 text-[0.68rem] text-[#6b6585]"
-        style={{ background: '#06060f' }}
-      >
-        <Link href="/privacy" className="hover:text-lunar-mid">Chính sách bảo mật</Link>
-        <span>·</span>
-        <Link href="/terms" className="hover:text-lunar-mid">Điều khoản sử dụng</Link>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between pt-4">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-[#06060f]/95 to-[#06060f]/60 backdrop-blur-md border-b border-[#c8943f]/20 h-16 shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
@@ -49,7 +32,7 @@ export default function Navbar() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden"
+          className="hidden"
           style={{ color: '#d9ab55', padding: '10px', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}

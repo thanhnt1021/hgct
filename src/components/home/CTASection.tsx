@@ -18,13 +18,14 @@ export default function CTASection() {
 
               <h2 className="mb-8 leading-tight">
                 <span className="block mb-2" style={{ color: '#c8943f', fontFamily: 'var(--font-vietnam)', fontSize: 'clamp(1.4rem, 2.8vw, 1.8rem)', letterSpacing: '0.1em', fontWeight: 600 }}>
-                  Bạn đã sẵn sàng muốn biết
+                  Bạn đã sẵn sàng <br className="sm:hidden" /> muốn biết
                 </span>
                 <span
                   className="block"
                   style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4rem)', textTransform: 'uppercase', background: 'linear-gradient(135deg, #c8943f, #f0cc78, #d9ab55)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1.1 }}
                 >
-                  Bầu trời lúc bạn<br />chào đời nói gì về<br />bạn?
+                  <span className="hidden sm:inline">Bầu trời lúc bạn<br />chào đời nói gì về<br />bạn?</span>
+                  <span className="sm:hidden">Bầu Trời<br />Lúc Bạn<br />Chào Đời<br />Nói Gì Về<br />Bạn?</span>
                 </span>
               </h2>
 
