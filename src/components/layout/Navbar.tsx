@@ -1,269 +1,81 @@
 'use client'
 
-// VISUAL ONLY — navigation bar restyled to Celestial Sanctum design
+// Navbar — logo + micro bar (privacy/terms links)
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
-
-interface NavAvatarProps { user: { image?: string }; avatarVersion: number; initials: string; size: number }
-function NavAvatar({ user, avatarVersion, initials, size }: NavAvatarProps) {
-  const [showCustom, setShowCustom] = useState(true)
-  const [showGoogle, setShowGoogle] = useState(false)
-
-  useEffect(() => { setShowCustom(true); setShowGoogle(false) }, [avatarVersion])
-
-  const style = { width: size, height: size, border: '1.5px solid rgba(217,171,85,0.45)', borderRadius: '50%' }
-
-  if (showCustom) return (
-    <img src={`/api/user/avatar?v=${avatarVersion}`} alt="avatar"
-      style={{ ...style, objectFit: 'cover' }}
-      referrerPolicy="no-referrer"
-      onError={() => { setShowCustom(false); setShowGoogle(!!user.image) }} />
-  )
-  if (showGoogle && user.image) return (
-    <img src={user.image} alt="avatar"
-      style={{ ...style, objectFit: 'cover' }}
-      referrerPolicy="no-referrer"
-      onError={() => setShowGoogle(false)} />
-  )
-  return (
-    <div style={{ ...style, background: 'linear-gradient(135deg,#261c56,#38287a)', color: '#d9ab55', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.35, fontWeight: 700 }}>
-      {initials}
-    </div>
-  )
-}
+import { useState } from 'react'
 
 export default function Navbar() {
-  const { user, logout, isLoading } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [avatarOpen, setAvatarOpen] = useState(false)
-  const [displayTen, setDisplayTen] = useState<string>('')
-  const [avatarVersion, setAvatarVersion] = useState(Date.now())
-  const router = useRouter()
-
-  // Fetch "Tên" from main chart data on login
-  useEffect(() => {
-    if (!user) { setDisplayTen(''); return }
-    fetch('/api/user/account', { cache: 'no-store' })
-      .then(r => r.ok ? r.json() : null)
-      .then((data: { mainChartData?: Record<string, string> | null } | null) => {
-        setDisplayTen(data?.mainChartData?.ten?.trim() || '')
-      })
-      .catch(() => setDisplayTen(''))
-  }, [user?.uid])
-
-  // Listen for real-time chart updates + avatar updates
-  useEffect(() => {
-    const onChartUpdated = (e: Event) => {
-      const ten = (e as CustomEvent).detail?.ten ?? ''
-      setDisplayTen(ten.trim())
-    }
-    const onAvatarUpdated = () => setAvatarVersion(Date.now())
-    window.addEventListener('chart:updated', onChartUpdated)
-    window.addEventListener('avatar:updated', onAvatarUpdated)
-    return () => {
-      window.removeEventListener('chart:updated', onChartUpdated)
-      window.removeEventListener('avatar:updated', onAvatarUpdated)
-    }
-  }, [])
-
-  const handleLogout = () => {
-    logout()
-    setAvatarOpen(false)
-    router.push('/')
-  }
-
-  // Display name: Tên (from chart) > Google name > username
-  const dropdownName = displayTen || user?.name || user?.username || ''
-  // Initials fallback when no avatar image
-  const initials = dropdownName
-    ? dropdownName.trim().split(' ').map((w: string) => w[0]).slice(-2).join('').toUpperCase()
-    : (user?.username?.[0] ?? '?').toUpperCase()
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50"
+    <header
+      className="fixed top-0 left-0 right-0 z-50 h-16"
       style={{
         background: 'rgba(6,6,15,0.88)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(200,148,63,0.1)',
-        transform: 'translateZ(0)',
-        WebkitTransform: 'translateZ(0)',
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-
-          {/* ── Logo ── */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style={{ flexShrink: 0 }}>
-              <circle cx="11" cy="11" r="2.5" fill="#d9ab55" opacity="0.9"/>
-              <circle cx="3"  cy="4"  r="1.2" fill="#d9ab55" opacity="0.6"/>
-              <circle cx="19" cy="5"  r="1"   fill="#d9ab55" opacity="0.5"/>
-              <circle cx="4"  cy="19" r="1"   fill="#d9ab55" opacity="0.45"/>
-              <circle cx="18" cy="18" r="1.3" fill="#d9ab55" opacity="0.55"/>
-              <line x1="11" y1="11" x2="3"  y2="4"  stroke="#d9ab55" strokeWidth="0.6" opacity="0.35"/>
-              <line x1="11" y1="11" x2="19" y2="5"  stroke="#d9ab55" strokeWidth="0.6" opacity="0.3"/>
-              <line x1="11" y1="11" x2="4"  y2="19" stroke="#d9ab55" strokeWidth="0.6" opacity="0.28"/>
-              <line x1="11" y1="11" x2="18" y2="18" stroke="#d9ab55" strokeWidth="0.6" opacity="0.32"/>
-            </svg>
-            <span
-              className="font-bold text-sm tracking-wide transition-opacity group-hover:opacity-90"
-              style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}
-            >
-              Hạt Giống Chiêm Tinh
-            </span>
-          </Link>
-
-          {/* ── Desktop menu ── */}
-          <div className="hidden md:flex items-center gap-7">
-            <Link href="/#features" className="nav-link">Dịch vụ</Link>
-            <Link href="/chart" className="nav-link">Bản đồ sao</Link>
-            <Link href="/services" className="nav-link">Đặt báo cáo</Link>
-
-            {!isLoading && (
-              user ? (
-                <div className="relative">
-                  <button onClick={() => setAvatarOpen(!avatarOpen)} className="flex items-center group">
-                    <NavAvatar user={user} avatarVersion={avatarVersion} initials={initials} size={32} />
-                  </button>
-
-                  {avatarOpen && (
-                    <div
-                      className="absolute right-0 top-11 rounded-xl py-2 w-52 z-50"
-                      style={{
-                        background: 'rgba(11,11,31,0.97)',
-                        border: '1px solid rgba(200,148,63,0.22)',
-                        boxShadow: '0 12px 48px rgba(0,0,0,0.7), 0 0 24px rgba(0,0,0,0.5)',
-                        backdropFilter: 'blur(20px)',
-                      }}
-                    >
-                      <div className="px-4 py-2.5 border-b" style={{ borderColor: 'rgba(200,148,63,0.1)' }}>
-                        <p className="text-sm font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
-                          {dropdownName}
-                        </p>
-                        <p className="text-xs mt-0.5" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)' }}>
-                          {user.email}
-                        </p>
-                      </div>
-                      <Link
-                        href="/profile"
-                        className="block px-4 py-2.5 text-sm transition-colors"
-                        style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)' }}
-                        onClick={() => setAvatarOpen(false)}
-                        onMouseEnter={e => (e.currentTarget.style.color = '#f4efe6')}
-                        onMouseLeave={e => (e.currentTarget.style.color = '#8a8399')}
-                      >
-                        Hồ sơ của tôi
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2.5 text-sm transition-colors"
-                        style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)' }}
-                        onMouseEnter={e => (e.currentTarget.style.color = '#c45252')}
-                        onMouseLeave={e => (e.currentTarget.style.color = '#8a8399')}
-                      >
-                        Đăng xuất
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <Link href="/auth/login" className="nav-link">Đăng nhập</Link>
-                  <Link
-                    href="/auth/register"
-                    className="px-4 py-2 text-xs font-bold tracking-wider transition-all hover:opacity-90"
-                    style={{
-                      background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
-                      backgroundSize: '200% 200%',
-                      color: '#06060f',
-                      borderRadius: '3px',
-                      fontFamily: 'var(--font-vietnam)',
-                      letterSpacing: '0.06em',
-                      boxShadow: '0 4px 16px rgba(200,148,63,0.3)',
-                    }}
-                  >
-                    Bắt đầu
-                  </Link>
-                </div>
-              )
-            )}
-          </div>
-
-          {/* ── Mobile hamburger ── */}
-          <button
-            className="md:hidden"
-            style={{ color: '#8a8399', padding: '10px', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
-            aria-expanded={menuOpen}
-            type="button"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {menuOpen
-                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
-              }
-            </svg>
-          </button>
-        </div>
-
-        {/* ── Mobile menu ── */}
-        {menuOpen && (
-          <div
-            className="md:hidden pb-5 pt-3 space-y-1"
-            style={{ borderTop: '1px solid rgba(200,148,63,0.1)' }}
-          >
-            <Link href="/#features" className="block py-2.5 px-1 nav-link" onClick={() => setMenuOpen(false)}>
-              Dịch vụ
-            </Link>
-            <Link href="/chart" className="block py-2.5 px-1 nav-link" onClick={() => setMenuOpen(false)}>
-              Bản đồ sao
-            </Link>
-            <Link href="/services" className="block py-2.5 px-1 nav-link" onClick={() => setMenuOpen(false)}>
-              Đặt báo cáo
-            </Link>
-            {user ? (
-              <>
-                <Link href="/profile" className="block py-2.5 px-1 nav-link" onClick={() => setMenuOpen(false)}>
-                  Hồ sơ của tôi
-                </Link>
-                <button
-                  onClick={() => { handleLogout(); setMenuOpen(false) }}
-                  className="block w-full text-left py-2.5 px-1 text-sm"
-                  style={{ color: '#c45252', fontFamily: 'var(--font-vietnam)' }}
-                >
-                  Đăng xuất
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/login" className="block py-2.5 px-1 nav-link" onClick={() => setMenuOpen(false)}>
-                  Đăng nhập
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="block mt-3 py-3 px-4 text-sm font-bold text-center"
-                  style={{
-                    background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                    color: '#06060f',
-                    borderRadius: '4px',
-                    fontFamily: 'var(--font-vietnam)',
-                    letterSpacing: '0.05em',
-                  }}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Bắt đầu ngay
-                </Link>
-              </>
-            )}
-          </div>
-        )}
+      {/* Micro bar */}
+      <div className="absolute top-0 left-0 right-0 h-4 border-b border-[#c8943f]/5 flex items-center justify-center gap-2 text-[0.68rem] text-[#6b6585]"
+        style={{ background: '#06060f' }}
+      >
+        <Link href="/privacy" className="hover:text-lunar-mid">Chính sách bảo mật</Link>
+        <span>·</span>
+        <Link href="/terms" className="hover:text-lunar-mid">Điều khoản sử dụng</Link>
       </div>
-    </nav>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between pt-4">
+
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <circle cx="12" cy="12" r="3" fill="#d9ab55"/>
+            <circle cx="12" cy="4" r="1.5" fill="#d9ab55"/>
+            <circle cx="20" cy="12" r="1.5" fill="#d9ab55"/>
+            <circle cx="12" cy="20" r="1.5" fill="#d9ab55"/>
+            <circle cx="4" cy="12" r="1.5" fill="#d9ab55"/>
+            <path d="M12 4L12 9M20 12L15 12M12 20L12 15M4 12L9 12" stroke="#d9ab55" strokeWidth="1.5"/>
+          </svg>
+          <span
+            className="font-bold text-sm tracking-wide uppercase transition-opacity group-hover:opacity-90"
+            style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}
+          >
+            Hạt Giống Chiêm Tinh
+          </span>
+        </Link>
+
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden"
+          style={{ color: '#d9ab55', padding: '10px', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'}
+          aria-expanded={menuOpen}
+          type="button"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {menuOpen
+              ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+              : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+            }
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile menu — empty */}
+      {menuOpen && (
+        <div
+          className="md:hidden absolute top-16 left-0 right-0 shadow-2xl"
+          style={{
+            background: 'rgba(6,6,15,0.95)',
+            backdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(200,148,63,0.2)',
+          }}
+        />
+      )}
+    </header>
   )
 }

@@ -313,7 +313,7 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 .dash-bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; font-style: italic; }
 .signature { font-family: 'NunitoItalic'; font-size: 11pt; color: #6b7280; margin: 8pt 0 3pt; }
 .spacer { height: 4pt; }
-.red-box { font-family: 'MontserratBold'; font-size: 16.5pt; border: 1.5pt solid #dc2626; background: #fff5f5; padding: 8pt 10pt; margin: 6pt 0 8pt; text-align: justify; page-break-inside: avoid; break-inside: avoid; }
+.red-box { font-family: 'MontserratBold'; font-size: 13.5pt; border: 1.5pt solid #dc2626; background: #fff5f5; padding: 18px 32px; margin: 20px 20px; text-align: justify; page-break-inside: avoid; break-inside: avoid; }
 .mini-box { font-family: 'Nunito'; font-size: 15.5pt; border: 1.2pt solid #dc2626; background: #fef9f9; padding: 7pt 10pt; margin: 5pt 0 7pt; text-align: justify; page-break-inside: avoid; break-inside: avoid; }
 
 /* Signature: fixed orphans/widows (typically 1-line, just a safety floor). */
@@ -370,6 +370,9 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
 
     const html = buildHtml(essayText, options)
     await page.setContent(html, { waitUntil: 'networkidle0' })
+
+    // Polyfill esbuild's __name helper for TSX runtime (not available in browser context)
+    await page.evaluate(() => { (globalThis as any).__name = (fn: any, _n: string) => fn })
 
     // Heading resize + orphan compression in one evaluate.
     // await document.fonts.ready ensures font metrics are accurate before any measurement.
@@ -596,6 +599,123 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         } else {
           console.log(`[sh-ok] stays: "${sh.textContent?.slice(0, 30)}"`)
         }
+      })
+
+
+
+      // ── SCALLOPED BORDER FOR RED-BOX ──────────────────────────────────────────────
+      // Replace the rectangular CSS border with a wavy/scalloped SVG border.
+      // Runs after all layout adjustments so box dimensions are final.
+
+      const genScallopPath = (W: number, H: number, scallopD: number): string => {
+        let cr = scallopD * 0.6
+        cr = Math.min(cr, (H - 4) / 2, (W - 4) / 2)
+        if (cr < 4) cr = 4
+
+        const topLen = Math.max(0, W - 2 * cr)
+        const sideLen = Math.max(0, H - 2 * cr)
+
+        const calcN = (length: number, targetD: number) => {
+          if (length <= 0) return { n: 0, d: 0 }
+          const n = Math.max(1, Math.round(length / targetD))
+          return { n, d: length / n }
+        }
+
+        const top = calcN(topLen, scallopD)
+        const side = calcN(sideLen, scallopD)
+
+        const kappa = 0.5522847498
+        const cb = cr * 0.55
+
+        let p = `M ${cr} 0`
+
+        // Top edge — scallops bulge UP (negative y)
+        for (let i = 0; i < top.n; i++) {
+          const sx = cr + i * top.d
+          const ex = sx + top.d
+          const b = top.d / 2 * 0.75
+          p += ` C ${sx + top.d * 0.25} ${-b}, ${sx + top.d * 0.75} ${-b}, ${ex} 0`
+        }
+
+        // Top-right corner
+        p += ` C ${W - cr + cr * kappa + cb * 0.3} ${-cb * 0.3}, ${W + cb * 0.3} ${cr - cr * kappa - cb * 0.3}, ${W} ${cr}`
+
+        // Right edge — scallops bulge RIGHT (positive x)
+        for (let i = 0; i < side.n; i++) {
+          const sy = cr + i * side.d
+          const ey = sy + side.d
+          const b = side.d / 2 * 0.75
+          p += ` C ${W + b} ${sy + side.d * 0.25}, ${W + b} ${sy + side.d * 0.75}, ${W} ${ey}`
+        }
+
+        // Bottom-right corner
+        p += ` C ${W + cb * 0.3} ${H - cr + cr * kappa + cb * 0.3}, ${W - cr + cr * kappa + cb * 0.3} ${H + cb * 0.3}, ${W - cr} ${H}`
+
+        // Bottom edge — scallops bulge DOWN (positive y), right to left
+        for (let i = 0; i < top.n; i++) {
+          const sx = W - cr - i * top.d
+          const ex = sx - top.d
+          const b = top.d / 2 * 0.75
+          p += ` C ${sx - top.d * 0.25} ${H + b}, ${sx - top.d * 0.75} ${H + b}, ${ex} ${H}`
+        }
+
+        // Bottom-left corner
+        p += ` C ${cr - cr * kappa - cb * 0.3} ${H + cb * 0.3}, ${-cb * 0.3} ${H - cr + cr * kappa + cb * 0.3}, 0 ${H - cr}`
+
+        // Left edge — scallops bulge LEFT (negative x), bottom to top
+        for (let i = 0; i < side.n; i++) {
+          const sy = H - cr - i * side.d
+          const ey = sy - side.d
+          const b = side.d / 2 * 0.75
+          p += ` C ${-b} ${sy - side.d * 0.25}, ${-b} ${sy - side.d * 0.75}, 0 ${ey}`
+        }
+
+        // Top-left corner
+        p += ` C ${-cb * 0.3} ${cr - cr * kappa - cb * 0.3}, ${cr - cr * kappa - cb * 0.3} ${-cb * 0.3}, ${cr} 0`
+
+        p += ' Z'
+        return p
+      }
+
+      ;(document.querySelectorAll('.red-box') as NodeListOf<HTMLElement>).forEach(box => {
+        const w = box.offsetWidth
+        const h = box.offsetHeight
+        const scallopD = 40
+        const strokeW = 2.5
+        const maxBulge = scallopD / 2 * 0.75
+        const overflow = Math.ceil(maxBulge + strokeW)
+
+        const pathD = genScallopPath(w, h, scallopD)
+
+        const svgNS = 'http://www.w3.org/2000/svg'
+        const svg = document.createElementNS(svgNS, 'svg')
+        svg.setAttribute('width', String(w + 2 * overflow))
+        svg.setAttribute('height', String(h + 2 * overflow))
+        svg.setAttribute('viewBox', `${-overflow} ${-overflow} ${w + 2 * overflow} ${h + 2 * overflow}`)
+        svg.style.position = 'absolute'
+        svg.style.top = `${-overflow}px`
+        svg.style.left = `${-overflow}px`
+        svg.style.pointerEvents = 'none'
+        svg.style.zIndex = '-1'
+
+        const pathEl = document.createElementNS(svgNS, 'path')
+        pathEl.setAttribute('d', pathD)
+        pathEl.setAttribute('fill', '#fff5f5')
+        pathEl.setAttribute('stroke', '#7B68AE')
+        pathEl.setAttribute('stroke-width', String(strokeW))
+        pathEl.setAttribute('stroke-linecap', 'round')
+        pathEl.setAttribute('stroke-linejoin', 'round')
+        svg.appendChild(pathEl)
+
+        // Remove CSS border/bg, create stacking context so SVG z-index:-1 sits behind text
+        box.style.border = 'none'
+        box.style.background = 'none'
+        box.style.position = 'relative'
+        box.style.zIndex = '0'
+        box.style.overflow = 'visible'
+        box.appendChild(svg)
+
+        console.log(`[scallop] red-box ${w}x${h} overflow=${overflow}`)
       })
     })
 

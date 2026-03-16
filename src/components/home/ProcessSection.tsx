@@ -1,9 +1,9 @@
 // VISUAL ONLY — process section restyled to Celestial Sanctum design
 
 const steps = [
-  { num: '01', title: 'Nhập ngày giờ sinh', description: 'Cho chúng tôi biết bạn sinh ngày nào, mấy giờ, ở đâu. Chỉ vậy thôi — không cần gì thêm.' },
-  { num: '02', title: 'Chọn điều muốn khám phá', description: 'Sự nghiệp, tình duyên, so sánh cặp đôi hay vận hạn sắp tới — bạn muốn hiểu điều gì nhất?' },
-  { num: '03', title: 'Nhận báo cáo trong email', description: 'Trong vài phút, một bản phân tích chi tiết — viết riêng cho bạn — sẽ có trong hộp thư.' },
+  { num: '01', title: 'Nhập thông tin ngày giờ sinh' },
+  { num: '02', title: 'Chọn điều bạn muốn khám phá' },
+  { num: '03', title: 'Nhận luận giải PDF qua email' },
 ]
 
 export default function ProcessSection() {
@@ -12,7 +12,7 @@ export default function ProcessSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center mb-20">
-          <p className="section-eyebrow mb-5">Cách hoạt động</p>
+          <p className="section-eyebrow mb-4">Thao tác dễ dàng</p>
           <h2
             style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: 'clamp(1.5rem, 4vw, 2.6rem)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '0.75rem' }}
           >
@@ -38,12 +38,9 @@ export default function ProcessSection() {
                   </span>
                 </div>
               </div>
-              <h3 className="mb-4 font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.15rem', letterSpacing: '0.01em' }}>
+              <h3 className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.15rem', letterSpacing: '0.01em' }}>
                 {step.title}
               </h3>
-              <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', lineHeight: 1.85, fontSize: '1rem' }}>
-                {step.description}
-              </p>
             </div>
           ))}
         </div>
