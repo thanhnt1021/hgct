@@ -4,13 +4,15 @@
 import fs from 'fs'
 import path from 'path'
 import type { ChartData } from '@/lib/astrology/calculations'
-import { getHouseOfPlanet, checkAspect } from '@/lib/astrology/calculations'
-import { OUTER_PLANETS, PLANET_NAMES_VN, PLANET_SYMBOLS } from '@/lib/astrology/constants'
+import { getHouseOfPlanet, checkAspect, getNatalPlanetNearCusp, getHouseRulerPlanet } from '@/lib/astrology/calculations'
+import { OUTER_PLANETS, CORE_PLANETS, PLANET_NAMES_VN, PLANET_SYMBOLS } from '@/lib/astrology/constants'
 import {
   scanHouseTransitsInRange,
   findExactAspectTimes,
+  findAspectPeriods,
   type HouseTransitPeriod,
   type ExactAspectHit,
+  type AspectPeriod,
 } from '@/lib/astrology/transit-stubs'
 
 // ─── Constants ───────────────────────────────────────────────────
@@ -194,12 +196,36 @@ function parseVanhanKB(kb: Record<string, unknown[][]>): VanhanKB {
 
 // ─── Core: Scan all transits and compute house scores ────────────
 
+const MAJOR_ASPECTS = ['Conjunction', 'Sextile', 'Square', 'Trine', 'Opposition']
+
+/**
+ * Extend a date string by ±days. Returns YYYY-MM-DD.
+ */
+function extendDate(dateStr: string, days: number): string {
+  const d = new Date(dateStr)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().split('T')[0]
+}
+
+/**
+ * Check if a date string falls within [start, end] range.
+ */
+function isDateInRange(dateStr: string, start: string, end: string): boolean {
+  return dateStr >= start && dateStr <= end
+}
+
+/**
+ * Check if a period [pStart, pEnd] overlaps with [start, end].
+ */
+function periodsOverlap(pStart: string, pEnd: string, start: string, end: string): boolean {
+  return pStart <= end && pEnd >= start
+}
+
 function computeHouseScores(
   natalChart: ChartData,
   startDate: string,
   endDate: string,
 ): HouseScore[] {
-  const cusps = natalChart.cusps
   const natalPlanets = natalChart.planets
 
   // Initialize scores for all 12 houses
@@ -214,21 +240,44 @@ function computeHouseScores(
     houseData[h] = { score: 0, transits: [], softAspects: [], hardAspects: [] }
   }
 
-  // For each outer planet, scan house transits
+  // ── Step 1: Build natal targets per house (cusp planet + house ruler) ──
+  const natalTargetsPerHouse: Record<number, string[]> = {}
+  const allNatalTargets = new Set<string>()
+  for (let h = 1; h <= 12; h++) {
+    const targets: string[] = []
+    const pn = getNatalPlanetNearCusp(natalChart, h)
+    if (pn && CORE_PLANETS.includes(pn)) {
+      allNatalTargets.add(pn)
+      targets.push(pn)
+    }
+    const pr = getHouseRulerPlanet(natalChart, h)
+    if (pr && CORE_PLANETS.includes(pr) && !targets.includes(pr)) {
+      allNatalTargets.add(pr)
+      targets.push(pr)
+    }
+    natalTargetsPerHouse[h] = targets
+  }
+
+  // ── Step 2: Scan house transits — count points ONCE per planet per house ──
   for (const planet of OUTER_PLANETS) {
     const planetVn = PLANET_NAMES_VN[planet] || planet
     const points = TRANSIT_POINTS[planet] || 0
 
-    // Get house transit periods
     let periods = scanHouseTransitsInRange(planet, natalChart, startDate, endDate)
     periods = mergeRetrogradePeriods(periods)
+
+    // Track which houses this planet has already scored transit points for
+    const scoredHouses = new Set<number>()
 
     for (const period of periods) {
       const h = period.house
       if (h < 1 || h > 12) continue
 
-      // Add transit points to house score
-      houseData[h].score += points
+      // Transit points: only count ONCE per planet per house (mo uses break)
+      if (!scoredHouses.has(h)) {
+        houseData[h].score += points
+        scoredHouses.add(h)
+      }
 
       houseData[h].transits.push({
         planet,
@@ -238,63 +287,76 @@ function computeHouseScores(
         retrograde: period.retrograde,
       })
     }
+  }
 
-    // Find aspects between transit planet and natal planets
-    const natalTargets = [
-      'Sun', 'Moon', 'Mercury', 'Venus', 'Mars',
-      'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto',
-      'Asc', 'MC',
-    ]
+  // ── Step 3: Compute aspect scores per house using period-based scoring ──
+  // Scan ±30 days wider than analysis range (matches mo behavior)
+  const scanStart = extendDate(startDate, -30)
+  const scanEnd = extendDate(endDate, 30)
 
-    for (const natalP of natalTargets) {
-      if (!(natalP in natalPlanets)) continue
-      const natalLon = natalPlanets[natalP].lon
-
-      const exactHits = findExactAspectTimes(
-        planet, natalP, natalLon, startDate, endDate,
-      )
-
-      if (exactHits.length === 0) continue
-
-      // Group hits by aspect type
-      const hitsByAspect: Record<string, ExactAspectHit[]> = {}
-      for (const hit of exactHits) {
-        if (!hitsByAspect[hit.aspect]) hitsByAspect[hit.aspect] = []
-        hitsByAspect[hit.aspect].push(hit)
+  // Pre-compute all aspect periods: cache[transitP_natalP] = AspectPeriod[]
+  const periodCache: Record<string, AspectPeriod[]> = {}
+  for (const tP of OUTER_PLANETS) {
+    for (const nP of allNatalTargets) {
+      if (!(nP in natalPlanets)) continue
+      const nLon = natalPlanets[nP].lon
+      const periods = findAspectPeriods(tP, nP, nLon, scanStart, scanEnd, MAJOR_ASPECTS)
+      if (periods.length > 0) {
+        periodCache[`${tP}_${nP}`] = periods
       }
+    }
+  }
 
-      for (const [aspectName, hits] of Object.entries(hitsByAspect)) {
-        const aspectVn = ASPECT_VN[aspectName] || aspectName
-        const type = ASPECT_TYPE_MAP[aspectName] || 'hard'
-        const exactDates = hits.map(h => formatDate(h.exactDate))
+  for (let h = 1; h <= 12; h++) {
+    const targets = natalTargetsPerHouse[h]
 
-        // Determine which house this natal planet is in
-        const natalHouse = getHouseOfPlanet(natalLon, cusps)
+    for (const tP of OUTER_PLANETS) {
+      const tPVn = PLANET_NAMES_VN[tP] || tP
 
-        // Add aspect score: soft aspects +1, hard aspects -1
-        if (type === 'soft') {
-          houseData[natalHouse].score += 1
-        } else {
-          houseData[natalHouse].score -= 1
-        }
+      for (const nP of targets) {
+        const cacheKey = `${tP}_${nP}`
+        const periods = periodCache[cacheKey]
+        if (!periods || periods.length === 0) continue
 
-        const natalPVn = PLANET_NAMES_VN[natalP] || natalP
+        for (const period of periods) {
+          // Only score if period overlaps the analysis range
+          if (!periodsOverlap(period.startDate, period.endDate, startDate, endDate)) continue
 
-        const aspectEntry: AspectInHouse = {
-          transitPlanet: planet,
-          transitPlanetVn: planetVn,
-          natalPlanet: natalP,
-          natalPlanetVn: natalPVn,
-          aspect: aspectName,
-          aspectVn,
-          type,
-          exactDates,
-        }
+          const aspectName = period.aspect
+          if (!MAJOR_ASPECTS.includes(aspectName)) continue
 
-        if (type === 'soft') {
-          houseData[natalHouse].softAspects.push(aspectEntry)
-        } else {
-          houseData[natalHouse].hardAspects.push(aspectEntry)
+          const aspectVn = ASPECT_VN[aspectName] || aspectName
+          const type = ASPECT_TYPE_MAP[aspectName] || 'hard'
+          const mod = type === 'soft' ? 1 : -1
+
+          // +1/-1 for the period itself
+          houseData[h].score += mod
+
+          // Filter exact hits to analysis range, +1/-1 per hit
+          const hitsInRange = period.exactHits.filter(
+            (hit) => isDateInRange(hit.exactDate, startDate, endDate),
+          )
+          houseData[h].score += mod * hitsInRange.length
+
+          const exactDates = hitsInRange.map((hit) => formatDate(hit.exactDate))
+          const nPVn = PLANET_NAMES_VN[nP] || nP
+
+          const aspectEntry: AspectInHouse = {
+            transitPlanet: tP,
+            transitPlanetVn: tPVn,
+            natalPlanet: nP,
+            natalPlanetVn: nPVn,
+            aspect: aspectName,
+            aspectVn,
+            type,
+            exactDates,
+          }
+
+          if (type === 'soft') {
+            houseData[h].softAspects.push(aspectEntry)
+          } else {
+            houseData[h].hardAspects.push(aspectEntry)
+          }
         }
       }
     }
@@ -451,7 +513,17 @@ function formatTongQuan(houseScores: HouseScore[], vkb?: VanhanKB): string {
     .sort((a, b) => a.score - b.score)
   const timVang = houseScores.filter(h => h.classification === 'TIM_VANG')
 
-  lines.push(`Tổng quan: ${timDo.length} nhà thuận lợi, ${timDen.length} nhà thách thức, ${timVang.length} nhà ổn định.`)
+  // Year conclusion formula:
+  // timDỏ + timVàng > timĐen → THUẬN LỢI
+  // timĐen > timĐỏ + timVàng → THÁCH THỨC
+  // timĐen = timĐỏ + timVàng → ỔN ĐỊNH
+  const positiveCount = timDo.length + timVang.length
+  const yearConclusion = timDen.length > positiveCount ? 'THÁCH THỨC'
+    : timDen.length === positiveCount ? 'ỔN ĐỊNH'
+    : 'THUẬN LỢI'
+
+  lines.push(`Kết luận tổng quan: ${yearConclusion}`)
+  lines.push(`Thuận lợi (${timDo.length} nhà), Ổn định (${timVang.length} nhà), Thách thức (${timDen.length} nhà).`)
   lines.push('')
 
   if (timDo.length > 0) {

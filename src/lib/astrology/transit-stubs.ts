@@ -27,6 +27,15 @@ export interface ExactAspectHit {
   natalLon: number
 }
 
+export interface AspectPeriod {
+  transitPlanet: string
+  natalPlanet: string
+  aspect: string
+  startDate: string
+  endDate: string
+  exactHits: ExactAspectHit[]
+}
+
 export interface OuterPlanetCycleEntry {
   startDate: string
   endDate: string
@@ -204,55 +213,231 @@ export function findExactAspectTimes(
   // Which aspects to check
   const aspectsToCheck = aspects ?? Object.keys(ASPECTS_DEF)
 
-  // For each aspect, scan for zero-crossings of (orb - 0)
+  // For each aspect, scan for zero-crossings using target-point approach.
+  // Instead of |difdeg2n| - angle (fails for Conjunction/Opposition where the
+  // value touches 0 but never crosses), compute difdeg2n(transitLon, targetPoint)
+  // which naturally crosses zero when the transit planet reaches the target.
   for (const aspectName of aspectsToCheck) {
     if (!(aspectName in ASPECTS_DEF)) continue
     const targetAngle = ASPECTS_DEF[aspectName].angle
 
-    // Get orb (signed distance from target angle) at a given jd
-    const getSignedOrb = (jd: number): number => {
-      const lon = getPlanetLon(jd, transitPlanet, 0, 0)
-      // difdeg2n gives signed difference; we want distance to target angle on either side
-      const diff = Math.abs(difdeg2n(lon, natalLon))
-      return diff - targetAngle
+    // Target longitudes where the aspect is exact:
+    // Conjunction(0°)/Opposition(180°) → single target point
+    // Others → two target points (natalLon ± angle)
+    const targetPoints: number[] = [((natalLon + targetAngle) % 360 + 360) % 360]
+    if (targetAngle !== 0 && targetAngle !== 180) {
+      targetPoints.push(((natalLon - targetAngle) % 360 + 360) % 360)
     }
 
-    let prevOrb = getSignedOrb(jdStart)
-    let jd = jdStart + step
-
-    while (jd <= jdEnd) {
-      const currOrb = getSignedOrb(jd)
-
-      // Zero crossing (exact aspect crossing)
-      if (prevOrb * currOrb <= 0 && Math.abs(prevOrb) < 10 && Math.abs(currOrb) < 10) {
-        // Bisect to find exact crossing
-        let lo = jd - step
-        let hi = jd
-        for (let iter = 0; iter < 30; iter++) {
-          const mid = (lo + hi) / 2
-          if (getSignedOrb(lo) * getSignedOrb(mid) <= 0) hi = mid
-          else lo = mid
-        }
-        const exactJd = (lo + hi) / 2
-        const exactLon = getPlanetLon(exactJd, transitPlanet, 0, 0)
-
-        results.push({
-          transitPlanet,
-          natalPlanet,
-          aspect: aspectName,
-          exactDate: jdToDateStr(exactJd),
-          transitLon: exactLon,
-          natalLon,
-        })
+    for (const tp of targetPoints) {
+      const getSignedOrb = (jd: number): number => {
+        const lon = getPlanetLon(jd, transitPlanet, 0, 0)
+        return difdeg2n(lon, tp)
       }
 
-      prevOrb = currOrb
-      jd += step
+      let prevOrb = getSignedOrb(jdStart)
+      let jd = jdStart + step
+
+      while (jd <= jdEnd) {
+        const currOrb = getSignedOrb(jd)
+
+        // Zero crossing (exact aspect crossing)
+        if (prevOrb * currOrb <= 0 && Math.abs(prevOrb) < 10 && Math.abs(currOrb) < 10) {
+          // Bisect to find exact crossing
+          let lo = jd - step
+          let hi = jd
+          for (let iter = 0; iter < 30; iter++) {
+            const mid = (lo + hi) / 2
+            if (getSignedOrb(lo) * getSignedOrb(mid) <= 0) hi = mid
+            else lo = mid
+          }
+          const exactJd = (lo + hi) / 2
+          const exactLon = getPlanetLon(exactJd, transitPlanet, 0, 0)
+
+          results.push({
+            transitPlanet,
+            natalPlanet,
+            aspect: aspectName,
+            exactDate: jdToDateStr(exactJd),
+            transitLon: exactLon,
+            natalLon,
+          })
+        }
+
+        prevOrb = currOrb
+        jd += step
+      }
     }
   }
 
   // Sort by date
   results.sort((a, b) => a.exactDate.localeCompare(b.exactDate))
+
+  return results
+}
+
+// ─── findAspectPeriods ───────────────────────────────────────────
+
+/**
+ * Find aspect periods (matching mo's find_exact_aspect_times approach).
+ * A period = continuous interval where orb < ORB_THRESHOLD degrees.
+ * Each period contains zero or more exact hits.
+ * This matches mo's two-layer detection: period boundaries + exact hits.
+ */
+const PERIOD_ORB_THRESHOLD = 3.0
+
+function getOrbStrict(
+  jd: number,
+  transitPlanet: string,
+  natalLon: number,
+  targetAngle: number,
+): number {
+  const pos = getPlanetLon(jd, transitPlanet, 0, 0)
+  const dist = Math.abs(difdeg2n(pos, natalLon))
+  return Math.abs(dist - targetAngle)
+}
+
+function findBoundaryStrict(
+  jdStart: number,
+  jdEnd: number,
+  transitPlanet: string,
+  natalLon: number,
+  targetAngle: number,
+): number {
+  let lo = jdStart
+  let hi = jdEnd
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2
+    const midOrb = getOrbStrict(mid, transitPlanet, natalLon, targetAngle)
+    const loOrb = getOrbStrict(lo, transitPlanet, natalLon, targetAngle)
+    if (midOrb < PERIOD_ORB_THRESHOLD) {
+      if (loOrb >= PERIOD_ORB_THRESHOLD) hi = mid
+      else lo = mid
+    } else {
+      if (loOrb < PERIOD_ORB_THRESHOLD) hi = mid
+      else lo = mid
+    }
+  }
+  return (lo + hi) / 2
+}
+
+function findHitsInPeriod(
+  jdStart: number,
+  jdEnd: number,
+  transitPlanet: string,
+  natalLon: number,
+  targetAngle: number,
+): number[] {
+  const hits: number[] = []
+
+  // Target points for zero-crossing detection
+  const t1 = ((natalLon + targetAngle) % 360 + 360) % 360
+  const t2 = ((natalLon - targetAngle) % 360 + 360) % 360
+
+  // Pick the closer target point
+  const posStart = getPlanetLon(jdStart, transitPlanet, 0, 0)
+  const activeTarget =
+    Math.abs(difdeg2n(posStart, t1)) < Math.abs(difdeg2n(posStart, t2)) ? t1 : t2
+
+  const steps = 200
+  const stepSize = (jdEnd - jdStart) / steps
+
+  for (let i = 0; i < steps; i++) {
+    const t1jd = jdStart + i * stepSize
+    const t2jd = jdStart + (i + 1) * stepSize
+    const r1 = difdeg2n(getPlanetLon(t1jd, transitPlanet, 0, 0), activeTarget)
+    const r2 = difdeg2n(getPlanetLon(t2jd, transitPlanet, 0, 0), activeTarget)
+
+    if (r1 * r2 <= 0) {
+      // Bisect
+      let lo = t1jd
+      let hi = t2jd
+      for (let iter = 0; iter < 30; iter++) {
+        const mid = (lo + hi) / 2
+        const rm = difdeg2n(getPlanetLon(mid, transitPlanet, 0, 0), activeTarget)
+        if (r1 * rm <= 0) hi = mid
+        else lo = mid
+      }
+      hits.push((lo + hi) / 2)
+    }
+  }
+
+  return hits
+}
+
+export function findAspectPeriods(
+  transitPlanet: string,
+  natalPlanet: string,
+  natalLon: number,
+  startDate: string,
+  endDate: string,
+  aspects?: string[],
+): AspectPeriod[] {
+  const results: AspectPeriod[] = []
+
+  // Step size depends on planet speed
+  let step: number
+  if (['Moon', 'Vertex'].includes(transitPlanet)) step = 0.02
+  else if (['Sun', 'Mercury', 'Venus', 'Mars'].includes(transitPlanet)) step = 0.1
+  else step = 1.0
+
+  const jdStart = dateStrToJd(startDate, 0.0)
+  const jdEnd = dateStrToJd(endDate, 0.0) + 20.0 // Extra margin like mo
+
+  const aspectsToCheck = aspects ?? Object.keys(ASPECTS_DEF)
+
+  for (const aspectName of aspectsToCheck) {
+    if (!(aspectName in ASPECTS_DEF)) continue
+    const targetAngle = ASPECTS_DEF[aspectName].angle
+
+    let jd = jdStart
+
+    while (jd < jdEnd && results.length < 50) {
+      if (getOrbStrict(jd, transitPlanet, natalLon, targetAngle) < PERIOD_ORB_THRESHOLD) {
+        // Found a period — walk back to find start
+        let jdBack = jd
+        while (getOrbStrict(jdBack, transitPlanet, natalLon, targetAngle) < PERIOD_ORB_THRESHOLD) {
+          jdBack -= step
+        }
+        const periodStartJd = findBoundaryStrict(jdBack, jdBack + step, transitPlanet, natalLon, targetAngle)
+
+        // Walk forward to find end
+        let jdFwd = jd
+        while (jdFwd < jdEnd && getOrbStrict(jdFwd, transitPlanet, natalLon, targetAngle) < PERIOD_ORB_THRESHOLD) {
+          jdFwd += step
+        }
+        const periodEndJd = findBoundaryStrict(jdFwd - step, jdFwd, transitPlanet, natalLon, targetAngle)
+
+        // Find exact hits within the period
+        const hitJds = findHitsInPeriod(periodStartJd, periodEndJd, transitPlanet, natalLon, targetAngle)
+        const exactHits: ExactAspectHit[] = hitJds.map((hJd) => ({
+          transitPlanet,
+          natalPlanet,
+          aspect: aspectName,
+          exactDate: jdToDateStr(hJd),
+          transitLon: getPlanetLon(hJd, transitPlanet, 0, 0),
+          natalLon,
+        }))
+
+        results.push({
+          transitPlanet,
+          natalPlanet,
+          aspect: aspectName,
+          startDate: jdToDateStr(periodStartJd),
+          endDate: jdToDateStr(periodEndJd),
+          exactHits,
+        })
+
+        // Skip past this period
+        jd = periodEndJd + step / 2
+      } else {
+        jd += step
+      }
+    }
+  }
+
+  // Sort by start date
+  results.sort((a, b) => a.startDate.localeCompare(b.startDate))
 
   return results
 }

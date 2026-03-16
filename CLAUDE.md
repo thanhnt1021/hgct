@@ -176,6 +176,7 @@ src/
 - [x] Em dash (—) fix — Love/Synastry/Vanhan output sạch không còn dấu gạch dài: xóa ` — ` trong prompt templates (love.txt, relationship.txt, vanhan.txt) + data brief labels trong love/prompt.ts và relationship/prompt.ts
 - [x] Dash bullet line break fix — inline `- ` list items bị dồn thành paragraph → tách thành dòng riêng: `splitInlineDashBullets()` pre-processing + `dash_bullet` classifyLine type + CSS `.dash-bullet` + prompt rules (vanhan/love/career) yêu cầu mỗi `- ` item xuống dòng riêng
 - [x] Vanhan KB integration — inject KB data từ tab "Tool Vận Hạn" vào prompt: area descriptions (THUẬN LỢI/ỔN ĐỊNH/THÁCH THỨC) per house, planet transit descriptions (Jupiter/Saturn/Uranus/Neptune/Pluto) per house, general summary; fix "Hội Tụ" → "Trùng" cho Conjunction; thêm rule 5 major aspects only + KB usage rule trong vanhan.txt
+- [x] Vanhan scoring match mo — `computeHouseScores` rewrite cho kết quả giống hệt mo: (1) `findAspectPeriods` period-based detection (orb<3° threshold + boundary bisection + exact hits) thay cho flat zero-crossing; (2) Conjunction/Opposition fix bằng target-point approach; (3) transit points đếm 1 lần/planet/house; (4) scan ±30 ngày rộng hơn analysis range; (5) per-house natal targets (cusp planet + house ruler); (6) chỉ 5 major aspects; (7) Year Conclusion formula (timĐỏ+timVàng > timĐen → THUẬN LỢI)
 
 ## What's TODO
 - [ ] Đặt giá thật cho từng dịch vụ trong `src/app/api/payment/create-order/route.ts` (hiện tại đang để 2222đ để test)
@@ -189,6 +190,8 @@ src/
 - `.next/standalone/` owned by root sau deploy → luôn deploy qua `sudo bash deploy.sh`
 - `max_tokens: 16000` cắt Vận Hạn giữa Phần 5 (`finish_reason: length`) → tăng lên 32000
 - Stream OpenRouter kết thúc mà không có `[DONE]` marker → `StreamInterruptedError` → retry tự động
+- `findExactAspectTimes` Conjunction/Opposition bug: `|difdeg2n| - angle` never crosses zero for angle=0/180 → fix: target-point approach `difdeg2n(transitLon, natalLon + angle)`
+- Vanhan transit points double-counting: planet có nhiều periods trong cùng house → chỉ đếm 1 lần (match mo `break` logic)
 
 ## Important Notes
 - Run dev server: `PORT=65498 npm run dev`
