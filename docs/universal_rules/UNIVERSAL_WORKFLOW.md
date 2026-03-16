@@ -67,6 +67,11 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy thẳng vào code**.
 
+> **⚠️ BƯỚC 0 — BẮT BUỘC, KHÔNG CÓ EXCEPTION:**
+> Nhận lệnh `feature: [tên]` → **tạo branch `feature/tên` NGAY LẬP TỨC**, trước khi đọc context hay làm bất cứ thứ gì.
+> Dù user đính kèm code/plan/patch đầy đủ đến đâu → **vẫn tạo branch trước.**
+> _Lý do: không có branch = làm thẳng trên main = không thể rollback, không thể review riêng, không thể test song song._
+
 > **⚠️ RULE CỨNG — KHÔNG BAO GIỜ bỏ qua Phase 1, dù user đính kèm plan chi tiết đến đâu.**
 > Plan là input để Claude đối chiếu với codebase — **KHÔNG phải lệnh implement.**
 > Vẫn phải đọc context, hỏi Q&A, và **chờ user confirm rõ ràng** trước khi viết bất kỳ dòng code nào.
