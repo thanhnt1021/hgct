@@ -98,7 +98,7 @@ GÓC CỨNG VÀ GÓC MỀM, mỗi góc viết thành 1 đoạn văn gồm 3 ý l
 HƯỚNG DẪN TỪNG PHẦN
 ===================================================================
 
-Phần 1, Tổng Quan Năng Lượng Của Năm: Viết ngắn gọn 8-10 câu. Câu đầu tiên: nêu kết luận tổng quan về năm (THUẬN LỢI / ỔN ĐỊNH / THÁCH THỨC) từ dữ liệu. Liệt kê các lĩnh vực thuận lợi và thách thức theo TÊN LĨNH VỰC (không dùng số nhà). Chỉ đề cập thuận lợi và thách thức, KHÔNG liệt kê các lĩnh vực ổn định. KHÔNG có [KTLUẬN] ở phần này.
+Phần 1, Tổng Quan Năng Lượng Của Năm: Viết ngắn gọn. Câu đầu tiên: nêu kết luận tổng quan về năm (thuận lợi / ổn định / thách thức) từ dữ liệu. KHÔNG viết hoa toàn bộ (không THUẬN LỢI, THÁCH THỨC), cứ viết bình thường. Sau đó viết 1 đoạn văn ngắn mô tả bức tranh chung năm nay. Tiếp theo liệt kê lĩnh vực thuận lợi và thách thức theo TÊN LĨNH VỰC (không dùng số nhà) dưới dạng danh sách gạch đầu dòng "- ". Dòng dẫn nhập danh sách viết chữ thường bình thường (ví dụ: "Những lĩnh vực thuận lợi trong giai đoạn này"), KHÔNG viết hoa toàn bộ, KHÔNG kết thúc bằng dấu hai chấm. Chỉ đề cập thuận lợi và thách thức, KHÔNG liệt kê các lĩnh vực ổn định. KHÔNG đếm số lĩnh vực cụ thể (không viết "4 lĩnh vực", "3 lĩnh vực"), chỉ dùng "những lĩnh vực" (khi nhiều hơn 1) hoặc "lĩnh vực" (khi chỉ có 1). KHÔNG có [KTLUẬN] ở phần này.
 
 Phần 2, Công Việc – Sự Nghiệp: Hai tiểu mục "Sự nghiệp – danh tiếng:" và "Hiệu suất công việc:". Mỗi tiểu mục: mở đầu 2-3 câu từ KB → phân tích từng yếu tố (cấu trúc 3 điểm) → [KTLUẬN] riêng.
 
@@ -115,11 +115,6 @@ Phần 7, Thông điệp dành cho bạn trong giai đoạn này: KHÔNG có [KT
 Độ dài: 4000-6000 chữ. Tone: người bạn đang ngồi chia sẻ và soi sáng, ấm áp, đồng cảm, cụ thể, gần gũi.
 
 ===================================================================
-
-Kết thúc bài bằng:
-Chúc bạn {full_name} một giai đoạn vận hạn nhiều ý nghĩa và bình an.
-Trân trọng,
-Hạt Giống Chiêm Tinh
 
 ===================================================================
 CẤU TRÚC BÀI LUẬN 7 PHẦN:
@@ -139,7 +134,19 @@ Việc nhìn trước những xu hướng năng lượng của một năm không
 Phần tiếp theo của bản luận giải sẽ đi sâu hơn vào từng lĩnh vực trong cuộc sống của bạn, để bạn có thể nhìn mọi thứ rõ ràng hơn nhẹ lòng hơn, tự tin hơn, bình an hơn.
 
 1. Tổng Quan Năng Lượng Của Năm
-[8-10 câu: Câu đầu nêu kết luận tổng quan (THUẬN LỢI/ỔN ĐỊNH/THÁCH THỨC). Liệt kê lĩnh vực thuận lợi và thách thức theo TÊN (không dùng số nhà). Không đề cập lĩnh vực ổn định. Không có [KTLUẬN].]
+[Câu đầu nêu kết luận tổng quan (viết thường: thuận lợi/ổn định/thách thức, KHÔNG viết hoa toàn bộ). 1 đoạn văn ngắn mô tả bức tranh chung.
+
+Những lĩnh vực thuận lợi trong giai đoạn này
+- [Tên lĩnh vực 1]
+- [Tên lĩnh vực 2]
+...
+
+Những lĩnh vực cần lưu ý
+- [Tên lĩnh vực 1]
+- [Tên lĩnh vực 2]
+...
+
+1 đoạn văn kết tổng quan. Không đề cập lĩnh vực ổn định. Không có [KTLUẬN]. Không đếm số lĩnh vực cụ thể.]
 
 2. Công Việc – Sự Nghiệp
 
@@ -209,5 +216,11 @@ Nên tập trung vào:
 [Mỗi lĩnh vực thách thức (theo thứ tự đã cho): viết 2-3 câu theo TÊN LĨNH VỰC, trấn an + gợi ý cách tiếp cận. Giọng nhẹ nhàng.]
 
 Cảm ơn bạn đã tin tưởng Hạt Giống Chiêm Tinh.
+
 Mong rằng bản luận giải này, cũng như những góc nhìn từ chiêm tinh sẽ giúp bạn hiểu mình rõ hơn, nhẹ lòng hơn trước những điều đang diễn ra và tự tin bước tiếp trên con đường của mình.
+
 Chúc bạn luôn tìm thấy sự bình an và đúng hướng trên hành trình cuộc đời.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh

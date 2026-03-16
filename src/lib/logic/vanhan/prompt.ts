@@ -523,7 +523,9 @@ function formatTongQuan(houseScores: HouseScore[], vkb?: VanhanKB): string {
     : 'THUẬN LỢI'
 
   lines.push(`Kết luận tổng quan: ${yearConclusion}`)
-  lines.push(`Thuận lợi (${timDo.length} lĩnh vực), Thách thức (${timDen.length} lĩnh vực).`)
+  const thuanLoiLabel = timDo.length > 1 ? 'những lĩnh vực' : 'lĩnh vực'
+  const thachThucLabel = timDen.length > 1 ? 'những lĩnh vực' : 'lĩnh vực'
+  lines.push(`Thuận lợi (${thuanLoiLabel} thuận lợi), Thách thức (${thachThucLabel} thách thức).`)
   lines.push('')
 
   if (timDo.length > 0) {

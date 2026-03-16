@@ -137,7 +137,7 @@ export function cleanForPdf(text: string): string {
 
 const VN_CONJUNCTIONS = new Set(['và','với','của','về','trong','cho','hay','hoặc','là','nhưng','từ','đến','tới','ra','vào','lên','xuống','qua','lại','cùng','theo'])
 const PROSE_STARTERS = ['Anh ','Chị ','Bạn ','Với ','Khi ','Để ','Việc ','Điều ','Đây ','Đó ','Như ','Nếu ','Tuy ','Dù ','Mặc ','Vì ','Do ','Bởi ','Qua ','Sau ','Trước ']
-const SIGN_KEYS = ['Trân trọng','Claude –','Claude -','Chúc ','— Claude','– Claude','Hạt Giống Chiêm Tinh']
+const SIGN_KEYS = ['Trân trọng','Claude –','Claude -','Chúc ','— Claude','– Claude','Hạt Giống Chiêm Tinh','Cảm ơn bạn đã tin tưởng','Mong rằng bản luận giải']
 
 function isVnTitleHeading(s: string): boolean {
   if (s.length > 80 || /[.,:;!?]$/.test(s)) return false
@@ -162,15 +162,7 @@ function classifyLine(line: string): string {
   if (s.startsWith('- ') && s.length > 2) return 'dash_bullet'
   if (/^\d+\.\s+\S/.test(s) && s.length < 120) return 'section_heading'
   if (s.toLowerCase().startsWith('kính gửi')) return 'opener'
-  if (SIGN_KEYS.some(k => s.startsWith(k))) {
-    // "Chúc bạn [lowercase]..." is body (thank-you content), not a sign-off
-    // "Chúc bạn [Uppercase Name]..." is signature (ending line)
-    if (/^Chúc bạn [a-zàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(s)) {
-      // fall through — not signature
-    } else {
-      return 'signature'
-    }
-  }
+  if (SIGN_KEYS.some(k => s.startsWith(k))) return 'signature'
   if (s.endsWith(':') && s.length < 90) return 'subheading'
   if (isVnTitleHeading(s)) return 'title_heading'
   return 'body'
@@ -318,7 +310,7 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 .body { text-align: justify; margin: 2pt 0 5pt; }
 .bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; }
 .bullet-indent { font-family: 'NunitoItalic'; font-size: 13.5pt; color: #dc2626; margin: 1pt 0 2pt; padding-left: 28pt; text-indent: -12pt; }
-.dash-bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; }
+.dash-bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; font-style: italic; }
 .signature { font-family: 'NunitoItalic'; font-size: 11pt; color: #6b7280; margin: 8pt 0 3pt; }
 .spacer { height: 4pt; }
 .red-box { font-family: 'MontserratBold'; font-size: 16.5pt; border: 1.5pt solid #dc2626; background: #fff5f5; padding: 8pt 10pt; margin: 6pt 0 8pt; text-align: justify; page-break-inside: avoid; break-inside: avoid; }
