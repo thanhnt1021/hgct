@@ -264,6 +264,7 @@ export async function processReport(
     sectionTitle,
     profile,
     profileB: coverProfileB,
+    service,
   })
 
   // Step 6: Save PDF

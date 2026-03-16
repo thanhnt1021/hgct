@@ -172,11 +172,14 @@ function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
+const VANHAN_IMGS_DIR = '/root/hgct/imgs'
+
 interface PdfOptions {
   coverTitle: string
   sectionTitle: string
   profile: { name: string; dob: { day: string; month: string; year: string }; tob?: string }
   profileB?: { name: string; dob: { day: string; month: string; year: string }; tob?: string }
+  service?: string
 }
 
 function buildFontFaces(): string {
@@ -337,6 +340,54 @@ ${contentHtml}
 </body></html>`
 }
 
+async function imageFileToPdf(imagePath: string): Promise<Buffer> {
+  const { PDFDocument } = await import('pdf-lib')
+  const imgBytes = fs.readFileSync(imagePath)
+  const pdfDoc = await PDFDocument.create()
+  const img = await pdfDoc.embedJpg(imgBytes)
+  // A4 in points (72dpi): 595.28 × 841.89
+  const page = pdfDoc.addPage([595.28, 841.89])
+  page.drawImage(img, { x: 0, y: 0, width: 595.28, height: 841.89 })
+  return Buffer.from(await pdfDoc.save())
+}
+
+/**
+ * Vanhan PDF assembly:
+ * cover (01) + each content page with bg-02 overlaid under text + end (03)
+ */
+async function buildVanhanPdf(contentPdfBuffer: Buffer): Promise<Buffer> {
+  const { PDFDocument } = await import('pdf-lib')
+  const W = 595.28, H = 841.89  // A4 in points
+
+  const coverBuf = await imageFileToPdf(`${VANHAN_IMGS_DIR}/pdf-VanHan-01.jpg`)
+  const endBuf   = await imageFileToPdf(`${VANHAN_IMGS_DIR}/pdf-VanHan-03.jpg`)
+  const bgImgBytes = fs.readFileSync(`${VANHAN_IMGS_DIR}/pdf-VanHan-02.jpg`)
+
+  const finalDoc = await PDFDocument.create()
+
+  // ── Page 1: cover ─────────────────────────────────────────────────────────
+  const coverDoc = await PDFDocument.load(coverBuf)
+  const [coverPage] = await finalDoc.copyPages(coverDoc, [0])
+  finalDoc.addPage(coverPage)
+
+  // ── Content pages: bg-02 under each content page ──────────────────────────
+  const bgImg = await finalDoc.embedJpg(bgImgBytes)
+  const contentDoc = await PDFDocument.load(contentPdfBuffer)
+  const embeddedContent = await finalDoc.embedPdf(contentPdfBuffer, contentDoc.getPageIndices())
+  for (const embedded of embeddedContent) {
+    const p = finalDoc.addPage([W, H])
+    p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })
+    p.drawPage(embedded, { x: 0, y: 0, width: W, height: H })
+  }
+
+  // ── Last page: end ─────────────────────────────────────────────────────────
+  const endDoc = await PDFDocument.load(endBuf)
+  const [endPage] = await finalDoc.copyPages(endDoc, [0])
+  finalDoc.addPage(endPage)
+
+  return Buffer.from(await finalDoc.save())
+}
+
 // Footer template for Puppeteer's native displayHeaderFooter.
 // Renders INSIDE the bottom margin area — never overlaps with page content.
 const FOOTER_TEMPLATE = `<div style="
@@ -351,6 +402,8 @@ const FOOTER_TEMPLATE = `<div style="
 
 export async function generatePdf(essayText: string, options: PdfOptions): Promise<Buffer | null> {
   try {
+    const isVanhan = options.service === 'vanhan' || options.service === 'transit'
+
     const chromium = await import('@sparticuz/chromium')
     const puppeteer = await import('puppeteer-core')
     const execPath = await chromium.default.executablePath()
@@ -719,7 +772,7 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       })
     })
 
-    const pdfBuffer = await page.pdf({
+    const contentPdf = await page.pdf({
       format: 'A4',
       printBackground: true,
       // Fix 2: Use Puppeteer native footer — renders inside bottom margin, never overlaps content.
@@ -729,7 +782,12 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       margin: { top: '25mm', right: '20mm', bottom: '20mm', left: '20mm' },
     })
     await browser.close()
-    return Buffer.from(pdfBuffer)
+
+    if (isVanhan) {
+      return await buildVanhanPdf(Buffer.from(contentPdf))
+    }
+
+    return Buffer.from(contentPdf)
   } catch (e) {
     console.error('[PDF ERROR]', e)
     return null
