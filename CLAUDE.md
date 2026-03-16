@@ -162,6 +162,7 @@ src/
 - [x] Đổi mật khẩu — `/api/user/password` POST + UI trong /profile
 - [x] Forgot password — full flow: token DB + email link + `/auth/reset-password` page
 - [x] Lưu Order vào DB — `orders` table ghi khi tạo báo cáo (pending → completed)
+- [x] **SePay payment integration** — free user thanh toán QR chuyển khoản per-order; `processReport` extracted ra `src/lib/astrology/reportProcessor.ts`; webhook tự động tạo report sau khi nhận tiền; polling frontend 3s; countdown 15 phút; QR từ `qr.sepay.vn`
 - [x] PDF cải thiện — tăng font size, footer native puppeteer, orphan/widow control, fix blank page
 - [x] Auto-timeout stuck jobs — sweep 15 phút khi restart + `markStuckIfNeeded` khi poll; nút Hủy báo cáo trên `/processing`
 - [x] OpenRouter retry — ECONNRESET/terminated tự retry 3 lần; `StreamInterruptedError` khi stream kết thúc không có `[DONE]`
@@ -176,7 +177,7 @@ src/
 - [x] Dash bullet line break fix — inline `- ` list items bị dồn thành paragraph → tách thành dòng riêng: `splitInlineDashBullets()` pre-processing + `dash_bullet` classifyLine type + CSS `.dash-bullet` + prompt rules (vanhan/love/career) yêu cầu mỗi `- ` item xuống dòng riêng
 
 ## What's TODO
-- [ ] **Payment integration** — `/api/payment/confirm` là placeholder; cần tích hợp SePay / PayOS hoặc xác minh chuyển khoản thật
+- [ ] Đặt giá thật cho từng dịch vụ trong `src/app/api/payment/create-order/route.ts` (hiện tại đang để 2222đ để test)
 
 ## Known Fixes Applied
 - `siderealTime` → `siderialTime` (swisseph library typo)

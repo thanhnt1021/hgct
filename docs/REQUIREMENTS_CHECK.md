@@ -99,6 +99,12 @@ CRON_SECRET=                     # secret cho /api/cron/cleanup — tạo: opens
 
 # Security
 PROFILE_ENCRYPTION_KEY=          # AES-256-GCM key (64 hex chars) — tạo: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+# SePay Payment (tích hợp thanh toán QR chuyển khoản)
+SEPAY_API_KEY=                   # API Key tự tạo, điền cùng giá trị vào SePay Dashboard → Webhook → Chứng thực API Key
+BANK_ACCOUNT_NUMBER=             # Số tài khoản ngân hàng đã liên kết trên SePay
+BANK_ACCOUNT_NAME=               # Tên chủ tài khoản (viết hoa, đúng như ngân hàng)
+BANK_NAME=                       # Tên ngân hàng đúng format SePay (vd: TPBank, MBBank, Vietcombank, ACB...)
 ```
 
 Sau khi tạo `.env.local`, copy vào standalone:

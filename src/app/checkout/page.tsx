@@ -39,7 +39,7 @@ const labelStyle: React.CSSProperties = {
   fontSize: '0.62rem',
   fontWeight: 700,
   letterSpacing: '0.06em',
-  
+
 }
 
 export default function CheckoutPage() {
@@ -96,10 +96,49 @@ export default function CheckoutPage() {
   const displayName = service === 'synastry' && nameB ? `${nameA} & ${nameB}` : nameA
   const eta = SERVICE_ETA[service] || '5–8'
 
-  const handlePayment = () => {
+  // Free user: create order then go to payment page
+  const handlePayment = async () => {
     if (!email.trim()) { alert('Vui lòng nhập email để nhận báo cáo'); return }
-    sessionStorage.setItem('paymentEmail', email.trim())
-    router.push('/payment')
+    setLoading(true)
+    try {
+      const res = await fetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service,
+          inputData,
+          email: email.trim(),
+          ...(inputDataB ? { inputDataB } : {}),
+          ...(profileUidA ? { profileUidA } : {}),
+          ...(profileUidB ? { profileUidB } : {}),
+          ...(service === 'transit' && transitStartDate && transitEndDate
+            ? { startDate: transitStartDate, endDate: transitEndDate }
+            : {}),
+        }),
+      })
+      const result = await res.json()
+      if (res.ok && result.orderId) {
+        sessionStorage.setItem('paymentOrderId', String(result.orderId))
+        sessionStorage.setItem('paymentEmail', email.trim())
+        const params = new URLSearchParams({
+          orderId: String(result.orderId),
+          transferCode: result.transferCode,
+          amount: String(result.amount),
+          bankAccount: result.bankAccount,
+          bankName: result.bankName,
+          bankAccountName: result.bankAccountName,
+          service,
+          name: displayName,
+        })
+        router.push(`/payment?${params.toString()}`)
+      } else {
+        alert(result.error || 'Có lỗi khi tạo đơn hàng')
+        setLoading(false)
+      }
+    } catch {
+      alert('Lỗi kết nối server')
+      setLoading(false)
+    }
   }
 
   const handleConfirm = async () => {
@@ -217,7 +256,7 @@ export default function CheckoutPage() {
               { label: 'Thời gian tạo', value: `~ ${eta} phút`, valueColor: '#d9ab55' },
             ].map(row => (
               <div key={row.label} className="flex justify-between items-baseline">
-                <span style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.04em',  }}>
+                <span style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.04em' }}>
                   {row.label}
                 </span>
                 <span style={{ color: row.valueColor, fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
@@ -250,34 +289,7 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* Payment placeholder */}
-          <div
-            className="rounded-xl p-5 mb-8"
-            style={{
-              background: 'rgba(6,6,15,0.6)',
-              border: '1px solid rgba(200,148,63,0.1)',
-            }}
-          >
-            <p
-              style={{
-                color: '#4a4560',
-                fontFamily: 'var(--font-vietnam)',
-                fontSize: '0.6rem',
-                letterSpacing: '0.06em',
-                
-                marginBottom: '0.85rem',
-              }}
-            >
-              Thanh toán
-            </p>
-            <div className="space-y-1.5" style={{ fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
-              <p style={{ color: '#4a4560' }}>Ngân hàng: <span style={{ color: '#c9c3d6' }}>MB Bank</span></p>
-              <p style={{ color: '#4a4560' }}>Số TK: <span style={{ color: '#c9c3d6' }}>xxxx xxxx xxxx</span></p>
-              <p style={{ color: '#4a4560' }}>Chủ TK: <span style={{ color: '#c9c3d6' }}>HAT GIONG CHIEM TINH</span></p>
-            </div>
-          </div>
-
-          {/* CTA: Premium/Lifetime → create report directly; Free/Guest → go to payment */}
+          {/* CTA: Premium/Lifetime → create report directly; Free/Guest → create order + go to payment */}
           {isPremiumOrLifetime ? (
             <>
               <button
@@ -296,7 +308,7 @@ export default function CheckoutPage() {
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
-                Tạo báo cáo & Gửi Email
+                Tạo báo cáo &amp; Gửi Email
               </button>
               <p style={{ color: '#4a4560', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
                 Báo cáo PDF sẽ được gửi đến email trong {eta} phút
@@ -320,7 +332,7 @@ export default function CheckoutPage() {
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
-                Sẵn sàng THANH TOÁN →
+                Tiến hành thanh toán →
               </button>
               <p style={{ color: '#4a4560', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
                 Hoàn tất thanh toán để nhận báo cáo PDF qua email
