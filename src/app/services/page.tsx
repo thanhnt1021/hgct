@@ -237,7 +237,7 @@ export default function ServicesPage() {
         }
       })
       .catch(() => setProfiles([]))
-  }, [])
+  }, [user?.uid])
 
   // Set default transit dates khi chọn dịch vụ Vận Hạn
   useEffect(() => {

@@ -1,6 +1,7 @@
 'use client'
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { Menu, X } from 'lucide-react'
 
@@ -32,7 +33,7 @@ const TABS = [
 type TabId = typeof TABS[number]['id']
 
 function ProfileContent() {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading, logout } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const urlTab = (searchParams.get('tab') || 'info') as TabId
@@ -127,6 +128,55 @@ function ProfileContent() {
           </button>
         ))}
       </nav>
+
+      {/* Link to services */}
+      <div className="px-3 mt-3">
+        <div className="mx-1 mb-3" style={{ height: 1, background: 'rgba(201,168,76,0.06)' }} />
+        <Link
+          href="/services"
+          className="w-full flex items-center gap-3 rounded-xl text-sm"
+          style={{
+            color: '#6b7280',
+            padding: '0.625rem 0.75rem',
+            fontFamily: 'var(--font-vietnam)',
+            minHeight: 44,
+            transition: 'color 0.15s, background 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#d9ab55'; e.currentTarget.style.background = 'rgba(201,168,76,0.07)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#6b7280'; e.currentTarget.style.background = 'transparent' }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          Đặt báo cáo
+        </Link>
+      </div>
+
+      {/* Spacer + Logout */}
+      <div className="flex-1" />
+      <div className="px-3 pb-5">
+        <div className="mx-1 mb-3" style={{ height: 1, background: 'rgba(201,168,76,0.06)' }} />
+        <button
+          onClick={() => { logout(); router.push('/') }}
+          className="w-full flex items-center gap-3 rounded-xl text-sm"
+          style={{
+            background: 'transparent',
+            color: '#6b7280',
+            padding: '0.625rem 0.75rem',
+            fontFamily: 'var(--font-vietnam)',
+            textAlign: 'left',
+            minHeight: 44,
+            transition: 'color 0.15s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#c45252')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Đăng xuất
+        </button>
+      </div>
     </>
   )
 
