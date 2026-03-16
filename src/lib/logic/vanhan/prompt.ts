@@ -39,7 +39,7 @@ const TRANSIT_POINTS: Record<string, number> = {
 }
 
 const ASPECT_VN: Record<string, string> = {
-  Conjunction: 'Hội Tụ (0°)',
+  Conjunction: 'Trùng (0°)',
   Sextile: 'Lục Hợp (60°)',
   Square: 'Vuông Góc (90°)',
   Trine: 'Tam Hợp (120°)',
@@ -145,6 +145,51 @@ function mergeRetrogradePeriods(periods: HouseTransitPeriod[]): HouseTransitPeri
   }
   merged.push(current)
   return merged
+}
+
+// ─── KB parsing ─────────────────────────────────────────────────
+
+interface VanhanKB {
+  planetDescriptions: Record<number, Record<string, string>>
+  areaDescriptions: Record<number, Record<string, string>>
+  generalSummary: string
+}
+
+const KB_PLANET_COLS: Record<string, number> = {
+  Jupiter: 6, Saturn: 9, Uranus: 12, Neptune: 15, Pluto: 18,
+}
+const KB_AREA_COLS: Record<string, number> = {
+  'THUẬN LỢI': 21, 'ỔN ĐỊNH': 22, 'THÁCH THỨC': 23,
+}
+
+function parseVanhanKB(kb: Record<string, unknown[][]>): VanhanKB {
+  const tab = kb['Tool Vận Hạn'] || []
+  const planetDescriptions: Record<number, Record<string, string>> = {}
+  const areaDescriptions: Record<number, Record<string, string>> = {}
+  let generalSummary = ''
+
+  for (let i = 1; i <= 12; i++) {
+    const row = tab[i] as string[] | undefined
+    if (!row) continue
+
+    planetDescriptions[i] = {}
+    for (const [planet, col] of Object.entries(KB_PLANET_COLS)) {
+      const desc = String(row[col] || '').trim()
+      if (desc) planetDescriptions[i][planet] = desc
+    }
+
+    areaDescriptions[i] = {}
+    for (const [area, col] of Object.entries(KB_AREA_COLS)) {
+      const desc = String(row[col] || '').trim()
+      if (desc) areaDescriptions[i][area] = desc
+    }
+
+    if (i === 1) {
+      generalSummary = String(row[3] || '').trim()
+    }
+  }
+
+  return { planetDescriptions, areaDescriptions, generalSummary }
 }
 
 // ─── Core: Scan all transits and compute house scores ────────────
@@ -283,7 +328,7 @@ function computeHouseScores(
 
 // ─── Format house block for prompt ───────────────────────────────
 
-function formatHouseBlock(hs: HouseScore): string {
+function formatHouseBlock(hs: HouseScore, vkb?: VanhanKB): string {
   const lines: string[] = []
   const theme = HOUSE_THEMES[hs.house] || ''
   const classLabel =
@@ -291,6 +336,14 @@ function formatHouseBlock(hs: HouseScore): string {
     hs.classification === 'TIM_DEN' ? 'THÁCH THỨC' : 'ỔN ĐỊNH'
 
   lines.push(`\n--- Nhà ${hs.house} (${theme}) /${classLabel} (điểm: ${hs.score}) ---`)
+
+  // KB area description for this house's classification
+  if (vkb) {
+    const areaDesc = vkb.areaDescriptions[hs.house]?.[classLabel]
+    if (areaDesc) {
+      lines.push(`[Tham khảo KB - Nhà ${hs.house} khi ${classLabel}]: ${areaDesc}`)
+    }
+  }
 
   // Transits through this house
   if (hs.transits.length > 0) {
@@ -300,6 +353,13 @@ function formatHouseBlock(hs: HouseScore): string {
         `* ${t.planetVn} (${PLANET_SYMBOLS[t.planet] || ''}) Transit qua Nhà ${hs.house} ` +
         `từ ${formatDate(t.startDate)} đến ${formatDate(t.endDate)}${retro}`
       )
+      // KB planet transit description
+      if (vkb) {
+        const planetDesc = vkb.planetDescriptions[hs.house]?.[t.planet]
+        if (planetDesc) {
+          lines.push(`  [Tham khảo KB - ${t.planetVn} vào Nhà ${hs.house}]: ${planetDesc}`)
+        }
+      }
     }
   }
 
@@ -352,6 +412,7 @@ function formatSectionData(
   sectionName: string,
   houseScores: HouseScore[],
   relevantHouses: number[],
+  vkb?: VanhanKB,
 ): string {
   const lines: string[] = []
 
@@ -367,7 +428,7 @@ function formatSectionData(
   }
 
   for (const hs of activeHouses) {
-    lines.push(formatHouseBlock(hs))
+    lines.push(formatHouseBlock(hs, vkb))
   }
 
   return lines.join('\n')
@@ -375,8 +436,14 @@ function formatSectionData(
 
 // ─── Tong Quan section (overview) ────────────────────────────────
 
-function formatTongQuan(houseScores: HouseScore[]): string {
+function formatTongQuan(houseScores: HouseScore[], vkb?: VanhanKB): string {
   const lines: string[] = []
+
+  // KB general summary
+  if (vkb?.generalSummary) {
+    lines.push(`[Tham khảo KB - Tổng kết vận chung]: ${vkb.generalSummary}`)
+    lines.push('')
+  }
 
   const timDo = houseScores.filter(h => h.classification === 'TIM_DO')
     .sort((a, b) => b.score - a.score)
@@ -391,6 +458,10 @@ function formatTongQuan(houseScores: HouseScore[]): string {
     lines.push('CÁC NHÀ THUẬN LỢI (ưu tiên):')
     for (const hs of timDo.slice(0, 4)) {
       lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
+      if (vkb) {
+        const desc = vkb.areaDescriptions[hs.house]?.['THUẬN LỢI']
+        if (desc) lines.push(`    [KB]: ${desc}`)
+      }
     }
   }
 
@@ -398,6 +469,10 @@ function formatTongQuan(houseScores: HouseScore[]): string {
     lines.push('\nCÁC NHÀ THÁCH THỨC (cần lưu ý):')
     for (const hs of timDen.slice(0, 4)) {
       lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
+      if (vkb) {
+        const desc = vkb.areaDescriptions[hs.house]?.['THÁCH THỨC']
+        if (desc) lines.push(`    [KB]: ${desc}`)
+      }
     }
   }
 
@@ -440,6 +515,7 @@ export function buildVanhanEssayPrompt(
   startDate: string,
   endDate: string,
   profile: Profile & { fullName?: string; onlyName?: string },
+  kb?: Record<string, unknown[][]>,
 ): string {
   const fullName = profile.fullName || profile.name || ''
   const name = profile.onlyName || profile.name || ''
@@ -448,6 +524,9 @@ export function buildVanhanEssayPrompt(
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
   const startStr = formatDate(startDate)
   const endStr = formatDate(endDate)
+
+  // Parse vanhan KB data
+  const vkb = kb ? parseVanhanKB(kb) : undefined
 
   // Compute all house scores
   const houseScores = computeHouseScores(natalChart, startDate, endDate)
@@ -464,13 +543,13 @@ export function buildVanhanEssayPrompt(
 
   // Section 1: Tổng quan
   dataLines.push('=== PHẦN 1: TỔNG QUAN NĂNG LƯỢNG CỦA NĂM ===')
-  dataLines.push(formatTongQuan(houseScores))
+  dataLines.push(formatTongQuan(houseScores, vkb))
   dataLines.push('')
 
   // All house details for overview
   for (const hs of houseScores) {
     if (hs.transits.length > 0 || hs.softAspects.length > 0 || hs.hardAspects.length > 0) {
-      dataLines.push(formatHouseBlock(hs))
+      dataLines.push(formatHouseBlock(hs, vkb))
     }
   }
   dataLines.push('')
@@ -479,47 +558,47 @@ export function buildVanhanEssayPrompt(
   dataLines.push('=== PHẦN 2: CÔNG VIỆC – SỰ NGHIỆP ===')
   dataLines.push('')
   dataLines.push('Sự nghiệp – danh tiếng (Nhà 10):')
-  dataLines.push(formatSectionData('su_nghiep', houseScores, [10]))
+  dataLines.push(formatSectionData('su_nghiep', houseScores, [10], vkb))
   dataLines.push('')
   dataLines.push('Hiệu suất công việc (Nhà 6):')
-  dataLines.push(formatSectionData('hieu_suat', houseScores, [6]))
+  dataLines.push(formatSectionData('hieu_suat', houseScores, [6], vkb))
   dataLines.push('')
 
   // Section 3: Tài chính
   dataLines.push('=== PHẦN 3: TÀI CHÍNH – ĐẦU TƯ ===')
   dataLines.push('')
   dataLines.push('Tiền tự kiếm (Nhà 2):')
-  dataLines.push(formatSectionData('tien', houseScores, [2]))
+  dataLines.push(formatSectionData('tien', houseScores, [2], vkb))
   dataLines.push('')
   dataLines.push('Đầu tư – kinh doanh (Nhà 8, 11):')
-  dataLines.push(formatSectionData('dau_tu', houseScores, [8, 11]))
+  dataLines.push(formatSectionData('dau_tu', houseScores, [8, 11], vkb))
   dataLines.push('')
 
   // Section 4: Tình yêu
   dataLines.push('=== PHẦN 4: TÌNH YÊU – HÔN NHÂN ===')
   dataLines.push('')
   dataLines.push('Tình yêu – chưa kết hôn (Nhà 5):')
-  dataLines.push(formatSectionData('tinh_yeu', houseScores, [5]))
+  dataLines.push(formatSectionData('tinh_yeu', houseScores, [5], vkb))
   dataLines.push('')
   dataLines.push('Hôn nhân – đã kết hôn (Nhà 7):')
-  dataLines.push(formatSectionData('hon_nhan', houseScores, [7]))
+  dataLines.push(formatSectionData('hon_nhan', houseScores, [7], vkb))
   dataLines.push('')
 
   // Section 5: Gia đình
   dataLines.push('=== PHẦN 5: GIA ĐÌNH – NHÀ CỬA ===')
   dataLines.push('')
   dataLines.push('Gia đình và nhà cửa (Nhà 4, 3):')
-  dataLines.push(formatSectionData('gia_dinh', houseScores, [4, 3]))
+  dataLines.push(formatSectionData('gia_dinh', houseScores, [4, 3], vkb))
   dataLines.push('')
 
   // Section 6: Sức khỏe
   dataLines.push('=== PHẦN 6: SỨC KHỎE ===')
   dataLines.push('')
   dataLines.push('Sức khỏe thể chất (Nhà 6, 1):')
-  dataLines.push(formatSectionData('the_chat', houseScores, [6, 1]))
+  dataLines.push(formatSectionData('the_chat', houseScores, [6, 1], vkb))
   dataLines.push('')
   dataLines.push('Sức khỏe tinh thần (Nhà 8, 12):')
-  dataLines.push(formatSectionData('tinh_than', houseScores, [8, 12]))
+  dataLines.push(formatSectionData('tinh_than', houseScores, [8, 12], vkb))
   dataLines.push('')
 
   // Section 7: Tổng kết

@@ -175,6 +175,7 @@ src/
 - [x] PDF subheading widow fix — XUNG ĐỘT/HÒA HỢP: detect h2.section → move h2 (không phải subheading); `spaceNeededFor()` dùng `offsetHeight` cho red-box/mini-box (page-break-inside:avoid)
 - [x] Em dash (—) fix — Love/Synastry/Vanhan output sạch không còn dấu gạch dài: xóa ` — ` trong prompt templates (love.txt, relationship.txt, vanhan.txt) + data brief labels trong love/prompt.ts và relationship/prompt.ts
 - [x] Dash bullet line break fix — inline `- ` list items bị dồn thành paragraph → tách thành dòng riêng: `splitInlineDashBullets()` pre-processing + `dash_bullet` classifyLine type + CSS `.dash-bullet` + prompt rules (vanhan/love/career) yêu cầu mỗi `- ` item xuống dòng riêng
+- [x] Vanhan KB integration — inject KB data từ tab "Tool Vận Hạn" vào prompt: area descriptions (THUẬN LỢI/ỔN ĐỊNH/THÁCH THỨC) per house, planet transit descriptions (Jupiter/Saturn/Uranus/Neptune/Pluto) per house, general summary; fix "Hội Tụ" → "Trùng" cho Conjunction; thêm rule 5 major aspects only + KB usage rule trong vanhan.txt
 
 ## What's TODO
 - [ ] Đặt giá thật cho từng dịch vụ trong `src/app/api/payment/create-order/route.ts` (hiện tại đang để 2222đ để test)

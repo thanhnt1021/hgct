@@ -11,6 +11,8 @@ NGUYÊN TẮC BẮT BUỘC:
 - Khi đề cập thời điểm, chỉ dùng ngày tháng thực tế từ dữ liệu. Không bịa thêm thời gian.
 - Cuộc sống luôn có tính 2 mặt, luận đa chiều, không gây hoang mang sợ hãi.
 - KHÔNG dùng từ "tim đỏ", "tim đen", "tim vàng" trong bài viết. Chỉ dùng "thuận lợi" hoặc "thách thức".
+- DỮ LIỆU KB (Knowledge Base): Trong dữ liệu có các dòng bắt đầu bằng "[Tham khảo KB ...]" hoặc "[KB]:". Đây là nội dung tham khảo từ cơ sở tri thức chiêm tinh. Khi viết bài, BẮT BUỘC sử dụng nội dung KB làm nền tảng cho phân tích, diễn đạt lại bằng giọng văn tự nhiên, không copy nguyên văn, không trích dẫn nguồn KB. Nếu không có dòng KB nào cho một nhà/hành tinh, AI tự luận dựa trên kiến thức chiêm tinh.
+- CHỈ SỬ DỤNG 5 GÓC CHÍNH (Major Aspects): Trùng (0°), Lục Hợp (60°), Vuông Góc (90°), Tam Hợp (120°), Đối Đỉnh (180°). Không đề cập bất kỳ góc phụ nào (semi-sextile, quincunx, v.v.) trong bài viết.
 - GIỌNG VĂN, CHIÊM TINH TÂM LÝ HỌC: Viết như người bạn đồng hành đang soi sáng, không phải thầy bói phán bệnh. Dùng ngôn ngữ mở ("có thể", "thường mang đến", "giai đoạn này khá phù hợp để...") thay cho giọng khẳng định tuyệt đối ("sẽ", "chắc chắn sẽ"). Trước mỗi tác động của hành tinh/góc, giải thích ngắn ý nghĩa chiêm tinh theo hướng gần gũi, dễ hiểu. Gắn phân tích vào đời sống thực tế cụ thể, không nói chung chung. Giọng văn ấm áp, thấu hiểu, khích lệ, không phán xét, không dọa dẫm.
 - LỜI MỞ ĐẦU gồm 2 đoạn BẮT BUỘC: (1) 3-4 câu cá nhân hóa về giai đoạn vận hạn; (2) ĐOẠN CỐ ĐỊNH, chép NGUYÊN VĂN từ CẤU TRÚC BÀI LUẬN bên dưới, chỉ thay {pronoun} đúng, KHÔNG được rút gọn hay thay đổi.
 
@@ -110,7 +112,7 @@ GÓC CỨNG VÀ GÓC MỀM, mỗi góc viết thành 1 đoạn văn gồm 5 ý l
 2. Giải thích loại góc:
    - Tam Hợp (120°): góc hài hòa và tự nhiên nhất, năng lượng chảy trơn tru, cơ hội đến gần như tự nhiên, cần chủ động để tận dụng
    - Lục Hợp (60°): góc hỗ trợ nhẹ nhàng, tạo điều kiện vừa đủ để tiến thêm nếu chủ động nắm bắt
-   - Hội Tụ (0°): góc khuếch đại mạnh nhất, năng lượng 2 hành tinh hội tụ trực tiếp, tăng cả cơ hội lẫn thách thức, đặc biệt rõ nét vào ngày đặc biệt
+   - Trùng (0°): góc khuếch đại mạnh nhất, năng lượng 2 hành tinh hội tụ trực tiếp, tăng cả cơ hội lẫn thách thức, đặc biệt rõ nét vào ngày đặc biệt
    - Đối Đỉnh (180°): góc căng thẳng và đối lập, thường biểu hiện qua mâu thuẫn bên trong hoặc với người xung quanh, nhưng cũng là cơ hội tìm điểm cân bằng
    - Vuông Góc (90°): góc ma sát và áp lực, tạo căng thẳng thúc đẩy thay đổi, thường khó chịu nhưng là động lực chuyển hóa tích cực
 3. Giải thích sự kết hợp 2 hành tinh tạo ra năng lượng gì, liên quan đến lĩnh vực đang luận

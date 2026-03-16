@@ -190,7 +190,7 @@ export async function processReport(
         .toISOString()
         .split('T')[0]
     }
-    prompt = buildVanhanEssayPrompt(chart, startDate, endDate, profile)
+    prompt = buildVanhanEssayPrompt(chart, startDate, endDate, profile, kb)
     coverTitle = 'LUẬN GIẢI VẬN HẠN'
     sectionTitle = 'TỔNG HỢP LUẬN GIẢI VẬN HẠN'
   } else {
