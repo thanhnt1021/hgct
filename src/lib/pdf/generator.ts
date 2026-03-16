@@ -162,7 +162,15 @@ function classifyLine(line: string): string {
   if (s.startsWith('- ') && s.length > 2) return 'dash_bullet'
   if (/^\d+\.\s+\S/.test(s) && s.length < 120) return 'section_heading'
   if (s.toLowerCase().startsWith('kính gửi')) return 'opener'
-  if (SIGN_KEYS.some(k => s.startsWith(k))) return 'signature'
+  if (SIGN_KEYS.some(k => s.startsWith(k))) {
+    // "Chúc bạn [lowercase]..." is body (thank-you content), not a sign-off
+    // "Chúc bạn [Uppercase Name]..." is signature (ending line)
+    if (/^Chúc bạn [a-zàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(s)) {
+      // fall through — not signature
+    } else {
+      return 'signature'
+    }
+  }
   if (s.endsWith(':') && s.length < 90) return 'subheading'
   if (isVnTitleHeading(s)) return 'title_heading'
   return 'body'
@@ -212,6 +220,7 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     sigBuffer.length = 0
   }
 
+  let seenSectionHeading = false
   for (const line of lines) {
     const s = line.trim()
     if (!s) {
@@ -222,7 +231,10 @@ function buildHtml(essayText: string, options: PdfOptions): string {
       }
       continue
     }
-    const kind = classifyLine(line)
+    let kind = classifyLine(line)
+    // Intro section (before first numbered heading): no subheadings
+    if (kind === 'subheading' && !seenSectionHeading) kind = 'body'
+    if (kind === 'section_heading') seenSectionHeading = true
     const safe = escapeHtml(s)
 
     if (kind === 'signature') {

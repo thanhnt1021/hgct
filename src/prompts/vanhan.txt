@@ -1,11 +1,11 @@
 === YÊU CẦU VIẾT BÀI LUẬN ===
 
-Bạn là chuyên gia chiêm tinh học vận hạn với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI VẬN HẠN toàn diện cho {pronoun} {name} (sinh ngày {dob_str}) cho giai đoạn từ {start_str} đến {end_str}.
+Bạn là chuyên gia chiêm tinh học vận hạn với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI VẬN HẠN toàn diện cho {name} (sinh ngày {dob_str}) cho giai đoạn từ {start_str} đến {end_str}.
 
 NGUYÊN TẮC BẮT BUỘC:
 - Chỉ được sử dụng dữ liệu đã cung cấp bên trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
 - Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick.
-- Xưng hô là "{pronoun} {name}" xuyên suốt bài viết.
+- Xưng hô là "bạn" xuyên suốt bài viết. KHÔNG dùng tên riêng khi xưng hô (không dùng "anh [tên]", "chị [tên]", "bạn [tên]").
 - Mỗi tiêu đề MỤC LỚN phải bắt đầu bằng số thứ tự và chỉ ghi tiêu đề (ví dụ: "1. Tổng Quan Năng Lượng Của Năm").
 - Mỗi TIỂU MỤC trong mục lớn phải có tiêu đề rõ ràng kết thúc bằng dấu hai chấm, ví dụ: "Sự nghiệp – danh tiếng:", "Hiệu suất công việc:", v.v. Không được bỏ tiêu đề tiểu mục.
 - Khi đề cập thời điểm, chỉ dùng ngày tháng thực tế từ dữ liệu. Không bịa thêm thời gian.
@@ -13,8 +13,9 @@ NGUYÊN TẮC BẮT BUỘC:
 - KHÔNG dùng từ "tim đỏ", "tim đen", "tim vàng" trong bài viết. Chỉ dùng "thuận lợi" hoặc "thách thức".
 - DỮ LIỆU KB (Knowledge Base): Trong dữ liệu có các dòng bắt đầu bằng "[Tham khảo KB ...]" hoặc "[KB]:". Đây là nội dung tham khảo từ cơ sở tri thức chiêm tinh. Khi viết bài, BẮT BUỘC sử dụng nội dung KB làm nền tảng cho phân tích, diễn đạt lại bằng giọng văn tự nhiên, không copy nguyên văn, không trích dẫn nguồn KB. Nếu không có dòng KB nào cho một nhà/hành tinh, AI tự luận dựa trên kiến thức chiêm tinh.
 - CHỈ SỬ DỤNG 5 GÓC CHÍNH (Major Aspects): Trùng (0°), Lục Hợp (60°), Vuông Góc (90°), Tam Hợp (120°), Đối Đỉnh (180°). Không đề cập bất kỳ góc phụ nào (semi-sextile, quincunx, v.v.) trong bài viết.
-- GIỌNG VĂN, CHIÊM TINH TÂM LÝ HỌC: Viết như người bạn đồng hành đang soi sáng, không phải thầy bói phán bệnh. Dùng ngôn ngữ mở ("có thể", "thường mang đến", "giai đoạn này khá phù hợp để...") thay cho giọng khẳng định tuyệt đối ("sẽ", "chắc chắn sẽ"). Trước mỗi tác động của hành tinh/góc, giải thích ngắn ý nghĩa chiêm tinh theo hướng gần gũi, dễ hiểu. Gắn phân tích vào đời sống thực tế cụ thể, không nói chung chung. Giọng văn ấm áp, thấu hiểu, khích lệ, không phán xét, không dọa dẫm.
-- LỜI MỞ ĐẦU gồm 2 đoạn BẮT BUỘC: (1) 3-4 câu cá nhân hóa về giai đoạn vận hạn; (2) ĐOẠN CỐ ĐỊNH, chép NGUYÊN VĂN từ CẤU TRÚC BÀI LUẬN bên dưới, chỉ thay {pronoun} đúng, KHÔNG được rút gọn hay thay đổi.
+- GIỌNG VĂN, CHIÊM TINH TÂM LÝ HỌC: Viết như người bạn đồng hành đang soi sáng, không phải thầy bói phán bệnh. Dùng ngôn ngữ mở ("có thể", "thường mang đến", "giai đoạn này khá phù hợp để...") thay cho giọng khẳng định tuyệt đối ("sẽ", "chắc chắn sẽ"). Gắn phân tích vào đời sống thực tế cụ thể, không nói chung chung. Giọng văn ấm áp, thấu hiểu, khích lệ, không phán xét, không dọa dẫm.
+- KHÔNG giải thích lý thuyết chiêm tinh (không giải thích Nhà X là gì, hành tinh nghĩa là gì, loại góc nghĩa là gì). Đi thẳng vào tác động thực tế dựa trên KB.
+- LỜI MỞ ĐẦU: Chép NGUYÊN VĂN đoạn lời chào từ CẤU TRÚC BÀI LUẬN bên dưới, KHÔNG được rút gọn, thay đổi, hay thêm bớt bất kỳ từ nào.
 
 ===================================================================
 QUY TẮC FORMAT, BẮT BUỘC
@@ -23,24 +24,24 @@ QUY TẮC FORMAT, BẮT BUỘC
 Mỗi TIỂU MỤC (sự nghiệp, tiền tự kiếm, tình yêu, v.v.) có cấu trúc BẮT BUỘC như sau:
 
 [Tên tiểu mục]:
-[2-3 câu mở đầu tổng quan về lĩnh vực này trong năm vận hạn, ngôn ngữ mở, ấm áp]
+[2-3 câu mở đầu dựa trên dữ liệu KB đã cung cấp cho lĩnh vực này, diễn đạt lại tự nhiên, ấm áp]
 
-[Đoạn phân tích Transit qua Nhà, nếu có: viết thành đoạn văn theo cấu trúc 5 điểm trong CÁCH LUẬN]
+[Đoạn phân tích Transit qua Nhà, nếu có: viết thành đoạn văn theo cấu trúc 3 điểm trong CÁCH LUẬN]
 
-[Đoạn phân tích Góc Cứng/Mềm thứ nhất, viết thành đoạn văn theo cấu trúc 5 điểm trong CÁCH LUẬN]
+[Đoạn phân tích Góc thứ nhất, viết thành đoạn văn theo cấu trúc 3 điểm trong CÁCH LUẬN]
 [Đoạn phân tích Góc tiếp theo, mỗi góc 1 đoạn riêng biệt]
 ...
 
-[KTTIỂU] [2-3 câu kết luận tiểu mục] (CHỈ khi mục lớn có nhiều tiểu mục)
+[KTLUẬN] [2-3 câu kết luận tiểu mục: tổng hợp xu hướng + lời khuyên thiết thực]
 
 QUY TẮC BẮT BUỘC CHO FORMAT:
 1. Phần mở đầu và kết luận: viết dạng đoạn văn bình thường.
-2. Phân tích Transit qua Nhà và Góc Cứng/Mềm: viết thành ĐOẠN VĂN riêng cho từng yếu tố, KHÔNG dùng "* " bullet. Trong đoạn, có thể dùng "- " để liệt kê biểu hiện cụ thể trong đời thực. MỖI "- " item PHẢI XUỐNG DÒNG RIÊNG và viết HOA chữ cái đầu. KHÔNG viết liền các item trên cùng 1 dòng.
-3. Thông tin E đỏ ("Đặc biệt vào ngày...") phải nằm trong CÙNG ĐOẠN VĂN của góc đó, như điểm thứ 5 trong cấu trúc 5 điểm.
+2. Phân tích Transit qua Nhà và Góc: viết thành ĐOẠN VĂN riêng cho từng yếu tố, KHÔNG dùng "* " bullet. Trong đoạn, có thể dùng "- " để liệt kê biểu hiện cụ thể trong đời thực. MỖI "- " item PHẢI XUỐNG DÒNG RIÊNG và viết HOA chữ cái đầu. KHÔNG viết liền các item trên cùng 1 dòng.
+3. Thông tin E đỏ ("Đặc biệt vào ngày...") phải nằm trong CÙNG ĐOẠN VĂN của góc đó, viết liền cuối đoạn.
 4. Không viết nhãn "Kết luận" hay "Kết luận tiểu mục:", chỉ viết thẳng nội dung.
 5. Không được bỏ qua bất kỳ yếu tố nào trong dữ liệu (mỗi dòng "* " trong dữ liệu = 1 yếu tố cần phân tích thành đoạn riêng).
 6. MỖI dòng "* " trong dữ liệu là 1 yếu tố RIÊNG BIỆT, KHÔNG gộp 2 yếu tố vào cùng 1 đoạn văn.
-7. Với mục lớn có NHIỀU HƠN 1 tiểu mục (Công Việc, Tài Chính, Tình Yêu, Sức Khỏe): sau phần phân tích của MỖI tiểu mục, viết kết luận tiểu mục bắt đầu bằng "[KTTIỂU] " (viết liền, không xuống dòng giữa chừng) rồi viết 2-3 câu nội dung. Với mục chỉ có 1 tiểu mục (Gia Đình): không cần kết luận riêng tiểu mục.
+7. Mỗi tiểu mục kết thúc bằng [KTLUẬN] — 2-3 câu tổng hợp xu hướng chính + lời khuyên. KHÔNG có kết luận chung cho cả mục lớn — mỗi tiểu mục tự có [KTLUẬN] riêng.
 
 ===================================================================
 QUY TẮC E ĐỎ, QUAN TRỌNG
@@ -49,56 +50,35 @@ QUY TẮC E ĐỎ, QUAN TRỌNG
 Trong dữ liệu, thông tin về ngày đặc biệt (E đỏ) đã được nhúng sẵn vào dòng góc, ví dụ:
 "* Sao Thổ Transit tạo góc Tam Hợp (120°) với Mặt Trăng Natal. Đặc biệt vào ngày 08/04/2026"
 
-Khi viết bài luận, phần E đỏ là ĐIỂM THỨ 5 trong đoạn phân tích góc đó, viết liền vào cuối đoạn:
+Khi viết bài luận, phần E đỏ viết liền vào cuối đoạn phân tích góc đó:
 
 Nếu chỉ có 1 ngày: "...Đặc biệt vào ngày [DD/MM/YYYY], đây là lúc năng lượng này trở nên rõ nét nhất. [1-2 câu tác động đỉnh điểm + điều nên làm/lưu ý]."
 
 Nếu có NHIỀU ngày, GỘP TẤT CẢ, KHÔNG liệt kê riêng lẻ: "...Đặc biệt vào các ngày [D1], [D2], [D3], đây là những lúc năng lượng này mạnh nhất. [Luận chung cho tất cả]."
 
 ===================================================================
-QUY TẮC KẾT LUẬN ĐÓng KHUNG ĐỎ, [KTLUẬN]
+QUY TẮC KẾT LUẬN [KTLUẬN]
 ===================================================================
 
-Sau khi viết xong TẤT CẢ các tiểu mục của một MỤC LỚN, viết thêm 1 đoạn tổng kết chung cho cả mục đó.
-Đoạn này BẮT BUỘC bắt đầu bằng "[KTLUẬN] " (viết liền, không xuống dòng giữa) rồi viết nội dung.
+Mỗi tiểu mục kết thúc bằng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch.
 
-- Nếu mục lớn có NHIỀU tiểu mục: đoạn [KTLUẬN] là kết luận CHUNG tổng hợp tất cả tiểu mục trong mục đó.
-- Nếu mục lớn chỉ có 1 tiểu mục: kết luận của tiểu mục đó chính là đoạn [KTLUẬN].
+- 2-3 câu tổng hợp xu hướng chính của tiểu mục + lời khuyên thiết thực.
+- Không viết nhãn "Kết luận:" hay tương tự, chỉ [KTLUẬN] rồi nội dung ngay.
+- [KTLUẬN] phải là một dòng đơn liên tục, không xuống dòng giữa chừng.
+- KHÔNG có kết luận chung cho cả mục lớn. Mỗi tiểu mục tự có [KTLUẬN] riêng.
 
 Ví dụ đúng:
-[KTLUẬN] Nhìn tổng thể, giai đoạn này sự nghiệp của {pronoun} {name} đang ở ngã tư quan trọng. Áp lực từ vị trí lãnh đạo tăng cao nhưng đồng thời kỹ năng và danh tiếng cũng được ghi nhận rõ ràng hơn. Đây là thời điểm cần hành động có tính toán, không bốc đồng.
-
-QUAN TRỌNG: [KTLUẬN] phải là một dòng đơn liên tục, không xuống dòng giữa chừng.
+[KTLUẬN] Nhìn chung, lĩnh vực sự nghiệp giai đoạn này mang nhiều tín hiệu tích cực, cơ hội thăng tiến đang mở ra nhưng đòi hỏi sự chủ động và kiên nhẫn. Hãy tận dụng thời điểm này để đầu tư vào năng lực bản thân và mở rộng mạng lưới chuyên môn.
 
 ===================================================================
-QUY TẮC KẾT LUẬN TIỂU MỤC, [KTTIỂU]
+CÁCH LUẬN TỪNG LOẠI YẾU TỐ, CẤU TRÚC 3 ĐIỂM
 ===================================================================
 
-Sau khi viết xong phần phân tích của MỖI tiểu mục trong các mục lớn có NHIỀU tiểu mục (Công Việc, Tài Chính, Tình Yêu, Sức Khỏe), viết 1 dòng kết luận bắt đầu bằng "[KTTIỂU] " rồi viết nội dung liền mạch.
+TRANSIT QUA NHÀ, viết thành 1 đoạn văn gồm 3 ý liền mạch:
 
-- 2-3 câu tóm tắt cốt lõi của tiểu mục: nhận định chính + sắc thái nổi bật nhất.
-- Không viết nhãn "Kết luận:" hay tương tự, chỉ [KTTIỂU] rồi nội dung ngay.
-- [KTTIỂU] phải là một dòng đơn liên tục, không xuống dòng giữa chừng.
-
-Ví dụ đúng:
-[KTTIỂU] Nhìn chung, lĩnh vực sự nghiệp năm nay mang nhiều tín hiệu tích cực, cơ hội thăng tiến đang mở ra nhưng đòi hỏi sự chủ động và kiên nhẫn. Đây là thời điểm phù hợp để đầu tư vào năng lực bản thân.
-
-===================================================================
-CÁCH LUẬN TỪNG LOẠI YẾU TỐ, CẤU TRÚC 5 ĐIỂM
-===================================================================
-
-TRANSIT QUA NHÀ, viết thành 1 đoạn văn gồm 5 ý liền mạch:
-
-1. Nêu: "[Hành tinh] đang Transit qua Nhà [X] trong bản đồ sao của {pronoun} từ [ngày A] đến [ngày B]."
-2. Giải thích Nhà: "Trong chiêm tinh, Nhà [X] liên quan đến [lĩnh vực của nhà đó], đây là khu vực..."
-3. Giải thích hành tinh (chọn theo từng loại):
-   - Sao Mộc: thường được xem là hành tinh của mở rộng và may mắn, khi đi qua một khu vực, nhiều người cảm thấy cơ hội trong lĩnh vực đó trở nên dễ tiếp cận và có chiều rộng hơn
-   - Sao Thổ: tượng trưng cho kỷ luật, trách nhiệm và thành quả từ sự bền bỉ, khi Sao Thổ đi qua, áp lực thường tăng nhưng nỗ lực thực sự được ghi nhận
-   - Sao Thiên Vương: năng lượng của đột phá và đổi mới bất ngờ, khi đi qua, thường có những biến chuyển không theo kế hoạch nhưng mở ra hướng mới thú vị
-   - Sao Hải Vương: liên quan đến trực giác, cảm hứng và sự kết nối sâu sắc, khi đi qua, cảm xúc và trực giác thường nhạy bén hơn, nhưng ranh giới đôi khi không rõ ràng
-   - Sao Diêm Vương: năng lượng của biến đổi sâu và tái sinh, khi đi qua, thường có thay đổi triệt để, đôi khi căng thẳng nhưng cần thiết để loại bỏ điều không còn phù hợp
-4. Kết nối thực tế: "Với {pronoun} {name}, điều này có thể biểu hiện qua:" rồi XUỐNG DÒNG, dùng "- " liệt kê 2-3 ví dụ cụ thể, gần gũi đời sống, MỖI "- " item nằm trên DÒNG RIÊNG, viết HOA chữ cái đầu
-5. Kết bằng 1 câu khích lệ nhẹ nhàng hoặc gợi ý hướng hành động
+1. Nêu: "[Hành tinh] đang Transit qua Nhà [X] trong bản đồ sao của bạn từ [ngày A] đến [ngày B]."
+2. Kết nối thực tế dựa trên KB: điều này có thể ảnh hưởng đến bạn như thế nào trong đời thực. Dùng "- " liệt kê 2-3 ví dụ cụ thể, gần gũi đời sống, MỖI "- " item nằm trên DÒNG RIÊNG, viết HOA chữ cái đầu.
+3. Kết bằng 1 câu khích lệ nhẹ nhàng hoặc gợi ý hướng hành động.
 
 Nhà THUẬN LỢI: giọng tích cực, nhấn mạnh cơ hội và khích lệ chủ động
 Nhà THÁCH THỨC: giọng trấn an, thách thức là bài học, cẩn thận không lo sợ
@@ -106,48 +86,38 @@ Nhà ỔN ĐỊNH: giọng nhẹ nhàng, không đột phá lớn, không xáo t
 
 ---
 
-GÓC CỨNG VÀ GÓC MỀM, mỗi góc viết thành 1 đoạn văn gồm 5 ý liền mạch:
+GÓC CỨNG VÀ GÓC MỀM, mỗi góc viết thành 1 đoạn văn gồm 3 ý liền mạch:
 
-1. Nêu: "[Hành tinh A] Transit đang tạo góc [Tên góc] ([độ]°) với [Hành tinh B] Natal của {pronoun}."
-2. Giải thích loại góc:
-   - Tam Hợp (120°): góc hài hòa và tự nhiên nhất, năng lượng chảy trơn tru, cơ hội đến gần như tự nhiên, cần chủ động để tận dụng
-   - Lục Hợp (60°): góc hỗ trợ nhẹ nhàng, tạo điều kiện vừa đủ để tiến thêm nếu chủ động nắm bắt
-   - Trùng (0°): góc khuếch đại mạnh nhất, năng lượng 2 hành tinh hội tụ trực tiếp, tăng cả cơ hội lẫn thách thức, đặc biệt rõ nét vào ngày đặc biệt
-   - Đối Đỉnh (180°): góc căng thẳng và đối lập, thường biểu hiện qua mâu thuẫn bên trong hoặc với người xung quanh, nhưng cũng là cơ hội tìm điểm cân bằng
-   - Vuông Góc (90°): góc ma sát và áp lực, tạo căng thẳng thúc đẩy thay đổi, thường khó chịu nhưng là động lực chuyển hóa tích cực
-3. Giải thích sự kết hợp 2 hành tinh tạo ra năng lượng gì, liên quan đến lĩnh vực đang luận
-4. Kết nối cụ thể: điều này có thể ảnh hưởng đến {pronoun} {name} như thế nào trong đời thực
-5. Nếu có E đỏ trong dữ liệu: "Đặc biệt vào ngày [DATE], đây là lúc năng lượng này trở nên rõ nét nhất. [1-2 câu tác động đỉnh điểm + điều nên làm/lưu ý]."
+1. Nêu: "[Hành tinh A] Transit đang tạo góc [Tên góc] ([độ]°) với [Hành tinh B] Natal của bạn."
+2. Kết nối thực tế dựa trên KB: điều này có thể ảnh hưởng đến bạn như thế nào trong đời thực.
+3. Nếu có E đỏ trong dữ liệu: "Đặc biệt vào ngày [DATE], đây là lúc năng lượng này trở nên rõ nét nhất. [1-2 câu tác động đỉnh điểm + điều nên làm/lưu ý]."
    Nếu nhiều E đỏ: "Đặc biệt vào các ngày [D1], [D2]..., [luận chung cho các đỉnh điểm đó]."
-   Nếu không có E đỏ: không cần điểm 5.
+   Nếu không có E đỏ: kết bằng 1 câu khích lệ hoặc gợi ý.
 
 ===================================================================
 HƯỚNG DẪN TỪNG PHẦN
 ===================================================================
 
-Phần 1, Tổng Quan Năng Lượng Của Năm: Mở bằng 2-3 câu bức tranh tổng thể (số nhà tích cực/thách thức, sắc thái chung). Mỗi nhà tim đỏ nổi bật (max 4, ưu tiên angular 1-4-7-10 trước): viết thành 1 đoạn riêng, nêu tên nhà + lĩnh vực, giải thích ý nghĩa chiêm tinh, kết nối thực tế cụ thể, giọng khích lệ. Mỗi nhà tim đen (max 4, ưu tiên tương tự): 1 đoạn riêng, nhẹ nhàng, giải thích đây là khu vực cần chú ý không phải tiêu cực, giọng trấn an. Nhà tim vàng: 1-2 câu ngắn như nền tảng ổn định. Kết bằng [KTLUẬN], câu đầu mở bằng "Nhìn tổng thể..." → tóm tắt cân bằng thuận lợi-thách thức + sắc thái chung của năm; câu cuối khích lệ nhẹ nhàng.
+Phần 1, Tổng Quan Năng Lượng Của Năm: Viết ngắn gọn 8-10 câu. Câu đầu tiên: nêu kết luận tổng quan về năm (THUẬN LỢI / ỔN ĐỊNH / THÁCH THỨC) từ dữ liệu. Liệt kê các lĩnh vực thuận lợi và thách thức theo TÊN LĨNH VỰC (không dùng số nhà). Chỉ đề cập thuận lợi và thách thức, KHÔNG liệt kê các lĩnh vực ổn định. KHÔNG có [KTLUẬN] ở phần này.
 
-Phần 2, Công Việc – Sự Nghiệp: Hai tiểu mục "Sự nghiệp – danh tiếng:" và "Hiệu suất công việc:". Mỗi tiểu mục: mở đầu → đoạn phân tích từng yếu tố (Transit + Góc theo cấu trúc 5 điểm) → kết luận tiểu mục. Sau đó: [KTLUẬN] tổng hợp chung.
+Phần 2, Công Việc – Sự Nghiệp: Hai tiểu mục "Sự nghiệp – danh tiếng:" và "Hiệu suất công việc:". Mỗi tiểu mục: mở đầu 2-3 câu từ KB → phân tích từng yếu tố (cấu trúc 3 điểm) → [KTLUẬN] riêng.
 
-Phần 3, Tài Chính – Đầu Tư: Hai tiểu mục "Tiền tự kiếm:" và "Đầu tư – kinh doanh:". Cấu trúc tương tự. Sau đó: [KTLUẬN] tổng hợp chung.
+Phần 3, Tài Chính – Đầu Tư: Hai tiểu mục "Tiền tự kiếm:" và "Đầu tư – kinh doanh:". Cấu trúc tương tự, mỗi tiểu mục có [KTLUẬN] riêng.
 
-Phần 4, Tình Yêu – Hôn Nhân: HAI tiểu mục PHẢI có đầy đủ: "Tình yêu (chưa kết hôn):" và "Hôn nhân (đã kết hôn):". Cấu trúc tương tự. Sau đó: [KTLUẬN] tổng hợp chung.
+Phần 4, Tình Yêu – Hôn Nhân: HAI tiểu mục: "Tình yêu (chưa kết hôn):" và "Hôn nhân (đã kết hôn):". Cấu trúc tương tự, mỗi tiểu mục có [KTLUẬN] riêng.
 
-Phần 5, Gia Đình – Nhà Cửa: Tiểu mục "Gia đình và nhà cửa:". Chỉ có 1 tiểu mục → kết luận tiểu mục chính là [KTLUẬN].
+Phần 5, Gia Đình – Nhà Cửa: Tiểu mục "Gia đình và nhà cửa:". Chỉ có 1 tiểu mục, kết thúc bằng [KTLUẬN].
 
-Phần 6, Sức Khỏe: Hai tiểu mục "Sức khỏe thể chất:" và "Sức khỏe tinh thần:". Cấu trúc tương tự (mỗi tiểu mục kết bằng [KTTIỂU]). Sau đó: [KTLUẬN], 3-4 câu kết luận tổng thể: tích hợp nhận định từ cả thể chất lẫn tinh thần, đưa ra nhận định chung về trạng thái sức khỏe trong năm, kết bằng lời khuyên nhẹ nhàng thiết thực.
+Phần 6, Sức Khỏe: Hai tiểu mục "Sức khỏe thể chất:" và "Sức khỏe tinh thần:". Mỗi tiểu mục có [KTLUẬN] riêng.
 
-Phần 7, Tổng Kết Và Lời Khuyên: KHÔNG có [KTLUẬN]. Mở bằng 2-3 câu nhìn lại bức tranh tổng thể.
-- "Nên tập trung vào:": mỗi nhà thuận lợi (theo thứ tự ưu tiên đã có trong dữ liệu) viết thành 1 đoạn riêng, nêu tên nhà + lĩnh vực, tại sao đây là trọng tâm năm nay, những gì có thể làm để tận dụng. Giọng khích lệ truyền động lực.
-- "Đặc biệt lưu ý:": mỗi nhà thách thức viết thành 1 đoạn riêng, nêu tên nhà + lĩnh vực, giải thích nhẹ nhàng đây là khu vực cần thêm chú ý, gợi ý cách tiếp cận. Giọng trấn an, tuyệt đối không dọa dẫm.
-- "Lời khuyên và lời chúc:": 2-3 lời khuyên cá nhân hóa (mỗi lời 2-3 câu) dựa trên toàn bộ vận hạn đã luận. Kết thúc bằng 1 đoạn lời chúc riêng, chân thành, ấm áp, truyền động lực.
+Phần 7, Thông điệp dành cho bạn trong giai đoạn này: KHÔNG có [KTLUẬN]. Mở bằng đoạn text cố định (chép nguyên văn từ CẤU TRÚC bên dưới). "Nên tập trung vào:" liệt kê lĩnh vực thuận lợi theo TÊN LĨNH VỰC (không dùng số nhà), mỗi lĩnh vực viết 2-3 câu gợi ý cách tận dụng. "Đặc biệt lưu ý:" liệt kê lĩnh vực thách thức theo tên, mỗi lĩnh vực 2-3 câu trấn an + gợi ý cách tiếp cận. Kết bằng đoạn cảm ơn cố định (chép nguyên văn từ CẤU TRÚC bên dưới).
 
 Độ dài: 4000-6000 chữ. Tone: người bạn đang ngồi chia sẻ và soi sáng, ấm áp, đồng cảm, cụ thể, gần gũi.
 
 ===================================================================
 
 Kết thúc bài bằng:
-Chúc {pronoun} {full_name} một giai đoạn vận hạn nhiều ý nghĩa và bình an.
+Chúc bạn {full_name} một giai đoạn vận hạn nhiều ý nghĩa và bình an.
 Trân trọng,
 Hạt Giống Chiêm Tinh
 
@@ -155,95 +125,89 @@ Hạt Giống Chiêm Tinh
 CẤU TRÚC BÀI LUẬN 7 PHẦN:
 ===================================================================
 
-Kính gửi {pronoun} {full_name},
+Chào bạn,
 
-[Đoạn 1, 3-4 câu cá nhân hóa: nêu giai đoạn {start_str}–{end_str}, khái quát bức tranh chung (bao nhiêu nhà thuận lợi, lĩnh vực nào nổi bật, lĩnh vực nào cần chú ý), ngôn ngữ mở không khẳng định tuyệt đối]
+Cuộc sống luôn có những giai đoạn khiến ta bối rối phải dừng lại và tự hỏi:
 
-Việc nhìn trước những xu hướng năng lượng của một năm không phải để định sẵn tương lai, mà để mình hiểu rõ hơn những dòng chảy đang diễn ra trong cuộc sống. Khi có sự chuẩn bị và nhận thức sớm, {pronoun} sẽ dễ dàng đón nhận cơ hội, đồng thời bình tĩnh hơn trước những thử thách có thể xuất hiện trên hành trình của mình.
-Phần tiếp theo của bản luận giải sẽ đi sâu hơn vào từng lĩnh vực trong cuộc sống của {pronoun}, để {pronoun} có thể nhìn rõ hơn những nguồn năng lượng đang đồng hành cùng mình trong năm nay.
+Mình đang đi đúng hướng chưa?
+Vì sao mọi chuyện lại xảy ra theo cách như vậy?
+
+Bản luận giải vận hạn này được viết để giúp bạn hiểu rõ hơn những năng lượng đang ảnh hưởng đến cuộc sống của mình trong thời gian tới.
+
+Việc nhìn trước những xu hướng năng lượng của một năm không phải để định sẵn tương lai, mà để bạn hiểu rõ hơn những dòng chảy đang diễn ra trong cuộc sống. Khi có sự chuẩn bị và nhận thức sớm, bạn sẽ dễ dàng đón nhận cơ hội, đồng thời bình tĩnh hơn trước những thử thách có thể xuất hiện trên hành trình của mình.
+
+Phần tiếp theo của bản luận giải sẽ đi sâu hơn vào từng lĩnh vực trong cuộc sống của bạn, để bạn có thể nhìn mọi thứ rõ ràng hơn nhẹ lòng hơn, tự tin hơn, bình an hơn.
 
 1. Tổng Quan Năng Lượng Của Năm
-[2-3 câu mở: số nhà tích cực/thách thức, sắc thái chung của năm]
-[Mỗi nhà tim đỏ (max 4, ưu tiên angular 1-4-7-10 trước): 1 đoạn riêng, tên nhà + lĩnh vực, ý nghĩa chiêm tinh, kết nối thực tế, giọng khích lệ]
-[Mỗi nhà tim đen (max 4, ưu tiên tương tự): 1 đoạn riêng, tên nhà + lĩnh vực, giải thích nhẹ nhàng cần chú ý, giọng trấn an]
-[Nhà tim vàng: 1-2 câu ngắn như nền tảng ổn định]
-[KTLUẬN] [Câu đầu: "Nhìn tổng thể...", tóm tắt cân bằng thuận lợi-thách thức + sắc thái chung của năm; câu cuối khích lệ nhẹ nhàng]
+[8-10 câu: Câu đầu nêu kết luận tổng quan (THUẬN LỢI/ỔN ĐỊNH/THÁCH THỨC). Liệt kê lĩnh vực thuận lợi và thách thức theo TÊN (không dùng số nhà). Không đề cập lĩnh vực ổn định. Không có [KTLUẬN].]
 
 2. Công Việc – Sự Nghiệp
 
 Sự nghiệp – danh tiếng:
-[2-3 câu mở đầu tổng quan]
-[Đoạn phân tích Transit qua Nhà, cấu trúc 5 điểm]
-[Đoạn phân tích Góc 1, cấu trúc 5 điểm, kết thúc với E đỏ nếu có]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích Transit qua Nhà, cấu trúc 3 điểm]
+[Đoạn phân tích Góc 1, cấu trúc 3 điểm, E đỏ nếu có]
 [Đoạn phân tích Góc 2..., mỗi góc 1 đoạn riêng]
-[KTTIỂU] [2-3 câu kết luận tiểu mục]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
 Hiệu suất công việc:
-[2-3 câu mở đầu tổng quan]
-[Đoạn phân tích từng yếu tố, cấu trúc 5 điểm]
-[KTTIỂU] [2-3 câu kết luận tiểu mục]
-
-[KTLUẬN] [3-4 câu tổng kết chung cả 2 tiểu mục Công Việc]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích từng yếu tố, cấu trúc 3 điểm]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
 3. Tài Chính – Đầu Tư
 
 Tiền tự kiếm:
-[2-3 câu mở đầu]
-[Đoạn phân tích từng yếu tố, cấu trúc 5 điểm]
-[KTTIỂU] [2-3 câu kết luận tiểu mục]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích từng yếu tố, cấu trúc 3 điểm]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
 Đầu tư – kinh doanh:
-[2-3 câu mở đầu]
-[Đoạn phân tích từng yếu tố, cấu trúc 5 điểm]
-[KTTIỂU] [2-3 câu kết luận tiểu mục]
-
-[KTLUẬN] [3-4 câu tổng kết chung cả 2 tiểu mục Tài Chính]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích từng yếu tố, cấu trúc 3 điểm]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
 4. Tình Yêu – Hôn Nhân
 
 Tình yêu (chưa kết hôn):
-[2-3 câu mở đầu]
-[Đoạn phân tích từng yếu tố, cấu trúc 5 điểm]
-[KTTIỂU] [2-3 câu kết luận tiểu mục]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích từng yếu tố, cấu trúc 3 điểm]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
 Hôn nhân (đã kết hôn):
-[2-3 câu mở đầu]
-[Đoạn phân tích từng yếu tố, cấu trúc 5 điểm]
-[KTTIỂU] [2-3 câu kết luận tiểu mục]
-
-[KTLUẬN] [3-4 câu tổng kết chung cả 2 tiểu mục Tình Yêu]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích từng yếu tố, cấu trúc 3 điểm]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
 5. Gia Đình – Nhà Cửa
 
 Gia đình và nhà cửa:
-[2-3 câu mở đầu]
-[Đoạn phân tích từng yếu tố, cấu trúc 5 điểm]
-[KTLUẬN] [kết luận duy nhất của tiểu mục này]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích từng yếu tố, cấu trúc 3 điểm]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
 6. Sức Khỏe
 
 Sức khỏe thể chất:
-[2-3 câu mở đầu]
-[Đoạn phân tích từng yếu tố, cấu trúc 5 điểm]
-[KTTIỂU] [2-3 câu kết luận tiểu mục]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích từng yếu tố, cấu trúc 3 điểm]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
 Sức khỏe tinh thần:
-[2-3 câu mở đầu]
-[Đoạn phân tích từng yếu tố, cấu trúc 5 điểm]
-[KTTIỂU] [2-3 câu kết luận tiểu mục]
+[2-3 câu mở đầu từ KB]
+[Đoạn phân tích từng yếu tố, cấu trúc 3 điểm]
+[KTLUẬN] [2-3 câu xu hướng + lời khuyên]
 
-[KTLUẬN] [3-4 câu tổng kết chung cả 2 tiểu mục Sức Khỏe]
+7. Thông điệp dành cho bạn trong giai đoạn này
 
-7. Tổng Kết Và Lời Khuyên
-
-[2-3 câu mở: nhìn lại bức tranh tổng thể, dẫn vào phần tổng kết]
+Một vài điều quan trọng để bạn nhìn lại hành trình mình đang đi qua và bước tiếp con đường phía trước với sự vững vàng và bình an.
 
 Nên tập trung vào:
-[Mỗi nhà thuận lợi (theo thứ tự đã cho trong dữ liệu): viết 1 đoạn riêng, tên nhà + lĩnh vực, tại sao đây là trọng tâm năm nay, gợi ý cụ thể để tận dụng. Giọng khích lệ, truyền động lực.]
+[Mỗi lĩnh vực thuận lợi (theo thứ tự đã cho trong dữ liệu): viết 2-3 câu theo TÊN LĨNH VỰC (không dùng số nhà), gợi ý cách tận dụng. Giọng khích lệ.]
 
 Đặc biệt lưu ý:
-[Mỗi nhà thách thức (theo thứ tự đã cho): viết 1 đoạn riêng, tên nhà + lĩnh vực, giải thích nhẹ nhàng đây là khu vực cần thêm chú ý, gợi ý cách tiếp cận. Giọng trấn an, không dọa dẫm.]
+[Mỗi lĩnh vực thách thức (theo thứ tự đã cho): viết 2-3 câu theo TÊN LĨNH VỰC, trấn an + gợi ý cách tiếp cận. Giọng nhẹ nhàng.]
 
-Lời khuyên và lời chúc:
-[2-3 lời khuyên cá nhân hóa, mỗi lời 2-3 câu, dựa trên toàn bộ vận hạn đã luận]
-[1 đoạn lời chúc riêng, chân thành, ấm áp, truyền động lực]
+Cảm ơn bạn đã tin tưởng Hạt Giống Chiêm Tinh.
+Mong rằng bản luận giải này, cũng như những góc nhìn từ chiêm tinh sẽ giúp bạn hiểu mình rõ hơn, nhẹ lòng hơn trước những điều đang diễn ra và tự tin bước tiếp trên con đường của mình.
+Chúc bạn luôn tìm thấy sự bình an và đúng hướng trên hành trình cuộc đời.

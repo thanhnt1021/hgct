@@ -62,7 +62,7 @@ const SECTION_HOUSES: Record<string, number[]> = {
   'cong_viec': [10, 6, 2],
   'tai_chinh': [2, 8, 11],
   'tinh_yeu': [5, 7, 1],
-  'gia_dinh': [4, 3, 12],
+  'gia_dinh': [4],
   'suc_khoe': [6, 1, 8, 12],
   'tong_ket': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 }
@@ -523,13 +523,13 @@ function formatTongQuan(houseScores: HouseScore[], vkb?: VanhanKB): string {
     : 'THUẬN LỢI'
 
   lines.push(`Kết luận tổng quan: ${yearConclusion}`)
-  lines.push(`Thuận lợi (${timDo.length} nhà), Ổn định (${timVang.length} nhà), Thách thức (${timDen.length} nhà).`)
+  lines.push(`Thuận lợi (${timDo.length} lĩnh vực), Thách thức (${timDen.length} lĩnh vực).`)
   lines.push('')
 
   if (timDo.length > 0) {
-    lines.push('CÁC NHÀ THUẬN LỢI (ưu tiên):')
+    lines.push('LĨNH VỰC THUẬN LỢI:')
     for (const hs of timDo.slice(0, 4)) {
-      lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
+      lines.push(`  ${HOUSE_THEMES[hs.house]} [Nhà ${hs.house}]`)
       if (vkb) {
         const desc = vkb.areaDescriptions[hs.house]?.['THUẬN LỢI']
         if (desc) lines.push(`    [KB]: ${desc}`)
@@ -538,20 +538,14 @@ function formatTongQuan(houseScores: HouseScore[], vkb?: VanhanKB): string {
   }
 
   if (timDen.length > 0) {
-    lines.push('\nCÁC NHÀ THÁCH THỨC (cần lưu ý):')
+    lines.push('\nLĨNH VỰC THÁCH THỨC:')
     for (const hs of timDen.slice(0, 4)) {
-      lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
+      lines.push(`  ${HOUSE_THEMES[hs.house]} [Nhà ${hs.house}]`)
       if (vkb) {
         const desc = vkb.areaDescriptions[hs.house]?.['THÁCH THỨC']
         if (desc) lines.push(`    [KB]: ${desc}`)
       }
     }
-  }
-
-  if (timVang.length > 0) {
-    lines.push('\nCÁC NHÀ ỔN ĐỊNH:')
-    const names = timVang.map(h => `Nhà ${h.house}`).join(', ')
-    lines.push(`  ${names}`)
   }
 
   return lines.join('\n')
@@ -569,12 +563,12 @@ function formatTongKet(houseScores: HouseScore[]): string {
 
   lines.push('NÊN TẬP TRUNG VÀO:')
   for (const hs of timDo) {
-    lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
+    lines.push(`  ${HOUSE_THEMES[hs.house]} [Nhà ${hs.house}]`)
   }
 
   lines.push('\nĐẶC BIỆT LƯU Ý:')
   for (const hs of timDen) {
-    lines.push(`  Nhà ${hs.house} (${HOUSE_THEMES[hs.house]}) /điểm ${hs.score}`)
+    lines.push(`  ${HOUSE_THEMES[hs.house]} [Nhà ${hs.house}]`)
   }
 
   return lines.join('\n')
@@ -592,7 +586,7 @@ export function buildVanhanEssayPrompt(
   const fullName = profile.fullName || profile.name || ''
   const name = profile.onlyName || profile.name || ''
   const gender = profile.gender || 'Female'
-  const pronoun = gender === 'Female' ? 'chị' : 'anh'
+  const pronoun = 'bạn'
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
   const startStr = formatDate(startDate)
   const endStr = formatDate(endDate)
@@ -659,8 +653,8 @@ export function buildVanhanEssayPrompt(
   // Section 5: Gia đình
   dataLines.push('=== PHẦN 5: GIA ĐÌNH – NHÀ CỬA ===')
   dataLines.push('')
-  dataLines.push('Gia đình và nhà cửa (Nhà 4, 3):')
-  dataLines.push(formatSectionData('gia_dinh', houseScores, [4, 3], vkb))
+  dataLines.push('Gia đình và nhà cửa (Nhà 4):')
+  dataLines.push(formatSectionData('gia_dinh', houseScores, [4], vkb))
   dataLines.push('')
 
   // Section 6: Sức khỏe
