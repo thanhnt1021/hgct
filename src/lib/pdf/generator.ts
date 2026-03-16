@@ -566,10 +566,17 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
 
       // How much space does nextEl need to not trigger a page break before it?
       // Elements with page-break-inside:avoid (red-box, mini-box) need full height.
+      // For red-box, add 2×SCALLOP_OVERFLOW (18px each side) because the scallop SVG
+      // protrudes beyond the box boundary — the wrapper approach adds this as padding,
+      // but spaceNeededFor() runs before the wrapper is created.
       // Regular paragraphs need orphans × lineHeight.
       function spaceNeededFor(nextEl: HTMLElement): number {
-        const breakAvoid = nextEl.classList.contains('red-box') || nextEl.classList.contains('mini-box')
-        if (breakAvoid) return nextEl.offsetHeight
+        const isRedBox = nextEl.classList.contains('red-box')
+        const breakAvoid = isRedBox || nextEl.classList.contains('mini-box')
+        if (breakAvoid) {
+          const SCALLOP_OVERFLOW = 18  // top + bottom wave protrusion for red-box scallop
+          return nextEl.offsetHeight + (isRedBox ? 2 * SCALLOP_OVERFLOW : 0)
+        }
         const lh = parseFloat(window.getComputedStyle(nextEl).lineHeight) || 22
         const orphans = parseInt(nextEl.style.orphans || '4') || 4
         const lines = Math.round(nextEl.offsetHeight / lh) || 1
@@ -725,7 +732,7 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         const scallopD = 40
         const strokeW = 2.5
         const maxBulge = scallopD / 2 * 0.75
-        const overflow = Math.ceil(maxBulge + strokeW)
+        const overflow = Math.ceil(maxBulge + strokeW)  // = 18px
 
         const pathD = genScallopPath(w, h, scallopD)
 
@@ -735,8 +742,8 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         svg.setAttribute('height', String(h + 2 * overflow))
         svg.setAttribute('viewBox', `${-overflow} ${-overflow} ${w + 2 * overflow} ${h + 2 * overflow}`)
         svg.style.position = 'absolute'
-        svg.style.top = `${-overflow}px`
-        svg.style.left = `${-overflow}px`
+        svg.style.top = '0'
+        svg.style.left = '0'
         svg.style.pointerEvents = 'none'
         svg.style.zIndex = '-1'
 
@@ -749,15 +756,44 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         pathEl.setAttribute('stroke-linejoin', 'round')
         svg.appendChild(pathEl)
 
-        // Remove CSS border/bg, create stacking context so SVG z-index:-1 sits behind text
+        // Wrapper approach: wrap the box in a div that includes the scallop overflow
+        // inside its own border-box (via padding: overflow). Move page-break-inside:avoid
+        // to the wrapper so the print engine's page-break algorithm sees the full
+        // wrapper height (box + overflow above/below) as the unbreakable unit.
+        // This prevents the SVG (positioned at top:0 of wrapper) from bleeding onto
+        // the previous page when the box is pushed to the next page.
+        // Wrapper margin is reduced by overflow so total visual spacing stays the same.
+        const computed = window.getComputedStyle(box)
+        const bmt = parseFloat(computed.marginTop) || 0
+        const bmr = parseFloat(computed.marginRight) || 0
+        const bmb = parseFloat(computed.marginBottom) || 0
+        const bml = parseFloat(computed.marginLeft) || 0
+
+        const wrapper = document.createElement('div')
+        wrapper.style.position = 'relative'
+        wrapper.style.padding = `${overflow}px`
+        wrapper.style.marginTop    = `${Math.max(0, bmt - overflow)}px`
+        wrapper.style.marginRight  = `${Math.max(0, bmr - overflow)}px`
+        wrapper.style.marginBottom = `${Math.max(0, bmb - overflow)}px`
+        wrapper.style.marginLeft   = `${Math.max(0, bml - overflow)}px`
+        wrapper.style.pageBreakInside = 'avoid'
+        wrapper.style.breakInside = 'avoid'
+
+        // Remove CSS border/bg from box; SVG provides them. Box no longer owns the break.
         box.style.border = 'none'
         box.style.background = 'none'
         box.style.position = 'relative'
         box.style.zIndex = '0'
-        box.style.overflow = 'visible'
-        box.appendChild(svg)
+        box.style.margin = '0'
+        box.style.pageBreakInside = 'auto'
+        box.style.breakInside = 'auto'
 
-        console.log(`[scallop] red-box ${w}x${h} overflow=${overflow}`)
+        // Re-parent: wrapper replaces box in the DOM, box + SVG go inside wrapper
+        box.parentNode!.insertBefore(wrapper, box)
+        wrapper.appendChild(box)
+        wrapper.appendChild(svg)
+
+        console.log(`[scallop] red-box ${w}x${h} overflow=${overflow} — wrapper`)
       })
     })
 
