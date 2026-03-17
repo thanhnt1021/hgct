@@ -34,7 +34,14 @@ function ProcessingInner() {
   const [recoveryToken, setRecoveryToken] = useState('')
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [frozenWarning, setFrozenWarning] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const frozenIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const hasAutoRetried = useRef(false)
+  const lastProgressRef = useRef({ value: 0, time: Date.now() })
+  // Fix F: capture at mount so useEffect doesn't re-run when these change (prevents double polling)
+  const serviceRef = useRef(service)
+  const nameRef = useRef(displayName)
 
   const eta = SERVICE_ETA[service] || '5–8'
   const serviceName = SERVICE_NAMES[service] || 'chiêm tinh'
@@ -46,59 +53,79 @@ function ProcessingInner() {
       return
     }
 
-    const poll = async () => {
-      try {
-        const res = await fetch(`/api/job/${jobId}`)
-        if (!res.ok) return
-        const job = await res.json()
-
-        setProgress(job.progress ?? 0)
-        setLabel(job.label ?? '')
-        setStatus(job.status)
-
-        if (job.status === 'done') {
-          if (intervalRef.current) clearInterval(intervalRef.current)
-          sessionStorage.setItem('reportResult', JSON.stringify({
-            ...job.result,
-            email: job.result?.email,
-          }))
-          setTimeout(() => router.replace('/success'), 2000)
-        } else if (job.status === 'error') {
-          if (intervalRef.current) clearInterval(intervalRef.current)
-          setErrorMsg(job.error || 'Có lỗi xảy ra khi tạo báo cáo.')
-          if (job.result?.recoveryToken) setRecoveryToken(job.result.recoveryToken)
-        }
-      } catch {
-        // network error, keep polling
-      }
+    type JobPayload = {
+      status: string
+      progress?: number
+      label?: string
+      error?: string
+      result?: { recoveryToken?: string; autoRetry?: boolean; email?: string }
     }
 
-    const pollWithRedirectOn404 = async () => {
-      const res = await fetch(`/api/job/${jobId}`)
-      if (res.status === 404) {
-        if (intervalRef.current) clearInterval(intervalRef.current)
-        router.replace('/services')
-        return
+    const handleJob = (job: JobPayload) => {
+      const newProgress = job.progress ?? 0
+      // Track progress change for frozen detection
+      if (newProgress !== lastProgressRef.current.value) {
+        lastProgressRef.current = { value: newProgress, time: Date.now() }
+        setFrozenWarning(false)
       }
-      if (!res.ok) return
-      const job = await res.json()
-      setProgress(job.progress ?? 0)
+      setProgress(newProgress)
       setLabel(job.label ?? '')
-      setStatus(job.status)
+      setStatus(job.status as 'processing' | 'done' | 'error')
+
       if (job.status === 'done') {
         if (intervalRef.current) clearInterval(intervalRef.current)
+        if (frozenIntervalRef.current) clearInterval(frozenIntervalRef.current)
         sessionStorage.setItem('reportResult', JSON.stringify({ ...job.result, email: job.result?.email }))
         setTimeout(() => router.replace('/success'), 2000)
       } else if (job.status === 'error') {
         if (intervalRef.current) clearInterval(intervalRef.current)
+        if (frozenIntervalRef.current) clearInterval(frozenIntervalRef.current)
+        const rToken = job.result?.recoveryToken
+        // Auto-retry: silent redirect on first failure (autoRetry=true), only once per page load
+        if (rToken && job.result?.autoRetry && !hasAutoRetried.current) {
+          hasAutoRetried.current = true
+          router.replace(`/recover?token=${rToken}&auto=1&service=${serviceRef.current}&name=${encodeURIComponent(nameRef.current)}`)
+          return
+        }
+        // Show error UI for manual recovery (retryCount >= 1 or no token)
         setErrorMsg(job.error || 'Có lỗi xảy ra khi tạo báo cáo.')
-        if (job.result?.recoveryToken) setRecoveryToken(job.result.recoveryToken)
+        if (rToken) setRecoveryToken(rToken)
       }
     }
 
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/job/${jobId}`)
+        if (!res.ok) return
+        handleJob(await res.json())
+      } catch { /* network error, keep polling */ }
+    }
+
+    const pollWithRedirectOn404 = async () => {
+      try {
+        const res = await fetch(`/api/job/${jobId}`)
+        if (res.status === 404) {
+          if (intervalRef.current) clearInterval(intervalRef.current)
+          if (frozenIntervalRef.current) clearInterval(frozenIntervalRef.current)
+          router.replace('/services')
+          return
+        }
+        if (!res.ok) return
+        handleJob(await res.json())
+      } catch { /* network error, keep polling */ }
+    }
+
+    // Frozen detection: if progress doesn't change for 90s, show gentle warning
+    frozenIntervalRef.current = setInterval(() => {
+      if (Date.now() - lastProgressRef.current.time > 90_000) setFrozenWarning(true)
+    }, 10_000)
+
     poll()
     intervalRef.current = setInterval(pollWithRedirectOn404, 2000)
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (frozenIntervalRef.current) clearInterval(frozenIntervalRef.current)
+    }
   }, [jobId, router])
 
   const handleCancel = async () => {
@@ -388,10 +415,16 @@ function ProcessingInner() {
           </button>
         </div>
 
-        <p style={{ color: '#4a4560', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)' }}>
-          Dự kiến hoàn thành trong khoảng{' '}
-          <strong style={{ color: '#8a8399' }}>{eta} phút</strong>
-        </p>
+        {frozenWarning ? (
+          <p style={{ color: '#d9ab55', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)', lineHeight: 1.7 }}>
+            Đang kiểm tra kết nối — hệ thống sẽ tự khôi phục nếu có sự cố...
+          </p>
+        ) : (
+          <p style={{ color: '#4a4560', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)' }}>
+            Dự kiến hoàn thành trong khoảng{' '}
+            <strong style={{ color: '#8a8399' }}>{eta} phút</strong>
+          </p>
+        )}
 
         {/* Cancel button */}
         <button

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { createReportJob } from '@/lib/astrology/reportProcessor'
+import { MAX_RETRIES } from '@/lib/jobs'
 
 export async function POST(req: Request) {
   let token: string
@@ -25,13 +26,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: 'completed', message: 'Báo cáo đã hoàn thành! Kiểm tra email để nhận file PDF.' })
   }
 
-  // Already retrying / processing by another request
+  // Fix E: Check retrying/processing BEFORE max retries
+  // → Avoids blocking a currently-running retry with a "max retries" error
   if (order.status === 'retrying' || order.status === 'processing') {
     return NextResponse.json({
       status: 'processing',
       jobId: order.jobId,
+      service: order.service,
+      name: ((order.profileData as Record<string, unknown>)?.name as string) || '',
       message: 'Báo cáo đang được xử lý. Vui lòng chờ.',
     })
+  }
+
+  // Max retries exceeded
+  if ((order.retryCount ?? 0) >= MAX_RETRIES) {
+    return NextResponse.json({
+      error: `Đã thử lại ${MAX_RETRIES} lần nhưng vẫn gặp lỗi. Vui lòng liên hệ hỗ trợ để được giải quyết.`,
+      maxRetriesReached: true,
+    }, { status: 429 })
   }
 
   if (order.status !== 'failed') {
@@ -60,21 +72,40 @@ export async function POST(req: Request) {
   if (order.startDate) body.startDate = order.startDate
   if (order.endDate) body.endDate = order.endDate
 
-  // Create new job
-  const jobId = createReportJob({
-    service: order.service,
-    body,
-    userUid: order.userUid || undefined,
-    orderId: order.id,
-  })
+  // Fix B: Wrap createReportJob + order.update in try/catch with rollback
+  // → If job creation or order update fails, reset order back to 'failed' (not stuck at 'retrying')
+  let jobId: string
+  try {
+    jobId = createReportJob({
+      service: order.service,
+      body,
+      userUid: order.userUid || undefined,
+      orderId: order.id,
+    })
 
-  // Update order with new jobId (best-effort)
-  await prisma.order.update({ where: { id: order.id }, data: { jobId } }).catch(console.error)
+    // Update order: new jobId + increment retryCount + clear token (sweep will generate fresh one if this job also fails)
+    await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        jobId,
+        retryCount: { increment: 1 },
+        recoveryToken: null,  // clear so next failure sweep generates a fresh token
+      },
+    })
+  } catch (err) {
+    // Rollback: reset to 'failed' so the next poll or manual retry can still proceed
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { status: 'failed' },
+    }).catch(() => {})
+    console.error(`[RECOVER] Failed to start job for order ${order.id}:`, err)
+    return NextResponse.json({ error: 'Không thể khởi tạo báo cáo. Vui lòng thử lại.' }, { status: 500 })
+  }
 
   const iData = (order.profileData as Record<string, unknown>) || {}
   const name = (iData.name as string) || ''
 
-  console.log(`[RECOVER] Order ${order.id} re-triggered → job ${jobId} (token: ${token})`)
+  console.log(`[RECOVER] Order ${order.id} re-triggered → job ${jobId} (token used: ${token}, retryCount now: ${(order.retryCount ?? 0) + 1})`)
 
   return NextResponse.json({
     status: 'retrying',

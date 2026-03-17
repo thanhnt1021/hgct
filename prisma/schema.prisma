@@ -96,6 +96,7 @@ model Order {
 
   // Recovery system
   recoveryToken String?   @unique @map("recovery_token")
+  retryCount    Int       @default(0)   @map("retry_count")
 
   @@map("orders")
 }
