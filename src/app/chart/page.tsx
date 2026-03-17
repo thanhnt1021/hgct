@@ -447,6 +447,8 @@ export default function ChartPage() {
 
         {/* ─── Wheel + Planets ──────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Left column: Wheel + Elements/Modality */}
+          <div className="flex flex-col gap-8">
           {/* Wheel */}
           <div className="rounded-2xl p-4" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
             <SectionHeader>BÁNH XE BẢN ĐỒ SAO</SectionHeader>
@@ -461,7 +463,7 @@ export default function ChartPage() {
             <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-4 justify-center">
               {([
                 ['Trùng','#d9ab55'], ['Tam Hợp','#5578d4'], ['Lục Hợp','#55b870'],
-                ['Vuông Góc','#c84545'], ['Đối Đỉnh','#b84060'], ['Phụ','#00cc00'],
+                ['Vuông Góc','#c84545'], ['Đối Đỉnh','#b84060'], ['Bán Lục Hợp','#00cc00'], ['Ngũ Chiếu','#00cc00'],
               ] as [string, string][]).map(([label, color]) => (
                 <span key={label} style={{ color, fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span style={{ display: 'inline-block', width: '16px', height: '1.5px', background: color, verticalAlign: 'middle' }} />
@@ -471,356 +473,370 @@ export default function ChartPage() {
             </div>
           </div>
 
-          {/* Planet table */}
+          {/* Elements/Modality - inside left column */}
           <div className="rounded-2xl p-5" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
-            <SectionHeader>VỊ TRÍ HÀNH TINH</SectionHeader>
-            <div style={{ overflowY: 'auto', maxHeight: '520px' }}>
-              <table style={tableStyle}>
-                <thead>
-                  <tr>
-                    <th style={th}>Hành tinh</th>
-                    <th style={th}>Cung</th>
-                    <th style={{ ...th, textAlign: 'right' }}>Độ</th>
-                    <th style={{ ...th, textAlign: 'center' }}>Nhà</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {planets.map((p) => (
-                    <tr key={p.name}>
-                      <td style={td}>
-                        <span style={{ color: '#d9ab55', fontSize: '1rem', marginRight: '6px', fontFamily: 'serif' }}>{p.symbol}</span>
-                        <span style={{ color: '#c9c3d6' }}>{p.nameVn}</span>
-                        {p.isRetro && <span style={{ color: '#c45252', fontSize: '0.72rem', marginLeft: '4px' }}>℞</span>}
-                      </td>
-                      <td style={td}>
-                        <span style={{ marginRight: '4px', fontFamily: 'serif' }}>{p.signSymbol}</span>
-                        <span style={{ color: '#8a8399' }}>{p.signCode}</span>
-                      </td>
-                      <td style={{ ...td, textAlign: 'right', color: '#f4efe6', fontVariantNumeric: 'tabular-nums' }}>
-                        {fmtDeg(p.degInSign)}
-                      </td>
-                      <td style={{ ...td, textAlign: 'center' }}>
-                        <span style={{
-                          display: 'inline-block', minWidth: '24px', padding: '1px 5px',
-                          background: 'rgba(200,148,63,0.08)', border: '1px solid rgba(200,148,63,0.2)',
-                          borderRadius: '3px', color: '#d9ab55', fontSize: '0.78rem', textAlign: 'center',
-                        }}>
-                          {p.house}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        {/* ─── House Cusps ──────────────────────────────── */}
-        <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
-          <SectionHeader>ĐỘ ĐỈNH CỦA 12 NHÀ</SectionHeader>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ ...tableStyle, minWidth: '480px' }}>
-              <thead>
-                <tr>
-                  {['Nhà','Cung','Độ','Chủ tinh'].map(h => (
-                    <th key={h} style={{ ...th, textAlign: h === 'Độ' ? 'right' : 'left' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {cusps.map((c) => (
-                  <tr key={c.house}>
-                    <td style={td}>
-                      <span style={{
-                        display: 'inline-block', minWidth: '28px', padding: '1px 6px',
-                        background: 'rgba(200,148,63,0.08)', border: '1px solid rgba(200,148,63,0.2)',
-                        borderRadius: '3px', color: '#d9ab55', fontSize: '0.8rem', textAlign: 'center',
-                      }}>
-                        {c.house}
-                      </span>
-                    </td>
-                    <td style={td}>
-                      <span style={{ marginRight: '5px', fontFamily: 'serif' }}>{c.signSymbol}</span>
-                      <span style={{ color: '#c9c3d6' }}>{c.sign}</span>
-                    </td>
-                    <td style={{ ...td, textAlign: 'right', color: '#f4efe6', fontVariantNumeric: 'tabular-nums' }}>
-                      {fmtDeg(c.degInSign)}
-                    </td>
-                    <td style={td}>
-                      <span style={{ color: '#d9ab55', fontFamily: 'serif', marginRight: '5px' }}>{c.rulerSymbol}</span>
-                      <span style={{ color: '#8a8399' }}>{c.ruler}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* ─── Dominant Houses ──────────────────────────── */}
-        {domHouses && domHouses.length > 0 && (
-          <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
-            <SectionHeader>NHÀ TRỘI</SectionHeader>
-            <div className="space-y-2.5">
-              {(() => {
-                const maxScore = domHouses[0].score
-                return domHouses.map(({ house, score }) => (
-                  <div key={house} className="flex items-center gap-3">
-                    <span style={{
-                      minWidth: '56px', color: '#d9ab55', fontFamily: 'var(--font-vietnam)',
-                      fontWeight: 700, fontSize: '0.82rem', textAlign: 'right',
-                    }}>
-                      Nhà {house}
-                    </span>
-                    <div style={{ flex: 1, height: '7px', background: 'rgba(200,148,63,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%', width: `${(score / maxScore) * 100}%`,
-                        background: 'linear-gradient(90deg, #c9a84c, #e8c96e)',
-                        borderRadius: '4px', opacity: 0.85,
-                      }} />
-                    </div>
-                    <span style={{
-                      minWidth: '32px', color: '#8a8399', fontFamily: 'var(--font-vietnam)',
-                      fontSize: '0.75rem', textAlign: 'right',
-                    }}>
-                      {score}
-                    </span>
+            <SectionHeader>BẢNG NGUYÊN TỐ & TÍNH CHẤT</SectionHeader>
+            <div className="rounded-xl p-5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+              {/* Bars 2-col: nguyên tố trái + tính chất phải */}
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>NGUYÊN TỐ</p>
+                  <div className="space-y-3">
+                    {EL_LABELS.map((label, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between mb-1">
+                          <span style={{ color: EL_COLORS[i], fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', fontWeight: 500 }}>{label}</span>
+                          <span style={{ color: '#f4efe6', fontFamily: 'monospace', fontSize: '0.78rem' }}>{Math.round((elScores[i] / elTotals) * 100)}%</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                          <div style={{ height: '100%', width: `${(elScores[i] / elTotals) * 100}%`, background: EL_COLORS[i], borderRadius: '9999px' }} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))
+                </div>
+                <div>
+                  <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>TÍNH CHẤT</p>
+                  <div className="space-y-3">
+                    {MOD_LABELS.map((label, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between mb-1">
+                          <span style={{ color: '#c8943f', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', fontWeight: 500 }}>{label}</span>
+                          <span style={{ color: '#f4efe6', fontFamily: 'monospace', fontSize: '0.78rem' }}>{Math.round((modScores[i] / modTotals) * 100)}%</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                          <div style={{ height: '100%', width: `${(modScores[i] / modTotals) * 100}%`, background: '#c8943f', borderRadius: '9999px', opacity: i === 0 ? 1 : i === 1 ? 0.7 : 0.4 }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Nhà trội chips */}
+              {domHouses && domHouses.length > 0 && (() => {
+                const housePlanets: Record<number, string[]> = {}
+                for (const p of planets) {
+                  if (!housePlanets[p.house]) housePlanets[p.house] = []
+                  housePlanets[p.house].push(p.symbol)
+                }
+                return (
+                  <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '1rem' }}>
+                    <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>NHÀ TRỘI</p>
+                    <div className="flex flex-wrap gap-2">
+                      {domHouses.map(({ house, score }) => (
+                        <div key={house} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ color: '#c8943f', fontSize: '0.72rem', fontWeight: 700, fontFamily: 'var(--font-vietnam)' }}>Nhà {house}</span>
+                          {(housePlanets[house] || []).length > 0 && (
+                            <span style={{ color: '#8a8399', fontFamily: 'serif', fontSize: '0.72rem', letterSpacing: '0.08em' }}>
+                              {housePlanets[house].join(' ')}
+                            </span>
+                          )}
+                          <span style={{ color: '#55b870', fontFamily: 'monospace', fontSize: '0.65rem' }}>{score}đ</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
               })()}
-            </div>
-          </div>
-        )}
-
-        {/* ─── Element / Modality ───────────────────────── */}
-        <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
-          <SectionHeader>BẢNG NGUYÊN TỐ & TÍNH CHẤT</SectionHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ ...tableStyle, minWidth: '320px' }}>
-                <thead>
-                  <tr>
-                    <th style={th}>Nguyên tố</th>
-                    {MOD_LABELS.map(m => <th key={m} style={{ ...th, textAlign: 'center' }}>{m}</th>)}
-                    <th style={{ ...th, textAlign: 'center' }}>Tổng</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {elementMatrix.map((row, ei) => (
-                    <tr key={ei}>
-                      <td style={td}>
-                        <span style={{ color: EL_COLORS[ei], fontFamily: 'var(--font-vietnam)', fontWeight: 600 }}>
-                          {EL_LABELS[ei]}
-                        </span>
-                      </td>
-                      {row.map((val, mi) => (
-                        <td key={mi} style={{ ...td, textAlign: 'center' }}>
-                          <span style={{
-                            display: 'inline-block', minWidth: '28px', padding: '1px 6px',
-                            background: val > 0 ? 'rgba(200,148,63,0.08)' : 'transparent',
-                            border: val > 0 ? '1px solid rgba(200,148,63,0.18)' : '1px solid transparent',
-                            borderRadius: '3px', color: val > 0 ? '#f4efe6' : '#4a4560',
-                          }}>
-                            {val}
+              {/* Table below */}
+              <div style={{ paddingTop: '1.25rem', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '1.25rem', overflowX: 'auto' }}>
+                <table style={{ ...tableStyle, minWidth: '320px' }}>
+                  <thead>
+                    <tr>
+                      <th style={th}>Nguyên tố</th>
+                      {MOD_LABELS.map(m => <th key={m} style={{ ...th, textAlign: 'center' }}>{m}</th>)}
+                      <th style={{ ...th, textAlign: 'center' }}>Tổng</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {elementMatrix.map((row, ei) => (
+                      <tr key={ei}>
+                        <td style={td}>
+                          <span style={{ color: EL_COLORS[ei], fontFamily: 'var(--font-vietnam)', fontWeight: 600 }}>
+                            {EL_LABELS[ei]}
                           </span>
                         </td>
-                      ))}
-                      <td style={{ ...td, textAlign: 'center', color: EL_COLORS[ei], fontWeight: 700 }}>{elScores[ei]}</td>
-                    </tr>
-                  ))}
-                  <tr style={{ borderTop: '1px solid rgba(200,148,63,0.15)' }}>
-                    <td style={{ ...td, color: '#6a6080', fontSize: '0.72rem' }}>Tổng</td>
-                    {modScores.map((v, i) => (
-                      <td key={i} style={{ ...td, textAlign: 'center', color: '#d9ab55', fontWeight: 700 }}>{v}</td>
-                    ))}
-                    <td style={{ ...td, textAlign: 'center', color: '#8a8399' }}>{elTotals}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <p style={{ color: '#6a6080', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', letterSpacing: '0.06em', fontWeight: 600, marginBottom: '0.75rem' }}>NGUYÊN TỐ</p>
-                {EL_LABELS.map((label, i) => (
-                  <div key={i} className="mb-2.5">
-                    <div className="flex justify-between mb-1">
-                      <span style={{ color: EL_COLORS[i], fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>{label}</span>
-                      <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>{elScores[i]} / {elTotals}</span>
-                    </div>
-                    <div style={{ height: '5px', background: 'rgba(200,148,63,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${(elScores[i] / elTotals) * 100}%`, background: EL_COLORS[i], borderRadius: '3px', opacity: 0.8 }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p style={{ color: '#6a6080', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', letterSpacing: '0.06em', fontWeight: 600, marginBottom: '0.75rem' }}>TÍNH CHẤT</p>
-                {MOD_LABELS.map((label, i) => (
-                  <div key={i} className="mb-2.5">
-                    <div className="flex justify-between mb-1">
-                      <span style={{ color: '#c9c3d6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>{label}</span>
-                      <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>{modScores[i]} / {modTotals}</span>
-                    </div>
-                    <div style={{ height: '5px', background: 'rgba(200,148,63,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${(modScores[i] / modTotals) * 100}%`, background: '#d9ab55', borderRadius: '3px', opacity: 0.7 }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ─── Aspect Grid (section 3): 15×15 lower-triangle matrix ─── */}
-        <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
-          <SectionHeader>BẢNG GÓC HỢP CỦA BẢN ĐỒ SAO</SectionHeader>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ borderCollapse: 'collapse', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)' }}>
-              <tbody>
-                {ASPECT_TABLE_OBJECTS.map((p1, i) => (
-                  <tr key={p1}>
-                    {/* Left count column — only for 10 CORE_PLANETS (section 3e) */}
-                    <td style={{ width: '28px', height: '40px', textAlign: 'center', padding: '2px 3px', verticalAlign: 'middle' }}>
-                      {CORE_SET.has(p1) && (majorCount[p1] || 0) > 0 ? (
-                        <span style={{
-                          display: 'inline-block', minWidth: '18px', padding: '1px 3px',
-                          background: 'rgba(200,148,63,0.1)', border: '1px solid rgba(200,148,63,0.3)',
-                          borderRadius: '3px', color: '#d9ab55', fontSize: '0.68rem', textAlign: 'center',
-                          fontFamily: 'var(--font-vietnam)', fontWeight: 700,
-                        }}>
-                          {majorCount[p1]}
-                        </span>
-                      ) : null}
-                    </td>
-                    {/* Row planet symbol (section 3a: column icon header) */}
-                    <td style={{ width: '28px', height: '40px', textAlign: 'right', padding: '2px 5px 2px 0', color: '#d9ab55', fontSize: '0.85rem', fontFamily: 'serif', verticalAlign: 'middle' }}>
-                      {PLANET_SYMBOLS[p1] || p1.slice(0, 2)}
-                    </td>
-                    {/* Matrix cells */}
-                    {ASPECT_TABLE_OBJECTS.map((p2, j) => {
-                      const cellBorder: React.CSSProperties = {
-                        borderRight: '1px solid rgba(200,148,63,0.05)',
-                        borderBottom: '1px solid rgba(200,148,63,0.05)',
-                      }
-                      if (j > i) {
-                        // Upper triangle: blank
-                        return <td key={p2} style={{ width: '32px', height: '40px', background: 'rgba(200,148,63,0.02)', ...cellBorder }} />
-                      }
-                      if (j === i) {
-                        // Diagonal: planet symbol = column header (section 3c)
-                        return (
-                          <td key={p2} style={{ width: '32px', height: '40px', textAlign: 'center', verticalAlign: 'middle', background: 'rgba(200,148,63,0.07)', borderRight: '1px solid rgba(200,148,63,0.12)', borderBottom: '1px solid rgba(200,148,63,0.12)' }}>
-                            <span style={{ color: '#d9ab55', fontFamily: 'serif', fontSize: '0.82rem' }}>
-                              {PLANET_SYMBOLS[p2] || p2.slice(0, 2)}
+                        {row.map((val, mi) => (
+                          <td key={mi} style={{ ...td, textAlign: 'center' }}>
+                            <span style={{
+                              display: 'inline-block', minWidth: '28px', padding: '1px 6px',
+                              background: val > 0 ? 'rgba(200,148,63,0.08)' : 'transparent',
+                              border: val > 0 ? '1px solid rgba(200,148,63,0.18)' : '1px solid transparent',
+                              borderRadius: '3px', color: val > 0 ? '#f4efe6' : '#4a4560',
+                            }}>
+                              {val}
                             </span>
                           </td>
-                        )
-                      }
-                      // Lower triangle (j < i): aspect info (section 3d)
-                      const asp = aspLookup[`${p1}__${p2}`] || aspLookup[`${p2}__${p1}`]
-                      if (!asp) {
-                        return <td key={p2} style={{ width: '32px', height: '40px', ...cellBorder }} />
-                      }
-                      // Type-based color: Hard=red, Soft=blue, Minor=green
-                      const typeClr = asp.type === 'Minor' ? '#00cc00' : asp.type === 'Soft' ? '#5578d4' : '#c84545'
-                      const orbR = orbRoundClient(asp.orb)
-                      return (
-                        <td key={p2} style={{ width: '32px', height: '40px', textAlign: 'center', verticalAlign: 'middle', padding: '1px', position: 'relative', ...cellBorder }}>
-                          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                            <span style={{ position: 'absolute', top: '1px', left: '2px', fontSize: '0.5rem', color: typeClr, lineHeight: 1, fontFamily: 'var(--font-vietnam)', opacity: 0.85 }}>{orbR}</span>
-                            <span style={{ color: typeClr, fontFamily: 'serif', fontSize: '0.8rem', lineHeight: 1 }}>{asp.symbol}</span>
-                            <span style={{ color: typeClr, fontSize: '0.48rem', lineHeight: 1, marginTop: '1px', fontFamily: 'monospace', opacity: 0.8 }}>{fmtOrb(asp.orb)}</span>
-                          </div>
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        ))}
+                        <td style={{ ...td, textAlign: 'center', color: EL_COLORS[ei], fontWeight: 700 }}>{elScores[ei]}</td>
+                      </tr>
+                    ))}
+                    <tr style={{ borderTop: '1px solid rgba(200,148,63,0.15)' }}>
+                      <td style={{ ...td, color: '#6a6080', fontSize: '0.72rem' }}>Tổng</td>
+                      {modScores.map((v, i) => (
+                        <td key={i} style={{ ...td, textAlign: 'center', color: '#d9ab55', fontWeight: 700 }}>{v}</td>
+                      ))}
+                      <td style={{ ...td, textAlign: 'center', color: '#8a8399' }}>{elTotals}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
+          </div>{/* end left column */}
 
-        {/* ─── Dominant Planets ─────────────────────────── */}
-        <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
-          <SectionHeader>HÀNH TINH TẠO NHIỀU GÓC NHẤT</SectionHeader>
-          {dominantPlanets.length === 0 ? (
-            <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', textAlign: 'center', padding: '2rem 0' }}>
-              Không có dữ liệu
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {dominantPlanets.map(dp => (
-                <div key={dp.name} style={{ background: 'rgba(200,148,63,0.04)', border: '1px solid rgba(200,148,63,0.12)', borderRadius: '10px', padding: '14px 16px' }}>
-                  {/* Planet header */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <span style={{ color: '#d9ab55', fontSize: '1.5rem', fontFamily: 'serif', lineHeight: 1 }}>{dp.symbol}</span>
-                    <div>
-                      <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.95rem' }}>{dp.nameVn}</p>
-                      <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>{dp.count} góc chính</p>
+          {/* Planets + Houses gộp chung 1 card */}
+          <div className="rounded-2xl p-5" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
+
+            {/* Vị trí hành tinh */}
+            <SectionHeader>VỊ TRÍ HÀNH TINH</SectionHeader>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2.5 mb-8">
+              {planets.map((p) => (
+                <div
+                  key={p.name}
+                  className="flex items-center justify-between p-2.5 rounded-lg"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.10)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span style={{ color: '#c8943f', fontSize: '1.25rem', fontFamily: 'serif', lineHeight: 1 }}>{p.symbol}</span>
+                    <div className="flex flex-col">
+                      <span style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 500, fontSize: '0.75rem', lineHeight: 1, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        {p.nameVn}
+                        {p.isRetro && <span style={{ color: '#c45252', fontSize: '0.55rem', fontWeight: 700 }}>Rx</span>}
+                      </span>
+                      <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', lineHeight: 1, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <span style={{ fontFamily: 'serif', color: '#c8943f' }}>{p.signSymbol}</span>
+                        {p.signCode}
+                      </span>
                     </div>
                   </div>
-                  {/* Aspect list */}
-                  <div className="space-y-1">
-                    {dp.aspects.map((a, ai) => {
-                      const col = ASPECT_COLORS[a.aspect] || '#808080'
-                      return (
-                        <div key={ai} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
-                          <span style={{ color: col, fontFamily: 'serif', fontSize: '0.9rem', minWidth: '14px', textAlign: 'center' }}>{a.aspSymbol}</span>
-                          <span style={{ color: '#d9ab55', fontFamily: 'serif' }}>{a.partnerSymbol}</span>
-                          <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)' }}>{a.partnerNameVn}</span>
-                          <span style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', marginLeft: 'auto', fontSize: '0.72rem' }}>{fmtOrb(a.orb)}</span>
-                        </div>
-                      )
-                    })}
+                  <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#f4efe6', lineHeight: 1, marginBottom: '4px' }}>{fmtDeg(p.degInSign)}</span>
+                    <span style={{ fontSize: '0.6rem', color: '#c8943f', background: 'rgba(200,148,63,0.1)', border: '1px solid rgba(200,148,63,0.2)', padding: '1px 6px', borderRadius: '3px', lineHeight: 1 }}>
+                      Nhà {p.house}
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
 
-        {/* ─── Tightest Aspects ─────────────────────────── */}
-        <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
-          <SectionHeader>GÓC CHẶT NHẤT</SectionHeader>
-          {tightestAspects.length === 0 ? (
-            <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', textAlign: 'center', padding: '2rem 0' }}>
-              Không tìm thấy góc hợp
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {tightestAspects.map((a, i) => {
-                const col = ASPECT_COLORS[a.aspect] || '#d9ab55'
+            {/* Độ đỉnh 12 nhà */}
+            <SectionHeader>ĐỘ ĐỈNH CỦA 12 NHÀ</SectionHeader>
+            {/* grid-flow-col: ép thứ tự hiển thị dọc (1-2-3 / 4-5-6...) */}
+            <div className="grid grid-cols-2 grid-rows-6 sm:grid-cols-3 sm:grid-rows-4 lg:grid-cols-2 lg:grid-rows-6 xl:grid-cols-3 xl:grid-rows-4 grid-flow-col gap-2.5">
+              {cusps.map((c) => {
+                const specialLabel = c.house === 1 ? 'AC' : c.house === 4 ? 'IC' : c.house === 7 ? 'DC' : c.house === 10 ? 'MC' : String(c.house)
                 return (
-                  <div key={i} className="flex items-center gap-4 flex-wrap" style={{
-                    padding: '10px 14px', borderRadius: '8px',
-                    background: `${col}08`, border: `1px solid ${col}28`,
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: '#d9ab55', fontFamily: 'serif', fontSize: '1.3rem' }}>{a.p1Symbol}</span>
-                      <span style={{ color: col, fontFamily: 'serif', fontSize: '1.4rem', lineHeight: 1 }}>{a.symbol}</span>
-                      <span style={{ color: '#d9ab55', fontFamily: 'serif', fontSize: '1.3rem' }}>{a.p2Symbol}</span>
-                    </div>
-                    <div>
-                      <span style={{ color: '#c9c3d6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
-                        {a.p1} {a.nameVn} {a.p2}
+                  <div
+                    key={c.house}
+                    className="flex items-center justify-between p-2.5 rounded-lg"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.10)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '4px', flexShrink: 0, background: 'rgba(200,148,63,0.1)', border: '1px solid rgba(200,148,63,0.2)', color: '#c8943f', fontSize: '0.6rem', fontWeight: 700, fontFamily: 'var(--font-vietnam)' }}>
+                        {specialLabel}
                       </span>
+                      <span style={{ color: '#c8943f', fontFamily: 'serif', fontSize: '0.9rem' }}>{c.signSymbol}</span>
                     </div>
-                    <div style={{ marginLeft: 'auto' }}>
-                      <span style={{
-                        display: 'inline-block', padding: '3px 10px', borderRadius: '5px',
-                        background: `${col}15`, border: `1px solid ${col}40`,
-                        color: col, fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.9rem',
-                      }}>
-                        orb {fmtOrb(a.orb)}
+                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#f4efe6', lineHeight: 1, marginBottom: '4px' }}>{fmtDeg(c.degInSign)}</span>
+                      <span style={{ fontSize: '0.6rem', color: '#8a8399', fontFamily: 'var(--font-vietnam)', lineHeight: 1 }}>
+                        Chủ: <span style={{ color: '#c8943f', fontFamily: 'serif' }}>{c.rulerSymbol}</span>
                       </span>
                     </div>
                   </div>
                 )
               })}
             </div>
-          )}
+
+          </div>
+        </div>
+
+
+        {/* ─── Aspect Grid (section 3): 15×15 lower-triangle matrix ─── */}
+        <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
+          <SectionHeader>BẢNG GÓC HỢP CỦA BẢN ĐỒ SAO</SectionHeader>
+          <div className="flex flex-col items-center">
+            <div className="overflow-x-auto sm:overflow-x-visible w-full flex justify-center">
+              <div className="flex flex-col gap-[1px] sm:gap-1">
+                {/* Header row — col symbols */}
+                <div className="flex gap-[1px] sm:gap-1">
+                  <div style={{ width: '24px' }} className="h-6 sm:h-8 flex-shrink-0" />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" />
+                  {ASPECT_TABLE_OBJECTS.slice(0, -1).map((p) => (
+                    <div key={p} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center flex-shrink-0" style={{ color: '#8a8399', fontFamily: 'serif', fontSize: '0.82rem' }}>
+                      {PLANET_SYMBOLS[p] || p.slice(0, 2)}
+                    </div>
+                  ))}
+                </div>
+                {/* Data rows — skip first planet (no lower-triangle cells) */}
+                {ASPECT_TABLE_OBJECTS.slice(1).map((p1, rowIndex) => (
+                  <div key={p1} className="flex gap-[1px] sm:gap-1">
+                    {/* Count */}
+                    <div style={{ width: '24px' }} className="h-6 sm:h-8 flex items-center justify-center flex-shrink-0">
+                      {CORE_SET.has(p1) && (majorCount[p1] || 0) > 0 ? (
+                        <span style={{
+                          display: 'inline-block', minWidth: '16px', padding: '1px 2px',
+                          background: 'rgba(200,148,63,0.1)', border: '1px solid rgba(200,148,63,0.3)',
+                          borderRadius: '3px', color: '#d9ab55', fontSize: '0.62rem', textAlign: 'center',
+                          fontFamily: 'var(--font-vietnam)', fontWeight: 700,
+                        }}>
+                          {majorCount[p1]}
+                        </span>
+                      ) : null}
+                    </div>
+                    {/* Row symbol */}
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center flex-shrink-0" style={{ color: '#d9ab55', fontFamily: 'serif', fontSize: '0.82rem' }}>
+                      {PLANET_SYMBOLS[p1] || p1.slice(0, 2)}
+                    </div>
+                    {/* Matrix cells: col 0 to rowIndex+1 (inclusive, last = diagonal) */}
+                    {ASPECT_TABLE_OBJECTS.slice(0, rowIndex + 2).map((p2, colIndex) => {
+                      if (colIndex === rowIndex + 1) {
+                        return (
+                          <div key={p2} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(200,148,63,0.07)', borderRight: '1px solid rgba(200,148,63,0.12)', borderBottom: '1px solid rgba(200,148,63,0.12)' }}>
+                            <span style={{ color: '#d9ab55', fontFamily: 'serif', fontSize: '0.78rem' }}>{PLANET_SYMBOLS[p2] || p2.slice(0, 2)}</span>
+                          </div>
+                        )
+                      }
+                      const asp = aspLookup[`${p1}__${p2}`] || aspLookup[`${p2}__${p1}`]
+                      if (!asp) {
+                        return <div key={p2} className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" style={{ borderRight: '1px solid rgba(200,148,63,0.05)', borderBottom: '1px solid rgba(200,148,63,0.05)' }} />
+                      }
+                      const typeClr = asp.type === 'Minor' ? '#00cc00' : asp.type === 'Soft' ? '#5578d4' : '#c84545'
+                      const orbR = orbRoundClient(asp.orb)
+                      return (
+                        <div
+                          key={p2}
+                          className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0 relative cursor-default"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(200,148,63,0.05)', transition: 'background 0.12s', borderRadius: '2px' }}
+                          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.12)')}
+                          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                        >
+                          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                            <span style={{ position: 'absolute', top: '1px', left: '2px', fontSize: '0.48rem', color: typeClr, lineHeight: 1, fontFamily: 'var(--font-vietnam)', opacity: 0.85 }}>{orbR}</span>
+                            <span style={{ color: typeClr, fontFamily: 'serif', fontSize: '0.75rem', lineHeight: 1 }}>{asp.symbol}</span>
+                            <span style={{ color: typeClr, fontSize: '0.44rem', lineHeight: 1, marginTop: '1px', fontFamily: 'monospace', opacity: 0.8 }}>{fmtOrb(asp.orb)}</span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-5" style={{ fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', color: '#8a8399' }}>
+              {([
+                ['☌', '#d9ab55', 'Trùng tụ (0°)'],
+                ['⚹', '#55b870', 'Lục hợp (60°)'],
+                ['□', '#c84545', 'Vuông góc (90°)'],
+                ['△', '#5578d4', 'Tam hợp (120°)'],
+                ['☍', '#b84060', 'Đối đỉnh (180°)'],
+                ['⚺', '#00cc00', 'Bán Lục Hợp (30°)'],
+                ['⚻', '#00cc00', 'Ngũ Chiếu (150°)'],
+              ] as [string, string, string][]).map(([sym, col, label]) => (
+                <div key={label} className="flex items-center gap-1.5">
+                  <span style={{ color: col, fontFamily: 'serif', fontSize: '0.8rem' }}>{sym}</span>
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ─── Tiêu điểm góc hợp ────────────────────────── */}
+        <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
+          <SectionHeader>TIÊU ĐIỂM GÓC HỢP</SectionHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            {/* Hành tinh tạo nhiều góc nhất */}
+            <div>
+              <h3 style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#c8943f', display: 'inline-block', flexShrink: 0 }} />
+                Hành tinh tạo nhiều góc nhất
+              </h3>
+              {dominantPlanets.length === 0 ? (
+                <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', textAlign: 'center', padding: '2rem 0' }}>Không có dữ liệu</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {dominantPlanets.map(dp => (
+                    <div key={dp.name} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '12px', padding: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(200,148,63,0.1)', border: '1px solid rgba(200,148,63,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <span style={{ color: '#c8943f', fontSize: '1.1rem', fontFamily: 'serif', lineHeight: 1 }}>{dp.symbol}</span>
+                        </div>
+                        <div>
+                          <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.88rem', lineHeight: 1, marginBottom: '3px' }}>{dp.nameVn}</p>
+                          <p style={{ color: '#c8943f', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', lineHeight: 1 }}>{dp.count} góc chính</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {dp.aspects.map((a, ai) => {
+                          const col = ASPECT_COLORS[a.aspect] || '#808080'
+                          return (
+                            <div key={ai} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ color: col, fontFamily: 'serif', fontSize: '0.9rem', lineHeight: 1, minWidth: '12px', textAlign: 'center' }}>{a.aspSymbol}</span>
+                                <span style={{ color: '#c8943f', fontFamily: 'serif' }}>{a.partnerSymbol}</span>
+                                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)' }}>{a.partnerNameVn}</span>
+                              </div>
+                              <span style={{ color: '#4a4560', fontFamily: 'monospace', fontSize: '0.65rem' }}>{fmtOrb(a.orb)}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Góc chặt nhất */}
+            <div>
+              <h3 style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#c84545', display: 'inline-block', flexShrink: 0 }} />
+                Góc hợp chặt chẽ nhất
+              </h3>
+              {tightestAspects.length === 0 ? (
+                <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', textAlign: 'center', padding: '2rem 0' }}>Không tìm thấy góc hợp</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {tightestAspects.map((a, i) => {
+                    const col = ASPECT_COLORS[a.aspect] || '#d9ab55'
+                    const cardBg = a.type === 'Hard' ? 'rgba(200,69,69,0.05)' : a.type === 'Soft' ? 'rgba(85,120,212,0.05)' : 'rgba(200,148,63,0.05)'
+                    const cardBorder = a.type === 'Hard' ? 'rgba(200,69,69,0.2)' : a.type === 'Soft' ? 'rgba(85,120,212,0.2)' : 'rgba(200,148,63,0.2)'
+                    const cardHover = a.type === 'Hard' ? 'rgba(200,69,69,0.10)' : a.type === 'Soft' ? 'rgba(85,120,212,0.10)' : 'rgba(200,148,63,0.10)'
+                    return (
+                      <div
+                        key={i}
+                        style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: '12px', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'background 0.15s', cursor: 'default' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = cardHover)}
+                        onMouseLeave={e => (e.currentTarget.style.background = cardBg)}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0,0,0,0.2)', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <span style={{ color: '#c8943f', fontFamily: 'serif', fontSize: '1.1rem', lineHeight: 1 }}>{a.p1Symbol}</span>
+                            <span style={{ color: col, fontFamily: 'serif', fontSize: '0.9rem', lineHeight: 1 }}>{a.symbol}</span>
+                            <span style={{ color: '#c8943f', fontFamily: 'serif', fontSize: '1.1rem', lineHeight: 1 }}>{a.p2Symbol}</span>
+                          </div>
+                          <span style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500 }}>{a.nameVn}</span>
+                        </div>
+                        <div style={{ color: col, fontFamily: 'monospace', fontSize: '0.65rem', background: `${col}1a`, padding: '2px 6px', borderRadius: '4px', border: `1px solid ${col}33`, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          {fmtOrb(a.orb)}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
 
       </div>
