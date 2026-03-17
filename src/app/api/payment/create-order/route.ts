@@ -5,11 +5,16 @@ import prisma from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-const SERVICE_AMOUNTS: Record<string, number> = {
-  career: 2222,
-  love: 2222,
-  synastry: 2222,
-  transit: 2222,
+const VALID_SERVICES = ['career', 'love', 'synastry', 'transit']
+
+async function getServicePrice(): Promise<number> {
+  try {
+    const cfg = await prisma.config.findUnique({ where: { key: 'service_price' } })
+    const price = cfg ? parseInt(cfg.value, 10) : NaN
+    return isNaN(price) || price <= 0 ? 3333 : price
+  } catch {
+    return 3333
+  }
 }
 
 export async function POST(request: Request) {
@@ -31,10 +36,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const amount = SERVICE_AMOUNTS[service]
-    if (!amount) {
+    if (!VALID_SERVICES.includes(service)) {
       return NextResponse.json({ error: 'Invalid service' }, { status: 400 })
     }
+
+    const amount = await getServicePrice()
 
     const session = await getServerSession(authOptions)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

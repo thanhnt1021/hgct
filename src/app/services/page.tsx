@@ -388,7 +388,7 @@ export default function ServicesPage() {
                 Chọn dịch vụ
               </h1>
               <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>
-                Mỗi báo cáo được AI biên soạn chi tiết và gửi qua email dưới dạng PDF
+                Mỗi báo cáo được các vì sao biên soạn chi tiết và gửi qua email dưới dạng PDF
               </p>
             </div>
 

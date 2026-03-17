@@ -239,7 +239,7 @@ function ProcessingInner() {
   const steps = [
     { pct: 5,  label: 'Tính toán bản đồ sao' },
     { pct: 15, label: 'Phân tích cung hoàng đạo' },
-    { pct: 18, label: 'AI biên soạn luận giải' },
+    { pct: 18, label: 'Vũ trụ biên soạn luận giải' },
     { pct: 90, label: 'Tạo file PDF' },
     { pct: 95, label: 'Gửi email' },
   ]
@@ -286,7 +286,7 @@ function ProcessingInner() {
           style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}
         >
           <span className="mr-2">{icon}</span>
-          AI đang biên soạn luận giải{' '}
+          Vũ trụ đang biên soạn luận giải{' '}
           <strong style={{ color: '#d9ab55' }}>{serviceName}</strong>
           {displayName && (
             <> riêng cho <strong style={{ color: '#f4efe6' }}>{displayName}</strong></>

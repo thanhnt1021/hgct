@@ -100,3 +100,11 @@ model Order {
 
   @@map("orders")
 }
+
+model Config {
+  key       String   @id
+  value     String
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("config")
+}

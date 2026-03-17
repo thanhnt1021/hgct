@@ -172,16 +172,7 @@ export default function LoginPage() {
             className="mt-5 text-center"
             style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
           >
-            Chưa có tài khoản?{' '}
-            <Link
-              href="/auth/register"
-              className="font-semibold transition-colors"
-              style={{ color: '#d9ab55' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#f0cc78')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#d9ab55')}
-            >
-              Đăng ký ngay
-            </Link>
+            Website tạm thời không nhận đăng ký mới
           </div>
         </div>
 

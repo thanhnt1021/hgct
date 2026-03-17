@@ -107,8 +107,11 @@ BANK_ACCOUNT_NAME=               # Tên chủ tài khoản (viết hoa, đúng n
 BANK_NAME=                       # Tên ngân hàng đúng format SePay (vd: TPBank, MBBank, Vietcombank, ACB...)
 
 # Telegram Notifications (thông báo đơn hàng)
-TELEGRAM_BOT_TOKEN=              # Bot token của @nguyclaudebot (lấy từ /root/.claude/hooks/telegram_config.env)
 OPENROUTER_MANAGEMENT_KEY=       # Management Key từ openrouter.ai/settings/keys (khác với OPENROUTER_API_KEY thông thường)
+
+# Admin Bot (@hatgiongchiemtinhbot) — order notifications + admin commands
+TELEGRAM_ADMIN_BOT_TOKEN=            # Token của @hatgiongchiemtinhbot
+TELEGRAM_ADMIN_WEBHOOK_SECRET=       # Random hex: node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
 ```
 
 Sau khi tạo `.env.local`, copy vào standalone:

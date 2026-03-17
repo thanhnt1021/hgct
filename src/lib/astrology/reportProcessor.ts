@@ -37,7 +37,7 @@ const MIN_CHARS: Record<string, number> = {
 const AI_LABELS = [
   { at: 18, label: 'Vũ trụ đang kết nối...' },
   { at: 30, label: 'Đang giải mã các chòm sao...' },
-  { at: 45, label: 'AI đang biên soạn luận giải...' },
+  { at: 45, label: 'Vũ trụ đang biên soạn luận giải...' },
   { at: 60, label: 'Đang khám phá bản đồ sao của bạn...' },
   { at: 75, label: 'Đang hoàn thiện nội dung...' },
   { at: 83, label: 'Gần xong rồi...' },

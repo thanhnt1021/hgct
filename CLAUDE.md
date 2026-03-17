@@ -179,7 +179,11 @@ src/
 - [x] Dash bullet line break fix — inline `- ` list items bị dồn thành paragraph → tách thành dòng riêng: `splitInlineDashBullets()` pre-processing + `dash_bullet` classifyLine type + CSS `.dash-bullet` + prompt rules (vanhan/love/career) yêu cầu mỗi `- ` item xuống dòng riêng
 - [x] Vanhan KB integration — inject KB data từ tab "Tool Vận Hạn" vào prompt: area descriptions (THUẬN LỢI/ỔN ĐỊNH/THÁCH THỨC) per house, planet transit descriptions (Jupiter/Saturn/Uranus/Neptune/Pluto) per house, general summary; fix "Hội Tụ" → "Trùng" cho Conjunction; thêm rule 5 major aspects only + KB usage rule trong vanhan.txt
 - [x] Vanhan scoring match mo — `computeHouseScores` rewrite cho kết quả giống hệt mo: (1) `findAspectPeriods` period-based detection (orb<3° threshold + boundary bisection + exact hits) thay cho flat zero-crossing; (2) Conjunction/Opposition fix bằng target-point approach; (3) transit points đếm 1 lần/planet/house; (4) scan ±30 ngày rộng hơn analysis range; (5) per-house natal targets (cusp planet + house ruler); (6) chỉ 5 major aspects; (7) Year Conclusion formula (timĐỏ+timVàng > timĐen → THUẬN LỢI)
-- [x] Telegram order notifications — sau mỗi report hoàn thành tự động gửi vào topic Telegram: dịch vụ, tên/email khách, số tiền, OR Fee ($), OR VND (VCB Sell rate real-time), OR Balance; sequential flow: chờ 15s → lấy fee (retry 2×10s nếu null) → balance + VCB rate song song → gửi; gen ID capture từ SSE chunk `id` field
+- [x] Telegram order notifications — sau mỗi report hoàn thành tự động gửi vào topic Telegram: dịch vụ, tên/email khách, số tiền, OR Fee ($), OR VND (VCB Sell rate real-time), OR Balance; sequential flow: chờ 15s → lấy fee (retry 2×10s nếu null) → balance + VCB rate song song → gửi; gen ID capture từ SSE chunk `id` field; dùng @hatgiongchiemtinhbot
+- [x] Chặn đăng ký mới — `/api/auth/register` trả 403; Google OAuth không tạo user mới nếu email chưa có; login page ẩn link đăng ký
+- [x] Giá dịch vụ dynamic từ DB — `config` table (`service_price` key); API `create-order` đọc từ DB; admin set giá qua Telegram bot `/setprice`
+- [x] Admin Telegram bot (@hatgiongchiemtinhbot) — webhook `/api/telegram-admin/[secret]/webhook`; chỉ admin ID 1247334831 được dùng; `/setprice`, `/getprice`, `/help`; restart services sau khi update giá
+- [x] Wording fix — thay "AI đang biên soạn" → "Vũ trụ đang biên soạn" trong reportProcessor.ts, processing/page.tsx, services/page.tsx
 - [x] `/chart` dominant planets algorithm — tie-breaking cải thiện để match mo: max-count filter → global min orb_round → total orb_round sort
 - [x] `/chart` page redesign — layout 2 cột: cột trái (Wheel + BẢNG NGUYÊN TỐ & TÍNH CHẤT); Elements (Lửa/Đất/Khí/Nước) + Modality (Khởi/Cố/Biến) dạng progress bar %; Nhà Trội dạng chips (symbol hành tinh + điểm); aspect legend "Bán Lục Hợp" + "Ngũ Chiếu" tách riêng
 - [x] PDF `[SUBTITLE]` marker — gray italic subtitle (NunitoItalic 12pt #6b7280) hiện giữa h2 và red rule; `pendingRule` state trong `buildHtml()` delay chèn `<hr class="section-rule">` để subtitle có thể chen vào trước; `title_heading` (XUNG ĐỘT/HÒA HỢP) get inline `<hr>` ngay; `.section` CSS bỏ `border-bottom` + `padding-bottom`
@@ -188,7 +192,6 @@ src/
 - [x] Section titles v2 — career (7 sections mới + `[SUBTITLE]` cho tất cả + `{greeting}` placeholder + `[CLOSING]` closing); love (6 sections, subtitle cho 2/3/4, fixed "Bạn yêu mến!" opening, `[CLOSING]`); synastry (6 sections, subtitle cho 1-4, fixed "Bạn yêu mến!" opening, `[CLOSING]`)
 
 ## What's TODO
-- [ ] Đặt giá thật cho từng dịch vụ trong `src/app/api/payment/create-order/route.ts` (hiện tại đang để 2222đ để test)
 
 ## Known Fixes Applied
 - `siderealTime` → `siderialTime` (swisseph library typo)

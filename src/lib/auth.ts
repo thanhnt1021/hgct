@@ -88,22 +88,8 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === 'google' && user.email) {
         const existing = await prisma.user.findUnique({ where: { email: user.email } })
         if (!existing) {
-          const uid = crypto.randomUUID()
-          let baseUsername = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '')
-          if (!baseUsername) baseUsername = 'user'
-          // Ensure unique username
-          let username = baseUsername
-          const taken = await prisma.user.findUnique({ where: { username } })
-          if (taken) username = baseUsername + '_' + uid.slice(0, 4)
-          await prisma.user.create({
-            data: {
-              username,
-              email: user.email,
-              passwordHash: '',
-              userUid: uid,
-              createdAt: new Date().toISOString(),
-            },
-          })
+          // Registration closed — block new Google accounts
+          return false
         }
       }
       return true
