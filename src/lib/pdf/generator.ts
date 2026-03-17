@@ -379,10 +379,12 @@ async function buildVanhanPdf(contentPdfBuffer: Buffer): Promise<Buffer> {
 
 // Footer template for Puppeteer's native displayHeaderFooter.
 // Renders INSIDE the bottom margin area — never overlaps with page content.
+// padding-bottom: 12mm lifts the footer text above any border/decoration at the
+// page bottom edge (measured from vanhan bg image: galaxy border = 10.4mm).
 const FOOTER_TEMPLATE = `<div style="
   box-sizing: border-box;
   width: 100%;
-  padding: 0 25mm;
+  padding: 0 25mm 12mm;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 10pt;
   color: #9ca3af;
