@@ -9,8 +9,8 @@ export const PLANET_SYMBOLS: Record<string, string> = {
 
 export const ZODIAC_SYMBOLS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓']
 
-// Aspect grid: 10 core + True Node + Chiron + Vertex + Asc + MC (15 objects, no Lilith/South Node)
+// Aspect grid: 10 core planets + Asc + MC (12 objects)
 export const ASPECT_TABLE_OBJECTS = [
   'Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn',
-  'Uranus','Neptune','Pluto','True Node','Chiron','Vertex','Asc','MC',
+  'Uranus','Neptune','Pluto','Asc','MC',
 ]

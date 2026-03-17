@@ -10,6 +10,7 @@ export interface JobResult {
   emailSent?: boolean
   email?: string
   recoveryToken?: string  // set when job failed and order has recovery token
+  autoRetry?: boolean     // true → processing page silent-redirects to /recover (first failure only)
 }
 
 export interface Job {
@@ -20,6 +21,7 @@ export interface Job {
   result?: JobResult
   error?: string
   createdAt: number
+  lastActivity?: number  // Fix A: in-memory only — updated by updateJob, used for stuck detection
   profileUidA?: string
   profileUidB?: string
   pdfExpiresAt?: string  // ISO string — set when PDF moved to soon_delete
@@ -50,6 +52,7 @@ export function createJob(id: string, meta?: JobMeta): Job {
     progress: 0,
     label: 'Đang khởi tạo...',
     createdAt: Date.now(),
+    lastActivity: Date.now(),
     profileUidA: meta?.profileUidA,
     profileUidB: meta?.profileUidB,
   }
@@ -70,7 +73,10 @@ export function createJob(id: string, meta?: JobMeta): Job {
 
 export function updateJob(id: string, updates: Partial<Omit<Job, 'id' | 'createdAt'>>) {
   const job = jobs.get(id)
-  if (job) Object.assign(job, updates)
+  if (job) {
+    Object.assign(job, updates)
+    job.lastActivity = Date.now()  // Fix A: refresh activity timestamp on every update
+  }
   const dbUpdates: Record<string, unknown> = {}
   if (updates.status !== undefined) dbUpdates.status = updates.status
   if (updates.progress !== undefined) dbUpdates.progress = updates.progress
@@ -94,7 +100,10 @@ export function generateRecoveryToken(): string {
 }
 
 function markStuckIfNeeded(job: Job): void {
-  if (job.status === 'processing' && Date.now() - job.createdAt > STUCK_TIMEOUT_MS) {
+  // Fix A: use lastActivity (last progress update time) instead of createdAt
+  // → prevents false positives for long-running Transit/Synastry jobs that actively update progress
+  const lastSeen = job.lastActivity ?? job.createdAt
+  if (job.status === 'processing' && Date.now() - lastSeen > STUCK_TIMEOUT_MS) {
     job.status = 'error'
     job.label = 'Lỗi'
     job.error = STUCK_ERROR
@@ -119,6 +128,8 @@ export async function getJobFromDb(id: string): Promise<Job | undefined> {
       result: dbJob.result as JobResult | undefined,
       error: dbJob.error ?? undefined,
       createdAt: dbJob.createdAt.getTime(),
+      // lastActivity intentionally not set for DB-loaded jobs:
+      // → markStuckIfNeeded falls back to createdAt (sweep already handles orphaned jobs)
       profileUidA: dbJob.profileUidA ?? undefined,
       profileUidB: dbJob.profileUidB ?? undefined,
       pdfExpiresAt: dbJob.pdfExpiresAt?.toISOString(),
@@ -147,6 +158,8 @@ export async function cancelJob(id: string): Promise<void> {
   await prisma.job.delete({ where: { id } }).catch(() => {})
 }
 
+export const MAX_RETRIES = 3
+
 // Startup sweep: recover orphaned jobs from previous server run
 // Logic: jobs in DB with status='processing' NOT in in-memory map → from previous run → mark failed + recovery token
 async function sweepStuckJobsOnce() {
@@ -158,39 +171,124 @@ async function sweepStuckJobsOnce() {
       // Skip jobs this server instance created (they're in memory)
       if (global.__hgctJobs?.has(dbJob.id)) continue
 
-      // Mark orphaned job as error
-      await prisma.job.update({
-        where: { id: dbJob.id },
-        data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR },
-      }).catch(() => {})
       fixedCount++
 
-      // Find linked order and generate recovery token
+      // Find linked order (needed for autoRetry decision)
       const order = await prisma.order.findFirst({
         where: { jobId: dbJob.id },
       }).catch(() => null)
 
-      if (!order || order.recoveryToken) continue // no order or already has token
+      const retryCount = order?.retryCount ?? 0
+      // autoRetry: true only on first failure (retryCount=0), silent redirect on processing page
+      const autoRetry = retryCount === 0
 
+      // Generate new recovery token (rotate — clears stale token from previous attempt)
+      const token = order ? generateRecoveryToken() : null
+
+      // Fix C: Update Order FIRST — only embed token in job.result if Order update succeeds
+      // → prevents token mismatch (job.result has token but Order doesn't)
+      let orderUpdated = false
+      if (order && token) {
+        try {
+          await prisma.order.update({
+            where: { id: order.id },
+            data: { status: 'failed', recoveryToken: token },
+            // Note: retryCount is incremented in /api/recover when user retries, not here
+          })
+          orderUpdated = true
+        } catch (err) {
+          console.error(`[jobs] Sweep: order update failed for ${order.id}:`, err)
+        }
+      }
+
+      // Mark orphaned job as error — embed token in result ONLY if order was updated successfully
+      await prisma.job.update({
+        where: { id: dbJob.id },
+        data: {
+          status: 'error',
+          label: 'Lỗi',
+          error: STUCK_ERROR,
+          result: orderUpdated && token ? { recoveryToken: token, autoRetry } : undefined,
+        },
+      }).catch(() => {})
+
+      if (!order || !token || !orderUpdated) continue
+
+      // Fix G: Send recovery email only on 2nd+ failure (autoRetry=false)
+      // First failure: processing page auto-redirects silently → email confuses user
+      // If auto-retry also fails, next sweep sends email (retryCount=1, autoRetry=false)
+      if (!autoRetry) {
+        try {
+          const iData = (order.profileData as Record<string, unknown>) || {}
+          const name = (iData.name as string) || (iData.ten as string) || ''
+          await sendRecoveryEmail({ to: order.email, service: order.service, token, name })
+          console.log(`[jobs] Sweep: recovery email sent for order ${order.id} (token: ${token})`)
+        } catch (err) {
+          console.error(`[jobs] Recovery email failed for order ${order.id}:`, err)
+        }
+      }
+
+      console.log(`[jobs] Sweep: order ${order.id} → token rotated, autoRetry=${autoRetry}, retryCount=${retryCount}`)
+    }
+
+    if (fixedCount > 0) console.log(`[jobs] Startup sweep: fixed ${fixedCount} orphaned job(s)`)
+
+    // Fix D: Also clean up orders stuck in 'retrying' state (from crashed /api/recover calls)
+    await sweepStuckRetryingOrders()
+  } catch (err) {
+    console.error('[jobs] sweepStuckJobsOnce error:', err)
+  }
+}
+
+// Fix D: Find orders stuck at 'retrying' without an active job → reset to 'failed' so recovery can proceed
+async function sweepStuckRetryingOrders() {
+  try {
+    const retryingOrders = await prisma.order.findMany({ where: { status: 'retrying' } })
+    if (retryingOrders.length === 0) return
+
+    for (const order of retryingOrders) {
+      // If job is in memory and still processing on THIS server instance, leave it alone
+      if (order.jobId && global.__hgctJobs?.has(order.jobId)) continue
+
+      // Check DB — if job is still processing, leave it alone
+      if (order.jobId) {
+        const job = await prisma.job.findUnique({
+          where: { id: order.jobId },
+          select: { status: true },
+        }).catch(() => null)
+        if (job?.status === 'processing') continue
+      }
+
+      // Order is stuck in 'retrying' without an active job → reset to 'failed' + new token
       const token = generateRecoveryToken()
+      const retryCount = order.retryCount ?? 0
+      const autoRetry = retryCount === 0
+
       try {
         await prisma.order.update({
           where: { id: order.id },
           data: { status: 'failed', recoveryToken: token },
         })
-        // Extract name from profileData (inputData)
-        const iData = (order.profileData as Record<string, unknown>) || {}
-        const name = (iData.name as string) || (iData.ten as string) || ''
-        await sendRecoveryEmail({ to: order.email, service: order.service, token, name })
-        console.log(`[jobs] Startup sweep: recovery email sent for order ${order.id} (token: ${token})`)
+        // Update job result with new token (best-effort)
+        if (order.jobId) {
+          await prisma.job.update({
+            where: { id: order.jobId },
+            data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR, result: { recoveryToken: token, autoRetry } },
+          }).catch(() => {})
+        }
+        // Fix G applied here too: email only on 2nd+ failure
+        if (!autoRetry) {
+          const iData = (order.profileData as Record<string, unknown>) || {}
+          const name = (iData.name as string) || (iData.ten as string) || ''
+          await sendRecoveryEmail({ to: order.email, service: order.service, token, name }).catch(() => {})
+        }
+        console.log(`[jobs] Sweep: cleaned stuck retrying order ${order.id} (retryCount=${retryCount}, autoRetry=${autoRetry})`)
       } catch (err) {
-        console.error(`[jobs] Recovery token/email failed for order ${order.id}:`, err)
+        console.error(`[jobs] Failed to clean stuck retrying order ${order.id}:`, err)
       }
     }
-
-    if (fixedCount > 0) console.log(`[jobs] Startup sweep: fixed ${fixedCount} orphaned job(s)`)
   } catch (err) {
-    console.error('[jobs] sweepStuckJobsOnce error:', err)
+    console.error('[jobs] sweepStuckRetryingOrders error:', err)
   }
 }
 

@@ -165,7 +165,8 @@ src/
 - [x] Lưu Order vào DB — `orders` table ghi khi tạo báo cáo (pending → completed)
 - [x] **SePay payment integration** — free user thanh toán QR chuyển khoản per-order; `processReport` extracted ra `src/lib/astrology/reportProcessor.ts`; webhook tự động tạo report sau khi nhận tiền; polling frontend 3s; countdown 15 phút; QR từ `qr.sepay.vn`
 - [x] PDF cải thiện — tăng font size, footer native puppeteer, orphan/widow control, fix blank page
-- [x] Auto-timeout stuck jobs — sweep 15 phút khi restart + `markStuckIfNeeded` khi poll; nút Hủy báo cáo trên `/processing`
+- [x] Auto-timeout stuck jobs — sweep khi restart + `markStuckIfNeeded` khi poll (dùng `lastActivity` thay `createdAt` tránh false positive với Transit/Synastry); nút Hủy báo cáo trên `/processing`
+- [x] Order recovery system — `/api/recover`: atomic lock + rollback nếu crash (không kẹt `retrying`); max 3 retries; sweep rotate token + autoRetry flag; sweep dọn `retrying` orders bị stuck; processing page tự silent-redirect lần đầu fail, frozen detection 90s; email chỉ gửi từ lần 2+ (lần đầu auto-redirect handle)
 - [x] OpenRouter retry — ECONNRESET/terminated tự retry 3 lần; `StreamInterruptedError` khi stream kết thúc không có `[DONE]`
 - [x] `max_tokens` tăng 16000 → 32000 — Vận Hạn cần ~22900 tokens, 16000 gây cắt giữa Phần 5
 - [x] MIN_CHARS per service — transit: 12000, synastry: 10000, career/love: 4000; tự retry nếu output quá ngắn
