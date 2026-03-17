@@ -73,7 +73,7 @@ src/
       email/              # Gửi email
       job/, jobs/         # Job status tracking
       location/           # Nominatim geocoding
-      payment/confirm/    # Payment webhook (placeholder)
+      payment/confirm/    # SePay webhook — nhận callback thanh toán, tự động tạo report
       pdf/                # PDF generation endpoint
       profiles/           # CRUD profiles
       user/account|avatar|upgrade/  # Quản lý tài khoản
@@ -102,6 +102,7 @@ src/
       love/               # manager + prompt
       relationship/       # manager + prompt (synastry)
       vanhan/             # manager + prompt (transit)
+    astrology/reportProcessor.ts  # processReport() extracted — dùng bởi cả report API và SePay webhook
     auth.ts               # NextAuth config
     db.ts                 # Prisma client
     email.ts              # sendReportEmail()
@@ -177,6 +178,11 @@ src/
 - [x] Dash bullet line break fix — inline `- ` list items bị dồn thành paragraph → tách thành dòng riêng: `splitInlineDashBullets()` pre-processing + `dash_bullet` classifyLine type + CSS `.dash-bullet` + prompt rules (vanhan/love/career) yêu cầu mỗi `- ` item xuống dòng riêng
 - [x] Vanhan KB integration — inject KB data từ tab "Tool Vận Hạn" vào prompt: area descriptions (THUẬN LỢI/ỔN ĐỊNH/THÁCH THỨC) per house, planet transit descriptions (Jupiter/Saturn/Uranus/Neptune/Pluto) per house, general summary; fix "Hội Tụ" → "Trùng" cho Conjunction; thêm rule 5 major aspects only + KB usage rule trong vanhan.txt
 - [x] Vanhan scoring match mo — `computeHouseScores` rewrite cho kết quả giống hệt mo: (1) `findAspectPeriods` period-based detection (orb<3° threshold + boundary bisection + exact hits) thay cho flat zero-crossing; (2) Conjunction/Opposition fix bằng target-point approach; (3) transit points đếm 1 lần/planet/house; (4) scan ±30 ngày rộng hơn analysis range; (5) per-house natal targets (cusp planet + house ruler); (6) chỉ 5 major aspects; (7) Year Conclusion formula (timĐỏ+timVàng > timĐen → THUẬN LỢI)
+- [x] `/chart` dominant planets algorithm — tie-breaking cải thiện để match mo: max-count filter → global min orb_round → total orb_round sort
+- [x] PDF `[SUBTITLE]` marker — gray italic subtitle (NunitoItalic 12pt #6b7280) hiện giữa h2 và red rule; `pendingRule` state trong `buildHtml()` delay chèn `<hr class="section-rule">` để subtitle có thể chen vào trước; `title_heading` (XUNG ĐỘT/HÒA HỢP) get inline `<hr>` ngay; `.section` CSS bỏ `border-bottom` + `padding-bottom`
+- [x] PDF `[CLOSING]` marker — khi gặp `[CLOSING]` trong output AI, kích hoạt `closingMode`: mọi dòng sau đó bị force thành `signature` (gray italic), kể cả body text — dùng cho lời cảm ơn cuối bài
+- [x] Pronoun bạn — career/love/synastry đổi xưng hô `anh/chị` → `bạn` thống nhất; career có age-conditional greeting (`≥22` người đi làm vs `<22` học sinh); `Chủ lá số` → `Chủ bản đồ sao` trong career brief; `SIGN_KEYS` broadened: `"Cảm ơn bạn đã tin tưởng"` → `"Cảm ơn bạn đã"`
+- [x] Section titles v2 — career (7 sections mới + `[SUBTITLE]` cho tất cả + `{greeting}` placeholder + `[CLOSING]` closing); love (6 sections, subtitle cho 2/3/4, fixed "Bạn yêu mến!" opening, `[CLOSING]`); synastry (6 sections, subtitle cho 1-4, fixed "Bạn yêu mến!" opening, `[CLOSING]`)
 
 ## What's TODO
 - [ ] Đặt giá thật cho từng dịch vụ trong `src/app/api/payment/create-order/route.ts` (hiện tại đang để 2222đ để test)

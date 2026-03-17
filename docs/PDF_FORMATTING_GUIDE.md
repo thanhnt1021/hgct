@@ -43,6 +43,8 @@ essayText (raw AI output)
 **Giữ:**
 - `[KTLUẬN]...` → render thành red-box (khung kết luận đỏ)
 - `[KTTIỂU]...` → render thành mini-box (khung kết luận tiểu mục đỏ nhỏ hơn)
+- `[SUBTITLE] text...` → render thành gray italic subtitle dưới section heading
+- `[CLOSING]` (dòng riêng, không có text sau) → kích hoạt closingMode, mọi dòng sau thành signature
 - Tất cả text thường
 
 ---
@@ -51,16 +53,28 @@ essayText (raw AI output)
 
 | Type | Điều kiện | HTML element |
 |------|-----------|-------------|
-| `section_heading` | match `/^\d+\.\s+\S/` và `length < 120` | `<h2 class="section">` |
-| `title_heading` | `isVnTitleHeading()` — nhiều chữ hoa, không phải câu văn | `<h2 class="section">` |
+| `section_heading` | match `/^\d+\.\s+\S/` và `length < 120` | `<h2 class="section">` + `pendingRule = true` |
+| `title_heading` | `isVnTitleHeading()` — nhiều chữ hoa, không phải câu văn | `<h2 class="section"><hr class="section-rule">` (inline) |
+| `section_subtitle` | bắt đầu bằng `[SUBTITLE]` | `<p class="section-subtitle">` + flush `pendingRule` ngay sau |
+| `closing_start` | `=== '[CLOSING]'` (exact match) | không render — kích hoạt `closingMode = true` |
 | `subheading` | kết thúc bằng `:` và `length < 90` | `<h3 class="subheading">` |
 | `opener` | bắt đầu bằng `kính gửi` (case-insensitive) | `<p class="opener">` |
-| `signature` | bắt đầu bằng `Trân trọng`, `Claude –`, `Chúc `, `— Claude`, `Hạt Giống Chiêm Tinh`, v.v. | `<p class="signature">` |
+| `signature` | bắt đầu bằng `Trân trọng`, `Chúc `, `Hạt Giống Chiêm Tinh`, `Cảm ơn bạn đã`, v.v. **hoặc** bất kỳ dòng nào sau `[CLOSING]` (closingMode) | `<p class="signature">` |
 | `bullet` | bắt đầu bằng `* ` | `<p class="bullet">` |
 | `bullet_indent` | bắt đầu với `   * ` (≥3 spaces + `* `) | `<p class="bullet-indent">` |
+| `dash_bullet` | bắt đầu bằng `- ` | `<p class="dash-bullet">` |
 | `red_box` | bắt đầu bằng `[KTLUẬN]` | `<div class="red-box">` |
 | `mini_box` | bắt đầu bằng `[KTTIỂU]` | `<div class="mini-box">` |
 | `body` | mặc định | `<p class="body">` |
+
+**`isBracketNote()` — dòng `[...]` bị filter trong `cleanForPdf()`:**
+Loại trừ khỏi filter: `[KTLUẬN]`, `[KTTIỂU]`, `[SUBTITLE]` (startsWith), `[CLOSING]` (exact match).
+
+**`pendingRule` state trong `buildHtml()`:**
+- `section_heading` → set `pendingRule = true`
+- Dòng tiếp theo là `section_subtitle` → flush rule **sau** subtitle: `subtitle html` rồi `<hr class="section-rule">`
+- Dòng tiếp theo KHÔNG phải subtitle → flush rule **trước** dòng đó: `<hr class="section-rule">` rồi nội dung
+- `closingMode = true` khi gặp `closing_start`; mọi `kind` sau đó bị override thành `signature`
 
 **Lưu ý `isVnTitleHeading()`:**
 - Không match nếu `length > 80` hoặc kết thúc `.,:;!?`
@@ -106,9 +120,11 @@ body          { font-size: 14.9pt; line-height: 1.55; font-family: Nunito; color
 .cover-name   { font: GreatVibes 50.8pt; }        /* single profile */
 .cover-name-sm{ font: GreatVibes 38.9pt; }        /* synastry — 2 tên */
 
-.section      { font: MontserratBold 19.5pt; color: #dc2626;
-                border-bottom: 1pt solid #dc2626; margin: 14pt 0 6pt; }
+/* ⚠️ .section KHÔNG có border-bottom — red rule được chèn bởi buildHtml() dưới dạng <hr> */
+.section      { font: MontserratBold 19.5pt; color: #dc2626; margin: 14pt 0 6pt; }
 .section-first{ margin-top: 0; }
+.section-subtitle { font: NunitoItalic 12pt; color: #6b7280; margin: -2pt 0 4pt; }
+.section-rule { border: none; border-top: 1pt solid #dc2626; margin: 0 0 8pt; }
 
 .subheading   { font: MontserratBold 16.5pt; color: #1f2937;
                 margin: 8pt 0 4pt;
@@ -119,10 +135,11 @@ body          { font-size: 14.9pt; line-height: 1.55; font-family: Nunito; color
 .bullet       { padding-left: 12pt; text-indent: -12pt; }
 .bullet-indent{ font: NunitoItalic 13.5pt; color: #dc2626;
                 padding-left: 28pt; text-indent: -12pt; }
+.dash-bullet  { padding-left: 12pt; text-indent: -12pt; font-style: italic; }
 .signature    { font: NunitoItalic 11pt; color: #6b7280; orphans: 4; widows: 4; }
 
-.red-box      { font: MontserratBold 16.5pt; border: 1.5pt solid #dc2626;
-                background: #fff5f5; padding: 8pt 10pt; margin: 6pt 0 8pt;
+.red-box      { font: MontserratBold 13.5pt; border: 1.5pt solid #dc2626;
+                background: #fff5f5; padding: 18px 32px; margin: 20px 20px;
                 page-break-inside: avoid; break-inside: avoid; }
 .mini-box     { font: Nunito 15.5pt; border: 1.2pt solid #dc2626;
                 background: #fef9f9; padding: 7pt 10pt; margin: 5pt 0 7pt;
@@ -265,13 +282,44 @@ Thay thế: dùng dấu phẩy, dấu chấm phẩy, hoặc viết lại câu.
 - `page-break-inside: avoid`
 - Section 1 (Tổng Quan) và Section 6 (Sức Khỏe) của Vanhan: dùng `[KTLUẬN]`, không phải `[KTTIỂU]`
 
-### 8.4 Subheading
+### 8.4 Marker `[SUBTITLE]` — Subtitle Xám Nghiêng
+
+Đặt ngay sau tiêu đề section (dòng `N. Tiêu đề`), trên cùng một dòng mới. Format:
+```
+1. Bạn thật sự là ai?
+[SUBTITLE] Tổng quan về con người và năng lượng cốt lõi của bạn
+```
+- Render thành `<p class="section-subtitle">` — NunitoItalic 12pt, màu `#6b7280`
+- Red rule `<hr class="section-rule">` được chèn **sau** subtitle (không phải sau h2)
+- Nếu không có `[SUBTITLE]`: red rule được chèn **trước** dòng nội dung đầu tiên
+- `title_heading` (XUNG ĐỘT/HÒA HỢP): không dùng `pendingRule`, rule chèn inline ngay sau h2
+
+### 8.5 Marker `[CLOSING]` — Lời Cảm Ơn Kết Thúc
+
+Đặt trước đoạn closing (lời cảm ơn cuối bài), **trên dòng riêng**:
+```
+[CLOSING]
+Cảm ơn bạn đã lựa chọn Hạt Giống Chiêm Tinh.
+
+Hy vọng ...
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh
+```
+- `[CLOSING]` trigger `closingMode = true` trong `buildHtml()`
+- Mọi dòng sau đó (kể cả body text, blank lines) bị force thành `kind = 'signature'`
+- Render thành `<p class="signature">` — NunitoItalic 11pt, màu `#6b7280`
+- `[CLOSING]` không render thành HTML — chỉ là trigger
+- **Không cần list `"Cảm ơn bạn đã..."` trong SIGN_KEYS** nữa — nhưng SIGN_KEYS vẫn là fallback khi AI output không có `[CLOSING]`
+
+### 8.6 Subheading
 
 Dòng kết thúc bằng `:` và `length < 90` → tự động được detect là subheading → render `<h3 class="subheading">`.
 
-Prompt nên hướng dẫn AI viết subheading theo format này (ví dụ: `Lỗi Tính Cách Của Chị Liên:`).
+Prompt nên hướng dẫn AI viết subheading theo format này (ví dụ: `Lỗi Tính Cách Của Bạn Liên:`).
 
-### 8.5 Không Dùng Markdown
+### 8.7 Không Dùng Markdown
 
 AI output không được chứa `**bold**`, `# heading`, `---`, backtick. `cleanForPdf()` sẽ strip nhưng tốt hơn là không có.
 
@@ -319,6 +367,8 @@ AI output không được chứa `**bold**`, `# heading`, `---`, backtick. `clea
 | max_tokens 16k cắt Vận Hạn | Transit cần ~22900 tokens | Tăng `max_tokens: 32000` |
 | Subheading rỗng (absent body) | AI viết subheading nhưng body toàn absent phrases | `cleanForPdf()` detect và bỏ cả subheading lẫn body |
 | red-box/mini-box bị cắt giữa trang | Không có page-break-inside: avoid | Thêm CSS `page-break-inside: avoid; break-inside: avoid` |
+| Red rule nằm sát h2 không có subtitle | `.section` dùng `border-bottom` → không thể chen subtitle vào giữa | Bỏ `border-bottom` khỏi `.section`, dùng `pendingRule` state + `<hr class="section-rule">` |
+| Closing text (cảm ơn) render như body | Không có cơ chế force-gray cho đoạn closing | Marker `[CLOSING]` kích hoạt `closingMode` → force signature |
 
 ---
 

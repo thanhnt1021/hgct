@@ -43,6 +43,7 @@ Browser (Client)
         ├── /api/job/:id            GET  — poll job progress
         ├── /api/jobs               GET  — list jobs (admin)
         ├── /api/pdf/:id            GET  — download PDF từ /var/hgct/pdfs/
+        ├── /api/payment/confirm    POST — SePay webhook, tự động gọi processReport()
         ├── /api/chart              GET/POST — lưu/lấy natal chart vào DB
         ├── /api/profiles           GET/POST/PUT/DELETE — CRUD profiles
         ├── /api/location/search    GET  — Nominatim geocoding
@@ -176,6 +177,7 @@ Profile page → nhập upgrade code
 │   │   │   ├── love/               — manager, prompt
 │   │   │   ├── relationship/       — manager, prompt
 │   │   │   └── vanhan/             — manager, prompt
+│   │   ├── astrology/reportProcessor.ts — processReport() — dùng bởi report API + SePay webhook
 │   │   ├── auth.ts                 — NextAuth config
 │   │   ├── db.ts                   — Prisma client singleton
 │   │   ├── jobs.ts                 — Job store (DB + in-memory cache)
