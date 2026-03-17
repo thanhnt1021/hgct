@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { calculateChart, getZodiac, getHouseOfPlanet, checkAspect } from '@/lib/astrology/calculations'
+import { calculateChart, getZodiac, getHouseOfPlanet, checkAspect, getDominantHousesSorted } from '@/lib/astrology/calculations'
 import {
   PLANET_SYMBOLS, PLANET_NAMES_VN, ZODIAC_SYMBOLS, ZODIAC_MATRIX,
   PLANET_POINTS, RULER_MAP, ASPECTS_DEF,
@@ -156,36 +156,22 @@ export async function POST(request: Request) {
       }
     }
 
-    // Funnel filter: find all winners
+    // Filter to max-count planets
     const maxCount = Math.max(...CORE_PLANETS.map(p => stats[p].count))
     let candidates = CORE_PLANETS.filter(p => stats[p].count === maxCount && stats[p].count > 0)
 
-    const funnelStep = (fn: (arr: string[]) => string[]) => {
-      if (candidates.length <= 1) return
-      const filtered = fn(candidates)
-      if (filtered.length > 0) candidates = filtered
+    // Tie-break: find global min orb_round across tied group's aspects, keep only planets with that min orb
+    if (candidates.length > 1) {
+      const minO = Math.min(...candidates.flatMap(p => stats[p].aspects.map(a => orbRound(a.orb))))
+      const withMinO = candidates.filter(p => stats[p].aspects.some(a => orbRound(a.orb) === minO))
+      if (withMinO.length > 0) candidates = withMinO
     }
 
-    funnelStep(arr => {
-      const max = Math.max(...arr.map(p => stats[p].tight))
-      return arr.filter(p => stats[p].tight === max)
-    })
-    funnelStep(arr => {
-      const min = Math.min(...arr.map(p => stats[p].loose))
-      return arr.filter(p => stats[p].loose === min)
-    })
-    funnelStep(arr => {
-      const hasPersonal = arr.some(p => PERSONAL_PLANETS.has(p))
-      const hasNonPersonal = arr.some(p => !PERSONAL_PLANETS.has(p))
-      return hasPersonal && hasNonPersonal ? arr.filter(p => PERSONAL_PLANETS.has(p)) : arr
-    })
-    funnelStep(arr => {
-      const min = Math.min(...arr.map(p => stats[p].totalOrbFloor))
-      return arr.filter(p => stats[p].totalOrbFloor === min)
-    })
-    funnelStep(arr => {
-      const min = Math.min(...arr.map(p => stats[p].totalOrb))
-      return arr.filter(p => stats[p].totalOrb === min)
+    // Sort by total orb_round ascending
+    candidates.sort((a, b) => {
+      const totalA = stats[a].aspects.reduce((s, asp) => s + orbRound(asp.orb), 0)
+      const totalB = stats[b].aspects.reduce((s, asp) => s + orbRound(asp.orb), 0)
+      return totalA - totalB
     })
 
     const dominantPlanets = candidates.map(name => ({
@@ -194,6 +180,9 @@ export async function POST(request: Request) {
       count: stats[name].count,
       aspects: stats[name].aspects.sort((a, b) => a.orb - b.orb),
     }))
+
+    // ── Dominant Houses ────────────────────────────────────────────
+    const domHouses = getDominantHousesSorted(chart)
 
     // ── Tightest aspects — orb_round method ──────────────────────────
     let minOrbRound = Infinity
@@ -211,7 +200,7 @@ export async function POST(request: Request) {
       name, chartInfo: chart.info,
       planets, cusps, aspects, wheelAspects,
       elementMatrix, elScores, modScores,
-      dominantPlanets, tightestAspects,
+      dominantPlanets, tightestAspects, domHouses,
       rawPlanets: Object.fromEntries(
         Object.entries(ap).map(([k, v]) => [k, { lon: v.lon, speed: v.speed }])
       ),

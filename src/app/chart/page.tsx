@@ -44,6 +44,9 @@ interface TightAspect {
   p1: string; p2: string; p1Symbol: string; p2Symbol: string
   aspect: string; nameVn: string; symbol: string; orb: number; type: string
 }
+interface DomHouse {
+  house: number; score: number
+}
 interface ChartResult {
   name: string; chartInfo: Record<string, string>
   planets: PlanetRow[]; cusps: CuspRow[]
@@ -52,6 +55,7 @@ interface ChartResult {
   elementMatrix: number[][]; elScores: number[]; modScores: number[]
   dominantPlanets: DominantPlanet[]
   tightestAspects: TightAspect[]
+  domHouses: DomHouse[]
   rawPlanets: Record<string, { lon: number; speed?: number }>
   rawCusps: number[]; angles: { Asc: number; MC: number }
 }
@@ -388,7 +392,7 @@ export default function ChartPage() {
   const {
     name, chartInfo, planets, cusps, aspects, wheelAspects,
     elementMatrix, elScores, modScores,
-    dominantPlanets, tightestAspects,
+    dominantPlanets, tightestAspects, domHouses,
     rawPlanets, rawCusps, angles,
   } = result
 
@@ -553,6 +557,41 @@ export default function ChartPage() {
             </table>
           </div>
         </div>
+
+        {/* ─── Dominant Houses ──────────────────────────── */}
+        {domHouses && domHouses.length > 0 && (
+          <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
+            <SectionHeader>NHÀ TRỘI</SectionHeader>
+            <div className="space-y-2.5">
+              {(() => {
+                const maxScore = domHouses[0].score
+                return domHouses.map(({ house, score }) => (
+                  <div key={house} className="flex items-center gap-3">
+                    <span style={{
+                      minWidth: '56px', color: '#d9ab55', fontFamily: 'var(--font-vietnam)',
+                      fontWeight: 700, fontSize: '0.82rem', textAlign: 'right',
+                    }}>
+                      Nhà {house}
+                    </span>
+                    <div style={{ flex: 1, height: '7px', background: 'rgba(200,148,63,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%', width: `${(score / maxScore) * 100}%`,
+                        background: 'linear-gradient(90deg, #c9a84c, #e8c96e)',
+                        borderRadius: '4px', opacity: 0.85,
+                      }} />
+                    </div>
+                    <span style={{
+                      minWidth: '32px', color: '#8a8399', fontFamily: 'var(--font-vietnam)',
+                      fontSize: '0.75rem', textAlign: 'right',
+                    }}>
+                      {score}
+                    </span>
+                  </div>
+                ))
+              })()}
+            </div>
+          </div>
+        )}
 
         {/* ─── Element / Modality ───────────────────────── */}
         <div className="rounded-2xl p-5 mb-8" style={{ background: 'rgba(12,10,30,0.7)', border: '1px solid rgba(200,148,63,0.14)' }}>
