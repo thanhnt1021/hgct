@@ -1,0 +1,29 @@
+'use client';
+
+import Link from 'next/link';
+
+export function FloatingButtons() {
+  return (
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+      <Link 
+        href="https://m.me/hatgiongchiemtinh" 
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-12 h-12 rounded-full bg-[#0b0b1f]/90 border border-gold-base/25 backdrop-blur-[12px] flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.47715 2 2 6.14346 2 11.25C2 14.1611 3.51867 16.757 5.86236 18.4419C5.99225 18.5353 6.07542 18.6811 6.08861 18.8413L6.28945 21.282C6.32631 21.7299 6.83056 21.9843 7.20527 21.7437L9.84581 20.0487C9.97157 19.9679 10.1219 19.9333 10.2716 19.9502C10.832 20.0136 11.4087 20.0469 12 20.0469C17.5228 20.0469 22 15.9034 22 10.7969C22 5.69036 17.5228 1.54688 12 1.54688V2Z" fill="#d9ab55"/>
+          <path d="M12.8718 13.5684L10.3644 10.8993C10.1032 10.6213 9.65863 10.6124 9.38622 10.8798L6.20845 13.999C5.93922 14.2633 6.29497 14.6675 6.6234 14.4705L9.62024 12.6734C9.84155 12.5407 10.1207 12.5646 10.317 12.7328L12.8244 14.881C13.0856 15.1052 13.5302 15.1141 13.8026 14.8467L16.9804 11.7275C17.2496 11.4632 16.8938 11.059 16.5654 11.256L13.5686 13.0531C13.3473 13.1858 13.0681 13.1619 12.8718 12.9937V13.5684Z" fill="#06060f"/>
+        </svg>
+      </Link>
+      <Link 
+        href="https://zalo.me/hatgiongchiemtinh" 
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-12 h-12 rounded-full bg-[#0b0b1f]/90 border border-gold-base/25 backdrop-blur-[12px] flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+      >
+        <span className="text-gold-warm font-bold text-[11px]">Zalo</span>
+      </Link>
+    </div>
+  );
+}

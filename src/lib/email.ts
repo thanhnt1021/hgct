@@ -201,6 +201,72 @@ export function buildReportEmailHtml(name: string, service: string, nameB?: stri
 </html>`
 }
 
+export async function sendRecoveryEmail({
+  to,
+  service,
+  token,
+  name,
+}: {
+  to: string
+  service: string
+  token: string
+  name?: string
+}) {
+  const svc = SERVICE_CONFIG[service] || SERVICE_CONFIG['career']
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hatgiongchiemtinh.com'
+  const recoveryUrl = `${appUrl}/recover?token=${token}`
+  const greeting = name ? `Xin chào ${name},` : 'Xin chào,'
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#0a0a1a;font-family:Georgia,serif;">
+  <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
+    <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
+      <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:#c9a84c;">✦ ✦ ✦</p>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">Hạt Giống Chiêm Tinh</h1>
+      <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
+    </div>
+    <div style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
+    <div style="padding:36px 16px;background:#0f0f28;border:1px solid rgba(201,168,76,0.15);border-top:none;border-bottom:none;">
+      <div style="display:inline-block;padding:6px 20px;border-radius:999px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);margin-bottom:24px;">
+        <span style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#ef4444;">Thông báo khôi phục đơn hàng</span>
+      </div>
+      <p style="margin:0 0 8px;font-size:17px;color:#9ca3af;">${greeting}</p>
+      <p style="margin:0 0 20px;font-size:15px;line-height:1.8;color:#b8a99a;">
+        Đơn hàng <strong style="color:#f5f0e8;">Báo cáo ${svc.label}</strong> của bạn đã gặp sự cố kỹ thuật trong quá trình xử lý.
+        Bạn <strong>không bị trừ tiền thêm</strong> — chúng tôi sẽ xử lý lại miễn phí cho bạn.
+      </p>
+      <div style="padding:24px;background:rgba(201,168,76,0.06);border-radius:12px;border:1px solid rgba(201,168,76,0.2);margin-bottom:24px;text-align:center;">
+        <p style="margin:0 0 8px;font-size:13px;letter-spacing:0.15em;text-transform:uppercase;color:#6b7280;">Mã khôi phục của bạn</p>
+        <p style="margin:0 0 16px;font-size:32px;font-weight:700;letter-spacing:0.3em;color:#c9a84c;font-family:'Courier New',monospace;">${token}</p>
+        <a href="${recoveryUrl}" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#c8943f,#f0cc78);color:#06060f;font-weight:700;font-size:14px;text-decoration:none;border-radius:8px;letter-spacing:0.05em;">Khôi phục báo cáo ngay →</a>
+      </div>
+      <p style="margin:0 0 12px;font-size:14px;line-height:1.8;color:#6b7280;">
+        Hoặc truy cập <strong style="color:#c9a84c;">${appUrl}/recover</strong> và nhập mã trên.
+      </p>
+      <p style="margin:0;font-size:14px;line-height:1.8;color:#6b7280;">
+        Liên hệ hỗ trợ:<br>
+        <a href="mailto:support@hatgiongchiemtinh.com" style="color:#c9a84c;text-decoration:none;font-weight:600;font-size:15px;">support@hatgiongchiemtinh.com</a>
+      </p>
+    </div>
+    <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
+      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Mã khôi phục có hiệu lực vĩnh viễn.<br>Hạt Giống Chiêm Tinh © 2026</p>
+    </div>
+  </div>
+</body>
+</html>`
+
+  return sendEmail({
+    to,
+    subject: `⚠ Khôi phục báo cáo ${svc.label} — Mã: ${token} | Hạt Giống Chiêm Tinh`,
+    html,
+  })
+}
+
 export async function sendReportEmail(
   email: string,
   name: string,

@@ -1,0 +1,179 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void-black: #02020a;
+  --color-void-deep: #06060f;
+  --color-void-night: #0b0b1f;
+
+  --color-nebula-dark: #120d2e;
+  --color-nebula-mid: #1c1540;
+  --color-nebula-glow: #261c56;
+  --color-nebula-rim: #38287a;
+
+  --color-gold-shadow: #7a5420;
+  --color-gold-deep: #9a6f2a;
+  --color-gold-base: #c8943f;
+  --color-gold-warm: #d9ab55;
+  --color-gold-bright: #f0cc78;
+  --color-gold-pale: #fdf3d8;
+
+  --color-lunar-bright: #f4efe6;
+  --color-lunar-warm: #e8e0d4;
+  --color-lunar-mid: #c9c3d6;
+  --color-lunar-dim: #8a8399;
+  --color-lunar-shadow: #4a4560;
+
+  --color-success: #3db88a;
+  --color-danger: #c45252;
+
+  --font-vietnam: var(--font-vietnam);
+  --font-playfair: var(--font-playfair);
+  --font-cinzel: var(--font-cinzel);
+}
+
+body {
+  background-color: var(--color-void-deep);
+  color: var(--color-lunar-bright);
+  font-family: var(--font-vietnam), sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--color-void-night); }
+::-webkit-scrollbar-thumb { background: var(--color-nebula-rim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gold-base); }
+
+/* Utilities */
+.sanctum-card {
+  background: rgba(28, 21, 64, 0.6);
+  border: 1px solid rgba(200, 148, 63, 0.14);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+.sanctum-card:hover {
+  border-color: rgba(200, 148, 63, 0.38);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 56px rgba(0,0,0,0.5), 0 0 32px rgba(200,148,63,0.07);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%);
+  background-size: 200% 200%;
+  color: #06060f;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 0.7rem 1.8rem;
+  box-shadow: 0 4px 20px rgba(200,148,63,0.25);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-gold:hover {
+  background-position: right center;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #d9ab55;
+  border: 1px solid rgba(217,171,85,0.4);
+  border-radius: 4px;
+  padding: 0.7rem 1.8rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-outline:hover {
+  background: rgba(217,171,85,0.1);
+}
+
+.btn-hero-secondary {
+  background: transparent;
+  color: #c9c3d6;
+  border: 1px solid rgba(200,148,63,0.3);
+  border-radius: 4px;
+  padding: 0.85rem 2.5rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-hero-secondary:hover {
+  background: rgba(200,148,63,0.1);
+}
+
+.form-input {
+  background: rgba(11,11,31,0.9);
+  border: 1px solid rgba(200,148,63,0.2);
+  color: #f4efe6;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  outline: none;
+  transition: all 0.3s ease;
+}
+.form-input:focus {
+  border-color: #d9ab55;
+  box-shadow: 0 0 0 3px rgba(217,171,85,0.1);
+}
+.form-input::placeholder {
+  color: #4a4560;
+  font-style: italic;
+}
+
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c8943f, transparent);
+  opacity: 0.45;
+  width: 100%;
+}
+
+.divider-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #c8943f;
+}
+.divider-ornament::before, .divider-ornament::after {
+  content: "";
+  height: 1px;
+  width: 50px;
+  background: linear-gradient(90deg, transparent, #c8943f, transparent);
+  opacity: 0.45;
+}
+
+.section-eyebrow {
+  font-family: var(--font-vietnam);
+  font-size: 0.92rem;
+  color: #d9ab55;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #c8943f 0%, #f0cc78 45%, #d9ab55 70%, #c8943f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.3); }
+}
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}

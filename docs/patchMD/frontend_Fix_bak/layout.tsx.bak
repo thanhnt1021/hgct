@@ -1,0 +1,47 @@
+import type {Metadata} from 'next';
+import { Be_Vietnam_Pro, Playfair_Display, Cinzel } from 'next/font/google';
+import './globals.css';
+import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
+import { FloatingButtons } from '@/components/FloatingButtons';
+import { StarField } from '@/components/StarField';
+
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-vietnam',
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-playfair',
+});
+
+const cinzel = Cinzel({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-cinzel',
+});
+
+export const metadata: Metadata = {
+  title: 'Hạt Giống Chiêm Tinh',
+  description: 'Giúp bạn hiểu bản thân sâu hơn qua chiêm tinh học. Mỗi bản đồ sao là một câu chuyện riêng — chúng tôi giúp bạn đọc nó.',
+};
+
+export default function RootLayout({children}: {children: React.ReactNode}) {
+  return (
+    <html lang="vi" className={`${beVietnamPro.variable} ${playfairDisplay.variable} ${cinzel.variable}`}>
+      <body className="antialiased min-h-screen flex flex-col relative" suppressHydrationWarning>
+        <StarField />
+        <Navbar />
+        <main className="flex-1 flex flex-col relative z-10">
+          {children}
+        </main>
+        <Footer />
+        <FloatingButtons />
+      </body>
+    </html>
+  );
+}

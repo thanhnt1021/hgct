@@ -28,7 +28,7 @@ Cấu trúc bài luận (1400-1800 chữ):
 [SUBTITLE] Tổng quan về con người và năng lượng cốt lõi của bạn
 [Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành chân dung thống nhất, cách tiếp cận cuộc sống (AC), khát vọng cốt lõi (Sun), nhu cầu cảm xúc (Moon). Làm rõ xu hướng hành động từ nguyên tố/tính chất trội. Nêu các lĩnh vực cuộc sống bạn {name} đặc biệt quan tâm (nhà trội). Cuối mục: [KTLUẬN] 2-3 câu kết luận lại tính cách nổi trội nhất của {name}, mối quan tâm thực sự của họ trong cuộc sống, và điều gì khiến họ cần để cảm thấy an toàn từ bên trong.]
 
-2. NĂNG LỰC bẩm sinh của bạn là gì?
+2. Năng lực bẩm sinh của bạn là gì?
 [SUBTITLE] Những điểm mạnh tự nhiên giúp bạn dễ phát triển và tạo ra giá trị lâu dài bền vững
 [Dùng dữ liệu MỤC 2 trong brief. Trả lời câu hỏi: "bạn {name} thực sự giỏi điều gì?". Tổng hợp từ: ưu điểm của AC/Sun/Moon, nguyên tố/tính chất trội, lĩnh vực phát triển từ nhà trội, năng khiếu từ góc chặt và hành tinh nhiều góc. Kết luận bằng 3-5 điểm mạnh rõ ràng và 3-5 tính chất công việc / lĩnh vực công việc bạn {name} nên ưu tiên. Cuối mục: [KTLUẬN] 2-3 câu nhấn mạnh năng lực đặc biệt nhất của bạn.]
 

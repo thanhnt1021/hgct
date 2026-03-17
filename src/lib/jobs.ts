@@ -2,12 +2,14 @@
 // (Next.js can re-evaluate modules per route bundle — global is always shared)
 
 import prisma from './db'
+import { sendRecoveryEmail } from './email'
 
 export interface JobResult {
   pdfUrl?: string
   pdfFilename?: string
   emailSent?: boolean
   email?: string
+  recoveryToken?: string  // set when job failed and order has recovery token
 }
 
 export interface Job {
@@ -83,7 +85,13 @@ export function updateJob(id: string, updates: Partial<Omit<Job, 'id' | 'created
 }
 
 const STUCK_TIMEOUT_MS = 15 * 60 * 1000
-const STUCK_ERROR = 'Đơn hàng gặp lỗi. Vui lòng thử lại.'
+export const STUCK_ERROR = 'Đơn hàng gặp lỗi. Vui lòng thử lại.'
+
+// Chars dễ đọc — loại bỏ O/0/I/1 dễ nhầm
+const TOKEN_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+export function generateRecoveryToken(): string {
+  return Array.from({ length: 8 }, () => TOKEN_CHARS[Math.floor(Math.random() * TOKEN_CHARS.length)]).join('')
+}
 
 function markStuckIfNeeded(job: Job): void {
   if (job.status === 'processing' && Date.now() - job.createdAt > STUCK_TIMEOUT_MS) {
@@ -139,15 +147,48 @@ export async function cancelJob(id: string): Promise<void> {
   await prisma.job.delete({ where: { id } }).catch(() => {})
 }
 
-// Startup sweep: fix any stuck jobs from previous server run
+// Startup sweep: recover orphaned jobs from previous server run
+// Logic: jobs in DB with status='processing' NOT in in-memory map → from previous run → mark failed + recovery token
 async function sweepStuckJobsOnce() {
-  const cutoff = new Date(Date.now() - STUCK_TIMEOUT_MS)
   try {
-    const { count } = await prisma.job.updateMany({
-      where: { status: 'processing', createdAt: { lt: cutoff } },
-      data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR },
-    })
-    if (count > 0) console.log(`[jobs] Startup sweep: marked ${count} stuck job(s) as error`)
+    const processingJobs = await prisma.job.findMany({ where: { status: 'processing' } })
+    let fixedCount = 0
+
+    for (const dbJob of processingJobs) {
+      // Skip jobs this server instance created (they're in memory)
+      if (global.__hgctJobs?.has(dbJob.id)) continue
+
+      // Mark orphaned job as error
+      await prisma.job.update({
+        where: { id: dbJob.id },
+        data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR },
+      }).catch(() => {})
+      fixedCount++
+
+      // Find linked order and generate recovery token
+      const order = await prisma.order.findFirst({
+        where: { jobId: dbJob.id },
+      }).catch(() => null)
+
+      if (!order || order.recoveryToken) continue // no order or already has token
+
+      const token = generateRecoveryToken()
+      try {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'failed', recoveryToken: token },
+        })
+        // Extract name from profileData (inputData)
+        const iData = (order.profileData as Record<string, unknown>) || {}
+        const name = (iData.name as string) || (iData.ten as string) || ''
+        await sendRecoveryEmail({ to: order.email, service: order.service, token, name })
+        console.log(`[jobs] Startup sweep: recovery email sent for order ${order.id} (token: ${token})`)
+      } catch (err) {
+        console.error(`[jobs] Recovery token/email failed for order ${order.id}:`, err)
+      }
+    }
+
+    if (fixedCount > 0) console.log(`[jobs] Startup sweep: fixed ${fixedCount} orphaned job(s)`)
   } catch (err) {
     console.error('[jobs] sweepStuckJobsOnce error:', err)
   }

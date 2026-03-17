@@ -8,8 +8,8 @@ import { getCareerBlocks } from '@/lib/logic/career/manager'
 import { buildCareerPrompt } from '@/lib/logic/career/prompt'
 import { generateEssayStreaming } from '@/lib/openrouter'
 import { generatePdf } from '@/lib/pdf/generator'
-import { sendReportEmail, makePdfFilename } from '@/lib/email'
-import { createJob, updateJob, isJobCancelled } from '@/lib/jobs'
+import { sendReportEmail, makePdfFilename, sendRecoveryEmail } from '@/lib/email'
+import { createJob, updateJob, isJobCancelled, generateRecoveryToken, STUCK_ERROR } from '@/lib/jobs'
 import prisma from '@/lib/db'
 import fs from 'fs'
 import path from 'path'
@@ -344,9 +344,37 @@ export function createReportJob(opts: CreateReportJobOptions): string {
   }
   createJob(jobId, meta)
 
-  processReport(jobId, body, orderId).catch((err) => {
+  processReport(jobId, body, orderId).catch(async (err) => {
     console.error(`[JOB ${jobId}] Error:`, err)
-    updateJob(jobId, { status: 'error', progress: 0, label: 'Có lỗi xảy ra', error: String(err) })
+
+    let recoveryToken: string | undefined
+    if (orderId) {
+      try {
+        recoveryToken = generateRecoveryToken()
+        const updated = await prisma.order.updateMany({
+          where: { id: orderId, status: { not: 'failed' } },
+          data: { status: 'failed', recoveryToken },
+        })
+        if (updated.count > 0) {
+          const iData = (body.inputData as Record<string, unknown>) || {}
+          const name = (iData.name as string) || ''
+          sendRecoveryEmail({ to: body.email as string, service, token: recoveryToken, name }).catch(console.error)
+        } else {
+          recoveryToken = undefined // order already in failed state (concurrent request)
+        }
+      } catch (tokenErr) {
+        console.error(`[JOB ${jobId}] Recovery token failed:`, tokenErr)
+        recoveryToken = undefined
+      }
+    }
+
+    updateJob(jobId, {
+      status: 'error',
+      progress: 0,
+      label: 'Có lỗi xảy ra',
+      error: STUCK_ERROR,
+      result: recoveryToken ? { recoveryToken } : undefined,
+    })
   })
 
   return jobId

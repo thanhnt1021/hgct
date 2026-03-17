@@ -62,12 +62,13 @@ export async function generateEssayStreaming(
 ): Promise<string> {
   if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not configured')
 
-  const MAX_RETRIES = 3
+  const MAX_RETRIES = 4
+  const RETRY_DELAYS = [5000, 20000, 60000] // 5s, 20s, 60s — exponential backoff
   let lastError: unknown
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     if (attempt > 0) {
-      const delay = attempt * 3000 // 3s, 6s
+      const delay = RETRY_DELAYS[attempt - 1] ?? 60000
       const reason = lastError instanceof StreamInterruptedError ? 'stream bị ngắt' : 'lỗi kết nối'
       console.log(`[OpenRouter] Retry attempt ${attempt}/${MAX_RETRIES - 1} after ${delay}ms`)
       onRetry?.(attempt, reason)

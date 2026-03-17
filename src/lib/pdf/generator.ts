@@ -200,6 +200,32 @@ function buildFontFaces(): string {
   }).join('\n')
 }
 
+/** Generate the HTML string for a single classified content line.
+ * Used by buildHtml() directly and by the subheading-wrap buffering logic.
+ * Handles all kinds except 'signature', 'empty', 'closing_start'. */
+function lineToHtml(kind: string, s: string): string {
+  const safe = escapeHtml(s)
+  switch (kind) {
+    case 'section_heading':  return `<h2 class="section">${safe}</h2>`
+    case 'title_heading':    return `<h2 class="section">${safe}</h2><hr class="section-rule">`
+    case 'section_subtitle': return `<p class="section-subtitle">${safe.replace(/^\[SUBTITLE\]\s*/, '')}</p>`
+    case 'subheading':       return `<h3 class="subheading">${safe}</h3>`
+    case 'opener':           return `<p class="opener">${safe}</p>`
+    case 'bullet':           return `<p class="bullet">${safe}</p>`
+    case 'bullet_indent':    return `<p class="bullet-indent">${safe}</p>`
+    case 'dash_bullet':      return `<p class="dash-bullet">${safe}</p>`
+    case 'red_box': {
+      const content = s.slice('[KTLUẬN]'.length).trim()
+      return `<div class="red-box">${escapeHtml(content)}</div>`
+    }
+    case 'mini_box': {
+      const content = s.slice('[KTTIỂU]'.length).trim()
+      return `<div class="mini-box">${escapeHtml(content)}</div>`
+    }
+    default: return `<p class="body">${safe}</p>`
+  }
+}
+
 function buildHtml(essayText: string, options: PdfOptions): string {
   // Strip AI's closing (unreliable) and inject hardcoded version when available.
   // Primary cut point: [CLOSING] marker. Fallback: detect "Cảm ơn bạn đã" at line start.
@@ -234,9 +260,19 @@ function buildHtml(essayText: string, options: PdfOptions): string {
   let seenSectionHeading = false
   let pendingRule = false
   let closingMode = false
+  const subheadingBuffer: string[] = []
+
+  // Flush orphaned subheadings (no following content) as plain h3 elements.
+  function flushSubheadingBuffer() {
+    if (!subheadingBuffer.length) return
+    subheadingBuffer.forEach(h => groupHtmlLines[groupHtmlLines.length - 1].push(h))
+    subheadingBuffer.length = 0
+  }
+
   for (const line of lines) {
     const s = line.trim()
     if (!s) {
+      if (subheadingBuffer.length > 0) continue  // skip spacers while buffering subheadings
       if (sigBuffer.length > 0) {
         sigBuffer.push('<div class="spacer"></div>')
       } else {
@@ -247,17 +283,43 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     let kind = classifyLine(line)
     // Once [CLOSING] is seen, all subsequent lines become signature
     if (closingMode && kind !== 'closing_start') kind = 'signature'
-    if (kind === 'closing_start') { flushSigs(); closingMode = true; continue }
+    if (kind === 'closing_start') { flushSubheadingBuffer(); flushSigs(); closingMode = true; continue }
     // Intro section (before first numbered heading): no subheadings
     if (kind === 'subheading' && !seenSectionHeading) kind = 'body'
     if (kind === 'section_heading') seenSectionHeading = true
-    const safe = escapeHtml(s)
 
     if (kind === 'signature') {
-      sigBuffer.push(`<p class="signature">${safe}</p>`)
+      flushSubheadingBuffer()
+      sigBuffer.push(`<p class="signature">${escapeHtml(s)}</p>`)
       continue
     }
     flushSigs()
+
+    // ── SUBHEADING BUFFERING ───────────────────────────────────────────────────
+    // Buffer consecutive h3 subheadings, then wrap them together with the first
+    // following content element in a page-break-inside:avoid div.
+    // The print engine keeps the whole block on one page — no JS measurement needed.
+    if (kind === 'subheading') {
+      if (pendingRule) {
+        groupHtmlLines[groupHtmlLines.length - 1].push('<hr class="section-rule">')
+        pendingRule = false
+      }
+      subheadingBuffer.push(lineToHtml('subheading', s))
+      continue
+    }
+
+    if (subheadingBuffer.length > 0) {
+      if (kind !== 'section_heading' && kind !== 'title_heading' && kind !== 'section_subtitle') {
+        // First real content after subheading(s) — wrap together as unbreakable unit
+        const wrapped = `<div style="page-break-inside:avoid;break-inside:avoid">${subheadingBuffer.join('')}${lineToHtml(kind, s)}</div>`
+        groupHtmlLines[groupHtmlLines.length - 1].push(wrapped)
+        subheadingBuffer.length = 0
+        continue
+      }
+      // Structural break (new section/subtitle): flush buffer as orphaned subheadings
+      flushSubheadingBuffer()
+    }
+    // ──────────────────────────────────────────────────────────────────────────
 
     // Flush pendingRule before any non-subtitle content
     if (pendingRule && kind !== 'section_subtitle') {
@@ -265,30 +327,9 @@ function buildHtml(essayText: string, options: PdfOptions): string {
       pendingRule = false
     }
 
-    if (kind === 'section_heading') {
-      groupHtmlLines.push([])
-    }
+    if (kind === 'section_heading') groupHtmlLines.push([])
 
-    let html = ''
-    switch (kind) {
-      case 'section_heading':  html = `<h2 class="section">${safe}</h2>`; break
-      case 'title_heading':    html = `<h2 class="section">${safe}</h2><hr class="section-rule">`; break
-      case 'section_subtitle': html = `<p class="section-subtitle">${safe.replace(/^\[SUBTITLE\]\s*/, '')}</p>`; break
-      case 'subheading':       html = `<h3 class="subheading">${safe}</h3>`; break
-      case 'opener':           html = `<p class="opener">${safe}</p>`; break
-      case 'bullet':           html = `<p class="bullet">${safe}</p>`; break
-      case 'bullet_indent':    html = `<p class="bullet-indent">${safe}</p>`; break
-      case 'dash_bullet':      html = `<p class="dash-bullet">${safe}</p>`; break
-      case 'red_box': {
-        const content = s.slice('[KTLUẬN]'.length).trim()
-        html = `<div class="red-box">${escapeHtml(content)}</div>`; break
-      }
-      case 'mini_box': {
-        const content = s.slice('[KTTIỂU]'.length).trim()
-        html = `<div class="mini-box">${escapeHtml(content)}</div>`; break
-      }
-      default:                 html = `<p class="body">${safe}</p>`
-    }
+    const html = lineToHtml(kind, s)
     groupHtmlLines[groupHtmlLines.length - 1].push(html)
     if (kind === 'section_heading') pendingRule = true
     if (kind === 'section_subtitle') {
@@ -296,6 +337,7 @@ function buildHtml(essayText: string, options: PdfOptions): string {
       pendingRule = false
     }
   }
+  flushSubheadingBuffer()
   flushSigs()
 
   const contentHtml = groupHtmlLines.map((htmlLines, i) => {
@@ -330,7 +372,7 @@ ${buildFontFaces()}
 /* margin:0 on body ensures clientWidth in screen mode = viewport width = print content width (642px) */
 body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #1f2937; line-height: 1.55; }
 
-.cover { page-break-after: always; text-align: center; height: 252mm; display: flex; flex-direction: column; box-sizing: border-box; }
+.cover { page-break-after: always; text-align: center; height: 244mm; display: flex; flex-direction: column; box-sizing: border-box; }
 .cover-line { width: 55%; height: 1.5px; background: #dc2626; margin: 7mm auto; }
 .cover-title { font-family: 'MontserratBold'; font-size: 32.9pt; color: #dc2626; margin: 0; }
 .cover-name { font-family: 'GreatVibes'; font-size: 50.8pt; color: #1f2937; margin: 10mm 0 4mm; }
@@ -341,10 +383,10 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 .cover-spacer { flex: 1; min-height: 0; }
 .cover-main { width: 100%; }
 
-.section { font-family: 'MontserratBold'; font-size: 19.5pt; color: #dc2626; margin: 14pt 0 6pt; }
+.section { font-family: 'MontserratBold'; font-size: 19.5pt; color: #dc2626; margin: 14pt 0 6pt; page-break-after: avoid; break-after: avoid; }
 .section-first { margin-top: 0; }
 .section-subtitle { font-family: 'NunitoItalic'; font-size: 12pt; color: #6b7280; margin: -2pt 0 4pt; }
-.section-rule { border: none; border-top: 1pt solid #dc2626; margin: 0 0 8pt; }
+.section-rule { border: none; border-top: 1pt solid #dc2626; margin: 0 0 8pt; page-break-after: avoid; break-after: avoid; }
 .subheading { font-family: 'MontserratBold'; font-size: 16.5pt; color: #1f2937; margin: 8pt 0 4pt; page-break-after: avoid; break-after: avoid; }
 .opener { font-family: 'NunitoItalic'; font-size: 14.9pt; margin: 4pt 0 6pt; }
 .body { text-align: justify; margin: 2pt 0 5pt; }
@@ -595,8 +637,8 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       // Positions measured relative to each section-group's top, because .is-section
       // groups always start at the top of a new print page (page-break-before: always).
       //
-      // PAGE_H = A4(297mm) - top(25mm) - bottom(20mm) = 252mm ≈ 952px at 96dpi
-      const PAGE_H = 252 * (96 / 25.4)
+      // PAGE_H = A4(297mm) - top(25mm) - bottom(28mm) = 244mm ≈ 922px at 96dpi
+      const PAGE_H = (297 - 25 - 28) * (96 / 25.4)
       const BODY_SEL = 'p.body, p.opener, p.bullet, p.bullet-indent, p.dash-bullet, p.signature'
 
       function hasOrphans(): boolean {
@@ -659,105 +701,6 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         el.style.orphans = String(o)
         console.log(`[ow] lines=${lineCount} w=${w} o=${o} "${el.textContent?.slice(0, 25)}"`)
       })
-
-      // ── SUBHEADING WIDOW HELPERS ──────────────────────────────────────────────────
-      // Shared helpers used by both the XUNG ĐỘT fix and the general subheading fix.
-
-      // Skip spacers and invisible elements to find the real next content sibling.
-      function findNextContent(el: HTMLElement): HTMLElement | null {
-        let next = el.nextElementSibling as HTMLElement | null
-        while (next && (next.classList.contains('spacer') || (next.textContent?.trim() === '' && next.offsetHeight <= 8))) {
-          next = next.nextElementSibling as HTMLElement | null
-        }
-        return next
-      }
-
-      // How much space does nextEl need to not trigger a page break before it?
-      // Elements with page-break-inside:avoid (red-box, mini-box) need full height.
-      // For red-box, add 2×SCALLOP_OVERFLOW (18px each side) because the scallop SVG
-      // protrudes beyond the box boundary — the wrapper approach adds this as padding,
-      // but spaceNeededFor() runs before the wrapper is created.
-      // Regular paragraphs need orphans × lineHeight.
-      function spaceNeededFor(nextEl: HTMLElement): number {
-        const isRedBox = nextEl.classList.contains('red-box')
-        const breakAvoid = isRedBox || nextEl.classList.contains('mini-box')
-        if (breakAvoid) {
-          const SCALLOP_OVERFLOW = 18  // top + bottom wave protrusion for red-box scallop
-          return nextEl.offsetHeight + (isRedBox ? 2 * SCALLOP_OVERFLOW : 0)
-        }
-        const lh = parseFloat(window.getComputedStyle(nextEl).lineHeight) || 22
-        const orphans = parseInt(nextEl.style.orphans || '4') || 4
-        const lines = Math.round(nextEl.offsetHeight / lh) || 1
-        return Math.min(orphans, lines) * lh
-      }
-
-      // Returns true if placing sh on its current page would leave it as a widow
-      // (i.e. the print engine would push the following content to the next page).
-      // Uses shTop (not shBottom) to determine which page the subheading belongs to —
-      // a subheading is "on" a page based on where it STARTS, not where it ends.
-      // Using shBottom caused Math.ceil to round up to the wrong page when the bottom
-      // overflowed by even 1px, making pageEndPx point to page N+1 and the check always fail.
-      function wouldBeWidow(sh: HTMLElement, group: HTMLElement): boolean {
-        const groupTop = group.getBoundingClientRect().top
-        const shTop = sh.getBoundingClientRect().top - groupTop
-        const pageEndPx = (Math.floor(shTop / PAGE_H) + 1) * PAGE_H
-        const nextEl = findNextContent(sh)
-        if (!nextEl) return false
-        const nextTop = nextEl.getBoundingClientRect().top - groupTop
-        return (pageEndPx - nextTop) < spaceNeededFor(nextEl)
-      }
-
-      // ── XUNG ĐỘT / HÒA HỢP WIDOW FIX ────────────────────────────────────────────
-      // These title-headings sit inside a section-group without page-break-before,
-      // so they can land near a page bottom. When the first subheading after them
-      // would be a widow, move the heading itself to the next page — pulling the
-      // subheading along. Do NOT also move the subheading independently.
-      const xdHandledSubheadings = new Set<HTMLElement>()
-      ;(Array.from(document.querySelectorAll('h2.section')) as HTMLElement[]).forEach(h2 => {
-        const txt = h2.textContent?.trim() || ''
-        if (txt !== 'XUNG ĐỘT' && txt !== 'HÒA HỢP') return
-        // Find the first h3.subheading that follows this heading
-        let firstSh: HTMLElement | null = null
-        let sib = h2.nextElementSibling as HTMLElement | null
-        while (sib) {
-          if (sib.tagName === 'H3' && sib.classList.contains('subheading')) { firstSh = sib; break }
-          sib = sib.nextElementSibling as HTMLElement | null
-        }
-        if (!firstSh) return
-        xdHandledSubheadings.add(firstSh)
-        const group = h2.closest('.section-group') as HTMLElement | null
-        if (!group) return
-        const groupTop = group.getBoundingClientRect().top
-        const h2Bottom = h2.getBoundingClientRect().bottom - groupTop
-        const h2PageEnd = Math.ceil(h2Bottom / PAGE_H) * PAGE_H
-        const firstShTop = firstSh.getBoundingClientRect().top - groupTop
-        const h2Isolated = firstShTop >= h2PageEnd  // firstSh đã bị CSS đẩy sang trang khác
-        if (wouldBeWidow(firstSh, group) || h2Isolated) {
-          h2.style.pageBreakBefore = 'always'
-          h2.style.breakBefore = 'always'
-          console.log(`[xd-widow] moved "${txt}" to next page (isolated=${h2Isolated})`)
-        } else {
-          console.log(`[xd-ok] "${txt}" stays`)
-        }
-      })
-
-      // ── SUBHEADING ORPHAN FIX ─────────────────────────────────────────────────────
-      // A subheading alone at the bottom of a page must move to the next page.
-      // Skips subheadings already handled by the XUNG ĐỘT/HÒA HỢP fix above.
-      // Uses improved spaceNeededFor() that handles page-break-inside:avoid elements.
-      ;(Array.from(document.querySelectorAll('h3.subheading')) as HTMLElement[]).forEach(sh => {
-        if (xdHandledSubheadings.has(sh)) return
-        const group = sh.closest('.section-group') as HTMLElement | null
-        if (!group) return
-        if (wouldBeWidow(sh, group)) {
-          sh.style.pageBreakBefore = 'always'
-          sh.style.breakBefore = 'always'
-          console.log(`[sh-orphan] moved: "${sh.textContent?.slice(0, 30)}"`)
-        } else {
-          console.log(`[sh-ok] stays: "${sh.textContent?.slice(0, 30)}"`)
-        }
-      })
-
 
 
       // ── SCALLOPED BORDER FOR RED-BOX ──────────────────────────────────────────────
@@ -913,7 +856,7 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       displayHeaderFooter: true,
       headerTemplate: '<div></div>',
       footerTemplate: FOOTER_TEMPLATE,
-      margin: { top: '25mm', right: '20mm', bottom: '20mm', left: '20mm' },
+      margin: { top: '25mm', right: '20mm', bottom: '28mm', left: '20mm' },
     })
     await browser.close()
 

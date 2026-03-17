@@ -1,0 +1,204 @@
+import Link from 'next/link';
+import { Briefcase, Heart, Users, TrendingUp, Fingerprint, Mail, Lock } from 'lucide-react';
+import Image from 'next/image';
+
+export default function Home() {
+  return (
+    <div className="flex flex-col w-full">
+      {/* Hero Section */}
+      <section className="min-h-screen flex flex-col items-center justify-center pt-16 px-4 relative">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-[1px] bg-gradient-to-r from-transparent to-[#c8943f] opacity-45"></div>
+          <div className="flex items-center gap-2 text-[#c8943f]">
+            <span className="text-[0.75rem] animate-pulse">✦</span>
+            <span className="text-[1.1rem]">✦</span>
+            <span className="text-[0.75rem] animate-pulse" style={{ animationDelay: '1s' }}>✦</span>
+          </div>
+          <div className="w-14 h-[1px] bg-gradient-to-l from-transparent to-[#c8943f] opacity-45"></div>
+        </div>
+
+        <div className="text-center flex flex-col items-center z-10">
+          <h1 className="flex flex-col items-center">
+            <span className="font-vietnam text-[clamp(2rem,3.5vw,2.6rem)] text-[#e8b96a] tracking-[0.12em] font-semibold mb-2">
+              Bầu trời lúc bạn
+            </span>
+            <span className="font-playfair italic text-[clamp(3.8rem,14vw,8.5rem)] uppercase text-gold-gradient leading-[0.95] mb-2">
+              chào đời
+            </span>
+            <span className="font-playfair italic text-[clamp(2.2rem,5vw,3.2rem)] uppercase text-lunar-mid">
+              nói gì về bạn?
+            </span>
+          </h1>
+
+          <div className="w-[80px] h-[1px] bg-gradient-to-r from-transparent via-[#c8943f] to-transparent opacity-45 my-8"></div>
+
+          <p className="text-lunar-dim font-vietnam text-[clamp(1.05rem,2vw,1.25rem)] leading-[1.9] max-w-3xl text-center mb-10">
+            Bầu trời lúc bạn chào đời không hề ngẫu nhiên. Mỗi hành tinh là một dấu ấn – mỗi góc chiếu là một câu chuyện về bạn. Bản đồ sao chính là hạt giống tiềm năng đang chờ bạn khám phá và đánh thức. Hiểu bản đồ sao là bắt đầu hành trình hiểu mình – để chọn đúng đường, đi đúng hướng và tìm đúng người đồng hành.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <Link href="/services" className="btn-gold px-[2.5rem] py-[0.85rem]">
+              Khám phá ngay tại đây
+            </Link>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3 max-w-3xl">
+            {['Bản đồ cuộc đời', 'Tình duyên & Hôn nhân', 'Sự nghiệp & Tiền bạc', 'Vận hạn sắp tới'].map((tag, i) => (
+              <div key={i} className="bg-[#1c1540]/55 border border-[#c8943f]/20 text-lunar-dim text-sm px-3 py-1.5 rounded-sm flex items-center gap-2">
+                <span className="text-gold-warm text-xs">✧</span> {tag}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-28 sm:py-36 max-w-6xl mx-auto px-4 w-full">
+        <div className="text-center mb-16 flex flex-col items-center">
+          <span className="section-eyebrow mb-4">Tại sao lựa chọn chúng tôi?</span>
+          <h2 className="flex flex-col items-center">
+            <span className="font-vietnam font-bold text-[clamp(2rem,5vw,3.4rem)] uppercase tracking-[0.04em] text-lunar-bright leading-tight">
+              Hạt giống chiêm tinh
+            </span>
+            <span className="font-playfair italic text-[clamp(1.5rem,4vw,2.5rem)] uppercase text-gold-warm mt-2">
+              hiểu mình - đánh thức - phát triển
+            </span>
+          </h2>
+          <div className="divider-ornament my-8">✦</div>
+          <p className="text-lunar-dim text-[1.05rem] leading-[1.9] max-w-[48rem] text-center">
+            Một bản phân tích thực sự đi vào chiều sâu. Không phải những luận giải chung chung, mà là phân tích bản đồ sao chi tiết, cá nhân hoá giúp bạn hiểu rõ bản thân mình. Để từ đó chọn đúng nghề, yêu đúng người và sống đúng hướng. Trải nghiệm đơn giản, nhanh chóng và luôn đảm bảo bảo mật thông tin.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-32">
+          {[
+            { icon: Fingerprint, title: 'Luận giải cá nhân hóa', desc: 'Phân tích bản đồ sao được viết riêng cho bạn, dựa trên ngày – giờ – nơi sinh, giúp bạn hiểu rõ tính cách, tiềm năng và hướng đi của mình.' },
+            { icon: Mail, title: 'Nhận qua email, đọc mọi lúc', desc: 'Bản luận giải PDF được gửi thẳng vào email trong vài phút. Chi tiết, gần gũi – lưu lại để đọc đi đọc lại bất cứ lúc nào.' },
+            { icon: Lock, title: 'Kết nối với chuyên gia', desc: 'Có thể đặt lịch coaching 1:1 để được giải đáp sâu hơn và hiểu rõ bản đồ sao của mình.' }
+          ].map((feature, i) => (
+            <div key={i} className="sanctum-card bg-[#120d2e]/65 p-8 rounded-2xl">
+              <div className="w-12 h-12 rounded-full bg-[#c8943f]/10 border border-[#c8943f]/20 flex items-center justify-center mb-6">
+                <feature.icon size={22} className="text-gold-warm" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-lunar-bright text-[1.1rem] font-semibold mb-3">{feature.title}</h3>
+              <p className="text-lunar-dim text-[1rem] leading-[1.85]">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mb-16 flex flex-col items-center">
+          <span className="section-eyebrow mb-4">Bốn góc nhìn chiêm tinh</span>
+          <h2 className="font-vietnam font-bold text-[clamp(1.5rem,4vw,2.4rem)] uppercase text-lunar-bright mb-4">
+            Bạn muốn biết điều gì?
+          </h2>
+          <p className="text-lunar-dim text-[1rem]">
+            Chọn một trong bốn góc nhìn chiêm tinh chuyên sâu dưới đây
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            { id: 'career', icon: Briefcase, tag: 'Xác định đúng hướng đi', title: 'Sự nghiệp & Tiền bạc', desc: 'Hiểu rõ điểm mạnh của bản thân, định hướng nghề nghiệp phù hợp và những lĩnh vực tài chính thuận lợi để phát triển.', accent: '#c8943f' },
+            { id: 'love', icon: Heart, tag: 'Hiểu rõ phong cách yêu', title: 'Tình yêu & hôn nhân', desc: 'Bạn yêu theo cách nào? Vì sao các mối quan hệ thường lặp lại một mô thức? Kiểu người phù hợp và cách xây dựng một mối quan hệ bền chặt.', accent: '#b84d70' },
+            { id: 'synastry', icon: Users, tag: 'Thương yêu để đồng hành', title: 'Bản đồ sao cặp đôi', desc: 'Khám phá lý do hai người gặp nhau, những điểm đồng điệu và khác biệt trong mối quan hệ, cùng chìa khóa để xây dựng một mối quan hệ hạnh phúc và phát triển.', accent: '#7c4dba' },
+            { id: 'transit', icon: TrendingUp, tag: 'Chuẩn bị để sẵn sàng', title: 'Vận hạn sắp tới', desc: 'Nhìn trước những xu hướng trong thời gian tới, lĩnh vực thuận lợi để phát triển và những điều cần lưu ý để chủ động chuẩn bị tốt hơn cho các quyết định quan trọng.', accent: '#4070b8' }
+          ].map((service, i) => (
+            <Link href={`/services?type=${service.id}`} key={i} className="sanctum-card p-6 flex gap-6 group">
+              <div className="w-11 h-11 rounded-full bg-void-black border border-white/5 flex items-center justify-center shrink-0">
+                <service.icon size={20} style={{ color: service.accent }} />
+              </div>
+              <div>
+                <span className="text-[0.78rem] font-bold tracking-[0.08em] uppercase mb-2 block" style={{ color: service.accent }}>
+                  {service.tag}
+                </span>
+                <h3 className="text-lunar-bright text-[1.25rem] font-semibold mb-3">{service.title}</h3>
+                <p className="text-lunar-dim text-[0.88rem] leading-[1.85]">{service.desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Process Section */}
+      <section className="py-28 sm:py-36 px-4 w-full">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20 flex flex-col items-center">
+            <span className="section-eyebrow mb-4">Thao tác dễ dàng</span>
+            <h2 className="font-vietnam font-bold text-[clamp(1.5rem,4vw,2.6rem)] uppercase text-lunar-bright mb-4">
+              Chỉ 3 bước đơn giản
+            </h2>
+            <p className="text-lunar-dim text-[1.05rem]">
+              Không phức tạp. Không mất nhiều thời gian.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-6 relative mb-24">
+            <div className="hidden md:block absolute top-[3.5rem] left-[16%] right-[16%] h-[1px] bg-gradient-to-r from-transparent via-[#c8943f]/50 to-transparent z-0"></div>
+            
+            {[
+              { step: '01', title: 'Nhập thông tin ngày giờ sinh' },
+              { step: '02', title: 'Chọn điều bạn muốn khám phá' },
+              { step: '03', title: 'Nhận luận giải PDF qua email' }
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col items-center text-center relative z-10">
+                <div className="w-28 h-28 rounded-full bg-[#120d2e]/90 border border-[#c8943f]/25 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(200,148,63,0.1)]">
+                  <span className="font-cinzel text-[1.9rem] font-bold text-gold-warm">{item.step}</span>
+                </div>
+                <h3 className="font-vietnam text-[1.15rem] font-semibold text-lunar-bright mb-3">{item.title}</h3>
+              </div>
+            ))}
+          </div>
+
+          <div className="max-w-3xl mx-auto sanctum-card bg-[#120d2e]/60 p-10 relative">
+            <div className="absolute top-6 left-6 font-playfair text-[5rem] text-[#c8943f]/15 leading-none">&quot;</div>
+            <p className="font-playfair italic text-[1.15rem] leading-[1.9] text-lunar-mid relative z-10 mb-8 px-4">
+              &quot;Mình không tin tưởng chiêm tinh lắm cho đến khi đọc bản phân tích về sự nghiệp — nó mô tả đúng đến mức mình phải đọc lại hai lần. Giờ mình hiểu tại sao mình luôn bị thu hút bởi những ngành sáng tạo dù học kỹ thuật.&quot;
+            </p>
+            <div className="flex items-center gap-4 px-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c8943f] to-[#9a6f2a] flex items-center justify-center text-void-black font-bold text-lg">
+                T
+              </div>
+              <div>
+                <p className="font-vietnam font-semibold text-lunar-bright text-[0.95rem]">Thanh N.</p>
+                <p className="italic text-[#9090a8] text-[0.85rem]">Hà Nội · Báo cáo hướng nghiệp</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-28 sm:py-36 px-4 w-full">
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-[15px] p-[1px] bg-gradient-to-b from-[#c8943f]/70 via-[#c8943f]/20 to-[#c8943f]/60">
+            <div className="bg-gradient-to-br from-[#0d0d26] to-[#080818] rounded-[14px] p-8 sm:p-16 flex flex-col items-center text-center">
+              <div className="divider-ornament mb-8">✦</div>
+              
+              <span className="font-vietnam font-semibold text-[clamp(1.4rem,2.8vw,1.8rem)] text-[#c8943f] tracking-[0.1em] mb-2">
+                Bạn đã sẵn sàng muốn biết
+              </span>
+              <h2 className="font-playfair italic text-[clamp(2.5rem,5vw,4rem)] uppercase text-gold-gradient leading-tight mb-8">
+                Bầu trời lúc bạn<br/>chào đời nói gì về<br/>bạn?
+              </h2>
+              
+              <div className="w-[60px] h-[1px] bg-[#c8943f]/45 mb-8"></div>
+              
+              <p className="text-lunar-dim text-[1.05rem] leading-[1.9] max-w-2xl mb-10">
+                Bạn không tình cờ lạc vào trang này đâu. Có thể vũ trụ đã sắp xếp một chút... hoặc một người bạn nào đó đưa bạn đến đây..<br/>
+                Nhưng nếu bạn đang đọc đến dòng này, có lẽ trong lòng bạn cũng đang có vài câu hỏi băn khoăn về bản thân, tình yêu hay con đường phía trước. Và biết đâu, câu trả lời đó đang nằm trong bản đồ sao của bạn.
+              </p>
+              
+              <Link href="/services" className="btn-gold px-[3rem] py-[0.95rem] mb-6">
+                Khám phá tại đây
+              </Link>
+              
+              <p className="text-[#9090a8] text-[0.85rem]">
+                Nhận báo cáo trong vài phút · Giao qua email · PDF lưu được
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

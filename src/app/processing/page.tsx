@@ -31,6 +31,7 @@ function ProcessingInner() {
   const [label, setLabel] = useState('Đang khởi tạo...')
   const [status, setStatus] = useState<'processing' | 'done' | 'error'>('processing')
   const [errorMsg, setErrorMsg] = useState('')
+  const [recoveryToken, setRecoveryToken] = useState('')
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -65,6 +66,7 @@ function ProcessingInner() {
         } else if (job.status === 'error') {
           if (intervalRef.current) clearInterval(intervalRef.current)
           setErrorMsg(job.error || 'Có lỗi xảy ra khi tạo báo cáo.')
+          if (job.result?.recoveryToken) setRecoveryToken(job.result.recoveryToken)
         }
       } catch {
         // network error, keep polling
@@ -90,6 +92,7 @@ function ProcessingInner() {
       } else if (job.status === 'error') {
         if (intervalRef.current) clearInterval(intervalRef.current)
         setErrorMsg(job.error || 'Có lỗi xảy ra khi tạo báo cáo.')
+        if (job.result?.recoveryToken) setRecoveryToken(job.result.recoveryToken)
       }
     }
 
@@ -125,24 +128,65 @@ function ProcessingInner() {
             >
               Có lỗi xảy ra
             </h2>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.8 }}>
+            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: recoveryToken ? '1.5rem' : '2rem', lineHeight: 1.8 }}>
               {errorMsg}
             </p>
+
+            {/* Recovery token block */}
+            {recoveryToken && (
+              <div style={{
+                padding: '16px 20px',
+                background: 'rgba(200,148,63,0.06)',
+                border: '1px solid rgba(200,148,63,0.2)',
+                borderRadius: '12px',
+                marginBottom: '1.5rem',
+                textAlign: 'center',
+              }}>
+                <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  Mã khôi phục của bạn
+                </p>
+                <p style={{ color: '#d9ab55', fontFamily: 'monospace', fontSize: '1.6rem', fontWeight: 700, letterSpacing: '0.25em', marginBottom: '10px' }}>
+                  {recoveryToken}
+                </p>
+                <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', lineHeight: 1.6 }}>
+                  Chúng tôi đã gửi link khôi phục vào email của bạn.<br />
+                  Dùng mã này tại <strong style={{ color: '#8a8399' }}>/recover</strong> để thử lại bất kỳ lúc nào.
+                </p>
+              </div>
+            )}
+
             <div className="flex gap-3 justify-center">
-              <Link
-                href="/services"
-                className="px-5 py-2.5 text-sm font-bold"
-                style={{
-                  background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                  color: '#06060f',
-                  borderRadius: '4px',
-                  fontFamily: 'var(--font-vietnam)',
-                  letterSpacing: '0.06em',
-                  fontSize: '0.72rem',
-                }}
-              >
-                Thử lại
-              </Link>
+              {recoveryToken ? (
+                <Link
+                  href={`/recover?token=${recoveryToken}`}
+                  className="px-5 py-2.5 text-sm font-bold"
+                  style={{
+                    background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
+                    color: '#06060f',
+                    borderRadius: '4px',
+                    fontFamily: 'var(--font-vietnam)',
+                    letterSpacing: '0.06em',
+                    fontSize: '0.72rem',
+                  }}
+                >
+                  Khôi phục ngay →
+                </Link>
+              ) : (
+                <Link
+                  href="/services"
+                  className="px-5 py-2.5 text-sm font-bold"
+                  style={{
+                    background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
+                    color: '#06060f',
+                    borderRadius: '4px',
+                    fontFamily: 'var(--font-vietnam)',
+                    letterSpacing: '0.06em',
+                    fontSize: '0.72rem',
+                  }}
+                >
+                  Thử lại
+                </Link>
+              )}
               <a
                 href="mailto:support@hatgiongchiemtinh.com"
                 className="px-5 py-2.5 text-sm"

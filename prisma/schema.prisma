@@ -94,5 +94,8 @@ model Order {
   startDate     String?   @map("start_date")
   endDate       String?   @map("end_date")
 
+  // Recovery system
+  recoveryToken String?   @unique @map("recovery_token")
+
   @@map("orders")
 }
