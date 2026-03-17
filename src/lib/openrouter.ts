@@ -59,6 +59,7 @@ export async function generateEssayStreaming(
   userPrompt: string,
   onProgress: (charsReceived: number) => void,
   onRetry?: (attempt: number, reason: string) => void,
+  onGenerationId?: (id: string) => void,
 ): Promise<string> {
   if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not configured')
 
@@ -103,6 +104,7 @@ export async function generateEssayStreaming(
       let fullText = ''
       let buffer = ''
       let finished = false
+      let genIdReported = false
 
       while (!finished) {
         const { done, value } = await reader.read()
@@ -122,6 +124,10 @@ export async function generateEssayStreaming(
 
           try {
             const parsed = JSON.parse(data)
+            if (!genIdReported && parsed.id && onGenerationId) {
+              onGenerationId(parsed.id)
+              genIdReported = true
+            }
             const delta = parsed.choices?.[0]?.delta?.content || ''
             if (delta) {
               fullText += delta

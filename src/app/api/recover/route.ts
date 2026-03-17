@@ -81,6 +81,7 @@ export async function POST(req: Request) {
       body,
       userUid: order.userUid || undefined,
       orderId: order.id,
+      amount: order.amount ?? 0,
     })
 
     // Update order: new jobId + increment retryCount + clear token (sweep will generate fresh one if this job also fails)

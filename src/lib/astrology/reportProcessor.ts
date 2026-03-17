@@ -11,6 +11,7 @@ import { generatePdf } from '@/lib/pdf/generator'
 import { sendReportEmail, makePdfFilename, sendRecoveryEmail } from '@/lib/email'
 import { createJob, updateJob, isJobCancelled, generateRecoveryToken, STUCK_ERROR } from '@/lib/jobs'
 import prisma from '@/lib/db'
+import { sendOrderNotification } from '@/lib/notify'
 import fs from 'fs'
 import path from 'path'
 
@@ -73,6 +74,7 @@ export async function processReport(
   jobId: string,
   body: Record<string, unknown>,
   orderId?: number,
+  amount?: number,
 ) {
   const { service, inputData, email } = body as {
     service: string
@@ -206,6 +208,7 @@ export async function processReport(
   const AI_MAX_RETRIES = 3
   let essayText = ''
   let totalAttempt = 0
+  const generationIds: string[] = []
   for (let aiAttempt = 0; aiAttempt < AI_MAX_RETRIES; aiAttempt++) {
     if (aiAttempt > 0) {
       const delay = aiAttempt * 4000
@@ -236,6 +239,7 @@ export async function processReport(
         })
         console.log(`[JOB ${jobId}] OpenRouter inner retry ${innerAttempt}`)
       },
+      (genId) => generationIds.push(genId),
     )
 
     if (essayText && essayText.length >= minChars) break
@@ -316,6 +320,15 @@ export async function processReport(
   console.log(
     `[JOB ${jobId}] Done — ${service} for ${name}, essay ${essayText.length} chars`,
   )
+
+  // Fire-and-forget: notify via Telegram
+  sendOrderNotification({
+    service,
+    name: fullName,
+    email: email ?? '',
+    amount: amount ?? 0,
+    generationIds,
+  }).catch((err) => console.error(`[JOB ${jobId}] Notify failed:`, err))
 }
 
 export interface CreateReportJobOptions {
@@ -323,10 +336,11 @@ export interface CreateReportJobOptions {
   body: Record<string, unknown>
   userUid?: string
   orderId?: number
+  amount?: number
 }
 
 export function createReportJob(opts: CreateReportJobOptions): string {
-  const { service, body, userUid, orderId } = opts
+  const { service, body, userUid, orderId, amount } = opts
   const jobId = randomUUID()
   const iData = body.inputData as Record<string, unknown> | undefined
   const meta = {
@@ -344,7 +358,7 @@ export function createReportJob(opts: CreateReportJobOptions): string {
   }
   createJob(jobId, meta)
 
-  processReport(jobId, body, orderId).catch(async (err) => {
+  processReport(jobId, body, orderId, amount).catch(async (err) => {
     console.error(`[JOB ${jobId}] Error:`, err)
 
     let recoveryToken: string | undefined

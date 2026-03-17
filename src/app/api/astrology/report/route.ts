@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     }
 
     // Fire and forget — background continues after response is sent
-    processReport(jobId, body, orderId).catch((err) => {
+    processReport(jobId, body, orderId, 0).catch((err) => {
       console.error(`[JOB ${jobId}] processReport error:`, err)
     })
 

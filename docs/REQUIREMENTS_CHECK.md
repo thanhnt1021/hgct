@@ -105,6 +105,10 @@ SEPAY_API_KEY=                   # API Key tự tạo, điền cùng giá trị 
 BANK_ACCOUNT_NUMBER=             # Số tài khoản ngân hàng đã liên kết trên SePay
 BANK_ACCOUNT_NAME=               # Tên chủ tài khoản (viết hoa, đúng như ngân hàng)
 BANK_NAME=                       # Tên ngân hàng đúng format SePay (vd: TPBank, MBBank, Vietcombank, ACB...)
+
+# Telegram Notifications (thông báo đơn hàng)
+TELEGRAM_BOT_TOKEN=              # Bot token của @nguyclaudebot (lấy từ /root/.claude/hooks/telegram_config.env)
+OPENROUTER_MANAGEMENT_KEY=       # Management Key từ openrouter.ai/settings/keys (khác với OPENROUTER_API_KEY thông thường)
 ```
 
 Sau khi tạo `.env.local`, copy vào standalone:

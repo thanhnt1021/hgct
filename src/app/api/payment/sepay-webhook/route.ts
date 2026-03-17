@@ -120,7 +120,7 @@ export async function POST(request: Request) {
     })
 
     // 10. Fire-and-forget report processing
-    processReport(jobId, body, order.id).catch((err) => {
+    processReport(jobId, body, order.id, order.amount ?? 0).catch((err) => {
       console.error(`[sepay-webhook] processReport error for job ${jobId}:`, err)
     })
 
