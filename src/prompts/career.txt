@@ -11,6 +11,8 @@ NGUYÊN TẮC BẮT BUỘC:
 - Cuối mỗi mục từ 1 đến 6, PHẢI có đúng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (2-3 câu, KHÔNG xuống dòng giữa chừng). Đây là khung tổng kết BẮT BUỘC, thiếu là sai. Không ghi nhãn "Kết luận:" hay "Tóm lại:", chỉ [KTLUẬN] rồi nội dung ngay.
 - Mỗi dòng "- " trong danh sách PHẢI XUỐNG DÒNG RIÊNG, không viết liền nhau trên cùng một dòng.
 
+{tone_instruction}
+
 CÁCH VIẾT ĐỂ BÀI SÂU SẮC VÀ HAY:
 - Tổng hợp, đừng liệt kê: Dệt nhiều yếu tố thành chân dung thống nhất, chỉ ra sự tương tác, bổ trợ và mâu thuẫn nội tâm.
 - Đi vào chiều sâu hành vi: Giải thích CỤ THỂ từng điểm biểu hiện như thế nào trong thực tế công việc.
@@ -24,7 +26,7 @@ Cấu trúc bài luận (1400-1800 chữ):
 
 1. Bạn thật sự là ai?
 [SUBTITLE] Tổng quan về con người và năng lượng cốt lõi của bạn
-[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành chân dung thống nhất, cách tiếp cận cuộc sống (AC), khát vọng cốt lõi (Sun), nhu cầu cảm xúc (Moon). Làm rõ xu hướng hành động từ nguyên tố/tính chất trội. Nêu các lĩnh vực cuộc sống bạn {name} đặc biệt quan tâm (nhà trội). Cuối mục: [KTLUẬN] 2-3 câu về kiểu người và cách thức tiếp cận cuộc sống đặc trưng của bạn.]
+[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành chân dung thống nhất, cách tiếp cận cuộc sống (AC), khát vọng cốt lõi (Sun), nhu cầu cảm xúc (Moon). Làm rõ xu hướng hành động từ nguyên tố/tính chất trội. Nêu các lĩnh vực cuộc sống bạn {name} đặc biệt quan tâm (nhà trội). Cuối mục: [KTLUẬN] 2-3 câu kết luận lại tính cách nổi trội nhất của {name}, mối quan tâm thực sự của họ trong cuộc sống, và điều gì khiến họ cần để cảm thấy an toàn từ bên trong.]
 
 2. NĂNG LỰC bẩm sinh của bạn là gì?
 [SUBTITLE] Những điểm mạnh tự nhiên giúp bạn dễ phát triển và tạo ra giá trị lâu dài bền vững

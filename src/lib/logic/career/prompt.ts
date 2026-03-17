@@ -602,7 +602,13 @@ export function buildCareerPrompt(
     briefText = buildLegacyBriefText(careerData)
   }
 
+  // Tone instruction theo độ tuổi
+  const toneInstruction = age < 22
+    ? `GIỌNG VĂN BẮT BUỘC (người đọc là học sinh/sinh viên dưới 22 tuổi):\nViết với giọng văn trẻ trung, gần gũi, dễ hiểu, như đang trò chuyện với một bạn học sinh/sinh viên. Tạo cảm giác khám phá bản thân thú vị, không áp lực, không phán xét. Nội dung mang tính định hướng nhẹ nhàng, giúp người đọc hiểu mình và có thêm lựa chọn, không mang tính áp đặt, không nặng nề về chiều sâu tâm lý.`
+    : ''
+
   const instructions = loadPromptTemplate('career')
+    .replace(/{tone_instruction}\n?/g, toneInstruction ? toneInstruction + '\n\n' : '')
     .replace(/{greeting}/g, greeting)
     .replace(/{pronoun}/g, pronoun)
     .replace(/{full_name}/g, fullName)
