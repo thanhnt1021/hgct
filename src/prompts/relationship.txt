@@ -95,12 +95,12 @@ Lõi Tính Cách Của {title_A} {name_A}:
 Lõi Tính Cách Của {title_B} {name_B}:
 [Tương tự / 2 đoạn như trên]
 
-Điểm Gặp Nhau Và Khác Biệt Ngầm:
+Những điểm đồng điệu và khác biệt trong mối quan hệ:
 [1 đoạn: Xét lõi tính cách (AC/Sun/Moon) của 2 người, có gì tự nhiên hòa hợp không? Ví dụ: cùng nguyên tố, năng lượng bổ trợ, nhu cầu cảm xúc tương đồng... Hoặc có điểm nào tự nhiên xung đột? Ví dụ: một người cần tự do, người kia cần kiểm soát; một người phản ứng nhanh, người kia cần thời gian...]
 [1 đoạn: Đối chiếu "cho đi" ↔ "cần nhận", điều {name_A} cho đi có khớp với điều {name_B} cần nhận không? Và ngược lại? Chỉ ra điểm bổ trợ đẹp.]
 [1 đoạn: Chỉ ra điểm lệch, điều một người cần mà người kia chưa cho được, hoặc cách thể hiện khác nhau. Luận hướng xây dựng: đây là điều cần hiểu và tôn trọng, không phải điểm yếu.]
 
-Nhà Được Kích Hoạt:
+Khi đối phương bước vào cuộc đời bạn, điều gì được kích hoạt?
 [Chiều 1 / Nhà của {name_A} được {name_B} kích hoạt: Liệt kê ĐẦY ĐỦ tất cả các nhà có trong dữ liệu, không bỏ sót nhà nào. Với từng nhà: viết 1 đoạn riêng giải thích sự hiện diện của {pronoun_B} {name_B} khiến lĩnh vực đó trong cuộc đời {pronoun_A} {name_A} trở nên sống động, có bài học, hoặc quan trọng hơn như thế nào.]
 [Chiều 2 / Nhà của {name_B} được {name_A} kích hoạt: Liệt kê ĐẦY ĐỦ tất cả các nhà có trong dữ liệu, không bỏ sót nhà nào. Với từng nhà: viết 1 đoạn riêng giải thích sự hiện diện của {pronoun_A} {name_A} khiến lĩnh vực đó trong cuộc đời {pronoun_B} {name_B} trở nên sống động, có bài học, hoặc quan trọng hơn như thế nào.]
 [Lưu ý: kích hoạt KHÔNG có nghĩa là đòi hỏi, mà là sự hiện diện của đối phương khiến lĩnh vực đó trong mình trở nên sống động hơn]

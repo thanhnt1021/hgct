@@ -35,8 +35,23 @@ Bản đồ sao giúp bạn hiểu rõ hơn mô thức tình cảm của mình, 
 Hy vọng bản luận giải này sẽ giúp bạn hiểu rõ bản thân trong tình yêu, để từ đó bước vào những mối quan hệ với nhiều sự chủ động, bình an và tự tin hơn.
 
 1. Bức tranh tổng thể về tình yêu của bạn
-[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành bức tranh về bản năng tình cảm: bạn {name} cho đi gì và cần nhận lại gì. Tích hợp Venus (cách yêu, gu), Moon (nhu cầu an toàn cảm xúc), Mars (cách theo đuổi và hấp dẫn). Nêu nhà trội để giải thích điều bạn vô thức mong muốn đối phương có.
-[KTLUẬN] [2-3 câu về năng lượng tình yêu đặc trưng của {name}].]
+QUAN TRỌNG: Mục này PHẢI viết thành 7 đoạn văn RIÊNG BIỆT theo đúng thứ tự dưới đây. KHÔNG gộp các đoạn lại với nhau. Mỗi đoạn là một đơn vị độc lập.
+
+[Đoạn mở / 2-3 câu: Một nhận xét tổng quan ấn tượng về tông màu tình yêu của {name} — không liệt kê hành tinh, chỉ vẽ cảm giác chung. Đây là câu dẫn vào toàn bộ mục.]
+
+[Đoạn Cung Mọc: Nói về lõi tính cách của {name} qua Cung Mọc — họ là người như thế nào trong cuộc sống và mang điều đó vào tình yêu ra sao. Viết tự nhiên, uyển chuyển: không máy móc kiểu "Vì Mọc là X nên...". Dùng dữ liệu "cho đi / cách yêu" và "điểm yếu tình cảm" từ Cung Mọc để làm sâu thêm, không liệt kê.]
+
+[Đoạn Mặt Trời: Nói về lõi bản ngã của {name} qua Mặt Trời — ý chí, bản sắc và điều {name} tự nhiên mang vào tình yêu từ cốt lõi bên trong. Dùng dữ liệu "cho đi / cách yêu" và "điểm yếu tình cảm" từ Mặt Trời. Nếu Mặt Trời và Mặt Trăng cùng cung → vẫn viết đoạn riêng, làm nổi bật góc bản ngã và ý chí, phân biệt với góc cảm xúc của Moon.]
+
+[Đoạn Mặt Trăng: Nói về thế giới cảm xúc bên trong của {name} qua Mặt Trăng — bản năng cảm xúc, cách {name} phản ứng khi yêu, và sâu hơn: điều {name} thực sự cần được nhận lại để cảm thấy an toàn trong tình yêu (dùng dữ liệu "nhu cầu cảm xúc" của Mặt Trăng từ brief). Nếu Mặt Trăng cùng cung với Mặt Trời → vẫn viết đoạn riêng, tập trung vào chiều cảm xúc, nỗi sợ, nhu cầu an toàn.]
+
+[Đoạn Sao Kim: Nói về cách {name} yêu theo Sao Kim — gu đối tác, cách {name} thể hiện tình cảm và muốn được yêu lại theo kiểu nào. Dùng dữ liệu "gu đối tác" từ brief.]
+
+[Đoạn Sao Hỏa: Nói về cách {name} theo đuổi và hấp dẫn theo Sao Hỏa — năng lượng chủ động, cách {name} tiếp cận và bày tỏ trong tình yêu. Luận từ cung và nhà của Sao Hỏa.]
+
+[Đoạn Nhà trội: Từ danh sách nhà trội trong brief, luận điều {name} vô thức mong muốn và tìm kiếm ở đối phương — điều {name} cần nhận lại để tình yêu cảm thấy trọn vẹn.]
+
+[KTLUẬN] [3-5 câu ngắn gọn, súc tích về cách {name} cho đi và nhận lại trong tình yêu — đây là bức tranh tổng thể về cân bằng tình cảm của {name}].
 
 2. Bạn thật sự cần điều gì trong tình yêu?
 [SUBTITLE] Những nhu cầu cảm xúc sâu bên trong và kiểu người phù hợp với bạn
