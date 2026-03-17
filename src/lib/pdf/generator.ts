@@ -309,6 +309,8 @@ function buildHtml(essayText: string, options: PdfOptions): string {
 <style>
 ${buildFontFaces()}
 
+:root { --scallop-stroke: ${SCALLOP_STROKE_COLOR[options.service ?? ''] ?? '#7B68AE'}; }
+
 /* @page: size only — margins are set via page.pdf() to avoid conflicts */
 @page { size: A4; }
 /* margin:0 on body ensures clientWidth in screen mode = viewport width = print content width (642px) */
@@ -359,6 +361,14 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 </div>
 ${contentHtml}
 </body></html>`
+}
+
+// Service → scallop border stroke color
+const SCALLOP_STROKE_COLOR: Record<string, string> = {
+  career:       '#346099',
+  love:         '#7B68AE',
+  synastry:     '#7B68AE',
+  transit:      '#7B68AE',
 }
 
 // Service → image prefix mapping
@@ -782,8 +792,9 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
 
         const pathEl = document.createElementNS(svgNS, 'path')
         pathEl.setAttribute('d', pathD)
+        const scallopStroke = getComputedStyle(document.documentElement).getPropertyValue('--scallop-stroke').trim() || '#7B68AE'
         pathEl.setAttribute('fill', '#fff5f5')
-        pathEl.setAttribute('stroke', '#7B68AE')
+        pathEl.setAttribute('stroke', scallopStroke)
         pathEl.setAttribute('stroke-width', String(strokeW))
         pathEl.setAttribute('stroke-linecap', 'round')
         pathEl.setAttribute('stroke-linejoin', 'round')
