@@ -172,7 +172,7 @@ function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-const VANHAN_IMGS_DIR = '/root/hgct/imgs'
+const PDF_IMGS_DIR = '/root/hgct/imgs'
 
 interface PdfOptions {
   coverTitle: string
@@ -340,24 +340,34 @@ ${contentHtml}
 </body></html>`
 }
 
+// Service → image prefix mapping
+const SERVICE_IMG_PREFIX: Record<string, string> = {
+  transit:      'VanHan',
+  vanhan:       'VanHan',
+  career:       'HuongNghiep',
+  love:         'TinhDuyen',
+  synastry:     'CapDoi',
+  relationship: 'CapDoi',
+}
+
 /**
- * Vanhan PDF assembly:
+ * Template PDF assembly (all services):
  * cover (01) + each content page with bg-02 overlaid under text + end (03)
  *
  * All 3 JPEGs embedded directly in finalDoc (no intermediate docs).
  * bgImg embedded ONCE, reused across all content pages — pdf-lib
  * references the same XObject, so bg is stored only once regardless of page count.
  */
-async function buildVanhanPdf(contentPdfBuffer: Buffer): Promise<Buffer> {
+async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string): Promise<Buffer> {
   const { PDFDocument } = await import('pdf-lib')
   const W = 595.28, H = 841.89  // A4 in points
 
   const finalDoc = await PDFDocument.create()
 
   // Embed all 3 JPEGs once into finalDoc
-  const coverImg = await finalDoc.embedJpg(fs.readFileSync(`${VANHAN_IMGS_DIR}/pdf-VanHan-01.jpg`))
-  const bgImg    = await finalDoc.embedJpg(fs.readFileSync(`${VANHAN_IMGS_DIR}/pdf-VanHan-02.jpg`))
-  const endImg   = await finalDoc.embedJpg(fs.readFileSync(`${VANHAN_IMGS_DIR}/pdf-VanHan-03.jpg`))
+  const coverImg = await finalDoc.embedJpg(fs.readFileSync(`${PDF_IMGS_DIR}/pdf-${imgPrefix}-01.jpg`))
+  const bgImg    = await finalDoc.embedJpg(fs.readFileSync(`${PDF_IMGS_DIR}/pdf-${imgPrefix}-02.jpg`))
+  const endImg   = await finalDoc.embedJpg(fs.readFileSync(`${PDF_IMGS_DIR}/pdf-${imgPrefix}-03.jpg`))
 
   // ── Page 1: cover ─────────────────────────────────────────────────────────
   finalDoc.addPage([W, H]).drawImage(coverImg, { x: 0, y: 0, width: W, height: H })
@@ -367,7 +377,7 @@ async function buildVanhanPdf(contentPdfBuffer: Buffer): Promise<Buffer> {
   for (const pageIndex of contentDoc.getPageIndices()) {
     const [embeddedPage] = await finalDoc.embedPages([contentDoc.getPage(pageIndex)])
     const p = finalDoc.addPage([W, H])
-    p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })     // layer 1: background
+    p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })       // layer 1: background
     p.drawPage(embeddedPage, { x: 0, y: 0, width: W, height: H }) // layer 2: text content
   }
 
@@ -393,7 +403,7 @@ const FOOTER_TEMPLATE = `<div style="
 
 export async function generatePdf(essayText: string, options: PdfOptions): Promise<Buffer | null> {
   try {
-    const isVanhan = options.service === 'vanhan' || options.service === 'transit'
+    const imgPrefix = options.service ? SERVICE_IMG_PREFIX[options.service] : undefined
 
     const chromium = await import('@sparticuz/chromium')
     const puppeteer = await import('puppeteer-core')
@@ -810,8 +820,8 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
     })
     await browser.close()
 
-    if (isVanhan) {
-      return await buildVanhanPdf(Buffer.from(contentPdf))
+    if (imgPrefix) {
+      return await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix)
     }
 
     return Buffer.from(contentPdf)
