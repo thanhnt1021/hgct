@@ -182,7 +182,7 @@ src/
 - [x] Telegram order notifications — sau mỗi report hoàn thành tự động gửi vào topic Telegram: dịch vụ, tên/email khách, số tiền, OR Fee ($), OR VND (VCB Sell rate real-time), OR Balance; sequential flow: chờ 15s → lấy fee (retry 2×10s nếu null) → balance + VCB rate song song → gửi; gen ID capture từ SSE chunk `id` field; dùng @hatgiongchiemtinhbot
 - [x] Chặn đăng ký mới — `/api/auth/register` trả 403; Google OAuth không tạo user mới nếu email chưa có; login page ẩn link đăng ký
 - [x] Giá dịch vụ dynamic từ DB — `config` table (`service_price` key); API `create-order` đọc từ DB; admin set giá qua Telegram bot `/setprice`
-- [x] Admin Telegram bot (@hatgiongchiemtinhbot) — webhook `/api/telegram-admin/[secret]/webhook`; chỉ admin ID 1247334831 được dùng; `/setprice`, `/getprice`, `/help`; restart services sau khi update giá
+- [x] Admin Telegram bot (@hatgiongchiemtinhbot) — webhook `/api/telegram-admin/[secret]/webhook`; chỉ admin ID 1247334831 được dùng; `/setprice`, `/getprice`, `/help`; restart services sau khi update giá; inline keyboard buttons (preset prices + custom); `setMyCommands` đăng ký command menu Telegram
 - [x] Wording fix — thay "AI đang biên soạn" → "Vũ trụ đang biên soạn" trong reportProcessor.ts, processing/page.tsx, services/page.tsx
 - [x] `/chart` dominant planets algorithm — tie-breaking cải thiện để match mo: max-count filter → global min orb_round → total orb_round sort
 - [x] `/chart` page redesign — layout 2 cột: cột trái (Wheel + BẢNG NGUYÊN TỐ & TÍNH CHẤT); Elements (Lửa/Đất/Khí/Nước) + Modality (Khởi/Cố/Biến) dạng progress bar %; Nhà Trội dạng chips (symbol hành tinh + điểm); aspect legend "Bán Lục Hợp" + "Ngũ Chiếu" tách riêng
