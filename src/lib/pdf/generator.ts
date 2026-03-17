@@ -201,7 +201,21 @@ function buildFontFaces(): string {
 }
 
 function buildHtml(essayText: string, options: PdfOptions): string {
-  const cleaned = cleanForPdf(essayText)
+  // Strip AI's closing (unreliable) and inject hardcoded version when available.
+  // Primary cut point: [CLOSING] marker. Fallback: detect "Cảm ơn bạn đã" at line start.
+  let processedText = essayText
+  const hardcodedClosing = options.service ? CLOSING_BLOCKS[options.service] : undefined
+  if (hardcodedClosing) {
+    let cutIdx = processedText.indexOf('[CLOSING]')
+    if (cutIdx < 0) {
+      // Fallback: find "Cảm ơn bạn đã" at the start of a line
+      const m = processedText.match(/\nCảm ơn bạn đã/)
+      if (m?.index != null) cutIdx = m.index
+    }
+    const base = cutIdx >= 0 ? processedText.slice(0, cutIdx).trimEnd() : processedText.trimEnd()
+    processedText = base + '\n\n[CLOSING]\n' + hardcodedClosing
+  }
+  const cleaned = cleanForPdf(processedText)
   const lines = cleaned.split('\n')
   const dobStr = `${options.profile.dob.day}/${options.profile.dob.month}/${options.profile.dob.year}`
 
@@ -361,6 +375,21 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 </div>
 ${contentHtml}
 </body></html>`
+}
+
+// Service → hardcoded closing block (injected after AI output, replaces AI's unreliable closing)
+// Keeping closing text in prompts is intentional — it nudges AI to output [CLOSING] marker.
+// Everything after [CLOSING] from AI is stripped and replaced with this.
+const CLOSING_BLOCKS: Partial<Record<string, string>> = {
+  career: `Cảm ơn bạn đã lựa chọn Hạt Giống Chiêm Tinh.
+
+Hy vọng những góc nhìn từ bản luận giải này sẽ giúp bạn nhìn rõ hơn những tiềm năng bên trong mình, hiểu được "hạt giống" riêng mà bạn mang theo và tìm thấy con đường phù hợp để phát triển.
+
+Chúc bạn luôn đủ kiên nhẫn, đủ tin tưởng vào bản thân và tìm thấy con đường sự nghiệp khiến bạn thật sự được là chính mình.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh`,
 }
 
 // Service → scallop border stroke color
