@@ -110,7 +110,7 @@ Phần 5, Gia Đình – Nhà Cửa: Tiểu mục "Gia đình và nhà cửa:". 
 
 Phần 6, Sức Khỏe: Hai tiểu mục "Sức khỏe thể chất:" và "Sức khỏe tinh thần:". Mỗi tiểu mục có [KTLUẬN] riêng.
 
-Phần 7, Thông điệp dành cho bạn trong giai đoạn này: KHÔNG có [KTLUẬN]. Mở bằng đoạn text cố định (chép nguyên văn từ CẤU TRÚC bên dưới). "Nên tập trung vào:" liệt kê lĩnh vực thuận lợi theo TÊN LĨNH VỰC (không dùng số nhà), mỗi lĩnh vực viết 2-3 câu gợi ý cách tận dụng. "Đặc biệt lưu ý:" liệt kê lĩnh vực thách thức theo tên, mỗi lĩnh vực 2-3 câu trấn an + gợi ý cách tiếp cận. Kết bằng đoạn cảm ơn cố định (chép nguyên văn từ CẤU TRÚC bên dưới).
+Phần 7, Thông điệp dành cho bạn trong giai đoạn này: KHÔNG có [KTLUẬN]. Mở bằng đoạn text cố định (chép nguyên văn từ CẤU TRÚC bên dưới). "Lĩnh vực nên tập trung:" liệt kê lĩnh vực thuận lợi theo TÊN LĨNH VỰC (không dùng số nhà), mỗi lĩnh vực viết 2-3 câu gợi ý cách tận dụng. "Lĩnh vực nên cẩn trọng:" liệt kê lĩnh vực thách thức theo tên, mỗi lĩnh vực 2-3 câu trấn an + gợi ý cách tiếp cận. Kết bằng đoạn cảm ơn cố định (chép nguyên văn từ CẤU TRÚC bên dưới).
 
 Độ dài: 4000-6000 chữ. Tone: người bạn đang ngồi chia sẻ và soi sáng, ấm áp, đồng cảm, cụ thể, gần gũi.
 
@@ -209,10 +209,10 @@ Sức khỏe tinh thần:
 
 Một vài điều quan trọng để bạn nhìn lại hành trình mình đang đi qua và bước tiếp con đường phía trước với sự vững vàng và bình an.
 
-Nên tập trung vào:
+Lĩnh vực nên tập trung:
 [Mỗi lĩnh vực thuận lợi (theo thứ tự đã cho trong dữ liệu): viết 2-3 câu theo TÊN LĨNH VỰC (không dùng số nhà), gợi ý cách tận dụng. Giọng khích lệ.]
 
-Đặc biệt lưu ý:
+Lĩnh vực nên cẩn trọng:
 [Mỗi lĩnh vực thách thức (theo thứ tự đã cho): viết 2-3 câu theo TÊN LĨNH VỰC, trấn an + gợi ý cách tiếp cận. Giọng nhẹ nhàng.]
 
 Cảm ơn bạn đã tin tưởng Hạt Giống Chiêm Tinh.
