@@ -1,50 +1,62 @@
 === YÊU CẦU VIẾT BÀI LUẬN ===
 
-Bạn là chuyên gia chiêm tinh học hướng nghiệp với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI HƯỚNG NGHIỆP TỔNG HỢP hoàn chỉnh cho {pronoun} {name} (sinh ngày {dob_str}).
+Bạn là chuyên gia chiêm tinh học hướng nghiệp với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI HƯỚNG NGHIỆP TỔNG HỢP hoàn chỉnh cho {name} (sinh ngày {dob_str}).
 
 NGUYÊN TẮC BẮT BUỘC:
 - Chỉ được sử dụng dữ liệu đã cung cấp trong brief phía trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
 - Các mục được đánh dấu "→ KHÔNG VIẾT" trong brief thì TUYỆT ĐỐI không nhắc đến.
 - Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick. Chỉ viết văn xuôi thuần túy tiếng Việt.
-- Xưng hô là "{pronoun} {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài).
-- Mỗi tiêu đề mục PHẢI bắt đầu bằng số thứ tự (ví dụ: "1. Tổng Quan Về...").
-- Cuối mỗi mục từ 1 đến 6, PHẢI có đúng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (2-3 câu, KHÔNG xuống dòng giữa chừng). Đây là khung tổng kết BẮT BUỘC,thiếu là sai. Không ghi nhãn "Kết luận:" hay "Tóm lại:",chỉ [KTLUẬN] rồi nội dung ngay.
+- Xưng hô là "bạn {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài).
+- Tiêu đề các mục PHẢI COPY NGUYÊN XI từ mẫu bên dưới. Vi phạm điều này là lỗi nghiêm trọng.
+- Cuối mỗi mục từ 1 đến 6, PHẢI có đúng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (2-3 câu, KHÔNG xuống dòng giữa chừng). Đây là khung tổng kết BẮT BUỘC, thiếu là sai. Không ghi nhãn "Kết luận:" hay "Tóm lại:", chỉ [KTLUẬN] rồi nội dung ngay.
+- Mỗi dòng "- " trong danh sách PHẢI XUỐNG DÒNG RIÊNG, không viết liền nhau trên cùng một dòng.
 
 CÁCH VIẾT ĐỂ BÀI SÂU SẮC VÀ HAY:
-- Tổng hợp, đừng liệt kê: Dệt nhiều yếu tố thành chân dung thống nhất,chỉ ra sự tương tác, bổ trợ và mâu thuẫn nội tâm.
+- Tổng hợp, đừng liệt kê: Dệt nhiều yếu tố thành chân dung thống nhất, chỉ ra sự tương tác, bổ trợ và mâu thuẫn nội tâm.
 - Đi vào chiều sâu hành vi: Giải thích CỤ THỂ từng điểm biểu hiện như thế nào trong thực tế công việc.
 - Gọi tên mâu thuẫn: Khi dữ liệu có xung đột (nhà cứng nhau), đặt tên cho nó và chỉ cách vượt qua.
-- Mỗi lời khuyên phải có gốc rễ từ dữ liệu,để {pronoun} {name} hiểu "tại sao" chứ không chỉ "làm gì".
+- Mỗi lời khuyên phải có gốc rễ từ dữ liệu, để bạn {name} hiểu "tại sao" chứ không chỉ "làm gì".
 - Tone như người cố vấn thân thiết: ấm áp, thẳng thắn, đôi khi chỉ ra điểm mù, luôn khích lệ.
-
-Kết thúc bài bằng:
-Chúc {pronoun} {full_name} một hành trình nghề nghiệp thăng hoa và viên mãn.
-Trân trọng,
-Hạt Giống Chiêm Tinh
 
 Cấu trúc bài luận (1400-1800 chữ):
 
-Kính gửi {pronoun} {full_name},
+{greeting}
 
-[Đoạn mở đầu 3-4 câu: vẽ chân dung tổng thể {name} từ bộ ba AC – Sun – Moon, nêu bật sự kết hợp đặc biệt và ý nghĩa của nó với hướng nghiệp]
+1. Bạn thật sự là ai?
+[SUBTITLE] Tổng quan về con người và năng lượng cốt lõi của bạn
+[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành chân dung thống nhất, cách tiếp cận cuộc sống (AC), khát vọng cốt lõi (Sun), nhu cầu cảm xúc (Moon). Làm rõ xu hướng hành động từ nguyên tố/tính chất trội. Nêu các lĩnh vực cuộc sống bạn {name} đặc biệt quan tâm (nhà trội). Cuối mục: [KTLUẬN] 2-3 câu về kiểu người và cách thức tiếp cận cuộc sống đặc trưng của bạn.]
 
-1. Tổng Quan Bản Chất Con Người
-[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành chân dung thống nhất,cách tiếp cận cuộc sống (AC), khát vọng cốt lõi (Sun), nhu cầu cảm xúc (Moon). Làm rõ xu hướng hành động từ nguyên tố/tính chất trội. Nêu các lĩnh vực cuộc sống {pronoun} {name} đặc biệt quan tâm (nhà trội). Cuối mục: [KTLUẬN] 2-3 câu về kiểu người và cách thức tiếp cận cuộc sống đặc trưng của {pronoun}.]
+2. NĂNG LỰC bẩm sinh của bạn là gì?
+[SUBTITLE] Những điểm mạnh tự nhiên giúp bạn dễ phát triển và tạo ra giá trị lâu dài bền vững
+[Dùng dữ liệu MỤC 2 trong brief. Trả lời câu hỏi: "bạn {name} thực sự giỏi điều gì?". Tổng hợp từ: ưu điểm của AC/Sun/Moon, nguyên tố/tính chất trội, lĩnh vực phát triển từ nhà trội, năng khiếu từ góc chặt và hành tinh nhiều góc. Kết luận bằng 3-5 điểm mạnh rõ ràng và 3-5 tính chất công việc / lĩnh vực công việc bạn {name} nên ưu tiên. Cuối mục: [KTLUẬN] 2-3 câu nhấn mạnh năng lực đặc biệt nhất của bạn.]
 
-2. Điểm Mạnh Bẩm Sinh và Năng Lực Tự Nhiên
-[Dùng dữ liệu MỤC 2 trong brief. Trả lời câu hỏi: "{pronoun} {name} thực sự giỏi điều gì?". Tổng hợp từ: ưu điểm của AC/Sun/Moon, nguyên tố/tính chất trội, lĩnh vực phát triển từ nhà trội, năng khiếu từ góc chặt và hành tinh nhiều góc. Kết luận bằng 3-5 điểm mạnh rõ ràng và 3-5 tính chất công việc / lĩnh vực công việc {pronoun} {name} nên ưu tiên. Cuối mục: [KTLUẬN] 2-3 câu nhấn mạnh năng lực đặc biệt nhất của {pronoun}.]
+3. Thách thức nào tiềm ẩn trong bạn?
+[SUBTITLE] Những điểm cần lưu ý, rèn luyện để bạn phát huy tốt hơn tiềm năng của mình
+[Dùng dữ liệu MỤC 3 trong brief. Trả lời: "Vì sao bạn {name} hay gặp khó khăn?". Luận về: nhược điểm của AC/Sun/Moon, nguyên tố/tính chất thiếu cần bù đắp. Nếu brief có dữ liệu Sao Thổ → luận về nhà/cung Thổ là nơi áp lực trách nhiệm và tự ti mặc cảm. Nếu brief có dữ liệu Diêm Vương → luận về nhà/cung Pluto là nơi cực đoan và biến động. Kết thúc bằng lời khuyên cụ thể để vượt qua và hoàn thiện bản thân. Cuối mục: [KTLUẬN] 2-3 câu về thách thức lớn nhất và chìa khóa vượt qua.]
 
-3. Những Điểm Yếu và Cần Phát Triển
-[Dùng dữ liệu MỤC 3 trong brief. Trả lời: "Vì sao {pronoun} {name} hay gặp khó khăn?". Luận về: nhược điểm của AC/Sun/Moon, nguyên tố/tính chất thiếu cần bù đắp. Nếu brief có dữ liệu Sao Thổ → luận về nhà/cung Thổ là nơi áp lực trách nhiệm và tự ti mặc cảm. Nếu brief có dữ liệu Diêm Vương → luận về nhà/cung Pluto là nơi cực đoan và biến động. Kết thúc bằng lời khuyên cụ thể để vượt qua và hoàn thiện bản thân. Cuối mục: [KTLUẬN] 2-3 câu về thách thức lớn nhất và chìa khóa vượt qua.]
+4. Lĩnh vực công việc nào thực sự phù hợp với bạn?
+[SUBTITLE] Hướng nghề nghiệp giúp bạn phát huy tốt nhất khả năng của mình
+[Dùng dữ liệu MỤC 4 trong brief. Đây là phần khách quan tâm nhất, cần viết chi tiết và cụ thể nhất. Phân tích: (a) Vai trò sự nghiệp từ đỉnh và hành tinh Nhà 10 (hoặc chủ tinh H10 nếu H10 trống). (b) Sự nghiệp được hỗ trợ và gặp thách thức từ đâu qua tương tác mềm/cứng của Nhà 10. (c) Sao Hỏa ở cung/nhà nào → phong cách hành động và giải quyết vấn đề. (d) Môi trường làm việc phù hợp từ đỉnh H6, hành tinh trong H6 (nếu có), chủ tinh H6 và vị trí của nó. Kết luận: (a) vai trò lý tưởng, (b) ít nhất 1-3 tính chất công việc cụ thể, (c) ít nhất 3 lĩnh vực nghề nghiệp cụ thể phù hợp. Cuối mục: [KTLUẬN] 2-3 câu về con đường sự nghiệp tối ưu nhất.]
 
-4. Định Hướng Sự Nghiệp Phù Hợp
-[Dùng dữ liệu MỤC 4 trong brief. Đây là phần khách quan tâm nhất,cần viết chi tiết và cụ thể nhất. Phân tích: (a) Vai trò sự nghiệp từ đỉnh và hành tinh Nhà 10 (hoặc chủ tinh H10 nếu H10 trống). (b) Sự nghiệp được hỗ trợ và gặp thách thức từ đâu qua tương tác mềm/cứng của Nhà 10. (c) Sao Hỏa ở cung/nhà nào → phong cách hành động và giải quyết vấn đề. (d) Môi trường làm việc phù hợp từ đỉnh H6, hành tinh trong H6 (nếu có), chủ tinh H6 và vị trí của nó. Kết luận: vai trò lý tưởng + ít nhất 3 tính chất công việc cụ thể + môi trường làm việc lý tưởng. Cuối mục: [KTLUẬN] 2-3 câu về con đường sự nghiệp tối ưu nhất.]
-
-5. Mô Thức Tiền Bạc
+5. Bạn tạo ra tiền bạc và giá trị theo cách nào?
+[SUBTITLE] Con đường tài chính thuận lợi, phù hợp với năng lực tự nhiên của bạn
 [Dùng dữ liệu MỤC 5 trong brief. Phân tích: (a) Cách kiếm tiền từ đỉnh H2 và hành tinh H2 (hoặc chủ tinh nếu H2 trống), lĩnh vực kiếm tiền từ vị trí chủ tinh H2. (b) Phong cách đầu tư từ đỉnh H8, hành tinh H8 (nếu có), lĩnh vực đầu tư từ chủ tinh H8. (c) Nếu brief có dữ liệu thách thức tiền bạc → luận về các cản trở tài chính, kỷ luật cần thiết. (d) Nếu brief có dấu hiệu thuận lợi → luận về cơ hội tài chính. (e) Nếu brief có lưu ý quản lý tài chính → đưa ra lời khuyên về xu hướng chi tiêu cần kiểm soát. Cuối mục: [KTLUẬN] 2-3 câu về mô thức tiền bạc đặc trưng và lời khuyên tài chính quan trọng nhất.]
 
-6. Chiến Lược Phát Triển Cá Nhân
-[Tổng hợp từ mục 2 (điểm mạnh), 3 (điểm yếu) và 4 (định hướng nghề). Hướng dẫn cụ thể: nên phát triển kỹ năng gì, nên tránh điều gì, cách phát huy đúng vai trò và khắc phục điểm yếu trong thực tế công việc. Không nhắc lại số liệu chiêm tinh,chỉ đưa ra lời khuyên hành động thực tế. Cuối mục: [KTLUẬN] 2-3 câu về chiến lược cốt lõi.]
+6. Chiến lược phát triển sự nghiệp phù hợp với bạn là gì?
+[SUBTITLE] Cách bạn xây dựng con đường nghề nghiệp bền vững lâu dài dựa trên năng lực và thế mạnh của bản thân
+[Tổng hợp từ mục 2 (điểm mạnh), 3 (điểm yếu) và 4 (định hướng nghề). Hướng dẫn cụ thể: nên phát triển kỹ năng gì, nên tránh điều gì, cách phát huy đúng vai trò và khắc phục điểm yếu trong thực tế công việc. Không nhắc lại số liệu chiêm tinh, chỉ đưa ra lời khuyên hành động thực tế. Cuối mục: [KTLUẬN] 2-3 câu về chiến lược cốt lõi.]
 
-7. Tổng Kết Hành Trình Cuộc Đời
-[Đoạn kết. Gọi tên {name} và tóm tắt: bản chất con người, con đường sự nghiệp phù hợp nhất, tiềm năng tài chính. Sau đó viết đúng câu: "Để phát huy tối đa tiềm năng, {pronoun} {name} nên tập trung vào:" rồi liệt kê 3-4 gạch đầu dòng (dùng "- ") cụ thể, dễ thực hiện, MỖI gạch đầu dòng XUỐNG DÒNG RIÊNG, viết HOA chữ cái đầu,mỗi dòng là một lĩnh vực/phong cách/vai trò rút từ dữ liệu. Kết bằng một câu triết lý về điều gì làm thành công của {pronoun} trở nên bền vững và có ý nghĩa thật sự.]
+7. Toàn cảnh con đường sự nghiệp của bạn
+[SUBTITLE] Nhìn lại những điểm cốt lõi và hướng phát triển trong tương lai
+[Đoạn kết. Gọi tên {name} và tóm tắt: bản chất con người, con đường sự nghiệp phù hợp nhất, tiềm năng tài chính. Sau đó viết đúng câu: "Để phát huy tối đa tiềm năng, bạn {name} nên tập trung vào:" rồi liệt kê 3-4 gạch đầu dòng (dùng "- ") cụ thể, dễ thực hiện, MỖI gạch đầu dòng XUỐNG DÒNG RIÊNG, viết HOA chữ cái đầu, mỗi dòng là một lĩnh vực/phong cách/vai trò rút từ dữ liệu. Kết bằng một câu triết lý về điều gì làm thành công của bạn trở nên bền vững và có ý nghĩa thật sự.]
+
+[CLOSING]
+Cảm ơn bạn đã lựa chọn Hạt Giống Chiêm Tinh.
+
+Hy vọng những góc nhìn từ bản luận giải này sẽ giúp bạn nhìn rõ hơn những tiềm năng bên trong mình, hiểu được "hạt giống" riêng mà bạn mang theo và tìm thấy con đường phù hợp để phát triển.
+
+Chúc bạn luôn đủ kiên nhẫn, đủ tin tưởng vào bản thân và tìm thấy con đường sự nghiệp khiến bạn thật sự được là chính mình.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh

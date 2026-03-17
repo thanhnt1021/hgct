@@ -63,8 +63,7 @@ function buildLoveBrief(
 ): string {
   const fullName = profile.fullName || profile.name || ''
   const name = profile.onlyName || profile.name || ''
-  const gender = profile.gender || 'Female'
-  const pronoun = gender === 'Female' ? 'chị' : 'anh'
+  const pronoun = 'bạn'
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
 
   const planets = chartData.planets
@@ -302,8 +301,7 @@ export function buildLovePrompt(
 ): string {
   const fullName = profile.fullName || profile.name || ''
   const name = profile.onlyName || profile.name || ''
-  const gender = profile.gender || 'Female'
-  const pronoun = gender === 'Female' ? 'chị' : 'anh'
+  const pronoun = 'bạn'
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
 
   const brief = buildLoveBrief(chartData, loveBlocks, profile)

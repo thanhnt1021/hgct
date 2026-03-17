@@ -221,18 +221,11 @@ export function buildRelationshipBrief(
   const fullNameB = profileB.fullName || profileB.name || nameB
   const isMaleFemale = new Set([genderA, genderB]).has('Male') && new Set([genderA, genderB]).has('Female') && genderA !== genderB
 
-  let titleA: string, titleB: string, pronounA: string, pronounB: string
-  if (genderA === 'Male' && genderB === 'Female') {
-    titleA = 'Anh'; titleB = 'Chị'; pronounA = 'anh'; pronounB = 'chị'
-  } else if (genderA === 'Female' && genderB === 'Male') {
-    titleA = 'Chị'; titleB = 'Anh'; pronounA = 'chị'; pronounB = 'anh'
-  } else {
-    titleA = titleB = 'Bạn'; pronounA = pronounB = 'bạn'
-  }
+  const titleA = 'Bạn', titleB = 'Bạn', pronounA = 'bạn', pronounB = 'bạn'
 
   const genderNote = isMaleFemale
-    ? 'Cặp Nam-Nữ / luận theo vai trò giới tính như hướng dẫn chi tiết từng phần.'
-    : 'Cặp đồng giới / giới tính khác / luận linh hoạt theo năng lượng hành tinh, KHÔNG gán vai trò \'nam tính\' hay \'nữ tính\' cho bất kỳ ai.'
+    ? 'Cặp Nam-Nữ / luận theo vai trò năng lượng, xưng hô thống nhất là bạn'
+    : 'Cặp đồng giới / luận linh hoạt theo năng lượng hành tinh, KHÔNG gán vai trò'
 
   // ── Planet position lines ──────────────────────────────────────────────────
 

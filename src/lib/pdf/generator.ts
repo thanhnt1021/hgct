@@ -32,7 +32,7 @@ function isAbsenceLine(s: string): boolean {
 }
 
 function isBracketNote(s: string): boolean {
-  return s.startsWith('[') && s.endsWith(']') && !s.startsWith('[KTLUẬN]') && !s.startsWith('[KTTIỂU]') && s.length > 2
+  return s.startsWith('[') && s.endsWith(']') && !s.startsWith('[KTLUẬN]') && !s.startsWith('[KTTIỂU]') && !s.startsWith('[SUBTITLE]') && s !== '[CLOSING]' && s.length > 2
 }
 
 /**
@@ -137,7 +137,7 @@ export function cleanForPdf(text: string): string {
 
 const VN_CONJUNCTIONS = new Set(['và','với','của','về','trong','cho','hay','hoặc','là','nhưng','từ','đến','tới','ra','vào','lên','xuống','qua','lại','cùng','theo'])
 const PROSE_STARTERS = ['Anh ','Chị ','Bạn ','Với ','Khi ','Để ','Việc ','Điều ','Đây ','Đó ','Như ','Nếu ','Tuy ','Dù ','Mặc ','Vì ','Do ','Bởi ','Qua ','Sau ','Trước ']
-const SIGN_KEYS = ['Trân trọng','Claude –','Claude -','Chúc ','— Claude','– Claude','Hạt Giống Chiêm Tinh','Cảm ơn bạn đã tin tưởng','Mong rằng bản luận giải']
+const SIGN_KEYS = ['Trân trọng','Claude –','Claude -','Chúc ','— Claude','– Claude','Hạt Giống Chiêm Tinh','Cảm ơn bạn đã','Mong rằng bản luận giải']
 
 function isVnTitleHeading(s: string): boolean {
   if (s.length > 80 || /[.,:;!?]$/.test(s)) return false
@@ -157,6 +157,8 @@ function classifyLine(line: string): string {
   if (!s) return 'empty'
   if (s.startsWith('[KTLUẬN]')) return 'red_box'
   if (s.startsWith('[KTTIỂU]')) return 'mini_box'
+  if (s === '[CLOSING]') return 'closing_start'
+  if (s.startsWith('[SUBTITLE]')) return 'section_subtitle'
   if (/^\s{3,}\*\s/.test(line)) return 'bullet_indent'
   if (s.startsWith('* ')) return 'bullet'
   if (s.startsWith('- ') && s.length > 2) return 'dash_bullet'
@@ -216,6 +218,8 @@ function buildHtml(essayText: string, options: PdfOptions): string {
   }
 
   let seenSectionHeading = false
+  let pendingRule = false
+  let closingMode = false
   for (const line of lines) {
     const s = line.trim()
     if (!s) {
@@ -227,6 +231,9 @@ function buildHtml(essayText: string, options: PdfOptions): string {
       continue
     }
     let kind = classifyLine(line)
+    // Once [CLOSING] is seen, all subsequent lines become signature
+    if (closingMode && kind !== 'closing_start') kind = 'signature'
+    if (kind === 'closing_start') { flushSigs(); closingMode = true; continue }
     // Intro section (before first numbered heading): no subheadings
     if (kind === 'subheading' && !seenSectionHeading) kind = 'body'
     if (kind === 'section_heading') seenSectionHeading = true
@@ -238,6 +245,12 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     }
     flushSigs()
 
+    // Flush pendingRule before any non-subtitle content
+    if (pendingRule && kind !== 'section_subtitle') {
+      groupHtmlLines[groupHtmlLines.length - 1].push('<hr class="section-rule">')
+      pendingRule = false
+    }
+
     if (kind === 'section_heading') {
       groupHtmlLines.push([])
     }
@@ -245,7 +258,8 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     let html = ''
     switch (kind) {
       case 'section_heading':  html = `<h2 class="section">${safe}</h2>`; break
-      case 'title_heading':    html = `<h2 class="section">${safe}</h2>`; break
+      case 'title_heading':    html = `<h2 class="section">${safe}</h2><hr class="section-rule">`; break
+      case 'section_subtitle': html = `<p class="section-subtitle">${safe.replace(/^\[SUBTITLE\]\s*/, '')}</p>`; break
       case 'subheading':       html = `<h3 class="subheading">${safe}</h3>`; break
       case 'opener':           html = `<p class="opener">${safe}</p>`; break
       case 'bullet':           html = `<p class="bullet">${safe}</p>`; break
@@ -262,6 +276,11 @@ function buildHtml(essayText: string, options: PdfOptions): string {
       default:                 html = `<p class="body">${safe}</p>`
     }
     groupHtmlLines[groupHtmlLines.length - 1].push(html)
+    if (kind === 'section_heading') pendingRule = true
+    if (kind === 'section_subtitle') {
+      groupHtmlLines[groupHtmlLines.length - 1].push('<hr class="section-rule">')
+      pendingRule = false
+    }
   }
   flushSigs()
 
@@ -306,8 +325,10 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 .cover-spacer { flex: 1; min-height: 0; }
 .cover-main { width: 100%; }
 
-.section { font-family: 'MontserratBold'; font-size: 19.5pt; color: #dc2626; margin: 14pt 0 6pt; padding-bottom: 4pt; border-bottom: 1pt solid #dc2626; }
+.section { font-family: 'MontserratBold'; font-size: 19.5pt; color: #dc2626; margin: 14pt 0 6pt; }
 .section-first { margin-top: 0; }
+.section-subtitle { font-family: 'NunitoItalic'; font-size: 12pt; color: #6b7280; margin: -2pt 0 4pt; }
+.section-rule { border: none; border-top: 1pt solid #dc2626; margin: 0 0 8pt; }
 .subheading { font-family: 'MontserratBold'; font-size: 16.5pt; color: #1f2937; margin: 8pt 0 4pt; page-break-after: avoid; break-after: avoid; }
 .opener { font-family: 'NunitoItalic'; font-size: 14.9pt; margin: 4pt 0 6pt; }
 .body { text-align: justify; margin: 2pt 0 5pt; }

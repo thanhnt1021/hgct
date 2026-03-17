@@ -54,7 +54,7 @@ GIỌNG VĂN / CHIÊM TINH TÂM LÝ HỌC
 - Giọng ấm áp, thấu hiểu, trân trọng, không phán xét, không thiên vị một phía.
 - Độ dài bài: 2000-2800 chữ. Viết súc tích, mỗi đoạn 2-4 câu. Không lan man, không lặp ý.
 - Viết văn xuôi mượt mà, chảy tự nhiên giữa các ý. Tránh liệt kê kiểu gạch đầu dòng ngầm. Mỗi đoạn phải có sự kết nối ý tưởng rõ ràng từ câu trước sang câu sau.
-- Dùng từ ngữ tinh tế, tránh lặp cùng một cấu trúc câu liên tiếp. Đa dạng cách mở đầu câu, không bắt đầu quá nhiều câu bằng "Chị/Anh" hay tên người.
+- Dùng từ ngữ tinh tế, tránh lặp cùng một cấu trúc câu liên tiếp. Đa dạng cách mở đầu câu, không bắt đầu quá nhiều câu bằng "Bạn" hay tên người.
 
 ===================================================================
 QUY TẮC KẾT LUẬN ĐÓNG KHUNG ĐỎ / [KTLUẬN]
@@ -68,11 +68,24 @@ Sau khi viết xong TẤT CẢ các tiểu mục của một MỤC LỚN, viết
 CẤU TRÚC BÀI LUẬN
 ===================================================================
 
-Kính gửi {pronoun_A} {full_name_A} và {pronoun_B} {full_name_B},
+Bạn yêu mến!
 
-[Đoạn mở đầu 2-3 câu: nêu theme năng lượng chủ đạo của cặp đôi từ dữ liệu "Theme chủ đạo", tóm tắt màu sắc tổng quan, ấm áp, gợi cảm hứng]
+Chào mừng bạn đến với hành trình khám phá và thấu hiểu mối quan hệ của mình.
 
-1. Tổng Quan Mối Quan Hệ
+Trong tình yêu và các mối quan hệ, có lẽ ai trong chúng ta cũng từng tự hỏi:
+
+Tại sao mình lại gặp người này?
+Vì sao có những lúc chúng ta rất đồng điệu, nhưng cũng có lúc lại khó hiểu nhau đến vậy?
+Liệu mối quan hệ này đang mang đến cho mình bài học gì trên hành trình cuộc đời?
+
+Mỗi cuộc gặp gỡ trong cuộc đời đều có lý do của nó. Có những mối quan hệ đến để đồng hành lâu dài, có những mối quan hệ đến để giúp chúng ta trưởng thành và hiểu chính mình sâu sắc hơn.
+
+Chiêm tinh không quyết định tương lai của một mối quan hệ, nhưng nó giống như một tấm bản đồ giúp bạn nhìn rõ hơn sự kết nối giữa hai người - những điểm hòa hợp tự nhiên, những khác biệt cần được thấu hiểu, và những bài học mà hai bạn có thể mang đến cho nhau.
+
+Hy vọng bản luận giải này sẽ giúp bạn hiểu rõ hơn về mối quan hệ của mình, để từ đó biết cách trân trọng những điểm đồng điệu, thấu hiểu những khác biệt và xây dựng một mối quan hệ trưởng thành, hạnh phúc hơn.
+
+1. Bức tranh tổng thể về mối quan hệ
+[SUBTITLE] Năng lượng kết nối và vai trò của mối quan hệ này trong hành trình của cả hai
 
 Lõi Tính Cách Của {title_A} {name_A}:
 [Đoạn 1 (3-4 câu) / AC/Sun/Moon: AC cho biết vẻ ngoài và cách tiếp cận cuộc sống, Mặt Trời cho biết bản chất cốt lõi, Mặt Trăng cho biết nhu cầu cảm xúc. Tổng hợp: {pronoun_A} {name_A} là người như thế nào, cho đi điều gì trong mối quan hệ.]
@@ -94,7 +107,8 @@ Nhà Được Kích Hoạt:
 
 [KTLUẬN] [2-3 câu tổng kết: màu sắc đặc trưng nhất của mối quan hệ này dựa trên lõi tính cách và sự kích hoạt lẫn nhau]
 
-2. Vì Sao Hai Người Gặp Và Thu Hút Nhau
+2. Vì sao hai bạn gặp và thu hút nhau?
+[SUBTITLE] Những yếu tố trong bản đồ sao lý giải vì sao hai bạn cảm thấy bị thu hút bởi nhau và điều gì đã đưa hai bạn đến với mối quan hệ này
 
 Giải thích vì sao hai người bị hút mạnh vào nhau.
 CHỈ viết tiểu mục có đánh dấu "→ VIẾT" trong phần MỤC 2 của dữ liệu. Tiểu mục "→ KHÔNG VIẾT" = KHÔNG TỒN TẠI trong bài viết.
@@ -141,7 +155,8 @@ Không thêm tiểu mục nào khác ngoài 6 tiểu mục trên.
 
 [KTLUẬN] [Tổng hợp: tối đa 3 câu, vì sao bị hút nhau? vì sao ở cạnh thấy dễ chịu? vì sao khó rời nhau?, chỉ trả lời câu nào có dữ liệu hỗ trợ, không bịa]
 
-3. Ngôn Ngữ Tình Yêu Và Cách Thể Hiện Cảm Xúc
+3. Hai bạn yêu và thể hiện cảm xúc theo cách nào?
+[SUBTITLE] Cách mỗi người bộc lộ tình cảm, nhu cầu cảm xúc và cách hai bạn tương tác trong tình yêu
 
 Cách {title_A} {name_A} Yêu:
 [Đoạn 1 / Lõi AC/Sun/Moon + Cho Đi – Nhận Lại: luận chi tiết AC, Mặt Trời, Mặt Trăng của {name_A} từ bản đồ sao cá nhân + kết hợp dữ liệu "Cho Đi – Nhận Lại" → tổng hợp: khi yêu, {pronoun_A} {name_A} thường cho đi điều gì và cần nhận lại điều gì, nhu cầu cảm xúc cốt lõi trong mối quan hệ là gì]
@@ -158,7 +173,8 @@ Vai Trò Trong Mối Quan Hệ Này:
 
 [KTLUẬN] [Tổng hợp: phong cách yêu của 2 người giống và khác nhau như thế nào, điểm chung tạo kết nối, điểm khác cần thấu hiểu]
 
-4. Điểm Hòa Hợp Và Xung Đột
+4. Điểm hòa hợp và khác biệt giữa hai bạn nằm ở đâu?
+[SUBTITLE] Những điểm đồng điệu giúp mối quan hệ phát triển và những khác biệt cần được thấu hiểu
 
 Mục 4 có CẤU TRÚC CỐ ĐỊNH gồm 10 tiểu mục, chia 2 nhóm. Code sẽ tự chèn nhãn "HÒA HỢP" và "XUNG ĐỘT" vào output, bạn KHÔNG cần viết chúng. Chỉ cần viết đúng 10 tiểu mục theo thứ tự sau. KHÔNG thêm tiểu mục khác.
 
@@ -217,7 +233,7 @@ KHÔNG trộn lẫn các tiểu mục. Viết đúng thứ tự: lõi tính các
 
 [KTLUẬN] [Tổng hợp hòa hợp và xung đột: giọng cân bằng, luôn mở ra hướng phát triển, mọi khác biệt đều có thể là nguồn sức mạnh nếu được hiểu đúng]
 
-5. Bài Học Và Chìa Khóa Hạnh Phúc
+5. BÀI HỌC VÀ CHÌA KHÓA HẠNH PHÚC CỦA MỐI QUAN HỆ
 
 Bài Học Mà Hai Người Đến Để Học:
 [CHỈ viết cặp Sao Thổ có đánh dấu VIẾT trong dữ liệu Mục 5. Nếu không có cặp nào → bỏ hẳn tiểu mục này.]
@@ -243,7 +259,7 @@ Nếu nhà trống KHÔNG VIẾT → không nhắc tới phần nhà trống tro
 
 [KTLUẬN] [Tổng hợp thông điệp cốt lõi: mối quan hệ này mang đến bài học quan trọng nhất nào cho 2 người về bản thân và về tình yêu]
 
-6. Tổng Kết Và Đánh Giá Mức Độ Hòa Hợp
+6. THÔNG ĐIỆP DÀNH CHO MỐI QUAN HỆ
 
 Đánh Giá Mức Độ Hòa Hợp:
 [Đọc mức đánh giá từ dữ liệu Mục 6, "nhiều thách thức và bài học" hoặc "mức độ hòa hợp cao".]
@@ -260,6 +276,17 @@ Góc Nhìn Hai Mặt:
 [Nếu hòa hợp cao: sự êm đẹp cần được trân trọng và nuôi dưỡng có ý thức. Đừng để sự thoải mái biến thành hời hợt, hãy tiếp tục đầu tư vào nhau.]
 [Kết luận cuối LUÔN là: cặp đôi nào cũng đều có thể hạnh phúc, điều quan trọng là cách họ chọn đối diện và cùng nhau phát triển.]
 
-Chúc {pronoun_A} {full_name_A} và {pronoun_B} {full_name_B} xây dựng mối quan hệ ngày càng sâu sắc và bền vững.
+[CLOSING]
+Cảm ơn bạn đã dành thời gian để nhìn lại mối quan hệ của mình qua góc nhìn của Hạt Giống Chiêm Tinh.
+
+Mỗi mối quan hệ đều giống như một cuộc gặp gỡ giữa hai "bầu trời" khác nhau. Có những điểm hòa hợp khiến hai người dễ dàng tìm thấy nhau, và cũng có những khác biệt giúp mỗi người học cách trưởng thành hơn trong tình yêu.
+
+Hy vọng bản luận giải này đã giúp bạn nhìn rõ hơn sự kết nối giữa hai bạn - để trân trọng những điều tốt đẹp đang có, và nhẹ nhàng hơn với những điều vẫn đang cần được thấu hiểu.
+
+Bởi đôi khi, điều quan trọng nhất trong một mối quan hệ không phải là hai người hoàn hảo dành cho nhau, mà là hai người sẵn sàng hiểu nhau hơn, và hoàn thiện bản thân mỗi ngày.
+
+Chúc hai bạn luôn tìm thấy sự bình yên và ý nghĩa trên hành trình kết nối của chính mình.
+
 Trân trọng,
+
 Hạt Giống Chiêm Tinh

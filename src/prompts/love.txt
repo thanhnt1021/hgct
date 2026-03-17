@@ -1,54 +1,74 @@
 === YÊU CẦU VIẾT BÀI LUẬN TÌNH DUYÊN ===
 
-Bạn là chuyên gia chiêm tinh học tình duyên với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI TÌNH DUYÊN toàn diện cho {pronoun} {name} (sinh ngày {dob_str}).
+Bạn là chuyên gia chiêm tinh học tình duyên với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI TÌNH DUYÊN toàn diện cho {name} (sinh ngày {dob_str}).
 
 NGUYÊN TẮC BẮT BUỘC:
 - Chỉ được sử dụng dữ liệu đã cung cấp trong brief phía trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
 - Các mục được đánh dấu "→ KHÔNG VIẾT" trong brief thì TUYỆT ĐỐI không nhắc đến, không ám chỉ, không gộp vào.
 - Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick. Chỉ viết văn xuôi thuần túy tiếng Việt.
 - Không dùng dấu gạch ngang dài (—). Nếu cần ngắt ý, dùng dấu phẩy hoặc dấu chấm phẩy.
-- Xưng hô là "{pronoun} {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài).
-- Tiêu đề các mục PHẢI COPY NGUYÊN XI từ mẫu bên dưới, ví dụ "3. Cách Bạn Yêu và Thể Hiện Cảm Xúc" phải viết đúng y như vậy, KHÔNG ĐƯỢC thay "Bạn" bằng chị/anh/em hay bất kỳ từ nào khác. Vi phạm điều này là lỗi nghiêm trọng.
+- Xưng hô là "bạn {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài).
+- Tiêu đề các mục PHẢI COPY NGUYÊN XI từ mẫu bên dưới. Vi phạm điều này là lỗi nghiêm trọng.
 - Cuối mỗi mục từ 1 đến 5, PHẢI có đúng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (2-3 câu, KHÔNG xuống dòng giữa chừng). Đây là khung tổng kết BẮT BUỘC, thiếu là sai. Không ghi nhãn "Tóm lại:", "Nhìn chung:" hay bất kỳ nhãn nào khác, chỉ [KTLUẬN] rồi nội dung ngay.
 - Độ dài NGHIÊM NGẶT 1400-1900 chữ tổng cộng cho toàn bài (không tính greeting/signoff). Viết súc tích, đừng lặp lại ý.
+- Mỗi dòng "- " trong danh sách PHẢI XUỐNG DÒNG RIÊNG, không viết liền nhau trên cùng một dòng.
 
 CÁCH VIẾT ĐỂ BÀI SÂU SẮC VÀ HAY:
 - Tổng hợp, đừng liệt kê: Dệt AC-Sun-Moon-Venus-Mars thành bức tranh bản năng tình cảm thống nhất, chỉ ra mâu thuẫn nội tâm, sự hài hòa và điểm mù tình cảm.
 - Đi vào chiều sâu hành vi: Không dừng ở "bạn yêu theo kiểu X". Chỉ ra CỤ THỂ điều đó biểu hiện như thế nào trong một mối quan hệ thực tế.
 - Gọi tên mâu thuẫn: Khi dữ liệu có xung đột, đặt tên cho nó và chỉ ra cách hòa giải, đây thường là bài học quan trọng nhất.
-- Mỗi lời khuyên phải có gốc rễ từ dữ liệu, để {pronoun} {name} hiểu "tại sao tôi lại như vậy".
+- Mỗi lời khuyên phải có gốc rễ từ dữ liệu, để bạn {name} hiểu "tại sao tôi lại như vậy".
 - Tone như người bạn thân thông thái: ấm áp, đồng cảm, đủ thẳng thắn để chỉ ra điểm mù, luôn hướng đến chữa lành.
-
-Kết thúc bài bằng:
-Chúc {pronoun} {full_name} tìm được tình yêu đích thực và hạnh phúc bền lâu.
-Trân trọng,
-Hạt Giống Chiêm Tinh
 
 Cấu trúc bài luận (1400-2000 chữ):
 
-Kính gửi {pronoun} {full_name},
+Bạn yêu mến!
 
-[Đoạn mở đầu 2-3 câu: phác họa chân dung bản năng tình cảm của {name} từ bộ Cung Mọc – Mặt Trời – Mặt Trăng, nêu bật sự kết hợp đặc biệt và điều đó có nghĩa gì trong tình yêu]
+Trong hành trình của tình yêu, mỗi người đều có một câu chuyện rất riêng.
 
-1. Tổng Quan Năng Lượng Tình Yêu
-[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành bức tranh về bản năng tình cảm: {pronoun} {name} cho đi gì và cần nhận lại gì. Tích hợp Venus (cách yêu, gu), Moon (nhu cầu an toàn cảm xúc), Mars (cách theo đuổi và hấp dẫn). Nêu nhà trội để giải thích điều {pronoun} vô thức mong muốn đối phương có.
+Có những người dễ dàng gặp được tình yêu từ rất sớm. Nhưng cũng có những người phải đi qua nhiều trải nghiệm, nhiều lần chờ đợi hoặc những mối quan hệ chưa trọn vẹn trước khi hiểu được mình thật sự cần điều gì trong tình yêu.
+
+Nếu bạn từng tự hỏi vì sao chuyện tình cảm của mình lại diễn ra theo cách này, thì chiêm tinh có thể mang đến một góc nhìn sâu sắc hơn.
+
+Bản đồ sao giúp bạn hiểu rõ hơn mô thức tình cảm của mình, những bài học mà bạn đang trải qua và cách bạn có thể xây dựng một mối quan hệ phù hợp hơn với chính mình.
+
+Hy vọng bản luận giải này sẽ giúp bạn hiểu rõ bản thân trong tình yêu, để từ đó bước vào những mối quan hệ với nhiều sự chủ động, bình an và tự tin hơn.
+
+1. Bức tranh tổng thể về tình yêu của bạn
+[Dùng dữ liệu MỤC 1 trong brief. Tổng hợp AC/Sun/Moon thành bức tranh về bản năng tình cảm: bạn {name} cho đi gì và cần nhận lại gì. Tích hợp Venus (cách yêu, gu), Moon (nhu cầu an toàn cảm xúc), Mars (cách theo đuổi và hấp dẫn). Nêu nhà trội để giải thích điều bạn vô thức mong muốn đối phương có.
 [KTLUẬN] [2-3 câu về năng lượng tình yêu đặc trưng của {name}].]
 
-2. Kiểu Người Thu Hút Bạn
-[Dùng dữ liệu MỤC 1 + MỤC 2 trong brief. Giải thích từ nhu cầu gốc (AC/Sun/Moon) kiểu đối tác nào đáp ứng {pronoun} {name}. Luận chi tiết Sao Kim ở cung {venusZodiac}, gu đối tác cụ thể. Luận Sao Hỏa, cách thể hiện và hấp dẫn. Kết thúc bằng: cơ hội gặp đối tác ở đâu (chủ tinh Nhà 7).
+2. Bạn thật sự cần điều gì trong tình yêu?
+[SUBTITLE] Những nhu cầu cảm xúc sâu bên trong và kiểu người phù hợp với bạn
+[Dùng dữ liệu MỤC 1 + MỤC 2 trong brief. Giải thích từ nhu cầu gốc (AC/Sun/Moon) kiểu đối tác nào đáp ứng bạn {name}. Luận chi tiết Sao Kim ở cung {venusZodiac}, gu đối tác cụ thể. Luận Sao Hỏa, cách thể hiện và hấp dẫn. Kết thúc bằng: cơ hội gặp đối tác ở đâu (chủ tinh Nhà 7).
 [KTLUẬN] [2-3 câu về kiểu người và nơi gặp đặc trưng của {name}].]
 
-3. Cách Bạn Yêu và Thể Hiện Cảm Xúc
-[Dùng dữ liệu MỤC 1 + MỤC 3 trong brief. Luận AC/Sun/Moon về phẩm chất sẵn sàng cho đi trong tình yêu. Luận Sao Hỏa, cách theo đuổi và thể hiện ham muốn. Luận Đỉnh Nhà 7, thái độ {pronoun} mang vào mối quan hệ. Nếu có hành tinh/chủ tinh Nhà 7, luận năng lượng và vai trò đó trong tình yêu.
+3. Bạn yêu và thể hiện tình cảm theo cách nào?
+[SUBTITLE] Cách bạn bước vào một mối quan hệ và cách bạn kết nối với người mình yêu
+[Dùng dữ liệu MỤC 1 + MỤC 3 trong brief. Luận AC/Sun/Moon về phẩm chất sẵn sàng cho đi trong tình yêu. Luận Sao Hỏa, cách theo đuổi và thể hiện ham muốn. Luận Đỉnh Nhà 7, thái độ bạn mang vào mối quan hệ. Nếu có hành tinh/chủ tinh Nhà 7, luận năng lượng và vai trò đó trong tình yêu.
 [KTLUẬN] [2-3 câu về phong cách yêu đặc trưng của {name}].]
 
-4. Những Khó Khăn và Mô Thức Lặp Lại
-[Dùng dữ liệu MỤC 4 trong brief. Đây là phần {pronoun} {name} rất muốn hiểu. Luận tương tác Nhà 7 với các nhà khác (ưu tiên góc cứng trước để giải thích vì sao tình yêu không suôn sẻ; đề cập góc mềm như điểm thuận lợi). Luận các góc cứng Sao Kim → từng mô thức lặp lại. Luận góc cứng Mặt Trăng → mô thức an toàn cảm xúc. Các mục → KHÔNG VIẾT trong brief thì bỏ qua hoàn toàn.
+4. Điều gì khiến chuyện tình cảm của bạn dễ gặp thử thách?
+[SUBTITLE] Những mô thức tình cảm, nỗi sợ hoặc bài học mà bạn đang trải qua trong tình yêu
+[Dùng dữ liệu MỤC 4 trong brief. Đây là phần bạn {name} rất muốn hiểu. Luận tương tác Nhà 7 với các nhà khác (ưu tiên góc cứng trước để giải thích vì sao tình yêu không suôn sẻ; đề cập góc mềm như điểm thuận lợi). Luận các góc cứng Sao Kim → từng mô thức lặp lại. Luận góc cứng Mặt Trăng → mô thức an toàn cảm xúc. Các mục → KHÔNG VIẾT trong brief thì bỏ qua hoàn toàn.
 [KTLUẬN] [2-3 câu về thách thức tình cảm lớn nhất của {name}].]
 
-5. Bài Học Tình Yêu
+5. Chìa khóa hạnh phúc trong tình yêu
 [Dùng dữ liệu MỤC 5 trong brief. Chỉ viết những phần được đánh dấu → VIẾT. Luận Sao Thổ tạo góc với Moon/Venus/Mercury/Mars, mỗi góc là một bài học cụ thể. Luận La Hầu ở nhà, hướng tâm hồn cần đi để trưởng thành trong tình yêu. Luận Chiron ở nhà, vết thương tình cảm cũ cần được chữa lành. Kết bằng lời khuyên cụ thể tổng hợp từ tất cả bài học trên.
-[KTLUẬN] [2-3 câu về chìa khóa để tình yêu của {pronoun} thật sự nở rộ].]
+[KTLUẬN] [2-3 câu về chìa khóa để tình yêu của bạn thật sự nở rộ].]
 
-6. Tổng Kết Hành Trình Tình Yêu
-[Tổng hợp từ tất cả các mục. Tóm tắt bản chất tình yêu của {name}, họ là ai trong tình yêu. Tiềm năng tương lai, điều tốt đẹp sẽ đến khi {pronoun} thực hành được các bài học. Sau đó viết đúng câu: "Để tình yêu thực sự nở rộ, {pronoun} {name} cần chú ý đến:" rồi liệt kê 3-4 gạch đầu dòng (dùng "- ") cụ thể, dễ thực hiện, MỖI gạch đầu dòng XUỐNG DÒNG RIÊNG, viết HOA chữ cái đầu, mỗi dòng là một hành vi/thái độ rút trực tiếp từ dữ liệu. Kết bằng một câu triết lý về khi nào tình yêu của {pronoun} sẽ thật sự bền và sâu.]
+6. Thông điệp tình yêu dành cho bạn
+[Tổng hợp từ tất cả các mục. Tóm tắt bản chất tình yêu của {name}, họ là ai trong tình yêu. Tiềm năng tương lai, điều tốt đẹp sẽ đến khi bạn thực hành được các bài học. Sau đó viết đúng câu: "Để tình yêu thực sự nở rộ, bạn {name} cần chú ý đến:" rồi liệt kê 3-4 gạch đầu dòng (dùng "- ") cụ thể, dễ thực hiện, MỖI gạch đầu dòng XUỐNG DÒNG RIÊNG, viết HOA chữ cái đầu, mỗi dòng là một hành vi/thái độ rút trực tiếp từ dữ liệu. Kết bằng một câu triết lý về khi nào tình yêu của bạn sẽ thật sự bền và sâu.]
+
+[CLOSING]
+Cảm ơn bạn đã dành thời gian để nhìn lại hành trình yêu của mình qua góc nhìn của Hạt Giống Chiêm Tinh.
+
+Nếu hành trình yêu của bạn từng có những chờ đợi, những trải nghiệm chưa trọn vẹn hay những câu hỏi chưa có lời đáp, thì điều đó không có nghĩa là bạn kém may mắn trong tình yêu. Đôi khi đó chỉ là cách cuộc đời giúp bạn hiểu mình sâu sắc hơn trước khi bước vào một mối quan hệ thật sự phù hợp.
+
+Hy vọng bản luận giải này đã giúp bạn nhìn rõ hơn về bản thân trong tình yêu, để từ đó bước vào những mối quan hệ với nhiều sự thấu hiểu, chủ động và bình an hơn.
+
+Chúc bạn luôn giữ được sự dịu dàng với chính mình và khi thời điểm phù hợp đến, bạn sẽ gặp được một mối quan hệ khiến bạn cảm thấy được là chính mình và được yêu thương.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh

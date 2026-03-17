@@ -104,8 +104,7 @@ export function buildCareerBrief(
 ): CareerBrief {
   const fullName = profile.fullName || profile.name || ''
   const name = profile.onlyName || profile.name || ''
-  const gender = profile.gender || 'Female'
-  const pronoun = gender === 'Female' ? 'chị' : 'anh'
+  const pronoun = 'bạn'
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
 
   const b1 = (careerData.block1 || {}) as Record<string, unknown>
@@ -386,7 +385,7 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
     }
   }
   if (muc2.ruler.content) {
-    L.push(`\n  Công cụ bẩm sinh /Chủ lá số (${muc2.ruler.label}): ${muc2.ruler.content}`)
+    L.push(`\n  Công cụ bẩm sinh /Chủ bản đồ sao (${muc2.ruler.label}): ${muc2.ruler.content}`)
   }
 
   // ══ MỤC 3: Điểm yếu ══
@@ -576,9 +575,21 @@ export function buildCareerPrompt(
 ): string {
   const fullName = profile.fullName || profile.name || ''
   const name = profile.onlyName || profile.name || ''
-  const gender = profile.gender || 'Female'
-  const pronoun = gender === 'Female' ? 'chị' : 'anh'
+  const pronoun = 'bạn'
   const dobStr = `${profile.dob.day}/${profile.dob.month}/${profile.dob.year}`
+
+  // Age-conditional greeting
+  const today = new Date()
+  const dobDate = new Date(Number(profile.dob.year), Number(profile.dob.month) - 1, Number(profile.dob.day))
+  let age = today.getFullYear() - dobDate.getFullYear()
+  const m = today.getMonth() - dobDate.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--
+
+  const greetingAdult = `Bạn yêu mến!\n\nChào mừng bạn đến với hành trình hiểu chính mình.\n\nCó thể bạn đang đứng trước một ngã rẽ trong công việc và cuộc sống, cũng có thể bạn chỉ đơn giản muốn hiểu bản thân mình rõ hơn. Bởi trong cuộc đời, ai cũng có những giai đoạn phải dừng lại và tự hỏi:\n\nMình thật sự phù hợp với điều gì?\nCon đường nào mới là hướng đi đúng với mình?\n\nMỗi người khi sinh ra đều mang theo một "hạt giống" riêng. Có những hạt giống cần được đặt đúng môi trường để nảy mầm, phát triển và tỏa sáng. Chiêm tinh giống như một tấm bản đồ giúp bạn nhận ra hạt giống đó - những điểm mạnh tự nhiên, cách bạn phát triển tốt nhất và môi trường giúp bạn trưởng thành.\n\nHy vọng bản luận giải này sẽ giúp bạn nhìn rõ hơn những tiềm năng bên trong mình, tìm thấy hướng đi phù hợp và từng bước xây dựng một con đường sự nghiệp vững vàng và bền vững hơn cho tương lai.`
+
+  const greetingYoung = `Bạn yêu mến!\n\nChào mừng bạn đến với hành trình khám phá chính mình.\n\nCó thể bạn đang bắt đầu nghĩ nhiều hơn về tương lai:\n\nMình phù hợp với ngành học nào?\nMình nên theo đuổi điều gì để vừa phát triển tốt vừa cảm thấy thật sự là chính mình?\n\nĐôi khi việc chọn hướng đi không hề dễ dàng, bởi mỗi người trong chúng ta đều có những điểm mạnh và cách phát triển rất khác nhau.\n\nTheo chiêm tinh, khi sinh ra mỗi người đều mang theo một "hạt giống" riêng - những khả năng tự nhiên, cách tư duy và môi trường phù hợp để mình phát triển tốt nhất. Chiêm tinh giống như một tấm bản đồ nhỏ giúp bạn nhận ra những tiềm năng đó, để từ đó hiểu mình rõ hơn và tự tin lựa chọn con đường phù hợp cho tương lai.\n\nHy vọng bản luận giải này sẽ giúp bạn khám phá thêm những điều thú vị về bản thân và tìm thấy hướng đi khiến bạn vừa phát triển tốt vừa cảm thấy hứng thú với hành trình phía trước.`
+
+  const greeting = age >= 22 ? greetingAdult : greetingYoung
 
   let briefText: string
 
@@ -592,6 +603,7 @@ export function buildCareerPrompt(
   }
 
   const instructions = loadPromptTemplate('career')
+    .replace(/{greeting}/g, greeting)
     .replace(/{pronoun}/g, pronoun)
     .replace(/{full_name}/g, fullName)
     .replace(/{name}/g, name)
@@ -638,7 +650,7 @@ function buildLegacyBriefText(careerData: Record<string, unknown>): string {
   for (const ta of (talents.tight || []) as Record<string, string>[]) {
     if (ta.content) lines.push(`Góc chặt ${ta.label}: ${stripHtml(ta.content)}`)
   }
-  if (ruler.content) lines.push(`Chủ lá số (${ruler.label}): ${stripHtml(ruler.content)}`)
+  if (ruler.content) lines.push(`Chủ bản đồ sao (${ruler.label}): ${stripHtml(ruler.content)}`)
 
   lines.push('\n=== BLOCK 3: SỰ NGHIỆP ===')
   const mc = (b3.mcInfo || b3.mc_info || {}) as Record<string, string>
