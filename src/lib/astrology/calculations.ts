@@ -308,26 +308,49 @@ export function analyzeHouseInteractions(
 
 // ─── Dominant Calculations ───────────────────────────────────────
 
-export function getDominantPlanetsLogic(chartData: ChartData): { name: string; count: number }[] {
-  const counts: Record<string, number> = {}
+export function getDominantPlanetsLogic(chartData: ChartData): { name: string; totalOrb: number }[] {
   const pPos = chartData.planets
+  type Stats = { count: number; aspects: { orb_round: number }[] }
+  const planetStats: Record<string, Stats> = {}
 
-  for (let i = 0; i < CORE_PLANETS.length; i++) {
-    for (let j = i + 1; j < CORE_PLANETS.length; j++) {
-      const p1 = CORE_PLANETS[i]
-      const p2 = CORE_PLANETS[j]
-      if (!(p1 in pPos) || !(p2 in pPos)) continue
-      const asp = checkAspect(pPos[p1].lon, pPos[p2].lon)
+  // For each planet, count all major aspects to other CORE planets (same as mo's per-planet loop)
+  for (const p of CORE_PLANETS) {
+    if (!(p in pPos)) continue
+    const stats: Stats = { count: 0, aspects: [] }
+    for (const target of CORE_PLANETS) {
+      if (p === target || !(target in pPos)) continue
+      const asp = checkAspect(pPos[p].lon, pPos[target].lon)
       if (asp && asp.type !== 'Minor') {
-        counts[p1] = (counts[p1] || 0) + 1
-        counts[p2] = (counts[p2] || 0) + 1
+        stats.count++
+        stats.aspects.push({ orb_round: asp.orb_round })
       }
     }
+    planetStats[p] = stats
   }
 
-  return Object.entries(counts)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
+  if (!Object.keys(planetStats).length) return []
+
+  // Step 1: filter to only planets with max count
+  const maxC = Math.max(...Object.values(planetStats).map(s => s.count))
+  let group = CORE_PLANETS.filter(p => p in planetStats && planetStats[p].count === maxC)
+
+  if (group.length === 1) {
+    const p = group[0]
+    return [{ name: p, totalOrb: planetStats[p].aspects.reduce((s, a) => s + a.orb_round, 0) }]
+  }
+
+  // Step 2: tie-break — find global min orb_round across all tied planets' aspects
+  const minO = Math.min(...group.flatMap(p => planetStats[p].aspects.map(a => a.orb_round)))
+  // Keep only planets that have at least one aspect with that minimum orb
+  group = group.filter(p => planetStats[p].aspects.some(a => a.orb_round === minO))
+
+  // Step 3: sort by total_orb ascending (tightest overall wins)
+  const result = group.map(p => ({
+    name: p,
+    totalOrb: planetStats[p].aspects.reduce((s, a) => s + a.orb_round, 0),
+  }))
+  result.sort((a, b) => a.totalOrb - b.totalOrb)
+  return result
 }
 
 export function getDominantHousesSorted(chartData: ChartData): { house: number; score: number }[] {

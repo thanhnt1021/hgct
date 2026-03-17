@@ -58,8 +58,7 @@ function calculateCommon(chartData: ChartData): CommonData {
   const { dom: modDom, weaks: modWeaks } = getDT(modScores, modLabels)
 
   const domHouses = getDominantHousesSorted(chartData).map(d => [d.house, d.score] as [number, number])
-  const domPlanetsRaw = getDominantPlanetsLogic(chartData)
-  const domPlanets = domPlanetsRaw.map(d => ({ name: d.name, totalOrb: 0 }))
+  const domPlanets = getDominantPlanetsLogic(chartData)
 
   // Tight aspects
   const tempAsps: Record<string, unknown>[] = []
