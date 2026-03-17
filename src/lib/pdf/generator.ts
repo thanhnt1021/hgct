@@ -390,6 +390,42 @@ Chúc bạn luôn đủ kiên nhẫn, đủ tin tưởng vào bản thân và t�
 Trân trọng,
 
 Hạt Giống Chiêm Tinh`,
+
+  love: `Cảm ơn bạn đã dành thời gian để nhìn lại hành trình yêu của mình qua góc nhìn của Hạt Giống Chiêm Tinh.
+
+Nếu hành trình yêu của bạn từng có những chờ đợi, những trải nghiệm chưa trọn vẹn hay những câu hỏi chưa có lời đáp, thì điều đó không có nghĩa là bạn kém may mắn trong tình yêu. Đôi khi đó chỉ là cách cuộc đời giúp bạn hiểu mình sâu sắc hơn trước khi bước vào một mối quan hệ thật sự phù hợp.
+
+Hy vọng bản luận giải này đã giúp bạn nhìn rõ hơn về bản thân trong tình yêu, để từ đó bước vào những mối quan hệ với nhiều sự thấu hiểu, chủ động và bình an hơn.
+
+Chúc bạn luôn giữ được sự dịu dàng với chính mình và khi thời điểm phù hợp đến, bạn sẽ gặp được một mối quan hệ khiến bạn cảm thấy được là chính mình và được yêu thương.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh`,
+
+  synastry: `Cảm ơn bạn đã dành thời gian để nhìn lại mối quan hệ của mình qua góc nhìn của Hạt Giống Chiêm Tinh.
+
+Mỗi mối quan hệ đều giống như một cuộc gặp gỡ giữa hai "bầu trời" khác nhau. Có những điểm hòa hợp khiến hai người dễ dàng tìm thấy nhau, và cũng có những khác biệt giúp mỗi người học cách trưởng thành hơn trong tình yêu.
+
+Hy vọng bản luận giải này đã giúp bạn nhìn rõ hơn sự kết nối giữa hai bạn - để trân trọng những điều tốt đẹp đang có, và nhẹ nhàng hơn với những điều vẫn đang cần được thấu hiểu.
+
+Bởi đôi khi, điều quan trọng nhất trong một mối quan hệ không phải là hai người hoàn hảo dành cho nhau, mà là hai người sẵn sàng hiểu nhau hơn, và hoàn thiện bản thân mỗi ngày.
+
+Chúc hai bạn luôn tìm thấy sự bình yên và ý nghĩa trên hành trình kết nối của chính mình.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh`,
+
+  transit: `Cảm ơn bạn đã tin tưởng Hạt Giống Chiêm Tinh.
+
+Mong rằng bản luận giải này, cũng như những góc nhìn từ chiêm tinh sẽ giúp bạn hiểu mình rõ hơn, nhẹ lòng hơn trước những điều đang diễn ra và tự tin bước tiếp trên con đường của mình.
+
+Chúc bạn luôn tìm thấy sự bình an và đúng hướng trên hành trình cuộc đời.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh`,
 }
 
 // Service → scallop border stroke color
