@@ -75,3 +75,11 @@ systemctl status hgct.service --no-pager | head -12
 CSS_FILE=$(ls "$APP_DIR/.next/static/css/" | head -1)
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:65498/_next/static/css/$CSS_FILE")
 echo "CSS check: $HTTP_CODE (should be 200)"
+
+# Re-register Telegram admin webhook (fixes sync errors caused by deploy downtime)
+TG_TOKEN=$(grep '^TELEGRAM_ADMIN_BOT_TOKEN=' "$APP_DIR/.env.local" | cut -d= -f2-)
+TG_SECRET=$(grep '^TELEGRAM_ADMIN_WEBHOOK_SECRET=' "$APP_DIR/.env.local" | cut -d= -f2-)
+if [ -n "$TG_TOKEN" ] && [ -n "$TG_SECRET" ]; then
+  WEBHOOK_RESULT=$(curl -s "https://api.telegram.org/bot${TG_TOKEN}/setWebhook?url=https://hatgiongchiemtinh.com/api/telegram-admin/${TG_SECRET}/webhook&drop_pending_updates=true")
+  echo "Telegram webhook: $(echo $WEBHOOK_RESULT | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get("description","?"))'  2>/dev/null || echo 'registered')"
+fi

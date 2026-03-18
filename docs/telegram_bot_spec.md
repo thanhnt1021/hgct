@@ -57,6 +57,8 @@ curl "https://api.telegram.org/bot${TOKEN}/setWebhook?url=https://hatgiongchiemt
 | `/setprice [service] <giá>` | Đặt giá — service = career/love/synastry/transit/all (bỏ trống = all) |
 | `/getprice` | Xem tất cả giá hiện tại |
 | `/pay <orderId>` | Mark paid đơn hàng thủ công và tạo báo cáo |
+| `/check` | Check ngay đơn failed + pending quá hạn → gửi vào nhóm |
+| `/setcheckinterval <phút>` | Đặt interval định kỳ check đơn (mặc định: 15 phút) |
 
 Update commands (chạy lại khi thêm/sửa command):
 ```bash
@@ -68,7 +70,9 @@ curl -s "https://api.telegram.org/bot${TOKEN}/setMyCommands" \
     {"command":"help","description":"Mở menu quản trị"},
     {"command":"setprice","description":"Đặt giá — /setprice [service] <giá>"},
     {"command":"getprice","description":"Xem giá hiện tại"},
-    {"command":"pay","description":"Mark paid đơn — /pay <orderId>"}
+    {"command":"pay","description":"Mark paid đơn — /pay <orderId>"},
+    {"command":"check","description":"Check ngay đơn failed + pending quá hạn"},
+    {"command":"setcheckinterval","description":"Đặt interval định kỳ — /setcheckinterval <phút>"}
   ]}'
 ```
 
@@ -121,9 +125,11 @@ Hiện tại: X.XXXđ
 #### System Menu — callback `m_system`
 ```
 🔧 Hệ thống
+⏱ Check đơn mỗi: X phút
 
 [ 🔄 Restart Production ] [ 🔄 Restart Demo ]
 [ 📡 Health Check        ] [ 💳 OR Balance   ]
+[ 🔍 Check đơn ngay      ] [ ⏱ Set interval  ]
 [ ↩️ Quay lại                                ]
 ```
 
@@ -141,27 +147,90 @@ Hiện tại: X.XXXđ
 | `p_c_3333` | Đặt career = 3333đ |
 | `p_l_5000` | Đặt love = 5000đ |
 | `p_a_10000` | Đặt tất cả = 10000đ |
-| `p_<svc>_cust` | Nhập giá custom (hiện hướng dẫn gõ lệnh) |
+| `p_<svc>_cust` | Nhập giá custom — ForceReply, gõ số trực tiếp (không cần gõ lại lệnh) |
 | `m_orders` | Mở orders menu |
 | `o_stats` | Thống kê đơn hôm nay |
-| `o_pending` | Danh sách đơn chờ thanh toán (top 5) |
-| `o_failed` | Danh sách đơn lỗi (top 5) |
+| `o_pending` | Danh sách đơn chờ thanh toán (top 5) — mỗi đơn có [✅ Paid] [🗑 Hủy] |
+| `o_failed` | Danh sách đơn lỗi (top 5) — mỗi đơn có [🔄 Retry] [📧 Email] [🗑 Hủy] |
 | `o_recent` | 5 đơn gần nhất |
 | `o_pay_N` | Mark paid đơn #N + tạo báo cáo |
 | `o_retry_N` | Force retry đơn #N (reset retryCount=0, bypass limit 3) |
 | `o_email_N` | Gửi lại email recovery cho đơn #N |
+| `o_cancel_N` | Hủy đơn #N — chỉ cho hủy `pending` và `failed`; block `processing`/`retrying`/`completed` |
+| `o_cancel_all_pending` | Hiện confirm screen — hủy tất cả pending unpaid |
+| `o_cancel_all_confirm` | Xác nhận hủy tất cả pending |
 | `m_system` | Mở system menu |
 | `s_rst_prod` | Restart production (hỏi nếu có active orders) |
 | `s_rst_prod_f` | Force restart (generate recovery tokens trước) |
 | `s_rst_demo` | Restart demo ngay |
 | `s_health` | Health check: DB + services + active orders |
 | `s_balance` | Xem OpenRouter balance |
+| `s_check` | Check ngay đơn failed + pending quá hạn → gửi kết quả vào nhóm |
+| `s_set_interval` | Đặt interval định kỳ — ForceReply, gõ số phút |
 
 **Quy ước naming:**
 - `m_*` = menu navigation
 - `p_<svc>_<price>` = price apply — svc: `c`=career `l`=love `s`=synastry `t`=transit `a`=all
-- `o_<action>_<id>` = order action — action: `pay` `retry` `email`
+- `o_<action>_<id>` = order action — action: `pay` `retry` `email` `cancel`
 - `s_*` = system action
+
+### ForceReply inputs
+
+2 nơi dùng ForceReply (không cần gõ lệnh đầy đủ):
+
+| Trigger | Marker trong bot message | Xử lý khi reply |
+|---------|--------------------------|-----------------|
+| Bấm `p_<svc>_cust` | `CUSTPRICE:<code>` (ẩn bằng `<tg-spoiler>`) | Parse số → `setPrice` / `setAllPrices` |
+| Bấm `s_set_interval` | `CHECKINTERVAL` (ẩn bằng `<tg-spoiler>`) | Parse số phút → `setCheckInterval` |
+
+Nếu nhập sai (không phải số dương) → bot báo lỗi + gửi lại ForceReply để nhập tiếp.
+Nếu admin ignore ForceReply, gõ lệnh khác → xử lý bình thường, không bị kẹt.
+
+### Periodic order check
+
+**Cơ chế:** System cron chạy mỗi phút, gọi `GET /api/cron/order-check` (auth: `Authorization: Bearer CRON_SECRET`). Endpoint tự check interval và bỏ qua nếu chưa đến giờ.
+
+**Config trong DB (`config` table):**
+- `order_check_interval` — số phút giữa các lần check (mặc định: 15)
+- `order_check_last_run` — ISO timestamp lần chạy gần nhất
+
+**Kết quả gửi vào group** `-1003849385640` thread `161` bằng `@hatgiongchiemtinhbot`:
+```
+🔎 Kiểm tra đơn — 18/03/2026 01:30
+
+❌ Đơn failed (2):
+• #18 — Vận Hạn — test@test.com — 13/03 15:30 — Retry: 3/3
+• #22 — Hướng Nghiệp — khach@gmail.com — 14/03 09:15 — Retry: 2/3
+
+⏳ Đơn pending quá hạn (3):
+• #27 — Cặp Đôi — khac@gmail.com — 18/03 01:10 — 3.333đ
+• #24 — Hướng Nghiệp — x@x.com — 18/03 01:05 — 5.000đ
+
+💳 OR Balance: $12.45
+
+[ 🔄 #18 ] [ 📧 #18 ] [ 🗑 #18 ]
+[ ✅ Paid #27 ] [ 🗑 Hủy #27 ]
+...
+```
+
+Nếu không có lỗi:
+```
+✅ Kiểm tra đơn — 18/03/2026 01:30
+Không có đơn lỗi hoặc pending quá hạn.
+💳 OR Balance: $12.45
+```
+
+**"Pending quá hạn"** = `status='pending'` + `paymentStatus='unpaid'` + `createdAt < now - 15 phút` (hết window thanh toán).
+
+**File:** `src/lib/orderCheck.ts` — export `runOrderCheck()`, `getCheckInterval()`, `setCheckInterval()`
+
+**Trigger thủ công:** `/check` hoặc nút `[🔍 Check đơn ngay]` trong System Menu.
+
+**Setup crontab** (mỗi lần setup server mới):
+```bash
+CRON_SECRET=<giá trị CRON_SECRET trong .env.local>
+(crontab -l 2>/dev/null | grep -v 'order-check'; echo "* * * * * curl -s -H \"Authorization: Bearer ${CRON_SECRET}\" \"https://hatgiongchiemtinh.com/api/cron/order-check\" > /dev/null 2>&1") | crontab -
+```
 
 ### Hệ thống giá per-service
 

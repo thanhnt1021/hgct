@@ -17,6 +17,7 @@ import { generateRecoveryToken, STUCK_ERROR } from '@/lib/jobs'
 import { createReportJob } from '@/lib/astrology/reportProcessor'
 import { sendRecoveryEmail } from '@/lib/email'
 import { getOpenRouterBalance } from '@/lib/notify'
+import { runOrderCheck, getCheckInterval, setCheckInterval } from '@/lib/orderCheck'
 
 const execAsync = promisify(exec)
 
@@ -145,9 +146,10 @@ export async function showOrdersMenu(ctx: Ctx) {
 }
 
 export async function showSystemMenu(ctx: Ctx) {
+  const interval = await getCheckInterval()
   await respond(
     ctx,
-    '🔧 <b>Hệ thống</b>',
+    `🔧 <b>Hệ thống</b>\n\n⏱ Check đơn mỗi: <b>${interval} phút</b>`,
     [
       [
         { text: '🔄 Restart Production', callback_data: 's_rst_prod' },
@@ -156,6 +158,10 @@ export async function showSystemMenu(ctx: Ctx) {
       [
         { text: '📡 Health Check', callback_data: 's_health' },
         { text: '💳 OR Balance', callback_data: 's_balance' },
+      ],
+      [
+        { text: '🔍 Check đơn ngay', callback_data: 's_check' },
+        { text: '⏱ Set interval', callback_data: 's_set_interval' },
       ],
       [{ text: '↩️ Quay lại', callback_data: 'main' }],
     ],
@@ -591,6 +597,31 @@ async function forceRecoverActiveOrders() {
   }
 }
 
+export async function handleCheckOrders(ctx: Ctx) {
+  if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '🔍 Đang kiểm tra...')
+  try {
+    await runOrderCheck()
+    // Notify admin in their own chat that check was triggered
+    await tgSend(ctx.chatId, '✅ Đã gửi kết quả kiểm tra vào nhóm.', {
+      threadId: ctx.threadId,
+      keyboard: [[{ text: '↩️ Quay lại', callback_data: 'm_system' }]],
+    })
+  } catch (err) {
+    console.error('[AdminBot] checkOrders error:', err)
+    await tgSend(ctx.chatId, '❌ Lỗi khi check đơn.', { threadId: ctx.threadId })
+  }
+}
+
+export async function handleSetCheckInterval(ctx: Ctx) {
+  if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId)
+  const interval = await getCheckInterval()
+  await tgSendForceReply(
+    ctx.chatId,
+    `<tg-spoiler>CHECKINTERVAL</tg-spoiler>\n⏱ Interval check đơn hiện tại: <b>${interval} phút</b>\n\nNhập số phút mới:`,
+    { threadId: ctx.threadId, placeholder: 'VD: 30' },
+  )
+}
+
 export async function handleHealthCheck(ctx: Ctx) {
   const results: string[] = ['📡 <b>Health Check</b>']
 
@@ -706,6 +737,8 @@ export async function handleCallback(
   if (cbData === 's_rst_demo') return handleRestartDemo(ctx)
   if (cbData === 's_health') return handleHealthCheck(ctx)
   if (cbData === 's_balance') return handleORBalance(ctx)
+  if (cbData === 's_check') return handleCheckOrders(ctx)
+  if (cbData === 's_set_interval') return handleSetCheckInterval(ctx)
 
   // Unknown — dismiss spinner silently
   await tgAnswer(cbQueryId)
@@ -740,6 +773,24 @@ export async function handleCommand(
           return
         }
         return applyPrice(ctx, code, priceNum)
+      }
+
+      const intervalMatch = replyText.match(/^CHECKINTERVAL/)
+      if (intervalMatch) {
+        const minutes = parseInt(text.trim(), 10)
+        if (isNaN(minutes) || minutes < 1) {
+          await tgSend(chatId, '❌ Nhập số phút nguyên dương (tối thiểu 1). VD: 30', { threadId })
+          await tgSendForceReply(chatId, '<tg-spoiler>CHECKINTERVAL</tg-spoiler>\n⏱ Nhập số phút mới:', {
+            threadId, placeholder: 'VD: 30',
+          })
+          return
+        }
+        await setCheckInterval(minutes)
+        await tgSend(chatId, `✅ Đã đặt interval check đơn = <b>${minutes} phút</b>`, {
+          threadId,
+          keyboard: [[{ text: '↩️ Quay lại', callback_data: 'm_system' }]],
+        })
+        return
       }
     }
   }
@@ -777,6 +828,24 @@ export async function handleCommand(
   if (payMatch) {
     const orderId = parseInt(payMatch[1], 10)
     return handleMarkPaid(ctx, orderId)
+  }
+
+  // /check — manual order check
+  if (text.match(/^\/check$/i)) {
+    return handleCheckOrders(ctx)
+  }
+
+  // /setcheckinterval <minutes>
+  const setIntervalMatch = text.match(/^\/setcheckinterval\s+(\d+)$/i)
+  if (setIntervalMatch) {
+    const minutes = parseInt(setIntervalMatch[1], 10)
+    if (isNaN(minutes) || minutes < 1) {
+      await tgSend(chatId, '❌ Nhập số phút nguyên dương. VD: /setcheckinterval 30', { threadId })
+      return
+    }
+    await setCheckInterval(minutes)
+    await tgSend(chatId, `✅ Interval check đơn = <b>${minutes} phút</b>`, { threadId })
+    return
   }
 
   // Unknown command — show main menu

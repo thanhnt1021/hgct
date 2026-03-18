@@ -166,19 +166,33 @@ sudo systemctl enable hgct hgct-demo
 
 ---
 
-## 10. First Deploy
+## 10. Crontab
+
+Setup cron check đơn định kỳ (chạy mỗi phút, endpoint tự check interval trong DB):
+```bash
+CRON_SECRET=<giá trị CRON_SECRET trong .env.local>
+(crontab -l 2>/dev/null | grep -v 'order-check'; echo "* * * * * curl -s -H \"Authorization: Bearer ${CRON_SECRET}\" \"https://hatgiongchiemtinh.com/api/cron/order-check\" > /dev/null 2>&1") | crontab -
+# Verify:
+crontab -l | grep order-check
+```
+
+---
+
+## 11. First Deploy
 
 ```bash
-sudo bash /root/hgct/deploy.sh                          # production
+sudo bash /root/hgct/deploy.sh                          # production (tự re-register Telegram webhook)
 sudo bash /root/hgct/deploy-demo.sh main                # demo
 ```
 
 ---
 
-## 11. Kiểm tra cuối
+## 12. Kiểm tra cuối
 
 - [ ] `curl -I https://yourdomain.com` → 200
 - [ ] `curl -I https://demo.yourdomain.com` → 200
 - [ ] `systemctl status hgct` → active (running)
 - [ ] `systemctl status hgct-demo` → active (running)
 - [ ] Tạo thử 1 báo cáo → PDF sinh được + email gửi được
+- [ ] Admin bot `/start` → menu hiện bình thường
+- [ ] `crontab -l | grep order-check` → cron entry tồn tại
