@@ -2,20 +2,11 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/db'
+import { getPrice } from '@/lib/pricing'
 
 export const dynamic = 'force-dynamic'
 
 const VALID_SERVICES = ['career', 'love', 'synastry', 'transit']
-
-async function getServicePrice(): Promise<number> {
-  try {
-    const cfg = await prisma.config.findUnique({ where: { key: 'service_price' } })
-    const price = cfg ? parseInt(cfg.value, 10) : NaN
-    return isNaN(price) || price <= 0 ? 3333 : price
-  } catch {
-    return 3333
-  }
-}
 
 export async function POST(request: Request) {
   try {
@@ -40,7 +31,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid service' }, { status: 400 })
     }
 
-    const amount = await getServicePrice()
+    const amount = await getPrice(service)
 
     const session = await getServerSession(authOptions)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,4 +1,4 @@
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_ADMIN_BOT_TOKEN || ''
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
 const TELEGRAM_CHAT_ID = '-1003849385640'
 const TELEGRAM_THREAD_ID = 161
 const OPENROUTER_MANAGEMENT_KEY = process.env.OPENROUTER_MANAGEMENT_KEY || ''
@@ -11,7 +11,7 @@ const SERVICE_NAMES: Record<string, string> = {
   transit: 'Vận Hạn',
 }
 
-async function getOpenRouterBalance(): Promise<number | null> {
+export async function getOpenRouterBalance(): Promise<number | null> {
   if (!OPENROUTER_MANAGEMENT_KEY) return null
   try {
     const res = await fetch('https://openrouter.ai/api/v1/credits', {
@@ -83,6 +83,79 @@ async function getGenerationCost(generationIds: string[]): Promise<number | null
     return null
   }
 }
+
+// ── Alert helpers (send to same notification group) ─────────────────────────
+
+async function sendToGroup(text: string, keyboard?: Array<Array<{ text: string; callback_data: string }>>) {
+  if (!TELEGRAM_BOT_TOKEN) return
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        message_thread_id: TELEGRAM_THREAD_ID,
+        text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+        ...(keyboard ? { reply_markup: { inline_keyboard: keyboard } } : {}),
+      }),
+    })
+  } catch (err) {
+    console.error('[Notify] sendToGroup failed:', err)
+  }
+}
+
+export async function sendAdminAlert(
+  text: string,
+  keyboard?: Array<Array<{ text: string; callback_data: string }>>,
+): Promise<void> {
+  await sendToGroup(text, keyboard)
+}
+
+export async function sendOrderFailedAlert(params: {
+  orderId: number
+  service: string
+  name: string
+  email: string
+  error: string
+}): Promise<void> {
+  const { orderId, service, name, email, error } = params
+  const svcName = SERVICE_NAMES[service] || service
+  const text = [
+    `❌ <b>Đơn #${orderId} bị lỗi!</b>`,
+    `📦 ${svcName} — ${name}`,
+    `📧 ${email}`,
+    `💥 ${error.slice(0, 120)}`,
+  ].join('\n')
+  const keyboard = [[
+    { text: '🔄 Retry ngay', callback_data: `o_retry_${orderId}` },
+    { text: '📧 Gửi email recovery', callback_data: `o_email_${orderId}` },
+  ]]
+  await sendToGroup(text, keyboard)
+}
+
+export async function sendUnderpaymentAlert(params: {
+  orderId: number
+  transferCode: string
+  expected: number
+  received: number
+}): Promise<void> {
+  const { orderId, transferCode, expected, received } = params
+  const text = [
+    `⚠️ <b>Underpayment — Đơn #${orderId}</b>`,
+    `Mã CK: <code>${transferCode}</code>`,
+    `Cần: <b>${expected.toLocaleString('vi-VN')}đ</b>`,
+    `Nhận: <b>${received.toLocaleString('vi-VN')}đ</b>`,
+    `Thiếu: ${(expected - received).toLocaleString('vi-VN')}đ`,
+  ].join('\n')
+  const keyboard = [[
+    { text: '✅ Mark Paid & Tạo báo cáo', callback_data: `o_pay_${orderId}` },
+  ]]
+  await sendToGroup(text, keyboard)
+}
+
+// ── Order success notification (original) ────────────────────────────────────
 
 export async function sendOrderNotification(params: {
   service: string
