@@ -193,6 +193,18 @@ src/
 - [x] Pronoun bạn — career/love/synastry đổi xưng hô `anh/chị` → `bạn` thống nhất; career có age-conditional greeting (`≥22` người đi làm vs `<22` học sinh); `Chủ lá số` → `Chủ bản đồ sao` trong career brief; `SIGN_KEYS` broadened: `"Cảm ơn bạn đã tin tưởng"` → `"Cảm ơn bạn đã"`
 - [x] Section titles v2 — career (7 sections mới + `[SUBTITLE]` cho tất cả + `{greeting}` placeholder + `[CLOSING]` closing); love (6 sections, subtitle cho 2/3/4, fixed "Bạn yêu mến!" opening, `[CLOSING]`); synastry (6 sections, subtitle cho 1-4, fixed "Bạn yêu mến!" opening, `[CLOSING]`)
 - [x] Periodic order check — `src/lib/orderCheck.ts` + `/api/cron/order-check`; cron chạy mỗi phút, endpoint check interval trong DB (`order_check_interval`, mặc định 15p); gửi vào group bằng `@hatgiongchiemtinhbot`; báo failed + pending quá 15p + OR Balance; interval set qua `/setcheckinterval` hoặc ForceReply; `deploy.sh` tự re-register webhook sau mỗi deploy
+- [x] **Resilient Order System v4** — `smartRetryOrder()` centralized (`src/lib/smart-retry.ts`, 4 outcomes: skipped/pdfResent/quotaExceeded/retrying); `sepay-webhook` dùng `createReportJob()` (full recovery thay vì fire-and-forget cũ); `sweepPaidPendingOrders()` startup sweep tìm paid+pending+jobId=null; Job Watchdog (`src/lib/job-watchdog.ts`) mỗi 2p per-service threshold (12p career/love, 20p synastry/transit); `/api/recover` + admin bot (`o_retry_N`) + watchdog đều dùng `smartRetryOrder`
+- [x] Claim Transfer — `/api/payment/claim-transfer`: khách tự báo đã CK sau countdown hết → lưu `claimedAt`/`claimInfo` vào Order → `sendCustomerClaimAlert()` admin alert với nút ✅ Mark Paid; `payment/page.tsx` countdown-expired hiện 2 nhánh choice (Chưa CK / Đã CK)
+- [x] Frontend resilience — `checkout/page.tsx` retry loop 3 lần (5xx/network, delay 3s); `processing/page.tsx` failCount banner + force-redirect progress=100; `success/page.tsx` Suspense + fallback chain (sessionStorage → URL params → fetch job → static fallback); `payment/page.tsx` failCount banner + countdown pause khi failCount≥4 + claim form
+- [x] Notify Bot 3 functions mới: `sendPaymentReceivedNotification()` (sepay-webhook sau mark paid), `sendCustomerClaimAlert()` (claim-transfer, nút Mark Paid), `sendUnmatchedPaymentAlert()` (sepay-webhook khi không khớp order)
+- [x] OR fee delays [8s/12s/18s] front-loaded (thay [15s/10s/10s]); fix `cost != null` edge case (không bỏ qua cost=0)
+- [x] Admin Bot pending/failed: hiển thị giờ tạo + thời gian trôi qua — `HH:MM (Xp trước)` / `HH:MM (Xh trước)`
+- [x] OrderCheck 3-group format — ❌ LỖI (paid+not completed) / ❓ NGHI VẤN (unpaid+claimedAt) / 💤 CHƯA THANH TOÁN (summary+retarget); `sendRetargetEmail()` gửi nhắc CK sau 12h (1 lần/đơn, marks `retargetEmailSentAt`); `o_pending_detail` callback → `showPendingOrders()`
+- [x] GuestSynastryModal — labels "── THÔNG TIN CỦA BẠN ──" / "── THÔNG TIN CỦA ĐỐI PHƯƠNG ──"; `initialDataA`/`initialDataB` props; `resetWith()` trong `usePersonState()`; `?edit=1` flow: sessionStorage persist + re-populate khi quay lại từ checkout
+- [x] Services cards — `h-full` same height; tag inline với tên (flex row); career desc merge 2 dòng; `minHeight: '2.2rem'` căn chỉnh description Y cùng vị trí
+- [x] Checkout — profile review block (tên + SN + nơi sinh, synastry: 2 người); back button "← Sửa thông tin" styled (border gold, underline, `#8a8399`); real-time email validation (`emailTouched`, `isValidEmail` regex, warning `#c8410a`, disable submit khi format sai)
+- [x] Payment page compact — amount vào header, 2 notices gộp 1, tighter spacing
+- [x] `/api/recover` cancelled case — trả 400 + message rõ trước khi check `status !== 'failed'`
 
 ## What's TODO
 

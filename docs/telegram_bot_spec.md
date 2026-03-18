@@ -150,8 +150,8 @@ Hiện tại: X.XXXđ
 | `p_<svc>_cust` | Nhập giá custom — ForceReply, gõ số trực tiếp (không cần gõ lại lệnh) |
 | `m_orders` | Mở orders menu |
 | `o_stats` | Thống kê đơn hôm nay |
-| `o_pending` | Danh sách đơn chờ thanh toán (top 5) — mỗi đơn có [✅ Paid] [🗑 Hủy] |
-| `o_failed` | Danh sách đơn lỗi (top 5) — mỗi đơn có [🔄 Retry] [📧 Email] [🗑 Hủy] |
+| `o_pending` | Danh sách đơn chờ thanh toán (top 5) — format: `#N service email HH:MM (Xp trước)` — mỗi đơn có [✅ Paid] [🗑 Hủy] |
+| `o_failed` | Danh sách đơn lỗi (top 5) — format: `#N service email HH:MM (Xh trước)` — mỗi đơn có [🔄 Retry] [📧 Email] [🗑 Hủy] |
 | `o_recent` | 5 đơn gần nhất |
 | `o_pay_N` | Mark paid đơn #N + tạo báo cáo |
 | `o_retry_N` | Force retry đơn #N (reset retryCount=0, bypass limit 3) |
@@ -199,12 +199,12 @@ Nếu admin ignore ForceReply, gõ lệnh khác → xử lý bình thường, kh
 🔎 Kiểm tra đơn — 18/03/2026 01:30
 
 ❌ Đơn failed (2):
-• #18 — Vận Hạn — test@test.com — 13/03 15:30 — Retry: 3/3
-• #22 — Hướng Nghiệp — khach@gmail.com — 14/03 09:15 — Retry: 2/3
+• #18 — Vận Hạn — test@test.com — 15:30 (2h trước) — Retry: 3/3
+• #22 — Hướng Nghiệp — khach@gmail.com — 09:15 (16h trước) — Retry: 2/3
 
 ⏳ Đơn pending quá hạn (3):
-• #27 — Cặp Đôi — khac@gmail.com — 18/03 01:10 — 3.333đ
-• #24 — Hướng Nghiệp — x@x.com — 18/03 01:05 — 5.000đ
+• #27 — Cặp Đôi — khac@gmail.com — 01:10 (20p trước) — 3.333đ
+• #24 — Hướng Nghiệp — x@x.com — 01:05 (25p trước) — 5.000đ
 
 💳 OR Balance: $12.45
 
@@ -288,7 +288,8 @@ TELEGRAM_BOT_TOKEN=<token>    # Token của @nguyclaudebot — PHẢI là bot đ
 ### Files liên quan
 
 ```
-src/lib/notify.ts    # sendOrderNotification, sendAdminAlert, sendOrderFailedAlert, sendUnderpaymentAlert
+src/lib/notify.ts    # sendOrderNotification, sendAdminAlert, sendOrderFailedAlert, sendUnderpaymentAlert,
+                     # sendPaymentReceivedNotification, sendCustomerClaimAlert, sendUnmatchedPaymentAlert
 ```
 
 ### Các trigger và nội dung message
@@ -346,14 +347,58 @@ Trigger: khi `sweepStuckJobsOnce()` recover được ≥1 đơn bị gián đo�
 Các khách hàng sẽ nhận email recovery để thử lại.
 ```
 
+#### Thanh toán nhận được — `sendPaymentReceivedNotification()`
+
+Trigger: `src/app/api/payment/sepay-webhook/route.ts` — sau khi mark paid + start job thành công (fire-and-forget)
+
+```
+💳 Thanh toán nhận được!
+📦 Đơn #N — <service> — <tên>
+📧 <email>
+💰 <số tiền>đ
+✅ Đang xử lý báo cáo...
+```
+
+#### Khách báo đã chuyển khoản — `sendCustomerClaimAlert()`
+
+Trigger: `src/app/api/payment/claim-transfer/route.ts` — khi khách điền form "Tôi đã CK" sau countdown hết
+
+```
+📋 Khách báo đã chuyển khoản!
+📦 Đơn #N — <service> — <tên>
+📧 <email>
+💰 Khách khai: <amount>đ
+📝 Nội dung CK: <transferContent>
+⏰ Lúc: HH:MM DD/MM
+
+[ ✅ Mark Paid #N ]
+```
+→ Button callback về Admin Bot webhook: `o_pay_N`
+
+#### Thanh toán không khớp — `sendUnmatchedPaymentAlert()`
+
+Trigger: `src/app/api/payment/sepay-webhook/route.ts` — khi SePay nhận tiền nhưng không tìm thấy order nào khớp `transferCode`
+
+```
+⚠️ Tiền vào không khớp order!
+💰 Số tiền: <transferAmount>đ
+📝 Nội dung CK: <content>
+🏦 Ngân hàng: <gateway>
+📅 <transactionDate>
+🔑 SePay TxnID: <id>
+
+Kiểm tra thủ công trong DB.
+```
+
 ### Luồng `sendOrderNotification` (sequential)
 
 ```
 [report hoàn thành]
        ↓
 getGenerationCost(generationIds)
-  ├─ wait 15s → query OR /api/v1/generation?id=...
-  ├─ cost=0 → retry 10s → retry 10s (max 3 attempts)
+  ├─ wait 8s → query OR /api/v1/generation?id=...
+  ├─ cost=null → retry 12s → retry 18s (max 3 attempts, front-loaded)
+  ├─ fix: check `cost != null` (không phải `totalCost > 0`) để tránh bỏ qua cost=0
   └─ trả về tổng cost (USD) hoặc null
        ↓
 Promise.all([
@@ -364,7 +409,8 @@ Promise.all([
 sendMessage → group -1003849385640 thread 161
 ```
 
-**Lý do sequential:** OR mất ~15s để tính cost; balance/tỷ giá fetch sau mới chính xác.
+**Lý do sequential:** OR cần thời gian để tính cost; balance/tỷ giá fetch sau mới chính xác.
+**Delays front-loaded [8s/12s/18s]:** Report ngắn (career/love) xong nhanh → lấy fee sớm hơn so với delay cũ [15s/10s/10s].
 
 ### OR Balance & Generation Cost
 
@@ -399,8 +445,10 @@ Group "Nhật Ký Bóc Lột" (-1003849385640 thread 161)
     (TELEGRAM_BOT_TOKEN)
     Trigger từ:
       - reportProcessor.ts  (đơn hoàn thành / đơn lỗi)
-      - sepay-webhook/route.ts  (underpayment)
+      - sepay-webhook/route.ts  (underpayment / payment received / unmatched payment)
       - jobs.ts  (startup sweep)
+      - job-watchdog.ts  (stuck job / email fail)
+      - claim-transfer/route.ts  (khách báo đã CK)
 
 Inline keyboard buttons trong group messages
     │ callback_query

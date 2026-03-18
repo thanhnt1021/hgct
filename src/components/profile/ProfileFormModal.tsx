@@ -57,11 +57,12 @@ interface Props {
   showSaveCheckbox?: boolean
   defaultSaveChecked?: boolean
   submitLabel?: string
+  hideNote?: boolean
   onSave: (data: ProfileFormData, saveProfile: boolean) => void
   onClose: () => void
 }
 
-export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, onSave, onClose }: Props) {
+export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, hideNote, onSave, onClose }: Props) {
   const [form, setForm] = useState<ProfileFormData>(initialData ?? EMPTY_PROFILE_FORM)
   const [yearMode, setYearMode] = useState<'select' | 'custom'>('select')
   const [customYearText, setCustomYearText] = useState('')
@@ -172,7 +173,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Date */}
             <div>
-              <label style={labelStyle}>Ngày sinh</label>
+              <label style={labelStyle}>Ngày sinh (Dương lịch)</label>
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label style={subLabelStyle}>Ngày</label>
@@ -255,7 +256,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
           <LocationPicker value={form.loc} onChange={v => setF('loc', v)} label="Nơi sinh" />
 
           {/* Note / nickname */}
-          <div>
+          {!hideNote && <div>
             <label style={labelStyle}>
               Biệt danh / Ghi chú{' '}
               <span style={{ color: '#4a4560', fontSize: '0.7rem', fontWeight: 400 }}>(tuỳ chọn)</span>
@@ -267,7 +268,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
               placeholder="VD: Anh trai, bạn thân Mai, sinh năm 1990..."
               maxLength={120}
             />
-          </div>
+          </div>}
 
           {showSaveCheckbox && (
             <label className="flex items-center gap-2 cursor-pointer select-none">

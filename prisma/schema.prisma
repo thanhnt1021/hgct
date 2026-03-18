@@ -98,6 +98,13 @@ model Order {
   recoveryToken String?   @unique @map("recovery_token")
   retryCount    Int       @default(0)   @map("retry_count")
 
+  // Claim Transfer (customer self-report payment)
+  claimedAt     DateTime? @map("claimed_at")
+  claimInfo     Json?     @map("claim_info")
+
+  // Retarget email
+  retargetEmailSentAt DateTime? @map("retarget_email_sent_at")
+
   @@map("orders")
 }
 

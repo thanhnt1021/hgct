@@ -10,6 +10,7 @@ import { generateEssayStreaming } from '@/lib/openrouter'
 import { generatePdf } from '@/lib/pdf/generator'
 import { sendReportEmail, makePdfFilename, sendRecoveryEmail } from '@/lib/email'
 import { createJob, updateJob, isJobCancelled, generateRecoveryToken, STUCK_ERROR } from '@/lib/jobs'
+import { chromiumSemaphore } from '@/lib/job-queue'
 import prisma from '@/lib/db'
 import { sendOrderNotification, sendOrderFailedAlert } from '@/lib/notify'
 import fs from 'fs'
@@ -96,7 +97,7 @@ export async function processReport(
   const onlyName = (ten || '').trim() || name
 
   // Step 1: Calculate chart
-  updateJob(jobId, { progress: 5, label: 'Đang tính toán bản đồ sao...' })
+  updateJob(jobId, { progress: 5, label: 'Đang xác lập chính xác bản đồ sao của bạn' })
   const dobStr = `${dob.day}/${dob.month}/${dob.year}`
   const tobStr = `${tob.hour}:${String(tob.minute).padStart(2, '0')}`
   const chart = calculateChart(dobStr, tobStr, loc.lat, loc.lon, loc.tz)
@@ -112,11 +113,11 @@ export async function processReport(
   }
 
   // Step 2: Load knowledge base
-  updateJob(jobId, { progress: 10, label: 'Đang tải dữ liệu chiêm tinh...' })
+  updateJob(jobId, { progress: 10, label: 'Đang xác lập chính xác bản đồ sao của bạn' })
   const kb = await getKnowledgeFromDB()
 
   // Step 3: Build prompt
-  updateJob(jobId, { progress: 15, label: 'Đang phân tích bản đồ sao...' })
+  updateJob(jobId, { progress: 15, label: 'Giải mã năng lượng các hành tinh và cung hoàng đạo' })
 
   let prompt: string
   let coverTitle: string
@@ -201,7 +202,7 @@ export async function processReport(
 
   // Step 4: AI generation with retry
   if (isJobCancelled(jobId)) return
-  updateJob(jobId, { progress: 18, label: 'Vũ trụ đang kết nối...' })
+  updateJob(jobId, { progress: 18, label: 'Biên soạn nội dung luận giải cá nhân hoá' })
   const expected = EXPECTED_CHARS[service] || 10000
   const minChars = MIN_CHARS[service] || 2000
 
@@ -260,16 +261,25 @@ export async function processReport(
     console.log(`[SYNASTRY] Sanitized — essay ${essayText.length} chars`)
   }
 
-  // Step 5: Generate PDF
+  // Step 5: Generate PDF (semaphore: max 1 concurrent Chromium to prevent OOM)
   if (isJobCancelled(jobId)) return
-  updateJob(jobId, { progress: 90, label: 'Đang tạo file PDF...' })
-  const pdfBuffer = await generatePdf(essayText, {
-    coverTitle,
-    sectionTitle,
-    profile,
-    profileB: coverProfileB,
-    service,
-  })
+  if (chromiumSemaphore.queued > 0) {
+    updateJob(jobId, { label: '⏳ Đang chờ xử lý...' })
+  }
+  await chromiumSemaphore.acquire()
+  let pdfBuffer: Buffer | null = null
+  try {
+    updateJob(jobId, { progress: 90, label: 'Đóng gói thành file PDF' })
+    pdfBuffer = await generatePdf(essayText, {
+      coverTitle,
+      sectionTitle,
+      profile,
+      profileB: coverProfileB,
+      service,
+    })
+  } finally {
+    chromiumSemaphore.release()
+  }
 
   // Step 6: Save PDF
   let pdfUrl: string | null = null
@@ -284,7 +294,7 @@ export async function processReport(
   }
 
   // Step 7: Send email
-  updateJob(jobId, { progress: 95, label: 'Đang gửi email...' })
+  updateJob(jobId, { progress: 95, label: 'Gửi đến email của bạn' })
   let emailSent = false
   if (email && pdfBuffer) {
     try {

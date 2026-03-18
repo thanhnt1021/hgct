@@ -267,6 +267,69 @@ export async function sendRecoveryEmail({
   })
 }
 
+export async function sendRetargetEmail({
+  to, service, name, transferCode, amount,
+}: {
+  to: string
+  service: string
+  name: string
+  transferCode: string
+  amount: number
+}) {
+  const svc = SERVICE_CONFIG[service] || SERVICE_CONFIG['career']
+  const amountStr = amount.toLocaleString('vi-VN') + 'đ'
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#0a0a1a;font-family:Georgia,serif;">
+  <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
+    <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
+      <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:#c9a84c;">✦ ✦ ✦</p>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">Hạt Giống Chiêm Tinh</h1>
+      <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
+    </div>
+    <div style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
+    <div style="padding:36px 16px;background:#0f0f28;border:1px solid rgba(201,168,76,0.15);border-top:none;border-bottom:none;">
+      <div style="display:inline-block;padding:6px 20px;border-radius:999px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);margin-bottom:24px;">
+        <span style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#c9a84c;">Nhắc nhở đơn hàng</span>
+      </div>
+      <p style="margin:0 0 8px;font-size:17px;color:#9ca3af;">${name ? `Xin chào ${name},` : 'Xin chào,'}</p>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.8;color:#b8a99a;">
+        Bạn đã đặt <strong style="color:#f5f0e8;">Báo cáo ${svc.label}</strong> nhưng chưa hoàn tất thanh toán.
+        Đơn hàng vẫn đang chờ — chỉ cần chuyển khoản để nhận báo cáo ngay.
+      </p>
+      <div style="padding:24px;background:rgba(201,168,76,0.06);border-radius:12px;border:1px solid rgba(201,168,76,0.2);margin-bottom:24px;text-align:center;">
+        <p style="margin:0 0 6px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#6b7280;">Nội dung chuyển khoản</p>
+        <p style="margin:0 0 10px;font-size:28px;font-weight:700;letter-spacing:0.25em;color:#c9a84c;font-family:'Courier New',monospace;">${transferCode}</p>
+        <p style="margin:0;font-size:20px;font-weight:700;color:#c8410a;">${amountStr}</p>
+      </div>
+      <p style="margin:0 0 16px;font-size:14px;line-height:1.8;color:#6b7280;">
+        Hệ thống sẽ tự động xác nhận và tạo báo cáo ngay khi nhận được tiền.<br>
+        Không cần làm thêm gì sau khi chuyển khoản.
+      </p>
+      <p style="margin:0;font-size:14px;line-height:1.8;color:#6b7280;">
+        Liên hệ hỗ trợ:<br>
+        <a href="mailto:support@hatgiongchiemtinh.com" style="color:#c9a84c;text-decoration:none;font-weight:600;font-size:15px;">support@hatgiongchiemtinh.com</a>
+      </p>
+    </div>
+    <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
+      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Hạt Giống Chiêm Tinh © 2026</p>
+    </div>
+  </div>
+</body>
+</html>`
+
+  return sendEmail({
+    to,
+    subject: `✦ Hoàn tất đơn ${svc.label} của bạn | Hạt Giống Chiêm Tinh`,
+    html,
+  })
+}
+
 export async function sendReportEmail(
   email: string,
   name: string,

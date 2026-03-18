@@ -131,6 +131,7 @@ Dùng chức năng **Giao dịch → Giả lập giao dịch** để test mà kh
 | `src/app/api/payment/create-order/route.ts` | `POST /api/payment/create-order` | Tạo Order trong DB, gen transferCode, trả bank info |
 | `src/app/api/payment/sepay-webhook/route.ts` | `POST /api/payment/sepay-webhook` | Nhận webhook SePay, verify, match order, trigger tạo báo cáo |
 | `src/app/api/payment/status/route.ts` | `GET /api/payment/status?orderId=xxx` | Frontend poll để biết thanh toán thành công chưa |
+| `src/app/api/payment/claim-transfer/route.ts` | `POST /api/payment/claim-transfer` | Khách tự báo đã CK → lưu claimedAt/claimInfo → alert admin |
 
 ### Frontend pages
 
@@ -155,7 +156,7 @@ model Order {
   service       String                            // "career"|"love"|"synastry"|"transit"
   profileData   Json      @map("profile_data")   // inputData của user (người A)
   email         String
-  status        String    @default("pending")    // "pending"|"processing"|"completed"
+  status        String    @default("pending")    // "pending"|"processing"|"retrying"|"completed"|"failed"
   pdfUrl        String?   @map("pdf_url")
   createdAt     DateTime  @default(now())
 
@@ -166,6 +167,15 @@ model Order {
   paidAt        DateTime? @map("paid_at")
   sepayTxnId    Int?      @unique @map("sepay_txn_id")    // ID từ SePay, chống duplicate
   jobId         String?   @map("job_id")                  // UUID của Job sau khi tạo report
+
+  // Recovery fields
+  recoveryToken  String?   @map("recovery_token")         // 8 ký tự uppercase, dùng tại /recover
+  retryCount     Int       @default(0) @map("retry_count") // số lần đã retry (max 3 non-admin)
+  bankAccountName String?  @map("bank_account_name")      // tên TK ngân hàng tại thời điểm tạo order
+
+  // Claim transfer fields (khách tự báo đã CK)
+  claimedAt     DateTime? @map("claimed_at")              // thời điểm khách submit claim
+  claimInfo     Json?     @map("claim_info")              // { amount?, transferContent? }
 
   // Extra data cho synastry/transit
   profileDataB  Json?     @map("profile_data_b")  // inputData người B (synastry)
@@ -246,10 +256,13 @@ SePay POST /api/payment/sepay-webhook
   ├─ 2. Filter: chỉ xử lý transferType === "in"
   ├─ 3. Dedup: kiểm tra sepayTxnId đã tồn tại chưa
   ├─ 4. Match: tìm Order có transferCode === code AND paymentStatus === "unpaid"
-  ├─ 5. Update Order: paymentStatus="paid", paidAt, sepayTxnId
-  ├─ 6. createJob(jobId) → processReport() [fire-and-forget]
-  ├─ 7. Update Order: jobId = jobId mới tạo
-  └─ 8. Return { success: true } HTTP 200 — LUÔN LUÔN, kể cả lỗi
+  │    └─ Không tìm thấy → sendUnmatchedPaymentAlert() [fire-and-forget] → return 200
+  ├─ 5. Check số tiền: nếu thiếu → sendUnderpaymentAlert() [fire-and-forget], vẫn tiếp tục
+  ├─ 6. Update Order: paymentStatus="paid", paidAt, sepayTxnId, status="processing"
+  ├─ 7. createReportJob(order) [full error recovery — atomic lock, token, sweep, email]
+  ├─ 8. Update Order: jobId = jobId mới tạo
+  ├─ 9. sendPaymentReceivedNotification() [fire-and-forget]
+  └─ 10. Return { success: true } HTTP 200 — LUÔN LUÔN, kể cả lỗi
 ```
 
 ### 5d. Frontend detect thanh toán thành công
@@ -264,23 +277,51 @@ if (data.paymentStatus === 'paid' && data.jobId) {
 
 **Điều kiện redirect:** Phải có ĐỦ cả `paymentStatus === 'paid'` VÀ `jobId` (vì trong webhook, 2 thứ này được set ở 2 DB call khác nhau, có thể poll rơi vào giữa).
 
+### 5e. Claim Transfer flow (khi countdown 15 phút hết)
+
+```
+Khách bấm "Tôi đã CK" → điền form (số tiền + nội dung CK)
+       ↓
+POST /api/payment/claim-transfer
+  body: { orderId, amount?, transferContent? }
+       ↓
+Server:
+  ├─ Lưu claimedAt = now() vào Order
+  ├─ Lưu claimInfo = { amount, transferContent } vào Order
+  └─ sendCustomerClaimAlert() → Telegram group (nút ✅ Mark Paid #N)
+       ↓
+Client hiện: "✅ Đã ghi nhận! Admin sẽ xác nhận trong 30 phút."
+       ↓
+Admin nhận alert → xác minh thủ công → bấm [✅ Mark Paid #N]
+  → callback o_pay_N → Admin Bot webhook → mark paid + createReportJob()
+```
+
 ---
 
 ## 6. Pricing — Cách thay đổi giá
 
-Giá được định nghĩa ở 1 chỗ duy nhất:
+Giá được đọc **real-time từ DB** — không cần hardcode hay rebuild:
 
 ```typescript
-// src/app/api/payment/create-order/route.ts
-const SERVICE_AMOUNTS: Record<string, number> = {
-  career: 99000,    // VND, integer, không dấu chấm
-  love: 99000,
-  synastry: 149000,
-  transit: 149000,
-}
+// src/lib/pricing.ts
+getPrice(service)       // đọc 1 dịch vụ
+getAllPrices()          // đọc tất cả
+setPrice(service, amt) // set 1 dịch vụ
+setAllPrices(amt)      // set tất cả cùng lúc
 ```
 
-Sau khi sửa → commit → deploy lại. Các order cũ không bị ảnh hưởng (amount được lưu vào DB khi tạo order).
+**DB keys** (bảng `config`): `price_career`, `price_love`, `price_synastry`, `price_transit`
+
+**Fallback chain khi đọc giá:**
+```
+price_<service>  →  service_price (key cũ, backward compat)  →  3333 (hardcode default)
+```
+
+**Cách thay đổi giá:**
+- Qua Admin Bot: `/setprice [service] <giá>` hoặc menu Price → chọn dịch vụ → bấm preset / nhập custom
+- Thay đổi có hiệu lực ngay, không cần rebuild/deploy
+
+**Lưu ý:** Amount được lưu vào DB khi tạo order → các order cũ không bị ảnh hưởng khi thay giá.
 
 ---
 
@@ -335,6 +376,17 @@ const existing = await prisma.order.findFirst({ where: { sepayTxnId: txnId } })
 if (existing) return OK() // Đã xử lý, bỏ qua
 ```
 
+### 7f. Server crash sau khi nhận tiền nhưng trước khi tạo job
+
+**Vấn đề cũ (trước v4):** Webhook dùng `createJob() + processReport().catch(console.error)` — nếu server crash giữa chừng, order ở trạng thái `paid+pending+jobId=null` và không có cơ chế tự phục hồi.
+
+**Fix hiện tại:**
+1. `sepay-webhook` dùng `createReportJob()` — có full error recovery (atomic lock, recovery token, email)
+2. `sweepPaidPendingOrders()` chạy khi server khởi động — tìm orders `paid+pending+jobId=null` và tự start job
+3. Job Watchdog (`src/lib/job-watchdog.ts`) kiểm tra định kỳ — phát hiện và retry stuck jobs
+
+Kết quả: Kể cả khi server crash giữa chừng, sau khi restart tất cả orders đã thanh toán sẽ được xử lý lại tự động.
+
 ---
 
 ## 8. Kiểm tra nhanh sau khi setup
@@ -361,13 +413,16 @@ psql -h localhost -U nguydev -d zodiacdb \
 
 Checklist khi replicate sang dự án khác:
 
-- [ ] Copy 3 API route files: `create-order`, `sepay-webhook`, `status`
+- [ ] Copy 4 API route files: `create-order`, `sepay-webhook`, `status`, `claim-transfer`
 - [ ] Copy `processReport` logic (hoặc tương đương) ra lib riêng để webhook handler dùng được
-- [ ] Thêm fields SePay vào Order model trong schema (xem mục 3)
+- [ ] Copy `src/lib/smart-retry.ts` — centralized retry logic
+- [ ] Thêm fields SePay vào Order model trong schema (xem mục 3) — bao gồm `claimedAt`, `claimInfo`
 - [ ] Thêm 4 env vars (SEPAY_API_KEY, BANK_ACCOUNT_NUMBER, BANK_ACCOUNT_NAME, BANK_NAME)
 - [ ] Update cả `.env.local` production lẫn demo
 - [ ] Điều chỉnh `transferCode` prefix (đang là `HGCT`) cho khớp dự án mới
-- [ ] Điều chỉnh `SERVICE_AMOUNTS` cho đúng giá
+- [ ] Giá đọc từ DB (`config` table) — setup `getPrice()` hoặc hardcode SERVICE_AMOUNTS nếu đơn giản hơn
 - [ ] Setup SePay dashboard: link bank → cấu hình mã → tạo webhook (xem mục 2)
+- [ ] Thêm `sweepPaidPendingOrders()` vào startup sequence
+- [ ] Setup Job Watchdog nếu cần tự động retry stuck jobs
 - [ ] Thêm `visibilitychange` listener trên payment page để poll ngay khi user quay lại tab (UX mobile)
 - [ ] Test bằng cách gọi curl test webhook (mục 8) trước khi live

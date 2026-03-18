@@ -1,11 +1,9 @@
 'use client'
 
-// VISUAL ONLY — success page restyled to Celestial Sanctum design
-// All logic (sessionStorage reads, emailSent check) untouched
-
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/layout/Navbar'
+import { useSearchParams } from 'next/navigation'
 
 const SERVICE_NAMES: Record<string, string> = {
   career: 'Hướng Nghiệp',
@@ -14,21 +12,134 @@ const SERVICE_NAMES: Record<string, string> = {
   transit: 'Vận Hạn',
 }
 
-export default function SuccessPage() {
+function SuccessInner() {
+  const searchParams = useSearchParams()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [service, setService] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [noData, setNoData] = useState(false)
 
   useEffect(() => {
     const stored = sessionStorage.getItem('reportResult')
-    if (stored) setResult(JSON.parse(stored))
-    setService(sessionStorage.getItem('selectedService') || '')
-  }, [])
+    const storedService = sessionStorage.getItem('selectedService') || ''
+    const urlService = searchParams.get('service') || ''
+
+    if (stored) {
+      setResult(JSON.parse(stored))
+      setService(storedService || urlService)
+      setLoading(false)
+      return
+    }
+
+    // sessionStorage empty — try URL params (e.g. direct navigate, tab restore, force-redirect)
+    const jobId = searchParams.get('jobId')
+    if (urlService || storedService) setService(urlService || storedService)
+
+    if (jobId) {
+      fetch(`/api/job/${jobId}`)
+        .then(r => r.ok ? r.json() : null)
+        .then((job) => {
+          if (job?.result) {
+            setResult({ ...job.result, email: job.result.email })
+          } else {
+            setNoData(true)
+          }
+          setLoading(false)
+        })
+        .catch(() => { setNoData(true); setLoading(false) })
+    } else {
+      setNoData(true)
+      setLoading(false)
+    }
+  }, [searchParams])
 
   const email = result?.email as string
   const pdfUrl = result?.pdfUrl as string
   const pdfFilename = result?.pdfFilename as string
   const emailSent = result?.emailSent as boolean | undefined
   const serviceName = SERVICE_NAMES[service] || 'chiêm tinh'
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#06060f' }}>
+        <div className="w-10 h-10 rounded-full animate-spin" style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
+      </div>
+    )
+  }
+
+  if (noData) {
+    return (
+      <div className="min-h-screen" style={{ background: '#06060f' }}>
+        <Navbar />
+        <div className="max-w-lg mx-auto px-4 pt-28 pb-16 text-center">
+          <div
+            className="rounded-2xl p-10"
+            style={{
+              background: 'rgba(18,13,46,0.7)',
+              border: '1px solid rgba(200,148,63,0.16)',
+              backdropFilter: 'blur(20px)',
+            }}
+          >
+            <p style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📬</p>
+            <h1
+              className="font-bold mb-3"
+              style={{
+                color: '#f4efe6',
+                fontFamily: 'var(--font-vietnam)',
+                fontSize: '1.3rem',
+                letterSpacing: '0.04em',
+              }}
+            >
+              Báo cáo đang được gửi
+            </h1>
+            <p
+              style={{
+                color: '#8a8399',
+                fontFamily: 'var(--font-vietnam)',
+                fontSize: '0.9rem',
+                lineHeight: 1.8,
+                marginBottom: '2rem',
+              }}
+            >
+              Kiểm tra email hoặc vào{' '}
+              <strong style={{ color: '#d9ab55' }}>Lịch sử đơn hàng</strong>{' '}
+              để xem kết quả.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/profile?tab=history"
+                className="px-7 py-3 text-sm font-bold"
+                style={{
+                  background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
+                  color: '#06060f',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-vietnam)',
+                  letterSpacing: '0.08em',
+                  fontSize: '0.72rem',
+                }}
+              >
+                Lịch sử đơn hàng →
+              </Link>
+              <Link
+                href="/services"
+                className="px-7 py-3 text-sm"
+                style={{
+                  background: 'transparent',
+                  color: '#8a8399',
+                  border: '1px solid rgba(200,148,63,0.15)',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-vietnam)',
+                  fontSize: '0.85rem',
+                }}
+              >
+                Tạo báo cáo mới
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen" style={{ background: '#06060f' }}>
@@ -183,7 +294,7 @@ export default function SuccessPage() {
               fontFamily: 'var(--font-vietnam)',
               fontSize: '0.65rem',
               letterSpacing: '0.06em',
-              
+
             }}
           >
             Sau 10 phút chưa nhận được?
@@ -225,5 +336,13 @@ export default function SuccessPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ background: '#06060f' }} />}>
+      <SuccessInner />
+    </Suspense>
   )
 }

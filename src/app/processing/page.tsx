@@ -39,6 +39,9 @@ function ProcessingInner() {
   const frozenIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const hasAutoRetried = useRef(false)
   const lastProgressRef = useRef({ value: 0, time: Date.now() })
+  const [statusBanner, setStatusBanner] = useState<string | null>(null)
+  const failCountRef = useRef(0)
+  const progress100TimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Fix F: capture at mount so useEffect doesn't re-run when these change (prevents double polling)
   const serviceRef = useRef(service)
   const nameRef = useRef(displayName)
@@ -62,6 +65,9 @@ function ProcessingInner() {
     }
 
     const handleJob = (job: JobPayload) => {
+      // Reset fail tracking on successful poll
+      if (failCountRef.current > 0) { failCountRef.current = 0; setStatusBanner(null) }
+
       const newProgress = job.progress ?? 0
       // Track progress change for frozen detection
       if (newProgress !== lastProgressRef.current.value) {
@@ -72,11 +78,22 @@ function ProcessingInner() {
       setLabel(job.label ?? '')
       setStatus(job.status as 'processing' | 'done' | 'error')
 
+      // Force redirect: progress=100 but status still 'processing' > 5s → navigate to success
+      if ((job.progress ?? 0) >= 100 && job.status === 'processing' && !progress100TimerRef.current) {
+        progress100TimerRef.current = setTimeout(() => {
+          router.replace(`/success?jobId=${jobId}&service=${serviceRef.current}&name=${encodeURIComponent(nameRef.current)}`)
+        }, 5000)
+      } else if (job.status !== 'processing' && progress100TimerRef.current) {
+        clearTimeout(progress100TimerRef.current)
+        progress100TimerRef.current = null
+      }
+
       if (job.status === 'done') {
         if (intervalRef.current) clearInterval(intervalRef.current)
         if (frozenIntervalRef.current) clearInterval(frozenIntervalRef.current)
+        if (progress100TimerRef.current) { clearTimeout(progress100TimerRef.current); progress100TimerRef.current = null }
         sessionStorage.setItem('reportResult', JSON.stringify({ ...job.result, email: job.result?.email }))
-        setTimeout(() => router.replace('/success'), 2000)
+        setTimeout(() => router.replace(`/success?jobId=${jobId}&service=${serviceRef.current}&name=${encodeURIComponent(nameRef.current)}`), 2000)
       } else if (job.status === 'error') {
         if (intervalRef.current) clearInterval(intervalRef.current)
         if (frozenIntervalRef.current) clearInterval(frozenIntervalRef.current)
@@ -110,9 +127,20 @@ function ProcessingInner() {
           router.replace('/services')
           return
         }
-        if (!res.ok) return
+        if (!res.ok) {
+          failCountRef.current++
+          const fc = failCountRef.current
+          if (fc === 4) setStatusBanner('⏳ Đang kết nối lại...')
+          else if (fc === 11) setStatusBanner('⚠️ Kết nối không ổn định — tiếp tục thử...')
+          return
+        }
         handleJob(await res.json())
-      } catch { /* network error, keep polling */ }
+      } catch {
+        failCountRef.current++
+        const fc = failCountRef.current
+        if (fc === 4) setStatusBanner('⏳ Đang kết nối lại...')
+        else if (fc === 11) setStatusBanner('⚠️ Kết nối không ổn định — tiếp tục thử...')
+      }
     }
 
     // Frozen detection: if progress doesn't change for 90s, show gentle warning
@@ -125,6 +153,7 @@ function ProcessingInner() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
       if (frozenIntervalRef.current) clearInterval(frozenIntervalRef.current)
+      if (progress100TimerRef.current) clearTimeout(progress100TimerRef.current)
     }
   }, [jobId, router])
 
@@ -237,11 +266,11 @@ function ProcessingInner() {
 
   // ── Processing state ──
   const steps = [
-    { pct: 5,  label: 'Tính toán bản đồ sao' },
-    { pct: 15, label: 'Phân tích cung hoàng đạo' },
-    { pct: 18, label: 'Vũ trụ biên soạn luận giải' },
-    { pct: 90, label: 'Tạo file PDF' },
-    { pct: 95, label: 'Gửi email' },
+    { pct: 5,  label: 'Đang xác lập chính xác bản đồ sao của bạn' },
+    { pct: 15, label: 'Giải mã năng lượng các hành tinh và cung hoàng đạo' },
+    { pct: 18, label: 'Biên soạn nội dung luận giải cá nhân hoá' },
+    { pct: 90, label: 'Đóng gói thành file PDF' },
+    { pct: 95, label: 'Gửi đến email của bạn' },
   ]
 
   return (
@@ -250,6 +279,22 @@ function ProcessingInner() {
       style={{ background: '#06060f' }}
     >
       <div className="max-w-md w-full text-center">
+
+        {/* Connection banner */}
+        {statusBanner && (
+          <div
+            className="mb-6 rounded-xl px-4 py-2.5"
+            style={{
+              background: 'rgba(200,148,63,0.06)',
+              border: '1px solid rgba(200,148,63,0.2)',
+              color: '#d9ab55',
+              fontFamily: 'var(--font-vietnam)',
+              fontSize: '0.8rem',
+            }}
+          >
+            {statusBanner}
+          </div>
+        )}
 
         {/* Pulsing stars */}
         <div className="flex items-center justify-center gap-5 mb-10">

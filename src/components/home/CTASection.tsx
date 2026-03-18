@@ -22,7 +22,7 @@ export default function CTASection() {
                 </span>
                 <span
                   className="block"
-                  style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4rem)', textTransform: 'uppercase', background: 'linear-gradient(135deg, #c8943f, #f0cc78, #d9ab55)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1.1 }}
+                  style={{ fontFamily: 'var(--font-fraunces)', fontStyle: 'italic', fontWeight: 400, fontSize: 'clamp(2.5rem, 5vw, 4rem)', textTransform: 'uppercase', background: 'linear-gradient(135deg, #c8943f, #f0cc78, #d9ab55)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1.1 }}
                 >
                   <span className="hidden sm:inline">Bầu trời lúc bạn<br />chào đời nói gì về<br />bạn?</span>
                   <span className="sm:hidden">Bầu Trời<br />Lúc Bạn<br />Chào Đời<br />Nói Gì Về<br />Bạn?</span>

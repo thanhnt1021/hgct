@@ -54,6 +54,8 @@ export default function CheckoutPage() {
   const [inputDataB, setInputDataB] = useState<Record<string, unknown> | null>(null)
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [retryMsg, setRetryMsg] = useState('')
+  const [emailTouched, setEmailTouched] = useState(false)
   const [profileUidA, setProfileUidA] = useState('')
   const [profileUidB, setProfileUidB] = useState('')
   const [transitStartDate, setTransitStartDate] = useState('')
@@ -90,6 +92,15 @@ export default function CheckoutPage() {
   }, [user, router])
 
   const fmtDate = (s: string) => { if (!s) return ''; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}` }
+  const fmtDob = (dob: Record<string, number> | undefined) => {
+    if (!dob || !dob.day || !dob.month || !dob.year) return ''
+    return `${String(dob.day).padStart(2,'0')}/${String(dob.month).padStart(2,'0')}/${dob.year}`
+  }
+  const fmtLoc = (loc: Record<string, unknown> | undefined) => (loc?.address as string) || ''
+
+  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+  const emailInvalid = emailTouched && email.length > 0 && !isValidEmail(email)
+  const canSubmit = email.trim() !== '' && isValidEmail(email)
 
   const nameA = (inputData?.name as string) || ''
   const nameB = (inputDataB?.name as string) || ''
@@ -100,86 +111,93 @@ export default function CheckoutPage() {
   const handlePayment = async () => {
     if (!email.trim()) { alert('Vui lòng nhập email để nhận báo cáo'); return }
     setLoading(true)
-    try {
-      const res = await fetch('/api/payment/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service,
-          inputData,
-          email: email.trim(),
-          ...(inputDataB ? { inputDataB } : {}),
-          ...(profileUidA ? { profileUidA } : {}),
-          ...(profileUidB ? { profileUidB } : {}),
-          ...(service === 'transit' && transitStartDate && transitEndDate
-            ? { startDate: transitStartDate, endDate: transitEndDate }
-            : {}),
-        }),
-      })
-      const result = await res.json()
-      if (res.ok && result.orderId) {
-        sessionStorage.setItem('paymentOrderId', String(result.orderId))
-        sessionStorage.setItem('paymentEmail', email.trim())
-        const params = new URLSearchParams({
-          orderId: String(result.orderId),
-          transferCode: result.transferCode,
-          amount: String(result.amount),
-          bankAccount: result.bankAccount,
-          bankName: result.bankName,
-          bankAccountName: result.bankAccountName,
-          service,
-          name: displayName,
-        })
-        router.push(`/payment?${params.toString()}`)
-      } else {
-        alert(result.error || 'Có lỗi khi tạo đơn hàng')
-        setLoading(false)
+    const payload = JSON.stringify({
+      service, inputData, email: email.trim(),
+      ...(inputDataB ? { inputDataB } : {}),
+      ...(profileUidA ? { profileUidA } : {}),
+      ...(profileUidB ? { profileUidB } : {}),
+      ...(service === 'transit' && transitStartDate && transitEndDate
+        ? { startDate: transitStartDate, endDate: transitEndDate } : {}),
+    })
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) {
+        setRetryMsg(`Lỗi kết nối, đang thử lại... (${attempt}/3)`)
+        await new Promise(r => setTimeout(r, 3000))
       }
-    } catch {
-      alert('Lỗi kết nối server')
-      setLoading(false)
+      try {
+        const res = await fetch('/api/payment/create-order', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload,
+        })
+        const result = await res.json()
+        if (res.ok && result.orderId) {
+          setRetryMsg('')
+          sessionStorage.setItem('paymentOrderId', String(result.orderId))
+          sessionStorage.setItem('paymentEmail', email.trim())
+          const params = new URLSearchParams({
+            orderId: String(result.orderId), transferCode: result.transferCode,
+            amount: String(result.amount), bankAccount: result.bankAccount,
+            bankName: result.bankName, bankAccountName: result.bankAccountName,
+            service, name: displayName,
+          })
+          router.push(`/payment?${params.toString()}`)
+          return
+        }
+        if (res.status < 500) {
+          // Client error — no point retrying
+          setRetryMsg('')
+          alert(result.error || 'Có lỗi khi tạo đơn hàng')
+          setLoading(false)
+          return
+        }
+      } catch { /* network error — retry */ }
     }
+    setRetryMsg('')
+    alert('Hệ thống đang bận. Vui lòng thử lại sau.')
+    setLoading(false)
   }
 
   const handleConfirm = async () => {
     if (!email.trim()) { alert('Vui lòng nhập email để nhận báo cáo'); return }
     setLoading(true)
-    try {
-      const res = await fetch('/api/astrology/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service,
-          inputData,
-          email: email.trim(),
-          premiumToken,
-          name: displayName,
-          ...(profileUidA ? { profileUid: profileUidA } : {}),
-          ...(service === 'synastry' && inputDataB ? { inputDataB, ...(profileUidB ? { profileUidB } : {}) } : {}),
-          ...(service === 'transit' && transitStartDate && transitEndDate ? { startDate: transitStartDate, endDate: transitEndDate } : {}),
-        }),
-      })
-      const result = await res.json()
-      if (res.ok && result.jobId) {
-        if (user?.username) {
-          saveJobToHistory(user.username, {
-            jobId: result.jobId,
-            service: service as 'career' | 'love' | 'synastry' | 'transit',
-            name: displayName,
-            email: email.trim(),
-            createdAt: new Date().toISOString(),
-          })
-        }
-        const params = new URLSearchParams({ job: result.jobId, service, name: displayName })
-        router.push(`/processing?${params.toString()}`)
-      } else {
-        alert(result.error || 'Có lỗi xảy ra')
-        setLoading(false)
+    const payload = JSON.stringify({
+      service, inputData, email: email.trim(), premiumToken, name: displayName,
+      ...(profileUidA ? { profileUid: profileUidA } : {}),
+      ...(service === 'synastry' && inputDataB ? { inputDataB, ...(profileUidB ? { profileUidB } : {}) } : {}),
+      ...(service === 'transit' && transitStartDate && transitEndDate ? { startDate: transitStartDate, endDate: transitEndDate } : {}),
+    })
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) {
+        setRetryMsg(`Lỗi kết nối, đang thử lại... (${attempt}/3)`)
+        await new Promise(r => setTimeout(r, 3000))
       }
-    } catch {
-      alert('Lỗi kết nối server')
-      setLoading(false)
+      try {
+        const res = await fetch('/api/astrology/report', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload,
+        })
+        const result = await res.json()
+        if (res.ok && result.jobId) {
+          setRetryMsg('')
+          if (user?.username) {
+            saveJobToHistory(user.username, {
+              jobId: result.jobId, service: service as 'career' | 'love' | 'synastry' | 'transit',
+              name: displayName, email: email.trim(), createdAt: new Date().toISOString(),
+            })
+          }
+          const params = new URLSearchParams({ job: result.jobId, service, name: displayName })
+          router.push(`/processing?${params.toString()}`)
+          return
+        }
+        if (res.status < 500) {
+          setRetryMsg('')
+          alert(result.error || 'Có lỗi xảy ra')
+          setLoading(false)
+          return
+        }
+      } catch { /* network error — retry */ }
     }
+    setRetryMsg('')
+    alert('Hệ thống đang bận. Vui lòng thử lại sau.')
+    setLoading(false)
   }
 
   // Auth still resolving
@@ -201,7 +219,7 @@ export default function CheckoutPage() {
             style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }}
           />
           <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em' }}>
-            ĐANG KẾT NỐI
+            {retryMsg || 'ĐANG KẾT NỐI'}
           </p>
         </div>
       </div>
@@ -246,10 +264,9 @@ export default function CheckoutPage() {
           <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.3), transparent)', marginBottom: '2rem' }} />
 
           {/* Order summary */}
-          <div className="space-y-3 mb-8">
+          <div className="space-y-3 mb-5">
             {[
               { label: 'Dịch vụ', value: `Luận giải ${SERVICE_NAMES[service] || service}`, valueColor: '#f4efe6' },
-              { label: 'Khách hàng', value: displayName, valueColor: '#f4efe6' },
               ...(service === 'transit' && transitStartDate && transitEndDate
                 ? [{ label: 'Giai đoạn', value: `${fmtDate(transitStartDate)} → ${fmtDate(transitEndDate)}`, valueColor: '#f4efe6' }]
                 : []),
@@ -266,6 +283,42 @@ export default function CheckoutPage() {
             ))}
           </div>
 
+          {/* Profile review block */}
+          {inputData && (
+            <div className="rounded-lg p-4 mb-8" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(200,148,63,0.1)' }}>
+              {service === 'synastry' ? (
+                <div className="space-y-3">
+                  <div>
+                    <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.08em', fontWeight: 700, marginBottom: '0.2rem' }}>NGƯỜI THỨ NHẤT</p>
+                    <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, margin: 0 }}>{nameA}</p>
+                    <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                      {[fmtDob(inputData.dob as Record<string, number>), fmtLoc(inputData.loc as Record<string, unknown>)].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  {inputDataB && (
+                    <>
+                      <div style={{ height: '1px', background: 'rgba(200,148,63,0.08)' }} />
+                      <div>
+                        <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.08em', fontWeight: 700, marginBottom: '0.2rem' }}>NGƯỜI THỨ HAI</p>
+                        <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, margin: 0 }}>{nameB}</p>
+                        <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                          {[fmtDob(inputDataB.dob as Record<string, number>), fmtLoc(inputDataB.loc as Record<string, unknown>)].filter(Boolean).join(' · ')}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, marginBottom: '0.2rem' }}>{nameA}</p>
+                  <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
+                    {[fmtDob(inputData.dob as Record<string, number>), fmtLoc(inputData.loc as Record<string, unknown>)].filter(Boolean).join(' · ')}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Email field */}
           <div className="mb-8">
             <label style={labelStyle}>Email nhận báo cáo PDF</label>
@@ -273,16 +326,22 @@ export default function CheckoutPage() {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
+              onFocus={() => setEmailTouched(true)}
               placeholder="email@example.com"
               className="w-full"
-              style={{ borderColor: email ? undefined : 'rgba(196,82,82,0.35)' }}
+              style={{ borderColor: emailInvalid ? 'rgba(196,82,82,0.55)' : (!email ? 'rgba(196,82,82,0.35)' : undefined) }}
             />
-            {user?.email && email === user.email && (
+            {emailInvalid && (
+              <p style={{ color: '#c8410a', fontSize: '0.75rem', marginTop: '0.5rem', fontFamily: 'var(--font-vietnam)' }}>
+                📧 Vui lòng nhập đúng định dạng email
+              </p>
+            )}
+            {!emailInvalid && user?.email && email === user.email && (
               <p style={{ color: '#4a4560', fontSize: '0.75rem', marginTop: '0.5rem', fontFamily: 'var(--font-vietnam)', fontStyle: 'italic' }}>
                 ✦ Lấy từ tài khoản đăng nhập
               </p>
             )}
-            {!email && (
+            {!emailInvalid && !email && (
               <p style={{ color: '#8a8399', fontSize: '0.75rem', marginTop: '0.5rem', fontFamily: 'var(--font-vietnam)' }}>
                 Báo cáo PDF sẽ được gửi đến địa chỉ email này
               </p>
@@ -294,7 +353,7 @@ export default function CheckoutPage() {
             <>
               <button
                 onClick={handleConfirm}
-                disabled={!email.trim()}
+                disabled={!canSubmit}
                 className="w-full py-4 font-bold text-sm tracking-wider"
                 style={{
                   background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
@@ -303,8 +362,8 @@ export default function CheckoutPage() {
                   borderRadius: '4px',
                   fontFamily: 'var(--font-vietnam)',
                   letterSpacing: '0.1em',
-                  opacity: !email.trim() ? 0.4 : 1,
-                  boxShadow: email.trim() ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
+                  opacity: !canSubmit ? 0.4 : 1,
+                  boxShadow: canSubmit ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
@@ -318,7 +377,7 @@ export default function CheckoutPage() {
             <>
               <button
                 onClick={handlePayment}
-                disabled={!email.trim()}
+                disabled={!canSubmit}
                 className="w-full py-4 font-bold text-sm tracking-wider"
                 style={{
                   background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
@@ -327,8 +386,8 @@ export default function CheckoutPage() {
                   borderRadius: '4px',
                   fontFamily: 'var(--font-vietnam)',
                   letterSpacing: '0.1em',
-                  opacity: !email.trim() ? 0.4 : 1,
-                  boxShadow: email.trim() ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
+                  opacity: !canSubmit ? 0.4 : 1,
+                  boxShadow: canSubmit ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
@@ -339,6 +398,16 @@ export default function CheckoutPage() {
               </p>
             </>
           )}
+
+          {/* Back button */}
+          <div className="text-center mt-5">
+            <button
+              onClick={() => router.push(profileUidA ? '/services' : '/services?edit=1')}
+              style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', background: 'none', border: '1px solid rgba(200,148,63,0.2)', borderRadius: '8px', padding: '6px 16px', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              ← Sửa thông tin
+            </button>
+          </div>
         </div>
       </div>
     </div>

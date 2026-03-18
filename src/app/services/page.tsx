@@ -8,7 +8,8 @@ import { useEffect, useState } from 'react'
 import { Search, Plus } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
-import ProfileFormModal, { ProfileFormData, EMPTY_PROFILE_FORM } from '@/components/profile/ProfileFormModal'
+import ProfileFormModal, { ProfileFormData } from '@/components/profile/ProfileFormModal'
+import GuestSynastryModal from '@/components/profile/GuestSynastryModal'
 
 interface Profile {
   id: string
@@ -35,10 +36,10 @@ interface ServiceDef {
 }
 
 const services: ServiceDef[] = [
-  { type: 'career',   name: 'Hướng Nghiệp', icon: '🎯', description: 'Phân tích sự nghiệp, tài năng nổi bật, con đường nghề nghiệp và tài chính phù hợp nhất.', color: 'rgba(200,148,63,0.08)',  border: 'rgba(200,148,63,0.22)',  tagColor: '#c8943f' },
-  { type: 'love',     name: 'Tình Duyên',   icon: '💝', description: 'Phân tích phong cách yêu, nhu cầu tình cảm, người bạn đời phù hợp và bài học tình duyên.',   color: 'rgba(185,77,112,0.08)',  border: 'rgba(185,77,112,0.22)',  tagColor: '#b84d70' },
-  { type: 'synastry', name: 'Cặp Đôi',      icon: '💑', description: 'So sánh bản đồ sao 2 người — phân tích hòa hợp, xung đột, bài học và chìa khóa hạnh phúc.', color: 'rgba(120,77,186,0.08)',  border: 'rgba(120,77,186,0.22)',  tagColor: '#7c4dba', needsTwo: true },
-  { type: 'transit',  name: 'Vận Hạn',      icon: '🔮', description: 'Phân tích transit hiện tại — sự nghiệp, tài chính, tình cảm, sức khỏe trong giai đoạn tới.', color: 'rgba(64,112,184,0.08)',  border: 'rgba(64,112,184,0.22)',  tagColor: '#4070b8' },
+  { type: 'career',   name: 'Hướng Nghiệp', icon: '🎯', description: 'Bạn đang loay hoay giữa nhiều lựa chọn, không chắc mình thực sự phù hợp với điều gì và nên đi theo hướng nào để vừa phát triển vừa có thu nhập tốt?\n\n→ Mỗi người đều mang trong mình một "hạt giống" riêng. Hiểu đúng hạt giống của bạn để chọn đúng hướng đi, phát triển đúng cách và xây dựng sự nghiệp – tài chính bền vững.', color: 'rgba(200,148,63,0.08)',  border: 'rgba(200,148,63,0.22)',  tagColor: '#c8943f' },
+  { type: 'love',     name: 'Tình Duyên',   icon: '💝', description: 'Bạn yêu như thế nào, và đâu là kiểu người khiến trái tim bạn thực sự bình yên?\n\n→ Bản luận giải này giúp bạn hiểu cách mình yêu, người phù hợp và cách xây dựng một mối quan hệ sâu sắc, bền vững.',   color: 'rgba(185,77,112,0.08)',  border: 'rgba(185,77,112,0.22)',  tagColor: '#b84d70' },
+  { type: 'synastry', name: 'Cặp Đôi',      icon: '💑', description: 'Vì sao hai bạn gặp nhau, điều gì khiến hai người thu hút nhau và những thử thách nào đang ẩn dấu trong mối quan hệ này?\n\n→ Bản luận giải này giúp bạn nhìn rõ sự hòa hợp, khác biệt và chìa khóa để mối quan hệ phát triển bền vững hơn.', color: 'rgba(120,77,186,0.08)',  border: 'rgba(120,77,186,0.22)',  tagColor: '#7c4dba', needsTwo: true },
+  { type: 'transit',  name: 'Vận Hạn',      icon: '🔮', description: 'Thời gian này bạn nên mở rộng, hay cần chậm lại một chút để nhìn rõ hơn?\n\n→ Bản luận giải giúp bạn hiểu rõ giai đoạn mình đang trải qua và lựa chọn hướng đi phù hợp hơn.', color: 'rgba(64,112,184,0.08)',  border: 'rgba(64,112,184,0.22)',  tagColor: '#4070b8' },
 ]
 
 function profileToInputData(p: Profile) {
@@ -203,16 +204,25 @@ export default function ServicesPage() {
   const router = useRouter()
   const { user } = useAuth()
   const [profiles, setProfiles] = useState<Profile[]>([])
+  const [profilesLoaded, setProfilesLoaded] = useState(false)
   const [selectedService, setSelectedService] = useState<ServiceDef | null>(null)
   const [profileA, setProfileA] = useState('')
   const [profileB, setProfileB] = useState('')
   const [transitStartDate, setTransitStartDate] = useState('')
   const [transitEndDate, setTransitEndDate] = useState('')
 
-  // Modal state
+  // Modal state (old flow — logged-in users with profiles)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalTarget, setModalTarget] = useState<'A' | 'B'>('A')
   const [modalSaving, setModalSaving] = useState(false)
+
+  // Guest flow state
+  const [guestService, setGuestService] = useState<ServiceDef | null>(null)
+  const [guestModalOpen, setGuestModalOpen] = useState(false)
+  const [guestSynastryOpen, setGuestSynastryOpen] = useState(false)
+  const [pendingServiceClick, setPendingServiceClick] = useState<ServiceDef | null>(null)
+  const [guestInitialDataA, setGuestInitialDataA] = useState<ProfileFormData | null>(null)
+  const [guestInitialDataB, setGuestInitialDataB] = useState<ProfileFormData | null>(null)
 
   useEffect(() => {
     fetch('/api/profiles')
@@ -235,9 +245,107 @@ export default function ServicesPage() {
             isTemp: false,
           })))
         }
+        setProfilesLoaded(true)
       })
-      .catch(() => setProfiles([]))
+      .catch(() => { setProfiles([]); setProfilesLoaded(true) })
   }, [user?.uid])
+
+  // Khi profiles loaded, xử lý pending click (user ấn service card lúc đang fetch)
+  useEffect(() => {
+    if (!profilesLoaded || !pendingServiceClick) return
+    const permCount = profiles.filter(p => !p.isTemp).length
+    if (permCount === 0) {
+      openGuestFlow(pendingServiceClick)
+    } else {
+      setSelectedService(pendingServiceClick)
+      setProfileA(''); setProfileB('')
+    }
+    setPendingServiceClick(null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profilesLoaded])
+
+  const openGuestFlow = (s: ServiceDef) => {
+    setGuestService(s)
+    if (s.needsTwo) setGuestSynastryOpen(true)
+    else setGuestModalOpen(true)
+  }
+
+  const guestProfileToInput = (formData: ProfileFormData, name: string) => ({
+    name, ten: formData.ten || '',
+    gender: formData.gender,
+    dob: { day: formData.dob.day, month: formData.dob.month, year: formData.dob.year },
+    tob: { hour: formData.tob.unknown ? 12 : formData.tob.hour, minute: formData.tob.unknown ? 0 : formData.tob.minute },
+    loc: { address: formData.loc.address, lat: formData.loc.lat, lon: formData.loc.lon, tz: formData.loc.tz },
+  })
+
+  const handleGuestModalSubmit = (formData: ProfileFormData, save: boolean) => {
+    if (!guestService) return
+    const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
+    sessionStorage.setItem('inputData', JSON.stringify(guestProfileToInput(formData, name)))
+    sessionStorage.setItem('selectedService', guestService.type)
+    sessionStorage.setItem('profileUidA', '')
+    sessionStorage.setItem('guestFormDataA', JSON.stringify(formData))
+    sessionStorage.removeItem('guestFormDataB')
+    sessionStorage.removeItem('inputDataB')
+    sessionStorage.removeItem('profileUidB')
+    if (guestService.type === 'transit') {
+      const today = new Date()
+      const oneYearLater = new Date(today)
+      oneYearLater.setFullYear(today.getFullYear() + 1)
+      sessionStorage.setItem('transitStartDate', today.toISOString().split('T')[0])
+      sessionStorage.setItem('transitEndDate', oneYearLater.toISOString().split('T')[0])
+    } else {
+      sessionStorage.removeItem('transitStartDate')
+      sessionStorage.removeItem('transitEndDate')
+    }
+    router.push('/checkout')
+    // Background save if user wants
+    if (user && save) {
+      fetch('/api/profiles', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, gender: formData.gender, isTemp: false, data: formData }),
+      }).catch(() => {})
+    }
+  }
+
+  const handleGuestSynastrySubmit = (formA: ProfileFormData, formB: ProfileFormData) => {
+    const nameA = [formA.ho, formA.dem, formA.ten].filter(Boolean).join(' ')
+    const nameB = [formB.ho, formB.dem, formB.ten].filter(Boolean).join(' ')
+    sessionStorage.setItem('inputData', JSON.stringify(guestProfileToInput(formA, nameA)))
+    sessionStorage.setItem('inputDataB', JSON.stringify(guestProfileToInput(formB, nameB)))
+    sessionStorage.setItem('selectedService', 'synastry')
+    sessionStorage.setItem('profileUidA', '')
+    sessionStorage.setItem('profileUidB', '')
+    sessionStorage.setItem('guestFormDataA', JSON.stringify(formA))
+    sessionStorage.setItem('guestFormDataB', JSON.stringify(formB))
+    sessionStorage.removeItem('transitStartDate')
+    sessionStorage.removeItem('transitEndDate')
+    router.push('/checkout')
+  }
+
+  // Xử lý ?edit=1 khi quay lại từ checkout
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('edit') !== '1') return
+    const svcType = sessionStorage.getItem('selectedService')
+    const svc = services.find(s => s.type === svcType)
+    if (!svc) return
+    const formAStr = sessionStorage.getItem('guestFormDataA')
+    const formA = formAStr ? JSON.parse(formAStr) as ProfileFormData : null
+    setGuestInitialDataA(formA)
+    if (svc.needsTwo) {
+      const formBStr = sessionStorage.getItem('guestFormDataB')
+      const formB = formBStr ? JSON.parse(formBStr) as ProfileFormData : null
+      setGuestInitialDataB(formB)
+      setGuestService(svc)
+      setGuestSynastryOpen(true)
+    } else {
+      setGuestService(svc)
+      setGuestModalOpen(true)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Set default transit dates khi chọn dịch vụ Vận Hạn
   useEffect(() => {
@@ -251,6 +359,14 @@ export default function ServicesPage() {
   }, [selectedService?.type])
 
   const handleServiceClick = (s: ServiceDef) => {
+    // Guest (no session): always guest flow
+    if (!user) { openGuestFlow(s); return }
+    // User: wait for profiles to load
+    if (!profilesLoaded) { setPendingServiceClick(s); return }
+    // User + profiles loaded
+    const permCount = profiles.filter(p => !p.isTemp).length
+    if (permCount === 0) { openGuestFlow(s); return }
+    // Old flow: user has saved profiles
     setSelectedService(s)
     setProfileA('')
     setProfileB('')
@@ -404,6 +520,7 @@ export default function ServicesPage() {
                     border: `1px solid ${s.border}`,
                     backdropFilter: 'blur(12px)',
                     transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                    height: '100%',
                   }}
                   onMouseEnter={e => {
                     (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'
@@ -417,21 +534,23 @@ export default function ServicesPage() {
                   <div className="flex items-start gap-4">
                     <span className="text-4xl flex-shrink-0" style={{ lineHeight: 1.2 }}>{s.icon}</span>
                     <div>
-                      {s.needsTwo && (
-                        <span
-                          className="inline-block text-xs px-2.5 py-0.5 rounded-sm mb-2.5"
-                          style={{ background: 'rgba(120,77,186,0.2)', color: '#9b6dd6', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.1em' }}
+                      <div className="flex items-center gap-2 mb-2" style={{ minHeight: '2.2rem' }}>
+                        <h3
+                          className="font-bold"
+                          style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem', letterSpacing: '0.02em', margin: 0 }}
                         >
-                          Cần 2 hồ sơ
-                        </span>
-                      )}
-                      <h3
-                        className="font-bold mb-2"
-                        style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem', letterSpacing: '0.02em' }}
-                      >
-                        {s.name}
-                      </h3>
-                      <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', lineHeight: 1.8 }}>
+                          {s.name}
+                        </h3>
+                        {s.needsTwo && (
+                          <span
+                            className="inline-block px-2 py-0.5 rounded-sm"
+                            style={{ background: 'rgba(120,77,186,0.2)', color: '#9b6dd6', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.1em', flexShrink: 0 }}
+                          >
+                            Cần 2 hồ sơ
+                          </span>
+                        )}
+                      </div>
+                      <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
                         {s.description}
                       </p>
                     </div>
@@ -439,6 +558,13 @@ export default function ServicesPage() {
                 </button>
               ))}
             </div>
+
+            {/* Loading indicator khi user đang fetch profiles */}
+            {user && !profilesLoaded && (
+              <p className="text-center mt-6" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+                Đang tải…
+              </p>
+            )}
           </>
         ) : (
           /* Profile selection step */
@@ -539,7 +665,7 @@ export default function ServicesPage() {
                 )}
 
                 {/* ── Transit date range picker ─────────────────────── */}
-                {selectedService?.type === 'transit' && (
+                {false && selectedService?.type === 'transit' && (
                   <div>
                     <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)', marginBottom: '1.25rem' }} />
                     <div className="grid grid-cols-2 gap-3 mb-3">
@@ -620,7 +746,7 @@ export default function ServicesPage() {
         )}
       </div>
 
-      {/* Modal nhập thông tin mới */}
+      {/* Modal nhập thông tin mới (old flow — user có profile) */}
       <ProfileFormModal
         open={modalOpen}
         title={
@@ -628,12 +754,32 @@ export default function ServicesPage() {
             ? (modalTarget === 'A' ? 'Người thứ nhất' : 'Người thứ hai')
             : 'Nhập thông tin'
         }
-        initialData={EMPTY_PROFILE_FORM}
         saving={modalSaving}
         showSaveCheckbox
         submitLabel={getModalSubmitLabel()}
         onSave={handleModalSave}
         onClose={() => setModalOpen(false)}
+      />
+
+      {/* Guest flow — 1-profile modal (career/love/transit) */}
+      <ProfileFormModal
+        open={guestModalOpen}
+        title="Thông tin của bạn"
+        hideNote
+        initialData={guestInitialDataA}
+        showSaveCheckbox={!!user}
+        submitLabel="Tiếp tục →"
+        onSave={handleGuestModalSubmit}
+        onClose={() => { setGuestModalOpen(false); setGuestService(null); setGuestInitialDataA(null) }}
+      />
+
+      {/* Guest flow — 2-profile modal (synastry) */}
+      <GuestSynastryModal
+        open={guestSynastryOpen}
+        onClose={() => { setGuestSynastryOpen(false); setGuestService(null); setGuestInitialDataA(null); setGuestInitialDataB(null) }}
+        onSubmit={handleGuestSynastrySubmit}
+        initialDataA={guestInitialDataA}
+        initialDataB={guestInitialDataB}
       />
     </div>
   )

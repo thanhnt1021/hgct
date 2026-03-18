@@ -62,21 +62,31 @@ async function getUsdToVndSellRate(): Promise<number | null> {
 async function getGenerationCost(generationIds: string[]): Promise<number | null> {
   if (!OPENROUTER_MANAGEMENT_KEY || generationIds.length === 0) return null
   try {
-    // Wait 15s for OR to populate cost, then retry 2x with 10s gaps
-    const delays = [15000, 10000, 10000]
+    // Front-loaded delays: 8s first (fast path), then 12s / 18s if not yet populated
+    const delays = [8000, 12000, 18000]
     for (let attempt = 0; attempt < delays.length; attempt++) {
       await new Promise((r) => setTimeout(r, delays[attempt]))
       let totalCost = 0
+      let allPopulated = true
       for (const id of generationIds) {
         const res = await fetch(`https://openrouter.ai/api/v1/generation?id=${id}`, {
           headers: { Authorization: `Bearer ${OPENROUTER_MANAGEMENT_KEY}` },
         })
         if (res.ok) {
           const data = await res.json()
-          totalCost += data.data?.total_cost ?? 0
+          const cost = data.data?.total_cost
+          // cost != null means OR has populated this generation (includes legitimate $0 cost)
+          if (cost != null) {
+            totalCost += cost
+          } else {
+            allPopulated = false
+          }
+        } else {
+          allPopulated = false
         }
       }
-      if (totalCost > 0) return totalCost
+      // All IDs populated → return (including $0 edge case)
+      if (allPopulated) return totalCost
     }
     return null
   } catch {
@@ -153,6 +163,64 @@ export async function sendUnderpaymentAlert(params: {
     { text: '✅ Mark Paid & Tạo báo cáo', callback_data: `o_pay_${orderId}` },
   ]]
   await sendToGroup(text, keyboard)
+}
+
+export async function sendPaymentReceivedNotification(params: {
+  orderId: number
+  service: string
+  name: string
+  email: string
+  amount: number
+  transferCode: string
+}): Promise<void> {
+  const { orderId, service, name, email, amount, transferCode } = params
+  const svcName = SERVICE_NAMES[service] || service
+  const text = [
+    `💳 <b>Thanh toán nhận được — Đơn #${orderId}</b>`,
+    `📦 ${svcName} — ${name}`,
+    `📧 ${email}`,
+    `💰 ${amount.toLocaleString('vi-VN')}đ`,
+    `🏷 Mã CK: <code>${transferCode}</code>`,
+  ].join('\n')
+  await sendToGroup(text)
+}
+
+export async function sendCustomerClaimAlert(params: {
+  orderId: number
+  transferCode: string
+  claimedAmount?: number
+  transferContent?: string
+}): Promise<void> {
+  const { orderId, transferCode, claimedAmount, transferContent } = params
+  const amountStr = claimedAmount ? `${claimedAmount.toLocaleString('vi-VN')}đ` : 'không rõ'
+  const lines = [
+    `🔔 <b>Khách báo đã CK — Đơn #${orderId}</b>`,
+    `🏷 Mã đơn: <code>${transferCode}</code>`,
+    `💰 Số tiền: ${amountStr}`,
+    transferContent ? `📝 Nội dung CK: <code>${transferContent}</code>` : null,
+    `👉 Kiểm tra lịch sử CK và xác nhận nếu đúng.`,
+  ]
+  const text = lines.filter(Boolean).join('\n')
+  const keyboard = [[
+    { text: `✅ Mark Paid #${orderId}`, callback_data: `o_pay_${orderId}` },
+  ]]
+  await sendToGroup(text, keyboard)
+}
+
+export async function sendUnmatchedPaymentAlert(params: {
+  txnId: number
+  code: string
+  amount: number
+}): Promise<void> {
+  const { txnId, code, amount } = params
+  const text = [
+    `⚠️ <b>Thanh toán không khớp đơn nào!</b>`,
+    `🔑 Mã nội dung: <code>${code}</code>`,
+    `💰 Số tiền: ${amount.toLocaleString('vi-VN')}đ`,
+    `🆔 SePay TxnID: ${txnId}`,
+    `→ Kiểm tra thủ công và xử lý nếu cần.`,
+  ].join('\n')
+  await sendToGroup(text)
 }
 
 // ── Order success notification (original) ────────────────────────────────────

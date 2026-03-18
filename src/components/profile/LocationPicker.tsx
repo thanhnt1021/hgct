@@ -85,6 +85,7 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
     { code: 'kr', label: 'Hàn Quốc' },
     { code: 'sg', label: 'Singapore' },
     { code: 'th', label: 'Thái Lan' },
+    { code: 'ru', label: 'Nga' },
     { code: '', label: 'Toàn cầu' },
   ]
 

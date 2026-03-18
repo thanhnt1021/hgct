@@ -341,10 +341,11 @@ auth: SMTP_USER / SMTP_PASS
 ```ts
 interface Job {
   id, status, progress, label, result, error, createdAt,
+  lastActivity?,       // updated by updateJob() — dùng bởi markStuckIfNeeded thay vì createdAt
   profileUidA?, profileUidB?, pdfExpiresAt?, pdfNote?
 }
 createJob(id, meta?)   → ghi DB + cache
-updateJob(id, data)    → update DB + cache
+updateJob(id, data)    → update DB + cache + refresh lastActivity
 getJob(id)             → đọc cache only (sync)
 getJobFromDb(id)       → cache trước, fallback DB (async) + markStuckIfNeeded
 cancelJob(id)          → xóa khỏi DB, set status cancelled trong cache
@@ -354,16 +355,105 @@ isJobCancelled(id)     → check cache
 **Auto-timeout stuck jobs:**
 - `STUCK_TIMEOUT_MS = 15 phút`
 - `sweepStuckJobsOnce()` chạy khi server khởi động — mark tất cả jobs processing > 15 phút thành error
-- `markStuckIfNeeded(job)` chạy mỗi lần `getJobFromDb` được gọi
+- `markStuckIfNeeded(job)` chạy mỗi lần `getJobFromDb` được gọi — dùng `lastActivity` (không phải `createdAt`) để tránh false positive với Transit/Synastry (chạy lâu bình thường)
 - In-memory cache auto-cleanup sau 1 giờ
+
+**`sweepPaidPendingOrders()`** — chạy sau `sweepStuckJobsOnce()` khi server khởi động:
+- Tìm orders: `paymentStatus='paid'`, `status='pending'`, `jobId=null`
+- Tự động start job cho từng order → gọi `createReportJob(order)`
+- Safety net: phòng server crash sau khi nhận tiền SePay nhưng trước khi tạo được job
 
 **Hủy báo cáo:**
 - Nút Hủy trên `/processing` → `DELETE /api/job/:id` → `cancelJob()` → xóa DB, set cancelled in memory
 - `isJobCancelled(jobId)` được check tại các checkpoint trong `processReport()`
 
+### Job Watchdog
+
+**File:** `src/lib/job-watchdog.ts`
+
+```
+startJobWatchdog()   → khởi động khi server boot
+```
+
+- **Delay khởi động:** 30 giây sau server boot
+- **Interval:** Chạy lại mỗi 2 phút
+
+**Per-service stuck thresholds:**
+
+| Dịch vụ | Ngưỡng stuck |
+|---------|-------------|
+| career / love | 12 phút |
+| synastry / transit | 20 phút |
+
+**Logic mỗi lần chạy:**
+1. Duyệt in-memory jobs đang `processing`
+2. Nếu `now - lastActivity > threshold` → gọi `smartRetryOrder(jobId, 'watchdog')`
+3. Gửi `sendAdminAlert()` cho kết quả: `quotaExceeded`, `pdfResent`, `retrying`
+4. Riêng: tìm orders `status='completed'`, `emailSent=false`, `> 5 phút trước` → resend email → alert nếu fail
+
 ---
 
-## 8. Prisma Client
+## 8. Smart Retry
+
+**File:** `src/lib/smart-retry.ts`
+
+```ts
+smartRetryOrder(orderId: number, triggeredBy: RetryTrigger): Promise<SmartRetryResult>
+type RetryTrigger = 'watchdog' | 'admin' | 'customer'
+type SmartRetryResult = 'skipped' | 'pdfResent' | 'quotaExceeded' | 'retrying'
+```
+
+Centralized retry logic — được dùng bởi: watchdog, admin bot (`o_retry_N`), `/api/recover`.
+
+**Luồng xử lý:**
+
+```
+1. Khi triggeredBy === 'admin': reset retryCount = 0 (bypass quota limit)
+2. Atomic lock: updateMany({ where: { status: 'failed' } }) → đảm bảo chỉ 1 request win
+3. Nếu thua race condition → return 'skipped'
+4. Check PDF trên disk: resolvePdfPath(pdfUrl) → file exists?
+   ├─ Có → resend email → return 'pdfResent'
+   └─ Không →
+5. Check quota: retryCount >= 3 && triggeredBy !== 'admin'?
+   ├─ Có → gửi recovery email cho khách → return 'quotaExceeded'
+   └─ Không →
+6. createReportJob(order) → full pipeline
+7. return 'retrying'
+```
+
+**Helper:**
+```ts
+resolvePdfPath(pdfUrl: string): string | null
+// Tính đường dẫn file từ URL dạng /api/pdf/{id}?filename=...
+// → /var/hgct/pdfs/{id}.pdf
+```
+
+---
+
+## 9. API Routes — Payment
+
+### `POST /api/payment/create-order`
+
+Đọc giá từ DB (`getPrice(service)`) — thay đổi qua Admin Bot không cần rebuild.
+
+### `POST /api/payment/claim-transfer`
+
+**File:** `src/app/api/payment/claim-transfer/route.ts`
+
+- Body: `{ orderId, amount?, transferContent? }`
+- Lưu `claimedAt = now()` và `claimInfo = { amount, transferContent }` vào Order
+- Gọi `sendCustomerClaimAlert()` → Telegram group với nút "✅ Mark Paid #N"
+- Response: `{ success: true, message: "Đã ghi nhận..." }`
+
+### `POST /api/recover`
+
+- Token-based recovery (khách nhập từ email hoặc /processing)
+- Dùng `smartRetryOrder(orderId, 'customer')` thay vì tự handle logic retry
+- Atomic lock tránh double-trigger
+
+---
+
+## 10. Prisma Client
 
 **File:** `src/lib/db.ts`
 

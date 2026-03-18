@@ -87,7 +87,7 @@ export function updateJob(id: string, updates: Partial<Omit<Job, 'id' | 'created
   if (updates.pdfNote !== undefined) dbUpdates.pdfNote = updates.pdfNote
   if (updates.pdfExpiresAt !== undefined) dbUpdates.pdfExpiresAt = updates.pdfExpiresAt ? new Date(updates.pdfExpiresAt) : null
   if (Object.keys(dbUpdates).length > 0) {
-    prisma.job.update({ where: { id }, data: dbUpdates }).catch(console.error)
+    prisma.job.updateMany({ where: { id }, data: dbUpdates }).catch(console.error)
   }
 }
 
@@ -108,7 +108,7 @@ function markStuckIfNeeded(job: Job): void {
     job.status = 'error'
     job.label = 'Lỗi'
     job.error = STUCK_ERROR
-    prisma.job.update({ where: { id: job.id }, data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR } }).catch(console.error)
+    prisma.job.updateMany({ where: { id: job.id }, data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR } }).catch(console.error)
   }
 }
 
@@ -296,7 +296,56 @@ async function sweepStuckRetryingOrders() {
   }
 }
 
+// Sweep orders that are paid but never had a job started (SePay arrived before server restart)
+async function sweepPaidPendingOrders() {
+  try {
+    const paidPending = await prisma.order.findMany({
+      where: { paymentStatus: 'paid', status: 'pending', jobId: null },
+    })
+    if (paidPending.length === 0) return
+
+    // Lazy import to avoid circular dependency
+    const { createReportJob } = await import('./astrology/reportProcessor')
+
+    for (const order of paidPending) {
+      try {
+        const body: Record<string, unknown> = {
+          service: order.service,
+          inputData: order.profileData,
+          email: order.email,
+          name: ((order.profileData as Record<string, unknown>)?.name as string) || '',
+        }
+        if (order.profileUidA) body.profileUid = order.profileUidA
+        if (order.profileUidB) body.profileUidB = order.profileUidB
+        if (order.profileDataB) body.inputDataB = order.profileDataB
+        if (order.startDate) body.startDate = order.startDate
+        if (order.endDate) body.endDate = order.endDate
+
+        await prisma.order.update({ where: { id: order.id }, data: { status: 'processing' } })
+
+        const jobId = createReportJob({
+          service: order.service,
+          body,
+          userUid: order.userUid || undefined,
+          orderId: order.id,
+          amount: order.amount ?? 0,
+        })
+
+        await prisma.order.update({ where: { id: order.id }, data: { jobId } })
+        console.log(`[jobs] Sweep paid/pending: order ${order.id} → job ${jobId.slice(0, 8)}`)
+      } catch (err) {
+        console.error(`[jobs] Sweep paid/pending: order ${order.id} failed:`, err)
+      }
+    }
+
+    sendAdminAlert(`💰 <b>Startup sweep: found ${paidPending.length} paid/pending order(s) — started jobs</b>`).catch(() => {})
+  } catch (err) {
+    console.error('[jobs] sweepPaidPendingOrders error:', err)
+  }
+}
+
 sweepStuckJobsOnce()
+sweepPaidPendingOrders()
 
 // Clean up in-memory jobs older than 1 hour
 setInterval(() => {
@@ -305,3 +354,12 @@ setInterval(() => {
     if (job.createdAt < cutoff) jobs.delete(id)
   }
 }, 15 * 60 * 1000)
+
+// Watchdog: proactive stuck-job detection, runs every 2 minutes
+// Import lazily to avoid circular dependency (watchdog imports smart-retry which imports reportProcessor)
+setTimeout(() => {
+  import('./job-watchdog').then(({ runWatchdog }) => {
+    runWatchdog().catch(() => {})
+    setInterval(() => runWatchdog().catch(() => {}), 2 * 60 * 1000)
+  }).catch(() => {})
+}, 30 * 1000)  // 30s delay — let server fully initialize first

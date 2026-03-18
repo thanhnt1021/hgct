@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, Be_Vietnam_Pro, Cinzel } from 'next/font/google'
+import { Playfair_Display, Be_Vietnam_Pro, Cinzel, Fraunces } from 'next/font/google'
 import './globals.css'
 import Providers from '@/components/Providers'
 
@@ -13,6 +13,14 @@ const cinzel = Cinzel({
 const playfair = Playfair_Display({
   subsets: ['latin', 'vietnamese'],
   variable: '--font-playfair',
+  weight: ['400'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+})
+
+const fraunces = Fraunces({
+  subsets: ['latin', 'vietnamese'],
+  variable: '--font-fraunces',
   weight: ['400'],
   style: ['normal', 'italic'],
   display: 'swap',
@@ -45,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const fontClasses = [
     cinzel.variable,
     playfair.variable,
+    fraunces.variable,
     beVietnamPro.variable,
   ].join(' ')
 

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
-import { randomUUID } from 'crypto'
 import prisma from '@/lib/db'
-import { createJob } from '@/lib/jobs'
-import { processReport } from '@/lib/astrology/reportProcessor'
-import { sendUnderpaymentAlert } from '@/lib/notify'
+import { createReportJob } from '@/lib/astrology/reportProcessor'
+import { sendUnderpaymentAlert, sendPaymentReceivedNotification, sendUnmatchedPaymentAlert } from '@/lib/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,6 +64,7 @@ export async function POST(request: Request) {
     })
     if (!order) {
       console.warn(`[sepay-webhook] No unpaid order for code=${code}`)
+      sendUnmatchedPaymentAlert({ txnId, code, amount: transferAmount }).catch(() => {})
       return OK()
     }
 
@@ -94,8 +93,7 @@ export async function POST(request: Request) {
       },
     })
 
-    // 9. Create report job
-    const jobId = randomUUID()
+    // 9. Build body and start report job via createReportJob (includes full error recovery)
     const body: Record<string, unknown> = {
       service: order.service,
       inputData: order.profileData,
@@ -111,13 +109,12 @@ export async function POST(request: Request) {
       endDate: order.endDate ?? undefined,
     }
 
-    createJob(jobId, {
-      userUid: order.userUid ?? undefined,
+    const jobId = createReportJob({
       service: order.service,
-      name: (order.profileData as Record<string, unknown>)?.name as string | undefined,
-      email: order.email,
-      profileUidA: order.profileUidA ?? undefined,
-      profileUidB: order.profileUidB ?? undefined,
+      body,
+      userUid: order.userUid ?? undefined,
+      orderId: order.id,
+      amount: order.amount ?? 0,
     })
 
     // Update order with jobId
@@ -126,12 +123,19 @@ export async function POST(request: Request) {
       data: { jobId },
     })
 
-    // 10. Fire-and-forget report processing
-    processReport(jobId, body, order.id, order.amount ?? 0).catch((err) => {
-      console.error(`[sepay-webhook] processReport error for job ${jobId}:`, err)
-    })
-
     console.log(`[sepay-webhook] Order ${order.id} paid — started job ${jobId}`)
+
+    // Notify admin: payment received
+    const profileData = order.profileData as Record<string, unknown>
+    sendPaymentReceivedNotification({
+      orderId: order.id,
+      service: order.service,
+      name: (profileData?.name as string) || '',
+      email: order.email,
+      amount: order.amount ?? transferAmount,
+      transferCode: code,
+    }).catch(() => {})
+
     return OK()
   } catch (err) {
     console.error('[sepay-webhook] Unexpected error:', err)

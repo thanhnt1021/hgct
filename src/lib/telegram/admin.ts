@@ -16,6 +16,7 @@ import {
 import { generateRecoveryToken, STUCK_ERROR } from '@/lib/jobs'
 import { createReportJob } from '@/lib/astrology/reportProcessor'
 import { sendRecoveryEmail } from '@/lib/email'
+import { smartRetryOrder } from '@/lib/smart-retry'
 import { getOpenRouterBalance } from '@/lib/notify'
 import { runOrderCheck, getCheckInterval, setCheckInterval } from '@/lib/orderCheck'
 
@@ -46,10 +47,32 @@ function fmt(n: number) {
   return n.toLocaleString('vi-VN') + 'đ'
 }
 
+function timeAgoStr(date: Date): string {
+  const diffMs = Date.now() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  if (diffMins < 1) return '<1p'
+  if (diffMins < 60) return `${diffMins}p`
+  const h = Math.floor(diffMins / 60)
+  const m = diffMins % 60
+  if (h < 24) return m > 0 ? `${h}h${m}p` : `${h}h`
+  const d = Math.floor(h / 24)
+  const rh = h % 24
+  return rh > 0 ? `${d}d${rh}h` : `${d}d`
+}
+
+function fmtTimeVN(date: Date): string {
+  return date.toLocaleTimeString('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 function statusEmoji(status: string) {
   if (status === 'completed') return '✅'
   if (status === 'processing' || status === 'retrying') return '🔄'
   if (status === 'failed') return '❌'
+  if (status === 'cancelled') return '🚫'
   return '⏳'
 }
 
@@ -238,10 +261,10 @@ export async function showPendingOrders(ctx: Ctx) {
       ])
       return
     }
-    const lines = orders.map(
-      o =>
-        `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${o.email} — ${fmt(o.amount ?? 0)} — ${new Date(o.createdAt).toLocaleDateString('vi-VN')}`,
-    )
+    const lines = orders.map(o => {
+      const d = new Date(o.createdAt)
+      return `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${o.email} — ${fmt(o.amount ?? 0)} — ${fmtTimeVN(d)} (${timeAgoStr(d)} trước)`
+    })
     const buttons: TgKeyboard = orders.map(o => [
       { text: `✅ Paid #${o.id}`, callback_data: `o_pay_${o.id}` },
       { text: `🗑 Hủy #${o.id}`, callback_data: `o_cancel_${o.id}` },
@@ -261,7 +284,7 @@ export async function showFailedOrders(ctx: Ctx) {
       where: { status: 'failed' },
       orderBy: { createdAt: 'desc' },
       take: 5,
-      select: { id: true, service: true, email: true, retryCount: true },
+      select: { id: true, service: true, email: true, retryCount: true, createdAt: true },
     })
     if (orders.length === 0) {
       await respond(ctx, '✅ Không có đơn nào bị lỗi.', [
@@ -269,10 +292,10 @@ export async function showFailedOrders(ctx: Ctx) {
       ])
       return
     }
-    const lines = orders.map(
-      o =>
-        `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${o.email} — Retry: ${o.retryCount}/3`,
-    )
+    const lines = orders.map(o => {
+      const d = new Date(o.createdAt)
+      return `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${o.email} — Retry: ${o.retryCount}/3 — ${fmtTimeVN(d)} (${timeAgoStr(d)} trước)`
+    })
     const buttons: TgKeyboard = orders.map(o => [
       { text: `🔄 #${o.id}`, callback_data: `o_retry_${o.id}` },
       { text: `📧 #${o.id}`, callback_data: `o_email_${o.id}` },
@@ -321,36 +344,27 @@ export async function handleMarkPaid(ctx: Ctx, orderId: number) {
     if (order.paymentStatus === 'paid') { await respond(ctx, `⚠️ Đơn #${orderId} đã được thanh toán rồi.`); return }
     if (order.status === 'completed') { await respond(ctx, `⚠️ Đơn #${orderId} đã hoàn thành rồi.`); return }
 
+    // Mark paid first (paid status is prerequisite for retry to proceed)
     await prisma.order.update({
       where: { id: orderId },
-      data: { paymentStatus: 'paid', paidAt: new Date(), status: 'processing' },
+      data: { paymentStatus: 'paid', paidAt: new Date(), status: 'failed' },
     })
 
-    const body: Record<string, unknown> = {
-      service: order.service,
-      inputData: order.profileData,
-      email: order.email,
-      name: (order.profileData as Record<string, unknown>)?.name || '',
+    // Use smartRetryOrder with admin privileges (resets retryCount, checks PDF)
+    const result = await smartRetryOrder(orderId, 'admin')
+
+    if (result.pdfResent) {
+      await respond(
+        ctx,
+        `✅ <b>Đơn #${orderId} đã được mark paid</b>\nPDF đã có sẵn — gửi lại email thành công.`,
+        [[{ text: '↩️ Quay lại', callback_data: 'm_orders' }]],
+      )
+      return
     }
-    if (order.profileUidA) body.profileUid = order.profileUidA
-    if (order.profileUidB) body.profileUidB = order.profileUidB
-    if (order.profileDataB) body.inputDataB = order.profileDataB
-    if (order.startDate) body.startDate = order.startDate
-    if (order.endDate) body.endDate = order.endDate
-
-    const jobId = createReportJob({
-      service: order.service,
-      body,
-      userUid: order.userUid || undefined,
-      orderId: order.id,
-      amount: order.amount ?? 0,
-    })
-
-    await prisma.order.update({ where: { id: orderId }, data: { jobId } })
 
     await respond(
       ctx,
-      `✅ <b>Đơn #${orderId} đã được mark paid</b>\nJob <code>${jobId.slice(0, 8)}</code> đang chạy — khách nhận PDF qua email khi xong.`,
+      `✅ <b>Đơn #${orderId} đã được mark paid</b>\nJob đang chạy — khách nhận PDF qua email khi xong.`,
       [[{ text: '↩️ Quay lại', callback_data: 'm_orders' }]],
     )
   } catch (err) {
@@ -365,44 +379,25 @@ export async function handleRetryOrder(ctx: Ctx, orderId: number) {
     if (!order) { await respond(ctx, `❌ Không tìm thấy đơn #${orderId}.`); return }
     if (order.paymentStatus !== 'paid') { await respond(ctx, `⚠️ Đơn #${orderId} chưa thanh toán — dùng Mark Paid trước.`); return }
     if (order.status === 'completed') { await respond(ctx, `✅ Đơn #${orderId} đã hoàn thành rồi.`); return }
+    if (order.status === 'cancelled') { await respond(ctx, `❌ Đơn #${orderId} đã bị hủy — không thể retry.`); return }
 
-    // Admin force retry: reset retryCount, bypass limit
-    const updated = await prisma.order.updateMany({
-      where: { id: orderId, status: { not: 'retrying' } },
-      data: { status: 'retrying', retryCount: 0, recoveryToken: null },
-    })
-    if (updated.count === 0) {
+    const result = await smartRetryOrder(orderId, 'admin')
+
+    if (result.skipped) {
       await respond(ctx, `⚠️ Đơn #${orderId} đang retry. Chờ xong.`); return
     }
-
-    const body: Record<string, unknown> = {
-      service: order.service,
-      inputData: order.profileData,
-      email: order.email,
-      name: (order.profileData as Record<string, unknown>)?.name || '',
+    if (result.pdfResent) {
+      await respond(
+        ctx,
+        `📧 <b>Đơn #${orderId} — PDF đã có, gửi lại email thành công.</b>`,
+        [[{ text: '↩️ Quay lại', callback_data: 'm_orders' }]],
+      )
+      return
     }
-    if (order.profileUidA) body.profileUid = order.profileUidA
-    if (order.profileUidB) body.profileUidB = order.profileUidB
-    if (order.profileDataB) body.inputDataB = order.profileDataB
-    if (order.startDate) body.startDate = order.startDate
-    if (order.endDate) body.endDate = order.endDate
-
-    const jobId = createReportJob({
-      service: order.service,
-      body,
-      userUid: order.userUid || undefined,
-      orderId: order.id,
-      amount: order.amount ?? 0,
-    })
-
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { jobId, retryCount: { increment: 1 } },
-    })
 
     await respond(
       ctx,
-      `🔄 <b>Đang retry đơn #${orderId}</b>\nJob <code>${jobId.slice(0, 8)}</code> đã khởi động — khách nhận PDF qua email khi xong.`,
+      `🔄 <b>Đang retry đơn #${orderId}</b>\nJob đã khởi động — khách nhận PDF qua email khi xong.`,
       [[{ text: '↩️ Quay lại', callback_data: 'm_orders' }]],
     )
   } catch (err) {
@@ -717,6 +712,7 @@ export async function handleCallback(
 
   if (cbData === 'o_stats') return showOrderStats(ctx)
   if (cbData === 'o_pending') return showPendingOrders(ctx)
+  if (cbData === 'o_pending_detail') return showPendingOrders(ctx)
   if (cbData === 'o_failed') return showFailedOrders(ctx)
   if (cbData === 'o_recent') return showRecentOrders(ctx)
 

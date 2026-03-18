@@ -118,7 +118,7 @@ transitEndDate  → ngày kết thúc (chỉ Vận Hạn)
 - QR code từ SePay: `https://qr.sepay.vn/img?acc=...&bank=...&amount=...&des={transferCode}`
 - Thông tin chuyển khoản: ngân hàng, số TK, chủ TK, số tiền (đỏ, cỡ lớn), nội dung CK (nổi bật xanh + nút Copy)
 - Dòng hướng dẫn: quét QR hoặc chuyển khoản thủ công với **đúng nội dung** `{transferCode}`
-- Countdown **15 phút** (sau đó hiện "Hết thời gian chờ")
+- Countdown **15 phút** — **tạm dừng** khi mất kết nối (failCount ≥ 4), tích lại `pausedMs`
 - Thông báo: "Hệ thống sẽ **tự động xác nhận** và tạo báo cáo khi nhận tiền"
 - Nút "Hủy giao dịch" → về /services
 
@@ -127,7 +127,26 @@ transitEndDate  → ngày kết thúc (chỉ Vận Hạn)
 `GET /api/payment/status?orderId={id}`
 
 - Nếu `paymentStatus === 'paid'` và có `jobId` → hiện "Thanh toán thành công!" → sau 1.8s redirect sang `/processing?job=...`
-- Nếu hết 15 phút chưa có → hiện màn "Hết thời gian chờ" → nút "Quay lại chọn dịch vụ"
+- Mỗi lần poll fail → `failCount++`:
+  - `failCount` 1–3: silent (không hiện gì)
+  - `failCount` 4–10: banner "⏳ Đang kết nối lại..." + **countdown tạm dừng**
+  - `failCount` 11–20: banner "🔄 Hệ thống đang cập nhật"
+  - `failCount` > 20: banner "⚠️ Mất kết nối"
+
+### Khi countdown hết 15 phút
+
+1. `checkOnceOnExpiry()` — gọi 1 lần nữa để check trạng thái:
+   - Nếu `paid + jobId` → redirect `/processing` như bình thường
+   - Nếu không paid → hiện 2 nhánh lựa chọn cho khách:
+
+**Nhánh A — "Chưa CK":**
+→ Quay lại `/services`
+
+**Nhánh B — "Tôi đã CK":**
+→ Hiện form điền: số tiền đã CK + nội dung CK (tùy chọn)
+→ POST `/api/payment/claim-transfer` `{ orderId, amount?, transferContent? }`
+→ Server lưu `claimedAt` + `claimInfo` vào Order, gửi `sendCustomerClaimAlert()` vào Telegram admin
+→ Hiện màn xác nhận: "✅ Đã ghi nhận! Admin sẽ xác nhận trong 30 phút. Kiểm tra email sau ít phút."
 
 ## BƯỚC 5 — SePay Webhook (backend, tự động)
 
@@ -140,11 +159,13 @@ transitEndDate  → ngày kết thúc (chỉ Vận Hạn)
 3. Bỏ qua nếu không có `code` trong content chuyển khoản
 4. **Dedup**: kiểm tra `sepayTxnId` đã tồn tại → bỏ qua nếu đã xử lý
 5. Tìm order có `transferCode === code` và `paymentStatus === 'unpaid'`
-6. Kiểm tra số tiền: nếu thiếu → log cảnh báo nhưng vẫn xử lý (policy hiện tại)
+   - Nếu **không tìm thấy order** khớp → `sendUnmatchedPaymentAlert()` (fire-and-forget) → trả 200
+6. Kiểm tra số tiền: nếu thiếu → `sendUnderpaymentAlert()` + vẫn xử lý (policy: chấp nhận, xử lý thủ công sau)
 7. Update order: `paymentStatus = 'paid'`, `paidAt`, `sepayTxnId`, `status = 'processing'`
-8. Tạo Job → chạy `processReport()` fire-and-forget
+8. Gọi `createReportJob(order)` — có full error recovery (atomic lock, token, sweep, email retry)
 9. Update order: lưu `jobId`
-10. **Luôn trả 200** — nếu trả non-200 thì SePay retry Fibonacci lên đến 7 lần trong 5 giờ
+10. `sendPaymentReceivedNotification()` (fire-and-forget) — thông báo vào Telegram group
+11. **Luôn trả 200** — nếu trả non-200 thì SePay retry Fibonacci lên đến 7 lần trong 5 giờ
 
 ## BƯỚC 6 — Trang /processing
 
@@ -158,12 +179,23 @@ transitEndDate  → ngày kết thúc (chỉ Vận Hạn)
 | 18–85% | Vũ trụ đang biên soạn luận giải (AI streaming) |
 | 90% | Tạo file PDF |
 | 95% | Gửi email |
-| 100% | Hoàn thành → redirect /success sau 2s |
+| 100% | Hoàn thành → redirect `/success?jobId=...&service=...&name=...` sau 2s |
 
 - **"Có thể đóng trang"**: job chạy server-side, email tự gửi khi xong dù khách đóng tab
 - Nút **"Đóng & về lịch sử"** → `/profile?tab=history`
 - Nút **"Hủy báo cáo"** → confirm dialog → gọi `DELETE /api/job/{jobId}` → về /services
 - **Frozen detection**: nếu progress không thay đổi >90s → hiện cảnh báo nhẹ "Đang kiểm tra kết nối..."
+
+### failCount banner (kết nối không ổn định)
+
+Mỗi lần poll fail → `failCount++`:
+- `failCount` 1–3: silent
+- `failCount` 4–10: `statusBanner` = "⏳ Đang kết nối lại..."
+- `failCount` ≥ 11: `statusBanner` = "⚠️ Kết nối không ổn định..."
+
+### Force redirect khi progress stuck ở 100%
+
+Nếu `progress >= 100 && status === 'processing'` kéo dài > 5 giây → frontend tự redirect `/success?jobId=...&service=...&name=...` mà không cần chờ status chuyển thành `done`. Đây là safety net phòng trường hợp job update không kịp hoặc race condition.
 
 ## BƯỚC 7 — Pipeline tạo báo cáo (backend)
 
@@ -207,12 +239,21 @@ transitEndDate  → ngày kết thúc (chỉ Vận Hạn)
 
 ## BƯỚC 8 — Trang /success
 
-- Đọc `reportResult` từ sessionStorage
-- Hiển thị:
-  - Tên dịch vụ + xác nhận đã gửi email
-  - Nút **"↓ Tải PDF về máy"** (download trực tiếp từ `/api/pdf/{id}`)
-  - Nếu email chưa gửi xong: hiện "⏳ Đang gửi file..."
-  - Nếu đã gửi: hiện "📬 File đã được gửi đến hộp thư"
+Kiến trúc: `Suspense` wrapper + `SuccessInner` component + `useSearchParams`.
+
+### Fallback chain để lấy dữ liệu báo cáo
+
+1. **sessionStorage `reportResult`** — nếu vừa hoàn thành và vẫn còn trong session
+2. **URL params `?jobId=...&service=...&name=...`** — được truyền từ `/processing` khi redirect
+3. **Fetch `/api/job/{jobId}`** — gọi API để lấy kết quả job từ DB
+4. **Fallback cuối** — nếu không có gì: hiện "📬 Báo cáo đang được gửi. Kiểm tra email hoặc vào Lịch sử đơn hàng"
+
+### Hiển thị
+
+- Tên dịch vụ + xác nhận đã gửi email
+- Nút **"↓ Tải PDF về máy"** (download trực tiếp từ `/api/pdf/{id}`)
+- Nếu email chưa gửi xong: hiện "⏳ Đang gửi file..."
+- Nếu đã gửi: hiện "📬 File đã được gửi đến hộp thư"
 - Hộp hỗ trợ: sau 10 phút chưa nhận → kiểm tra Spam, hoặc liên hệ:
   - Email: support@hatgiongchiemtinh.com
   - Zalo: zalo.me/hatgiongchiemtinh
@@ -271,6 +312,29 @@ transitEndDate  → ngày kết thúc (chỉ Vận Hạn)
 
 ## HỆ THỐNG RECOVERY (khi job thực sự fail)
 
+### `smartRetryOrder()` — Centralized retry logic
+
+**File:** `src/lib/smart-retry.ts`
+
+```
+smartRetryOrder(orderId, triggeredBy: 'watchdog' | 'admin' | 'customer'): SmartRetryResult
+```
+
+Được dùng bởi: watchdog, admin bot (`o_retry_N`), `/api/recover`.
+
+**4 outcomes có thể xảy ra:**
+
+| Outcome | Điều kiện | Hành động |
+|---------|-----------|-----------|
+| `skipped` | Order không ở trạng thái retryable (đang locked, race condition) | Không làm gì |
+| `pdfResent` | PDF đã có trên disk tại `/var/hgct/pdfs/{id}.pdf` | Chỉ resend email, không re-generate |
+| `quotaExceeded` | `retryCount >= 3` và `triggeredBy !== 'admin'` | Gửi email recovery cho khách, gửi admin alert |
+| `retrying` | Đủ điều kiện retry | Atomic lock → `createReportJob()` full pipeline |
+
+**Khi admin trigger:** Luôn reset `retryCount = 0` trước khi gọi → bypass quota limit.
+
+**`resolvePdfPath(pdfUrl)`** — helper tính đường dẫn file từ URL dạng `/api/pdf/{id}?filename=...`.
+
 ### Cơ chế tự động (Recovery lần 1 — khách không biết)
 
 1. Job fail → `processReport` catch error
@@ -279,7 +343,7 @@ transitEndDate  → ngày kết thúc (chỉ Vận Hạn)
 4. **Gửi recovery email** với token + link (chỉ từ lần retry thứ 2 trở đi — lần 1 xử lý tự động)
 5. `/processing` phát hiện job error:
    - Nếu `autoRetry = true` và chưa auto-retry lần này → **silent redirect** sang `/recover?token=...&auto=1`
-   - `/recover` tự submit token → tạo job mới → redirect sang `/processing` mới
+   - `/recover` tự submit token → `smartRetryOrder(id, 'customer')` → tạo job mới → redirect sang `/processing` mới
    - Khách vẫn đang ngồi nhìn màn hình — không thấy lỗi gì
 
 ### Cơ chế thủ công (Recovery lần 2+ — khách thấy)
@@ -322,32 +386,75 @@ Khi auto-retry cũng fail, /processing hiện màn lỗi với:
 | Token không tồn tại | 404 "Không tìm thấy đơn hàng" |
 | Order đã completed | "Báo cáo đã hoàn thành! Kiểm tra email." |
 | Order đang retrying/processing | Redirect về /processing với jobId hiện tại |
-| Đã retry ≥3 lần | 429 "Vui lòng liên hệ hỗ trợ" |
-| Thành công | Tạo job mới → redirect /processing |
+| `smartRetryOrder` → `quotaExceeded` | 429 "Vui lòng liên hệ hỗ trợ" |
+| `smartRetryOrder` → `pdfResent` | Email được gửi lại → redirect /success |
+| `smartRetryOrder` → `retrying` | Tạo job mới → redirect /processing |
 
 **Atomic lock**: dùng `updateMany({ where: { status: 'failed' } })` để tránh 2 request cùng trigger 1 recovery. Nếu thua race condition → trả "đang xử lý".
 
-**Max retries**: 3 lần. Sau đó cần **can thiệp thủ công**.
+**Max retries**: 3 lần. Sau đó cần **can thiệp thủ công** qua admin bot hoặc DB.
+
+### Job Watchdog (tự động kiểm tra định kỳ)
+
+**File:** `src/lib/job-watchdog.ts`
+
+- Khởi động **30 giây** sau khi server boot, chạy lại **mỗi 2 phút**
+- Kiểm tra in-memory jobs theo `lastActivity`:
+
+| Dịch vụ | Ngưỡng stuck |
+|---------|-------------|
+| career / love | 12 phút |
+| synastry / transit | 20 phút |
+
+- Job stuck → gọi `smartRetryOrder(id, 'watchdog')`
+- Kết quả watchdog: gửi `sendAdminAlert()` vào Telegram group cho các case: `quotaExceeded`, `pdfResent`, `retrying`, `emailFail`
+
+**Bổ sung — check email chưa gửi:**
+- Orders `status='completed'`, `emailSent=false`, `completedAt > 5 phút trước` → resend email → alert admin nếu fail lần nữa
+
+### sweepPaidPendingOrders (startup sweep)
+
+**File:** `src/lib/jobs.ts`
+
+Chạy ngay khi server khởi động (sau `sweepStuckJobsOnce`).
+
+- Tìm orders: `paymentStatus='paid'`, `status='pending'`, `jobId=null`
+- Tự động start job cho từng order → gọi `createReportJob(order)`
+- Đây là safety net: phòng trường hợp webhook nhận tiền thành công nhưng server crash trước khi tạo được job
+
+### Claim Transfer flow (khách tự báo đã CK)
+
+**File:** `src/app/api/payment/claim-transfer/route.ts`
+
+1. Khách điền form trên trang `/payment` sau khi countdown hết (chọn "Tôi đã CK")
+2. `POST /api/payment/claim-transfer` `{ orderId, amount?, transferContent? }`
+3. Server: lưu `claimedAt = now`, `claimInfo = { amount, transferContent }` vào Order
+4. `sendCustomerClaimAlert()` → Telegram group với nút "✅ Mark Paid #N"
+5. Admin xem thông báo, xác minh thủ công → bấm nút → `o_pay_N` → webhook admin bot xử lý
 
 ### Khi nào cần can thiệp thủ công
 
-1. `retryCount >= 3` → khách thấy "Vui lòng liên hệ hỗ trợ"
+1. `retryCount >= 3` (non-admin) → khách thấy "Vui lòng liên hệ hỗ trợ" → admin dùng bot bấm `🔄 Retry ngay` (reset retryCount=0, bypass quota)
 2. Order kẹt ở status `retrying` lâu (sweep tự reset về `failed` sau timeout, nhưng nếu sweep chưa chạy)
-3. PDF sinh ra nhưng email không gửi được liên tục → tải về từ server và forward thủ công
-4. Underpayment: SePay webhook log cảnh báo nhưng vẫn xử lý — cần check log định kỳ
+3. PDF sinh ra nhưng email không gửi được liên tục → watchdog alert → admin forward thủ công
+4. Underpayment: webhook gửi `sendUnderpaymentAlert()` — admin confirm thủ công
+5. Claim transfer: khách báo đã CK nhưng webhook chưa nhận → admin verify + bấm Mark Paid
 
-**Cách can thiệp thủ công:**
-1. Lấy `recoveryToken` từ DB (`orders` table)
-2. Reset `retryCount = 0`, `status = 'failed'`
-3. Hướng dẫn khách vào `/recover?token=...` hoặc tự gọi API để trigger lại
+**Cách can thiệp thủ công qua admin bot:**
+- Admin bot → Orders → Đơn lỗi → `[🔄 Retry ngay #N]` (reset retryCount=0, dùng smartRetryOrder với 'admin')
+- Hoặc trực tiếp: `/pay <orderId>` để mark paid và tạo báo cáo
 
 ---
 
 ## ĐIỂM LƯU Ý VẬN HÀNH
 
-- **Giá dịch vụ**: đọc real-time từ DB → thay đổi qua Telegram bot `/setprice` không cần rebuild
+- **Giá dịch vụ**: đọc real-time từ DB (`config` table, keys `price_career/love/synastry/transit`) → thay đổi qua Telegram bot `/setprice` không cần rebuild
 - **Email spam**: hay vào Spam/Junk với Gmail — hướng dẫn khách kiểm tra ngay từ /success
 - **Vận Hạn chậm nhất**: ETA thực tế 8–15 phút (AI output ~22.000–28.000 chars)
 - **PDF không mất**: lưu tại `/var/hgct/pdfs/` persistent, có thể tải lại qua `/api/pdf/{id}` bất kỳ lúc nào
-- **Free user timeout 15 phút**: nếu khách không chuyển khoản trong 15 phút → phiên hết hạn, cần vào /services lại từ đầu. Order vẫn còn trong DB với status `pending` — không tự xóa.
+- **Free user timeout 15 phút**: nếu khách không chuyển khoản trong 15 phút → countdown hết → 2 nhánh (Chưa CK / Đã CK). Order vẫn còn trong DB với status `pending` — không tự xóa.
 - **SePay retry**: nếu webhook nhận lỗi, SePay tự retry theo Fibonacci (tối đa 7 lần / 5 giờ). Webhook luôn trả 200 để tránh bị retry vô ích.
+- **sweepPaidPendingOrders**: khi server restart, tự tìm orders `paid+pending+jobId=null` và start job — đề phòng server crash giữa chừng sau khi nhận tiền.
+- **Job Watchdog**: chạy ngầm mỗi 2 phút, tự phát hiện job stuck (>12p career/love, >20p synastry/transit) và retry. Admin nhận alert qua Telegram.
+- **Claim transfer**: khách có thể tự báo đã CK sau khi countdown hết → admin nhận alert + xác nhận thủ công trong 30 phút.
+- **OR fee delays**: [8s/12s/18s] — front-loaded để lấy OR fee sớm hơn khi report xong nhanh.
