@@ -30,7 +30,8 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `deploy demo` | Full deploy từ GitHub (sau khi đã commit) |
 | `check requirements` | Kiểm tra và setup mọi thứ còn thiếu theo `NEW_PROJECT_SETUP.md` |
 | `update workflow` | Review + đề xuất cải tiến các file trong `universal_rules/` |
-| `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) + source files project-specific (xem CLAUDE.md). **Sau khi đọc xong → bắt buộc output structured summary** theo format định nghĩa trong mục "read context — Output Format" bên dưới. |
+| `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) + source files project-specific (xem CLAUDE.md của từng project). Hiểu project xong → báo ngắn "Đã hiểu, sẵn sàng nhận lệnh." → **DỪNG. Không output gì thêm.** |
+| `report context` | Giống `read context` nhưng sau khi đọc xong → **output full structured summary** theo format định nghĩa trong mục **"report context — Output Format"** bên dưới. |
 
 ---
 
@@ -109,9 +110,9 @@ Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy 
 
 ---
 
-## read context — Output Format
+## report context — Output Format
 
-Sau khi đọc xong tất cả files, **bắt buộc output** một summary có cấu trúc như sau. Không được chỉ im lặng sau khi đọc — output này là mục đích chính của lệnh `read context`.
+Sau khi đọc xong tất cả files, **bắt buộc output** một summary có cấu trúc như sau. Chỉ dùng khi lệnh là `report context` — nếu lệnh là `read context` thì **không output gì**, chỉ báo "Đã hiểu, sẵn sàng nhận lệnh."
 
 ### 1. Tech Stack
 Liệt kê ngắn: framework, DB, auth, AI/external services, deploy, port/domain.

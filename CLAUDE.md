@@ -53,7 +53,8 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 - **"branch hiện tại là gì"** → `git branch --show-current`
 - **"check requirements"** → đọc `docs/universal_rules/NEW_PROJECT_SETUP.md`, kiểm tra + tạo files còn thiếu
 - **"update workflow"** → review + đề xuất cải tiến các file trong `docs/universal_rules/`
-- **"read context"** → đọc toàn bộ context: `CLAUDE.md` + tất cả files trong `docs/` + `docs/universal_rules/`. Sau đó tuỳ task đọc thêm: `prisma/schema.prisma` (models), `src/app/api/astrology/report/route.ts` (report flow), `src/lib/jobs.ts` (job system), `src/lib/astrology/calculations.ts` (chart engine). **Sau khi đọc xong → output structured summary** theo format trong `docs/universal_rules/UNIVERSAL_WORKFLOW.md` mục "read context — Output Format".
+- **"read context"** → đọc để hiểu project: `CLAUDE.md` + tất cả files trong `docs/` + `docs/universal_rules/`. Tuỳ task đọc thêm: `prisma/schema.prisma` (models), `src/app/api/astrology/report/route.ts` (report flow), `src/lib/jobs.ts` (job system), `src/lib/astrology/calculations.ts` (chart engine). **Sau khi đọc xong → báo ngắn "Đã hiểu, sẵn sàng nhận lệnh." → DỪNG. Không output gì thêm.**
+- **"report context"** → giống `read context` nhưng sau khi đọc xong → output full structured summary theo format trong `docs/universal_rules/UNIVERSAL_WORKFLOW.md` mục "report context — Output Format".
 
 **Universal-workflow repo (cho Rule 7):**
 - Repo: `git@github.com:hentaiikidd/universal-workflow.git`
