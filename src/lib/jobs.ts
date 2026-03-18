@@ -3,6 +3,7 @@
 
 import prisma from './db'
 import { sendRecoveryEmail } from './email'
+import { sendAdminAlert } from './notify'
 
 export interface JobResult {
   pdfUrl?: string
@@ -231,7 +232,10 @@ async function sweepStuckJobsOnce() {
       console.log(`[jobs] Sweep: order ${order.id} → token rotated, autoRetry=${autoRetry}, retryCount=${retryCount}`)
     }
 
-    if (fixedCount > 0) console.log(`[jobs] Startup sweep: fixed ${fixedCount} orphaned job(s)`)
+    if (fixedCount > 0) {
+      console.log(`[jobs] Startup sweep: fixed ${fixedCount} orphaned job(s)`)
+      sendAdminAlert(`🔄 <b>Startup sweep: recovered ${fixedCount} đơn bị gián đoạn</b>\nCác khách hàng sẽ nhận email recovery để thử lại.`).catch(() => {})
+    }
 
     // Fix D: Also clean up orders stuck in 'retrying' state (from crashed /api/recover calls)
     await sweepStuckRetryingOrders()

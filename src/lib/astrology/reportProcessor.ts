@@ -11,7 +11,7 @@ import { generatePdf } from '@/lib/pdf/generator'
 import { sendReportEmail, makePdfFilename, sendRecoveryEmail } from '@/lib/email'
 import { createJob, updateJob, isJobCancelled, generateRecoveryToken, STUCK_ERROR } from '@/lib/jobs'
 import prisma from '@/lib/db'
-import { sendOrderNotification } from '@/lib/notify'
+import { sendOrderNotification, sendOrderFailedAlert } from '@/lib/notify'
 import fs from 'fs'
 import path from 'path'
 
@@ -360,6 +360,18 @@ export function createReportJob(opts: CreateReportJobOptions): string {
 
   processReport(jobId, body, orderId, amount).catch(async (err) => {
     console.error(`[JOB ${jobId}] Error:`, err)
+
+    // Alert admin via Telegram
+    if (orderId) {
+      const iDataForAlert = (body.inputData as Record<string, unknown>) || {}
+      sendOrderFailedAlert({
+        orderId,
+        service,
+        name: (iDataForAlert.name as string) || '',
+        email: (body.email as string) || '',
+        error: String(err).slice(0, 120),
+      }).catch(() => {})
+    }
 
     let recoveryToken: string | undefined
     if (orderId) {

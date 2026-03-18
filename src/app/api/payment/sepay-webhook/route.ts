@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import prisma from '@/lib/db'
 import { createJob } from '@/lib/jobs'
 import { processReport } from '@/lib/astrology/reportProcessor'
+import { sendUnderpaymentAlert } from '@/lib/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,12 +69,18 @@ export async function POST(request: Request) {
       return OK()
     }
 
-    // 7. Verify amount (allow overpayment, reject underpayment)
+    // 7. Verify amount (allow overpayment, alert on underpayment)
     if (order.amount && transferAmount < order.amount) {
       console.warn(
         `[sepay-webhook] Underpayment: got ${transferAmount}, expected ${order.amount} for order=${order.id}`,
       )
-      // Policy: still mark paid (amount close enough) — log for manual review
+      sendUnderpaymentAlert({
+        orderId: order.id,
+        transferCode: code,
+        expected: order.amount,
+        received: transferAmount,
+      }).catch(() => {})
+      // Policy: still mark paid and process — admin can review via Telegram alert
     }
 
     // 8. Mark order as paid

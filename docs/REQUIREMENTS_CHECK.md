@@ -106,12 +106,16 @@ BANK_ACCOUNT_NUMBER=             # Số tài khoản ngân hàng đã liên kế
 BANK_ACCOUNT_NAME=               # Tên chủ tài khoản (viết hoa, đúng như ngân hàng)
 BANK_NAME=                       # Tên ngân hàng đúng format SePay (vd: TPBank, MBBank, Vietcombank, ACB...)
 
-# Telegram Notifications (thông báo đơn hàng)
-OPENROUTER_MANAGEMENT_KEY=       # Management Key từ openrouter.ai/settings/keys (khác với OPENROUTER_API_KEY thông thường)
+# OpenRouter Management (query cost + balance)
+OPENROUTER_MANAGEMENT_KEY=       # Management Key từ openrouter.ai/settings/keys (KHÁC với OPENROUTER_API_KEY)
 
-# Admin Bot (@hatgiongchiemtinhbot) — order notifications + admin commands
-TELEGRAM_ADMIN_BOT_TOKEN=            # Token của @hatgiongchiemtinhbot
-TELEGRAM_ADMIN_WEBHOOK_SECRET=       # Random hex: node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
+# Telegram — ĐỌC KỸ: 2 bot KHÁC NHAU, không được nhầm lẫn
+# Bot 1: @nguyclaudebot — gửi notifications vào group "Nhật Ký Bóc Lột"
+TELEGRAM_BOT_TOKEN=              # Token của @nguyclaudebot (notify bot)
+# Bot 2: @hatgiongchiemtinhbot — admin bot nhận lệnh qua webhook
+TELEGRAM_ADMIN_BOT_TOKEN=        # Token của @hatgiongchiemtinhbot (admin bot)
+TELEGRAM_ADMIN_WEBHOOK_SECRET=   # Random hex: node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
+# Chi tiết setup cả 2 bot: xem docs/telegram_bot_spec.md
 ```
 
 Sau khi tạo `.env.local`, copy vào standalone:
