@@ -201,6 +201,7 @@ src/
 - [x] OR fee delays [8s/12s/18s] front-loaded (thay [15s/10s/10s]); fix `cost != null` edge case (không bỏ qua cost=0)
 - [x] Admin Bot pending/failed: hiển thị giờ tạo + thời gian trôi qua — `HH:MM (Xp trước)` / `HH:MM (Xh trước)`
 - [x] OrderCheck 3-group format — ❌ LỖI (paid+not completed) / ❓ NGHI VẤN (unpaid+claimedAt) / 💤 CHƯA THANH TOÁN (summary+retarget); `sendRetargetEmail()` gửi nhắc CK sau 12h (1 lần/đơn, marks `retargetEmailSentAt`); `o_pending_detail` callback → `showPendingOrders()`
+- [x] Retarget email pause — `RETARGET_EMAIL_ENABLED = false` trong `src/lib/orderCheck.ts`; khi `false`: skip gửi email nhưng **vẫn mark `retargetEmailSentAt`** vào DB (bot biết không báo lại); bot display: ✉️ → 🔖, "Đã retarget" → "Đã đánh dấu"; **bật lại**: đổi flag → `true` rồi deploy
 - [x] GuestSynastryModal — labels "── THÔNG TIN CỦA BẠN ──" / "── THÔNG TIN CỦA ĐỐI PHƯƠNG ──"; `initialDataA`/`initialDataB` props; `resetWith()` trong `usePersonState()`; `?edit=1` flow: sessionStorage persist + re-populate khi quay lại từ checkout
 - [x] Services cards — `h-full` same height; tag inline với tên (flex row); career desc merge 2 dòng; `minHeight: '2.2rem'` căn chỉnh description Y cùng vị trí
 - [x] Checkout — profile review block (tên + SN + nơi sinh, synastry: 2 người); back button "← Sửa thông tin" styled (border gold, underline, `#8a8399`); real-time email validation (`emailTouched`, `isValidEmail` regex, warning `#c8410a`, disable submit khi format sai)

@@ -10,6 +10,8 @@ const GROUP_CHAT_ID = '-1003849385640'
 const GROUP_THREAD_ID = 161
 const PENDING_OVERDUE_MINUTES = 15
 const RETARGET_HOURS = 12
+// Set to true to re-enable sending retarget emails to customers
+const RETARGET_EMAIL_ENABLED = false
 
 function fmtDate(d: Date) {
   return d.toLocaleString('vi-VN', {
@@ -79,7 +81,7 @@ export async function runOrderCheck(): Promise<void> {
     getOpenRouterBalance(),
   ])
 
-  // Run retarget emails for qualifying orders
+  // Mark orders that have passed the retarget threshold (email disabled via RETARGET_EMAIL_ENABLED)
   const retargetTargets = pendingUnpaid.filter(o =>
     !o.retargetEmailSentAt && o.createdAt < retargetThreshold &&
     o.transferCode && o.amount
@@ -87,22 +89,26 @@ export async function runOrderCheck(): Promise<void> {
   let retargetSentCount = 0
   for (const o of retargetTargets) {
     try {
-      const name = ((o.profileData as Record<string, unknown>)?.name as string) || ''
-      await sendRetargetEmail({
-        to: o.email,
-        service: o.service,
-        name,
-        transferCode: o.transferCode!,
-        amount: o.amount!,
-      })
+      if (RETARGET_EMAIL_ENABLED) {
+        const name = ((o.profileData as Record<string, unknown>)?.name as string) || ''
+        await sendRetargetEmail({
+          to: o.email,
+          service: o.service,
+          name,
+          transferCode: o.transferCode!,
+          amount: o.amount!,
+        })
+        console.log(`[ORDERCHECK] Retarget email sent: order ${o.id} (${o.email})`)
+      } else {
+        console.log(`[ORDERCHECK] Retarget email disabled — marking order ${o.id} as retargeted without sending`)
+      }
       await prisma.order.updateMany({
         where: { id: o.id },
         data: { retargetEmailSentAt: now },
       })
       retargetSentCount++
-      console.log(`[ORDERCHECK] Retarget email sent: order ${o.id} (${o.email})`)
     } catch (err) {
-      console.error(`[ORDERCHECK] Retarget email failed for order ${o.id}:`, err)
+      console.error(`[ORDERCHECK] Retarget failed for order ${o.id}:`, err)
     }
   }
 
@@ -154,9 +160,9 @@ export async function runOrderCheck(): Promise<void> {
 
   // 💤 CHƯA THANH TOÁN group (summary + inline list)
   if (pendingUnpaid.length > 0) {
-    const alreadySent = pendingUnpaid.filter(o => o.retargetEmailSentAt).length
-    const notSent = pendingUnpaid.length - alreadySent - retargetSentCount
-    const retargetNote = retargetSentCount > 0 ? ` · 📧 Vừa gửi retarget: ${retargetSentCount}` : ''
+    const alreadyMarked = pendingUnpaid.filter(o => o.retargetEmailSentAt).length
+    const notMarked = pendingUnpaid.length - alreadyMarked - retargetSentCount
+    const retargetNote = retargetSentCount > 0 ? ` · 🔖 Vừa đánh dấu: ${retargetSentCount}` : ''
     lines.push(`\n💤 <b>CHƯA THANH TOÁN (${pendingUnpaid.length} đơn):</b>`)
     // Inline list (max 5)
     const shown = pendingUnpaid.slice(0, 5)
@@ -164,11 +170,11 @@ export async function runOrderCheck(): Promise<void> {
       const svc = SERVICE_LABELS[o.service] ?? o.service
       const amt = o.amount ? `${o.amount.toLocaleString('vi-VN')}đ` : '?đ'
       const ago = timeAgo(new Date(o.createdAt))
-      const retargetMark = o.retargetEmailSentAt ? ' ✉️' : ''
+      const retargetMark = o.retargetEmailSentAt ? ' 🔖' : ''
       lines.push(`• #${o.id} — ${svc} — ${o.email} — ${amt} — ${ago} trước${retargetMark}`)
     }
     if (pendingUnpaid.length > 5) lines.push(`... và ${pendingUnpaid.length - 5} đơn nữa`)
-    lines.push(`Đã retarget: ${alreadySent + retargetSentCount} · Chưa gửi: ${Math.max(0, notSent)}${retargetNote}`)
+    lines.push(`Đã đánh dấu: ${alreadyMarked + retargetSentCount} · Chưa xử lý: ${Math.max(0, notMarked)}${retargetNote}`)
     keyboard.push([
       { text: `📋 Chi tiết ${pendingUnpaid.length} đơn →`, callback_data: 'o_pending_detail' },
     ])
