@@ -43,6 +43,20 @@ export const metadata: Metadata = {
   description: 'Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Cặp Đôi và Vận Hạn. Báo cáo PDF chi tiết gửi qua email trong vài phút.',
   icons: { icon: '/favicon.ico' },
   metadataBase: new URL('https://hatgiongchiemtinh.com'),
+  openGraph: {
+    title: 'Hạt Giống Chiêm Tinh — Bản đồ sao của bạn nói gì?',
+    description: 'Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Cặp Đôi và Vận Hạn.',
+    url: 'https://hatgiongchiemtinh.com',
+    siteName: 'Hạt Giống Chiêm Tinh',
+    type: 'website',
+    images: [{ url: 'https://hatgiongchiemtinh.com/api/og', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Hạt Giống Chiêm Tinh — Bản đồ sao của bạn nói gì?',
+    description: 'Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Cặp Đôi và Vận Hạn.',
+    images: ['https://hatgiongchiemtinh.com/api/og'],
+  },
 }
 
 // Inline script chạy synchronously khi browser parse HTML, trước React hydration.
