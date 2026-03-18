@@ -594,6 +594,7 @@ async function forceRecoverActiveOrders() {
 
 export async function handleCheckOrders(ctx: Ctx) {
   if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '🔍 Đang kiểm tra...')
+  else await tgSend(ctx.chatId, '🔍 Đang check đơn...', { threadId: ctx.threadId })
   try {
     await runOrderCheck()
     // Notify admin in their own chat that check was triggered
@@ -608,12 +609,22 @@ export async function handleCheckOrders(ctx: Ctx) {
 }
 
 export async function handleSetCheckInterval(ctx: Ctx) {
-  if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId)
   const interval = await getCheckInterval()
-  await tgSendForceReply(
-    ctx.chatId,
-    `<tg-spoiler>CHECKINTERVAL</tg-spoiler>\n⏱ Interval check đơn hiện tại: <b>${interval} phút</b>\n\nNhập số phút mới:`,
-    { threadId: ctx.threadId, placeholder: 'VD: 30' },
+  return respond(
+    ctx,
+    `⏱ <b>Interval check đơn</b>\nHiện tại: <b>${interval} phút</b>\n\nChọn nhanh hoặc gõ <code>/setcheckinterval &lt;số&gt;</code>:`,
+    [
+      [
+        { text: '5p', callback_data: 's_interval_5' },
+        { text: '10p', callback_data: 's_interval_10' },
+        { text: '15p', callback_data: 's_interval_15' },
+      ],
+      [
+        { text: '30p', callback_data: 's_interval_30' },
+        { text: '60p', callback_data: 's_interval_60' },
+      ],
+      [{ text: '↩️ Quay lại', callback_data: 'm_system' }],
+    ],
   )
 }
 
@@ -736,6 +747,17 @@ export async function handleCallback(
   if (cbData === 's_check') return handleCheckOrders(ctx)
   if (cbData === 's_set_interval') return handleSetCheckInterval(ctx)
 
+  const intervalPresetMatch = cbData.match(/^s_interval_(\d+)$/)
+  if (intervalPresetMatch) {
+    const minutes = parseInt(intervalPresetMatch[1], 10)
+    await setCheckInterval(minutes)
+    return respond(
+      ctx,
+      `✅ <b>Interval check đơn: ${minutes} phút</b>`,
+      [[{ text: '↩️ Quay lại System', callback_data: 'm_system' }]],
+    )
+  }
+
   // Unknown — dismiss spinner silently
   await tgAnswer(cbQueryId)
 }
@@ -749,45 +771,42 @@ export async function handleCommand(
   const ctx: Ctx = { chatId, threadId }
 
   // Handle ForceReply responses (admin replied to a bot prompt)
+  // Note: skip is_bot check — only ADMIN_USER_ID reaches here, safe to match by text marker alone
   if (replyToMessage) {
-    const replyFrom = replyToMessage.from as Record<string, unknown> | undefined
-    if (replyFrom?.is_bot) {
-      const replyText = (replyToMessage.text as string | undefined) ?? ''
-      const custMatch = replyText.match(/^CUSTPRICE:([clsta])/)
-      if (custMatch) {
-        const code = custMatch[1]
-        const priceNum = parseInt(text.trim(), 10)
-        if (isNaN(priceNum) || priceNum <= 0) {
-          const svc = CODE_SVC[code]
-          const label = svc === 'all' ? 'tất cả dịch vụ' : (SERVICE_LABELS[svc] ?? svc)
-          await tgSend(chatId, '❌ Chỉ nhập số nguyên dương. VD: 8000', { threadId })
-          await tgSendForceReply(
-            chatId,
-            `<tg-spoiler>CUSTPRICE:${code}</tg-spoiler>\n💰 Nhập giá mới cho <b>${label}</b> (chỉ gõ số):`,
-            { threadId, placeholder: 'VD: 8000' },
-          )
-          return
-        }
-        return applyPrice(ctx, code, priceNum)
+    const replyText = (replyToMessage.text as string | undefined) ?? ''
+    const custMatch = replyText.match(/CUSTPRICE:([clsta])/)
+    if (custMatch) {
+      const code = custMatch[1]
+      const priceNum = parseInt(text.trim(), 10)
+      if (isNaN(priceNum) || priceNum <= 0) {
+        const svc = CODE_SVC[code]
+        const label = svc === 'all' ? 'tất cả dịch vụ' : (SERVICE_LABELS[svc] ?? svc)
+        await tgSend(chatId, '❌ Chỉ nhập số nguyên dương. VD: 8000', { threadId })
+        await tgSendForceReply(
+          chatId,
+          `<tg-spoiler>CUSTPRICE:${code}</tg-spoiler>\n💰 Nhập giá mới cho <b>${label}</b> (chỉ gõ số):`,
+          { threadId, placeholder: 'VD: 8000' },
+        )
+        return
       }
+      return applyPrice(ctx, code, priceNum)
+    }
 
-      const intervalMatch = replyText.match(/^CHECKINTERVAL/)
-      if (intervalMatch) {
-        const minutes = parseInt(text.trim(), 10)
-        if (isNaN(minutes) || minutes < 1) {
-          await tgSend(chatId, '❌ Nhập số phút nguyên dương (tối thiểu 1). VD: 30', { threadId })
-          await tgSendForceReply(chatId, '<tg-spoiler>CHECKINTERVAL</tg-spoiler>\n⏱ Nhập số phút mới:', {
-            threadId, placeholder: 'VD: 30',
-          })
-          return
-        }
-        await setCheckInterval(minutes)
-        await tgSend(chatId, `✅ Đã đặt interval check đơn = <b>${minutes} phút</b>`, {
-          threadId,
-          keyboard: [[{ text: '↩️ Quay lại', callback_data: 'm_system' }]],
+    if (replyText.includes('CHECKINTERVAL')) {
+      const minutes = parseInt(text.trim(), 10)
+      if (isNaN(minutes) || minutes < 1) {
+        await tgSend(chatId, '❌ Nhập số phút nguyên dương (tối thiểu 1). VD: 30', { threadId })
+        await tgSendForceReply(chatId, '<tg-spoiler>CHECKINTERVAL</tg-spoiler>\n⏱ Nhập số phút mới:', {
+          threadId, placeholder: 'VD: 30',
         })
         return
       }
+      await setCheckInterval(minutes)
+      await tgSend(chatId, `✅ Interval check đơn: <b>${minutes} phút</b>`, {
+        threadId,
+        keyboard: [[{ text: '↩️ Quay lại System', callback_data: 'm_system' }]],
+      })
+      return
     }
   }
 
@@ -827,14 +846,14 @@ export async function handleCommand(
   }
 
   // /check — manual order check
-  if (text.match(/^\/check$/i)) {
+  if (text.match(/^\/check(@\w+)?$/i)) {
     return handleCheckOrders(ctx)
   }
 
   // /setcheckinterval <minutes>
-  const setIntervalMatch = text.match(/^\/setcheckinterval\s+(\d+)$/i)
+  const setIntervalMatch = text.match(/^\/setcheckinterval(@\w+)?\s+(\d+)$/i)
   if (setIntervalMatch) {
-    const minutes = parseInt(setIntervalMatch[1], 10)
+    const minutes = parseInt(setIntervalMatch[2], 10)
     if (isNaN(minutes) || minutes < 1) {
       await tgSend(chatId, '❌ Nhập số phút nguyên dương. VD: /setcheckinterval 30', { threadId })
       return
