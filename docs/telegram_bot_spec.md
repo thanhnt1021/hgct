@@ -194,33 +194,44 @@ Nếu admin ignore ForceReply, gõ lệnh khác → xử lý bình thường, kh
 - `order_check_interval` — số phút giữa các lần check (mặc định: 15)
 - `order_check_last_run` — ISO timestamp lần chạy gần nhất
 
-**Kết quả gửi vào group** `-1003849385640` thread `161` bằng `@hatgiongchiemtinhbot`:
+**Kết quả gửi vào group** `-1003849385640` thread `161` bằng `@hatgiongchiemtinhbot` — **3 nhóm:**
+
 ```
 🔎 Kiểm tra đơn — 18/03/2026 01:30
 
-❌ Đơn failed (2):
-• #18 — Vận Hạn — test@test.com — 15:30 (2h trước) — Retry: 3/3
-• #22 — Hướng Nghiệp — khach@gmail.com — 09:15 (16h trước) — Retry: 2/3
+❌ LỖI — đã CK nhưng chưa xong (2):
+• #18 Vận Hạn — test@test.com — failed — 15:30 (2h trước)
+• #22 Hướng Nghiệp — khach@gmail.com — failed — 09:15 (16h trước)
 
-⏳ Đơn pending quá hạn (3):
-• #27 — Cặp Đôi — khac@gmail.com — 01:10 (20p trước) — 3.333đ
-• #24 — Hướng Nghiệp — x@x.com — 01:05 (25p trước) — 5.000đ
+❓ NGHI VẤN — khách đã báo CK (1):
+• #31 Cặp Đôi — y@gmail.com — 99.000đ — báo lúc 01:15
+
+💤 CHƯA THANH TOÁN (3 đơn):
+• #27 — Cặp Đôi — khac@gmail.com — 3.333đ — 20p trước
+• #24 — Hướng Nghiệp — x@x.com — 5.000đ — 25p trước
+• #21 — Tình Duyên — z@x.com — 3.333đ — 1h trước ✉️
+Đã retarget: 1 · Chưa gửi: 2
 
 💳 OR Balance: $12.45
 
 [ 🔄 #18 ] [ 📧 #18 ] [ 🗑 #18 ]
-[ ✅ Paid #27 ] [ 🗑 Hủy #27 ]
-...
+[ ✅ Paid #31 ] [ 🗑 Hủy #31 ]
+[ 📋 Chi tiết 3 đơn → ]
 ```
 
-Nếu không có lỗi:
+Nếu không có vấn đề:
 ```
 ✅ Kiểm tra đơn — 18/03/2026 01:30
-Không có đơn lỗi hoặc pending quá hạn.
+Không có vấn đề gì.
 💳 OR Balance: $12.45
 ```
 
-**"Pending quá hạn"** = `status='pending'` + `paymentStatus='unpaid'` + `createdAt < now - 15 phút` (hết window thanh toán).
+**Định nghĩa từng nhóm:**
+- **❌ LỖI**: `paymentStatus='paid'` + `status NOT IN (completed, processing, retrying, cancelled)` — đã thu tiền nhưng chưa hoàn thành và không đang xử lý
+- **❓ NGHI VẤN**: `paymentStatus='unpaid'` + `claimedAt IS NOT NULL` + `status='pending'` — chưa nhận tiền nhưng khách tự báo đã CK
+- **💤 CHƯA THANH TOÁN**: `paymentStatus='unpaid'` + `claimedAt IS NULL` + `status='pending'` + `createdAt < now - 15p` — quá window thanh toán, chưa hành động gì; `✉️` = đã gửi retarget email
+
+**Retarget email:** Đơn chưa CK sau 12h → `sendRetargetEmail()` tự động gửi nhắc, đánh dấu `retargetEmailSentAt`. Chỉ gửi 1 lần/đơn.
 
 **File:** `src/lib/orderCheck.ts` — export `runOrderCheck()`, `getCheckInterval()`, `setCheckInterval()`
 

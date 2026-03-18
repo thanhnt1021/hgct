@@ -241,3 +241,214 @@ curl -s -X POST https://{domain}/api/payment/sepay-webhook \
 - [ ] Setup SePay dashboard: link bank → cấu hình mã (prefix khớp code) → tạo webhook
 - [ ] Restart production sau deploy để webhook endpoint có hiệu lực
 - [ ] Test curl webhook trước khi live
+
+---
+
+## 9. Resilient Order System — Chống mất đơn khi server crash
+
+> Áp dụng khi: SePay webhook kích hoạt async job (AI, PDF, email...) — server có thể crash bất kỳ lúc nào giữa "nhận tiền" và "hoàn thành dịch vụ".
+
+### Vấn đề cần giải quyết
+
+```
+Khách CK → SePay webhook nhận → server crash → job biến mất → khách mất tiền, không nhận được dịch vụ
+```
+
+3 tình huống crash phổ biến:
+1. Server restart (deploy) sau khi nhận tiền nhưng trước khi job xong
+2. Job stuck (AI timeout, OOM, network fail) — không có progress, không có error
+3. Webhook nhận tiền thành công nhưng chưa tạo được job (crash giữa chừng)
+
+---
+
+### Pattern 1 — Startup Sweep: tìm paid+pending+no-job
+
+Chạy **ngay khi server boot**. Tìm orders đã nhận tiền nhưng chưa có job → start job ngay:
+
+```typescript
+// src/lib/jobs.ts (hoặc instrumentation.ts)
+async function sweepPaidPendingOrders() {
+  const orders = await db.order.findMany({
+    where: { paymentStatus: 'paid', status: 'pending', jobId: null },
+  })
+  for (const order of orders) {
+    await createReportJob(order)  // hoặc hàm trigger service tương đương
+    console.log(`[SWEEP] Started job for paid+pending order ${order.id}`)
+  }
+}
+```
+
+_Lý do: SePay webhook có thể đã nhận tiền và update `paymentStatus='paid'` trước khi server crash — nhưng job chưa kịp tạo. Restart lại không có gì chạy nếu không có sweep này._
+
+---
+
+### Pattern 2 — Job Watchdog: phát hiện job stuck
+
+Chạy mỗi 2–5 phút. Tìm job đang processing nhưng không có activity trong một khoảng thời gian → retry:
+
+```typescript
+// src/lib/job-watchdog.ts
+const STUCK_THRESHOLDS: Record<string, number> = {
+  fast_service: 12 * 60 * 1000,   // 12 phút
+  slow_service: 20 * 60 * 1000,   // 20 phút (AI output dài hơn)
+}
+
+async function runWatchdog() {
+  const now = Date.now()
+  // Lấy jobs đang processing + in-memory lastActivity
+  for (const [jobId, job] of activeJobs.entries()) {
+    const threshold = STUCK_THRESHOLDS[job.service] ?? 15 * 60 * 1000
+    if (job.status === 'processing' && now - job.lastActivity > threshold) {
+      const order = await db.order.findFirst({ where: { jobId } })
+      if (order) await smartRetryOrder(order.id, 'watchdog')
+    }
+  }
+}
+
+// Khởi động: delay 30s sau boot (chờ server ổn định), sau đó mỗi 2 phút
+setTimeout(() => {
+  runWatchdog()
+  setInterval(runWatchdog, 2 * 60 * 1000)
+}, 30_000)
+```
+
+**Per-service threshold:** Service chạy lâu hơn (AI output dài) cần threshold cao hơn — tránh false positive retry khi job đang chạy bình thường.
+
+---
+
+### Pattern 3 — `smartRetryOrder()`: Centralized retry logic
+
+Thay vì mỗi nơi (sweep, watchdog, admin, customer) tự handle retry riêng → gom vào 1 hàm:
+
+```typescript
+// src/lib/smart-retry.ts
+type TriggeredBy = 'sweep' | 'watchdog' | 'admin' | 'customer'
+type RetryResult = 'skipped' | 'pdfResent' | 'quotaExceeded' | 'retrying'
+
+async function smartRetryOrder(orderId: number, triggeredBy: TriggeredBy): Promise<RetryResult> {
+  // 0. Admin bypass: reset retryCount để không bị quota block
+  if (triggeredBy === 'admin') {
+    await db.order.update({ where: { id: orderId }, data: { retryCount: 0 } })
+  }
+
+  // 1. Atomic lock: chỉ lấy lock nếu status là failed/processing (tránh race condition)
+  const locked = await db.order.updateMany({
+    where: { id: orderId, status: { in: ['failed', 'processing'] } },
+    data: { status: 'retrying' },
+  })
+  if (locked.count === 0) return 'skipped'  // Ai đó đã lấy lock trước
+
+  const order = await db.order.findUnique({ where: { id: orderId } })!
+
+  // 2. Check PDF đã tồn tại — nếu có chỉ cần resend email (tiết kiệm API cost)
+  const pdfPath = resolvePdfPath(order.pdfUrl)  // /var/[project]/pdfs/{id}.pdf
+  if (pdfPath && fs.existsSync(pdfPath)) {
+    await resendEmailOnly(order, pdfPath)
+    await db.order.update({ where: { id: orderId }, data: { status: 'completed' } })
+    return 'pdfResent'
+  }
+
+  // 3. Quota check (bỏ qua nếu admin)
+  if (triggeredBy !== 'admin' && order.retryCount >= 3) {
+    await db.order.update({ where: { id: orderId }, data: { status: 'failed' } })
+    await sendRecoveryEmail(order)
+    await notifyAdmin(`Đơn #${orderId} hết quota retry`)
+    return 'quotaExceeded'
+  }
+
+  // 4. Full retry
+  await db.order.update({
+    where: { id: orderId },
+    data: { retryCount: { increment: 1 } },
+  })
+  await createJob(order)  // fire-and-forget
+  return 'retrying'
+}
+```
+
+**4 outcomes:**
+
+| Outcome | Khi nào | Hành động |
+|---------|---------|-----------|
+| `skipped` | Race condition — ai đó đã lấy lock | Không làm gì |
+| `pdfResent` | PDF đã có trên disk | Chỉ resend email, không re-generate |
+| `quotaExceeded` | retryCount ≥ 3 (non-admin) | Gửi email recovery, alert admin |
+| `retrying` | Đủ điều kiện | Tạo job mới, full pipeline |
+
+**Dùng ở mọi điểm trigger:** sweep, watchdog, admin bot retry button, customer `/recover` page.
+
+---
+
+### Pattern 4 — Claim Transfer: khách tự báo đã CK
+
+Khi countdown hết mà SePay chưa nhận được webhook (webhook miss, CK sai nội dung, network lag):
+
+```typescript
+// POST /api/payment/claim-transfer
+// { orderId, amount?, transferContent? }
+
+// 1. Verify order: pending + unpaid + chưa claim
+const order = await db.order.findFirst({
+  where: { id: orderId, paymentStatus: 'unpaid', status: 'pending', claimedAt: null }
+})
+if (!order) return error('Không tìm thấy đơn hoặc đã xử lý')
+
+// 2. Lưu claim — KHÔNG tự mark paid, chờ admin verify
+await db.order.update({
+  where: { id: orderId },
+  data: { claimedAt: new Date(), claimInfo: { amount, transferContent } }
+})
+
+// 3. Alert admin với nút [✅ Mark Paid]
+await sendTelegramAlert(`🖐️ Khách báo đã CK! Đơn #${orderId} | ${order.email}
+💰 Báo: ${amount}đ | 📝 ${transferContent}`, {
+  keyboard: [[{ text: '✅ Mark Paid', callback_data: `o_pay_${orderId}` }]]
+})
+```
+
+**Frontend UI khi countdown hết:**
+```
+Hết 15 phút — bạn muốn:
+
+[Quay lại / Chưa CK]    [Tôi đã chuyển khoản ✋]
+                               ↓
+                    Form: số tiền + nội dung CK
+                               ↓
+                    "Đã ghi nhận! Admin xác nhận trong 30 phút."
+```
+
+---
+
+### Schema fields bổ sung cho Resilient System
+
+```prisma
+model Order {
+  // ... fields SePay cơ bản từ Section 6 ...
+
+  // Recovery
+  status          String    @default("pending")     // pending/processing/retrying/failed/completed/cancelled
+  retryCount      Int       @default(0) @map("retry_count")
+  recoveryToken   String?   @map("recovery_token")  // 8 chars uppercase — cho khách tự recover
+
+  // Claim transfer
+  claimedAt       DateTime? @map("claimed_at")
+  claimInfo       Json?     @map("claim_info")      // { amount, transferContent }
+
+  // Tracking
+  completedAt     DateTime? @map("completed_at")
+  emailSent       Boolean   @default(false) @map("email_sent")
+  lastActivity    DateTime? @map("last_activity")   // watchdog dùng để detect stuck
+}
+```
+
+---
+
+### Checklist bổ sung (ngoài checklist cơ bản ở Section 8)
+
+- [ ] Startup sweep: `sweepPaidPendingOrders()` chạy khi server boot
+- [ ] Job Watchdog: `setInterval` 2 phút, per-service threshold
+- [ ] `smartRetryOrder()`: centralize mọi retry path qua 1 hàm
+- [ ] Claim Transfer API: `POST /api/payment/claim-transfer`
+- [ ] Frontend payment page: countdown pause khi mất kết nối, 2-branch UI khi countdown hết
+- [ ] Webhook luôn trả 200 — kể cả khi lỗi nội bộ (tránh SePay retry Fibonacci)
+- [ ] Schema: thêm `retryCount`, `recoveryToken`, `claimedAt`, `claimInfo`, `lastActivity`

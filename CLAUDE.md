@@ -205,6 +205,10 @@ src/
 - [x] Checkout — profile review block (tên + SN + nơi sinh, synastry: 2 người); back button "← Sửa thông tin" styled (border gold, underline, `#8a8399`); real-time email validation (`emailTouched`, `isValidEmail` regex, warning `#c8410a`, disable submit khi format sai)
 - [x] Payment page compact — amount vào header, 2 notices gộp 1, tighter spacing
 - [x] `/api/recover` cancelled case — trả 400 + message rõ trước khi check `status !== 'failed'`
+- [x] processing page guest UX — ẩn nút "Đóng & về lịch sử" + "Hủy báo cáo" cho guest (`isGuest = !user`); tên khách xuống dòng riêng (`<br />`) sau "riêng cho"; synastry hiện "A & B" (displayName đã join ở checkout)
+- [x] OrderCheck fix: `'cancelled'` excluded khỏi ❌ LỖI query (`notIn`); 💤 CHƯA THANH TOÁN hiện danh sách inline max 5 đơn (`• #id — svc — email — amount — Xh trước`)
+- [x] LocationPicker dropdown: font size `0.85rem` + padding compact `6px 12px`
+- [x] ProfileFormModal + GuestSynastryModal: `paddingBottom: 60px` trên body để dropdown không bị cắt khi scroll
 
 ## What's TODO
 

@@ -156,6 +156,98 @@ Thông tin quan trọng phải luôn visible hoặc dùng tap/click để toggle
 - Dùng `inputmode` attribute đúng loại: `numeric`, `email`, `tel`, `url`
 - Autocomplete attributes: `name`, `email`, `current-password`, `new-password`
 
+### Dropdown trong modal có `overflow-y: auto`
+
+`position: absolute` dropdown bị cắt bởi `overflow-y: auto` của container cha — đây là browser behavior chuẩn, không phải bug.
+
+**Fix đơn giản (chấp nhận scroll nhẹ):** Thêm `paddingBottom` (60–80px) ở cuối modal body → user scroll thêm một chút là thấy dropdown:
+
+```tsx
+// Modal body
+<div className="px-6 py-5 space-y-4" style={{ paddingBottom: '60px' }}>
+```
+
+**Fix triệt để (không cần scroll):** Dùng `position: fixed` + `getBoundingClientRect()` để tính tọa độ thực. `fixed` không bị `overflow: auto` của parent cắt:
+
+```tsx
+const addrRef = useRef<HTMLDivElement>(null)
+const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 })
+
+useEffect(() => {
+  if (open && results.length > 0 && addrRef.current) {
+    const r = addrRef.current.getBoundingClientRect()
+    setDropPos({ top: r.bottom + 4, left: r.left, width: r.width })
+  }
+}, [open, results])
+
+// Dropdown:
+<div style={{ position: 'fixed', top: dropPos.top, left: dropPos.left, width: dropPos.width, zIndex: 9999 }}>
+```
+
+_⚠️ Edge case của fixed approach: nếu parent có `transform`/`filter` → fixed sẽ bị anchor vào parent thay vì viewport. Kiểm tra trước khi dùng._
+
+### Email validation — `emailTouched` pattern
+
+Chỉ hiện lỗi validation SAU khi user đã focus vào field ít nhất 1 lần. Tránh UX xấu khi vừa vào trang đã thấy lỗi đỏ, hoặc khi email được pre-fill từ server.
+
+```tsx
+const [emailTouched, setEmailTouched] = useState(false)
+const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+const emailInvalid = emailTouched && email.length > 0 && !isValidEmail(email)
+const canSubmit = email.trim() !== '' && isValidEmail(email)
+
+<input
+  type="email"
+  value={email}
+  onChange={e => setEmail(e.target.value)}
+  onFocus={() => setEmailTouched(true)}  // ← bật flag khi lần đầu focus
+/>
+{emailInvalid && (
+  <p style={{ color: '#c8410a', fontSize: '0.75rem' }}>
+    📧 Vui lòng nhập đúng định dạng email
+  </p>
+)}
+<button disabled={!canSubmit}>Submit</button>
+```
+
+**Rules:**
+- `emailTouched` chỉ bật khi `onFocus`, không bao giờ tắt lại
+- Lỗi hiện khi: touched AND có text AND format sai
+- Button disable khi: email rỗng OR (có text AND format sai)
+- KHÔNG dùng `type="email"` browser validation thay thế — UX không nhất quán giữa các browser
+
+### Auth-conditional UI elements
+
+Nút/tính năng chỉ có nghĩa với user đã đăng nhập (lịch sử, hủy, profile...) → **ẩn hoàn toàn** cho guest, không disabled.
+
+_Lý do: disabled button gây bối rối — guest không hiểu tại sao không bấm được, không có CTA rõ để đăng nhập. Ẩn hẳn + thay bằng text giải thích rõ hơn._
+
+```tsx
+const { user } = useAuth()
+const isGuest = !user
+
+// ✅ Đúng — ẩn hoàn toàn
+{!isGuest && (
+  <button onClick={() => router.push('/profile?tab=history')}>
+    Về lịch sử →
+  </button>
+)}
+
+// Thay bằng text phù hợp cho guest
+{isGuest && (
+  <p>Báo cáo sẽ tự gửi vào email khi hoàn thành.</p>
+)}
+
+// ❌ Sai — disabled nhưng không giải thích
+<button disabled={isGuest}>Về lịch sử →</button>
+```
+
+**Các trường hợp thường gặp cần ẩn cho guest:**
+- "Về lịch sử / My orders"
+- "Hủy báo cáo / Cancel" (guest đã trả tiền → cancel = mất tiền, không nên để bấm)
+- "Lưu hồ sơ" — hiện nhưng cần redirect login
+- Settings, profile, subscription buttons
+
 ## Performance
 
 - Lazy load images, ưu tiên `next/image` (Next.js) hoặc tương đương
