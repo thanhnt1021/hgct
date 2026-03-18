@@ -163,15 +163,16 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
                   key={i}
                   type="button"
                   onClick={() => select(r)}
-                  className="w-full text-left px-4 py-3 text-sm transition-all"
+                  className="w-full text-left transition-all"
                   style={{
                     color: '#f4efe6',
+                    padding: '6px 12px',
                     borderBottom: i < results.length - 1 ? '1px solid rgba(200,148,63,0.07)' : 'none',
                   }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'rgba(38,28,86,0.5)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span className="font-medium" style={{ fontFamily: 'var(--font-vietnam)' }}>
+                  <span className="font-medium" style={{ fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
                     {r.short_name}
                   </span>
                   <span

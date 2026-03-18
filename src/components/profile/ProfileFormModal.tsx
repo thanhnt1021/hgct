@@ -138,7 +138,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4 form-compact">
+        <div className="px-6 py-5 space-y-4 form-compact" style={{ paddingBottom: '60px' }}>
 
           {/* Row 1: Name + Gender same row */}
           <div className="grid gap-3 items-end" style={{ gridTemplateColumns: '1fr auto' }}>

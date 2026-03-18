@@ -44,7 +44,7 @@ export async function runOrderCheck(): Promise<void> {
     prisma.order.findMany({
       where: {
         paymentStatus: 'paid',
-        status: { notIn: ['completed', 'processing', 'retrying'] },
+        status: { notIn: ['completed', 'processing', 'retrying', 'cancelled'] },
       },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -152,12 +152,22 @@ export async function runOrderCheck(): Promise<void> {
     }
   }
 
-  // 💤 CHƯA THANH TOÁN group (summary)
+  // 💤 CHƯA THANH TOÁN group (summary + inline list)
   if (pendingUnpaid.length > 0) {
     const alreadySent = pendingUnpaid.filter(o => o.retargetEmailSentAt).length
     const notSent = pendingUnpaid.length - alreadySent - retargetSentCount
     const retargetNote = retargetSentCount > 0 ? ` · 📧 Vừa gửi retarget: ${retargetSentCount}` : ''
     lines.push(`\n💤 <b>CHƯA THANH TOÁN (${pendingUnpaid.length} đơn):</b>`)
+    // Inline list (max 5)
+    const shown = pendingUnpaid.slice(0, 5)
+    for (const o of shown) {
+      const svc = SERVICE_LABELS[o.service] ?? o.service
+      const amt = o.amount ? `${o.amount.toLocaleString('vi-VN')}đ` : '?đ'
+      const ago = timeAgo(new Date(o.createdAt))
+      const retargetMark = o.retargetEmailSentAt ? ' ✉️' : ''
+      lines.push(`• #${o.id} — ${svc} — ${o.email} — ${amt} — ${ago} trước${retargetMark}`)
+    }
+    if (pendingUnpaid.length > 5) lines.push(`... và ${pendingUnpaid.length - 5} đơn nữa`)
     lines.push(`Đã retarget: ${alreadySent + retargetSentCount} · Chưa gửi: ${Math.max(0, notSent)}${retargetNote}`)
     keyboard.push([
       { text: `📋 Chi tiết ${pendingUnpaid.length} đơn →`, callback_data: 'o_pending_detail' },

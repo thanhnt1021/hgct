@@ -6,6 +6,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
 
 const SERVICE_NAMES: Record<string, string> = {
   career: 'Hướng Nghiệp',
@@ -26,6 +27,8 @@ function ProcessingInner() {
   const jobId = searchParams.get('job') || ''
   const service = searchParams.get('service') || ''
   const displayName = searchParams.get('name') || ''
+  const { user } = useAuth()
+  const isGuest = !user
 
   const [progress, setProgress] = useState(0)
   const [label, setLabel] = useState('Đang khởi tạo...')
@@ -333,8 +336,9 @@ function ProcessingInner() {
           <span className="mr-2">{icon}</span>
           Vũ trụ đang biên soạn luận giải{' '}
           <strong style={{ color: '#d9ab55' }}>{serviceName}</strong>
+          {' '}riêng cho
           {displayName && (
-            <> riêng cho <strong style={{ color: '#f4efe6' }}>{displayName}</strong></>
+            <><br /><strong style={{ color: '#f4efe6' }}>{displayName}</strong></>
           )}
         </p>
 
@@ -437,27 +441,29 @@ function ProcessingInner() {
               fontSize: '0.8rem',
               fontFamily: 'var(--font-vietnam)',
               lineHeight: 1.7,
-              marginBottom: '0.75rem',
+              marginBottom: isGuest ? 0 : '0.75rem',
             }}
           >
             Bạn có thể <strong>đóng trang này</strong> — báo cáo sẽ tự động gửi vào email khi hoàn thành
           </p>
-          <button
-            onClick={() => router.push('/profile?tab=history')}
-            style={{
-              background: 'rgba(61,184,138,0.12)',
-              border: '1px solid rgba(61,184,138,0.3)',
-              color: '#3db88a',
-              fontFamily: 'var(--font-vietnam)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              padding: '0.45rem 1rem',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            Đóng &amp; về lịch sử →
-          </button>
+          {!isGuest && (
+            <button
+              onClick={() => router.push('/profile?tab=history')}
+              style={{
+                background: 'rgba(61,184,138,0.12)',
+                border: '1px solid rgba(61,184,138,0.3)',
+                color: '#3db88a',
+                fontFamily: 'var(--font-vietnam)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                padding: '0.45rem 1rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+              }}
+            >
+              Đóng &amp; về lịch sử →
+            </button>
+          )}
         </div>
 
         {frozenWarning ? (
@@ -471,24 +477,26 @@ function ProcessingInner() {
           </p>
         )}
 
-        {/* Cancel button */}
-        <button
-          onClick={() => setShowCancelConfirm(true)}
-          style={{
-            marginTop: '1rem',
-            background: 'rgba(239,68,68,0.07)',
-            border: '1px solid rgba(239,68,68,0.2)',
-            color: '#ef4444',
-            fontFamily: 'var(--font-vietnam)',
-            fontSize: '0.8rem',
-            fontWeight: 500,
-            padding: '0.5rem 1.25rem',
-            borderRadius: '8px',
-            cursor: 'pointer',
-          }}
-        >
-          Hủy báo cáo
-        </button>
+        {/* Cancel button — logged-in users only */}
+        {!isGuest && (
+          <button
+            onClick={() => setShowCancelConfirm(true)}
+            style={{
+              marginTop: '1rem',
+              background: 'rgba(239,68,68,0.07)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              color: '#ef4444',
+              fontFamily: 'var(--font-vietnam)',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              padding: '0.5rem 1.25rem',
+              borderRadius: '8px',
+              cursor: 'pointer',
+            }}
+          >
+            Hủy báo cáo
+          </button>
+        )}
       </div>
 
       {/* Cancel confirm modal */}

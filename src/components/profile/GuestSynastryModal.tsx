@@ -255,7 +255,7 @@ export default function GuestSynastryModal({
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-8">
+        <div className="px-6 py-5 space-y-8" style={{ paddingBottom: '60px' }}>
           <PersonSection label="── THÔNG TIN CỦA BẠN ──" state={a} />
           <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.25), transparent)' }} />
           <PersonSection label="── THÔNG TIN CỦA ĐỐI PHƯƠNG ──" state={b} />
