@@ -105,6 +105,9 @@ model Order {
   // Retarget email
   retargetEmailSentAt DateTime? @map("retarget_email_sent_at")
 
+  // Admin intentional cancel (immune to status resets)
+  adminCancelledAt    DateTime? @map("admin_cancelled_at")
+
   @@map("orders")
 }
 

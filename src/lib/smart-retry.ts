@@ -36,6 +36,7 @@ export async function smartRetryOrder(
 ): Promise<SmartRetryResult> {
   const order = await prisma.order.findUnique({ where: { id: orderId } })
   if (!order) return { skipped: true }
+  if (order.adminCancelledAt) return { skipped: true }
 
   // Admin bypass: reset retryCount so quota check doesn't block
   if (triggeredBy === 'admin' && order.retryCount >= MAX_RETRIES) {

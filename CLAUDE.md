@@ -212,6 +212,7 @@ src/
 - [x] LocationPicker dropdown: font size `0.85rem` + padding compact `6px 12px`
 - [x] ProfileFormModal + GuestSynastryModal: `paddingBottom: 60px` trên body để dropdown không bị cắt khi scroll
 - [x] OG Image — `/api/og`: Puppeteer render HTML 1200×630 (EB Garamond từ Google Fonts CDN, tiếng Việt đầy đủ), cache 24h; `layout.tsx` thêm `openGraph.images` + `twitter.images`; xoá `opengraph-image.tsx` cũ (edge runtime, font bị dính)
+- [x] Admin cancel immune — `adminCancelledAt DateTime?` trên Order; `handleCancelOrder` + `handleCancelAllPending` set field này; `runOrderCheck` 3 queries đều lọc `adminCancelledAt: null`; `smartRetryOrder` guard skip nếu set; `sendOrderFailedAlert`/`sendUnderpaymentAlert`/`sendCustomerClaimAlert` chuyển sang `sendToGroupActionable` (admin bot token) + thêm nút `🗑 Hủy đơn #N` — button callbacks giờ route đúng về admin webhook
 
 ## What's TODO
 

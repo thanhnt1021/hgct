@@ -47,6 +47,7 @@ export async function runOrderCheck(): Promise<void> {
       where: {
         paymentStatus: 'paid',
         status: { notIn: ['completed', 'processing', 'retrying', 'cancelled'] },
+        adminCancelledAt: null,
       },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -58,6 +59,7 @@ export async function runOrderCheck(): Promise<void> {
         paymentStatus: 'unpaid',
         claimedAt: { not: null },
         status: 'pending',
+        adminCancelledAt: null,
       },
       orderBy: { claimedAt: 'desc' },
       take: 5,
@@ -70,6 +72,7 @@ export async function runOrderCheck(): Promise<void> {
         claimedAt: null,
         status: 'pending',
         createdAt: { lt: overdueThreshold },
+        adminCancelledAt: null,
       },
       orderBy: { createdAt: 'desc' },
       take: 20,

@@ -440,22 +440,30 @@ export async function handleCancelOrder(ctx: Ctx, orderId: number) {
   try {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      select: { status: true },
+      select: { status: true, adminCancelledAt: true },
     })
     if (!order) {
       if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, `❌ Không tìm thấy đơn #${orderId}`)
+      return
+    }
+    if (order.adminCancelledAt) {
+      if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '✅ Đơn đã được admin hủy rồi')
       return
     }
     if (order.status === 'processing' || order.status === 'retrying') {
       if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '❌ Đơn đang xử lý — không thể hủy')
       return
     }
-    if (order.status === 'completed' || order.status === 'cancelled') {
-      if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '❌ Đơn không thể hủy')
+    if (order.status === 'completed') {
+      if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '❌ Đơn đã hoàn thành — không thể hủy')
       return
     }
     const wasPending = order.status === 'pending'
-    await prisma.order.update({ where: { id: orderId }, data: { status: 'cancelled' } })
+    const now = new Date()
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status: 'cancelled', adminCancelledAt: now },
+    })
     if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, `✅ Đã hủy đơn #${orderId}`)
     // Edit message in-place with refreshed list (no cbQueryId to avoid double-answer)
     const editCtx: Ctx = { chatId: ctx.chatId, threadId: ctx.threadId, messageId: ctx.messageId }
@@ -499,7 +507,7 @@ export async function handleCancelAllPending(ctx: Ctx) {
   try {
     const result = await prisma.order.updateMany({
       where: { status: 'pending', paymentStatus: 'unpaid' },
-      data: { status: 'cancelled' },
+      data: { status: 'cancelled', adminCancelledAt: new Date() },
     })
     await respond(
       ctx,

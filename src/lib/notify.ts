@@ -96,6 +96,7 @@ async function getGenerationCost(generationIds: string[]): Promise<number | null
 
 // ── Alert helpers (send to same notification group) ─────────────────────────
 
+// Informational alerts — sent via notify bot (1-way, no button callbacks needed)
 async function sendToGroup(text: string, keyboard?: Array<Array<{ text: string; callback_data: string }>>) {
   if (!TELEGRAM_BOT_TOKEN) return
   try {
@@ -116,11 +117,37 @@ async function sendToGroup(text: string, keyboard?: Array<Array<{ text: string; 
   }
 }
 
+// Actionable alerts with buttons — sent via admin bot so callbacks route to admin webhook
+async function sendToGroupActionable(text: string, keyboard: Array<Array<{ text: string; callback_data: string }>>) {
+  const token = process.env.TELEGRAM_ADMIN_BOT_TOKEN
+  if (!token) return
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        message_thread_id: TELEGRAM_THREAD_ID,
+        text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+        reply_markup: { inline_keyboard: keyboard },
+      }),
+    })
+  } catch (err) {
+    console.error('[Notify] sendToGroupActionable failed:', err)
+  }
+}
+
 export async function sendAdminAlert(
   text: string,
   keyboard?: Array<Array<{ text: string; callback_data: string }>>,
 ): Promise<void> {
-  await sendToGroup(text, keyboard)
+  if (keyboard) {
+    await sendToGroupActionable(text, keyboard)
+  } else {
+    await sendToGroup(text)
+  }
 }
 
 export async function sendOrderFailedAlert(params: {
@@ -138,11 +165,14 @@ export async function sendOrderFailedAlert(params: {
     `📧 ${email}`,
     `💥 ${error.slice(0, 120)}`,
   ].join('\n')
-  const keyboard = [[
-    { text: '🔄 Retry ngay', callback_data: `o_retry_${orderId}` },
-    { text: '📧 Gửi email recovery', callback_data: `o_email_${orderId}` },
-  ]]
-  await sendToGroup(text, keyboard)
+  const keyboard = [
+    [
+      { text: '🔄 Retry ngay', callback_data: `o_retry_${orderId}` },
+      { text: '📧 Gửi email recovery', callback_data: `o_email_${orderId}` },
+    ],
+    [{ text: `🗑 Hủy đơn #${orderId}`, callback_data: `o_cancel_${orderId}` }],
+  ]
+  await sendToGroupActionable(text, keyboard)
 }
 
 export async function sendUnderpaymentAlert(params: {
@@ -159,10 +189,11 @@ export async function sendUnderpaymentAlert(params: {
     `Nhận: <b>${received.toLocaleString('vi-VN')}đ</b>`,
     `Thiếu: ${(expected - received).toLocaleString('vi-VN')}đ`,
   ].join('\n')
-  const keyboard = [[
-    { text: '✅ Mark Paid & Tạo báo cáo', callback_data: `o_pay_${orderId}` },
-  ]]
-  await sendToGroup(text, keyboard)
+  const keyboard = [
+    [{ text: '✅ Mark Paid & Tạo báo cáo', callback_data: `o_pay_${orderId}` }],
+    [{ text: `🗑 Hủy đơn #${orderId}`, callback_data: `o_cancel_${orderId}` }],
+  ]
+  await sendToGroupActionable(text, keyboard)
 }
 
 export async function sendPaymentReceivedNotification(params: {
@@ -201,10 +232,11 @@ export async function sendCustomerClaimAlert(params: {
     `👉 Kiểm tra lịch sử CK và xác nhận nếu đúng.`,
   ]
   const text = lines.filter(Boolean).join('\n')
-  const keyboard = [[
-    { text: `✅ Mark Paid #${orderId}`, callback_data: `o_pay_${orderId}` },
-  ]]
-  await sendToGroup(text, keyboard)
+  const keyboard = [
+    [{ text: `✅ Mark Paid #${orderId}`, callback_data: `o_pay_${orderId}` }],
+    [{ text: `🗑 Hủy đơn #${orderId}`, callback_data: `o_cancel_${orderId}` }],
+  ]
+  await sendToGroupActionable(text, keyboard)
 }
 
 export async function sendUnmatchedPaymentAlert(params: {
