@@ -249,29 +249,54 @@ export async function showOrderStats(ctx: Ctx) {
 
 export async function showPendingOrders(ctx: Ctx) {
   try {
-    const orders = await prisma.order.findMany({
-      where: { paymentStatus: 'unpaid', status: 'pending' },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: { id: true, service: true, email: true, amount: true, createdAt: true },
-    })
-    if (orders.length === 0) {
+    const baseSelect = { id: true, service: true, email: true, amount: true, createdAt: true } as const
+    const [uncontacted, contacted] = await Promise.all([
+      prisma.order.findMany({
+        where: { paymentStatus: 'unpaid', status: 'pending', retargetEmailSentAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: baseSelect,
+      }),
+      prisma.order.findMany({
+        where: { paymentStatus: 'unpaid', status: 'pending', retargetEmailSentAt: { not: null } },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: baseSelect,
+      }),
+    ])
+
+    const total = uncontacted.length + contacted.length
+    if (total === 0) {
       await respond(ctx, '✅ Không có đơn nào đang chờ thanh toán.', [
         [{ text: '↩️ Quay lại', callback_data: 'm_orders' }],
       ])
       return
     }
-    const lines = orders.map(o => {
+
+    const fmtLine = (o: { id: number; service: string; email: string; amount: number | null; createdAt: Date }) => {
       const d = new Date(o.createdAt)
       return `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${o.email} — ${fmt(o.amount ?? 0)} — ${fmtTimeVN(d)} (${timeAgoStr(d)} trước)`
-    })
-    const buttons: TgKeyboard = orders.map(o => [
+    }
+
+    const sections: string[] = []
+    if (uncontacted.length > 0) {
+      sections.push(`📋 <b>Chưa gửi mail (${uncontacted.length})</b>`)
+      uncontacted.forEach(o => sections.push(fmtLine(o)))
+    }
+    if (contacted.length > 0) {
+      if (sections.length > 0) sections.push('')
+      sections.push(`✉️ <b>Đã gửi mail / đã đánh dấu (${contacted.length})</b>`)
+      contacted.forEach(o => sections.push(fmtLine(o)))
+    }
+
+    const allOrders = [...uncontacted, ...contacted]
+    const buttons: TgKeyboard = allOrders.map(o => [
       { text: `✅ Paid #${o.id}`, callback_data: `o_pay_${o.id}` },
       { text: `🗑 Hủy #${o.id}`, callback_data: `o_cancel_${o.id}` },
     ])
     buttons.push([{ text: '🗑 Hủy tất cả pending', callback_data: 'o_cancel_all_pending' }])
     buttons.push([{ text: '↩️ Quay lại', callback_data: 'm_orders' }])
-    await respond(ctx, `⏳ <b>Đơn chờ thanh toán (${orders.length})</b>\n\n${lines.join('\n')}`, buttons)
+    await respond(ctx, `⏳ <b>Đơn chờ thanh toán (${total})</b>\n\n${sections.join('\n')}`, buttons)
   } catch (err) {
     console.error('[AdminBot] pending orders error:', err)
     await respond(ctx, '❌ Lỗi khi lấy danh sách.')

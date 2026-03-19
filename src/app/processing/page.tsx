@@ -64,7 +64,7 @@ function ProcessingInner() {
       progress?: number
       label?: string
       error?: string
-      result?: { recoveryToken?: string; autoRetry?: boolean; email?: string }
+      result?: { recoveryToken?: string; autoRetry?: boolean; email?: string; autoRetryJobId?: string }
     }
 
     const handleJob = (job: JobPayload) => {
@@ -101,6 +101,13 @@ function ProcessingInner() {
         if (intervalRef.current) clearInterval(intervalRef.current)
         if (frozenIntervalRef.current) clearInterval(frozenIntervalRef.current)
         const rToken = job.result?.recoveryToken
+        const autoRetryJobId = job.result?.autoRetryJobId
+        // Sweep auto-retry: redirect to new job that system already started
+        if (autoRetryJobId && !hasAutoRetried.current) {
+          hasAutoRetried.current = true
+          router.replace(`/processing?job=${autoRetryJobId}&service=${serviceRef.current}&name=${encodeURIComponent(nameRef.current)}`)
+          return
+        }
         // Auto-retry: silent redirect on first failure (autoRetry=true), only once per page load
         if (rToken && job.result?.autoRetry && !hasAutoRetried.current) {
           hasAutoRetried.current = true

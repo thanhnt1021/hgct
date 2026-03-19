@@ -11,6 +11,7 @@ export interface JobResult {
   email?: string
   recoveryToken?: string  // set when job failed and order has recovery token
   autoRetry?: boolean     // true → processing page silent-redirects to /recover (first failure only)
+  autoRetryJobId?: string // set by sweep when auto-retry started — processing page redirects to new job
 }
 
 export interface Job {
@@ -218,6 +219,11 @@ async function sweepStuckJobsOnce() {
         const updated = await prisma.order.findUnique({ where: { id: order.id }, select: { jobId: true } })
         const newJobId = updated?.jobId
         if (newJobId) {
+          // Tag old job with autoRetryJobId so processing page can redirect to new job
+          await prisma.job.update({
+            where: { id: dbJob.id },
+            data: { result: { autoRetryJobId: newJobId } },
+          }).catch(() => {})
           const { sendAutoRetryEmail } = await import('./email')
           await sendAutoRetryEmail({ to: order.email, service: order.service, name, jobId: newJobId }).catch(() => {})
         }
@@ -300,7 +306,12 @@ async function sweepStuckRetryingOrders() {
       if (result.retrying) {
         const updated = await prisma.order.findUnique({ where: { id: order.id }, select: { jobId: true } })
         const newJobId = updated?.jobId
-        if (newJobId) {
+        if (newJobId && order.jobId) {
+          // Tag old job with autoRetryJobId so processing page can redirect
+          await prisma.job.update({
+            where: { id: order.jobId },
+            data: { result: { autoRetryJobId: newJobId } },
+          }).catch(() => {})
           const { sendAutoRetryEmail } = await import('./email')
           await sendAutoRetryEmail({ to: order.email, service: order.service, name, jobId: newJobId }).catch(() => {})
         }
