@@ -213,6 +213,7 @@ src/
 - [x] ProfileFormModal + GuestSynastryModal: `paddingBottom: 60px` trên body để dropdown không bị cắt khi scroll
 - [x] OG Image — `/api/og`: Puppeteer render HTML 1200×630 (EB Garamond từ Google Fonts CDN, tiếng Việt đầy đủ), cache 24h; `layout.tsx` thêm `openGraph.images` + `twitter.images`; xoá `opengraph-image.tsx` cũ (edge runtime, font bị dính)
 - [x] Admin cancel immune — `adminCancelledAt DateTime?` trên Order; `handleCancelOrder` + `handleCancelAllPending` set field này; `runOrderCheck` 3 queries đều lọc `adminCancelledAt: null`; `smartRetryOrder` guard skip nếu set; `sendOrderFailedAlert`/`sendUnderpaymentAlert`/`sendCustomerClaimAlert` chuyển sang `sendToGroupActionable` (admin bot token) + thêm nút `🗑 Hủy đơn #N` — button callbacks giờ route đúng về admin webhook
+- [x] Premium/lifetime cancel order — `DELETE /api/job/[id]`: sau `cancelJob`, nếu `planType === 'premium'/'lifetime'` thì updateMany order `{ jobId: id, status: { not: 'completed' } }` → set `status: 'cancelled', adminCancelledAt: now()` — order không còn hiện trong ❌ LỖI alert; `/api/astrology/report` order tạo với `status: 'processing'` + `jobId` (fix root cause: trước đó `status: 'pending'` + `jobId: null` nên cancel không tìm được); watchdog thêm `adminCancelledAt: null` guard
 
 ## What's TODO
 

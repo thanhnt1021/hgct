@@ -52,8 +52,9 @@ export async function POST(request: Request) {
           service: typeof svc === 'string' ? svc : service,
           profileData: (iData as object) ?? {},
           email: typeof emailVal === 'string' ? emailVal : '',
-          status: 'pending',
+          status: 'processing',
           paymentStatus: 'paid', // premium users don't pay per-order
+          jobId: jobId,
         },
       })
       orderId = order.id

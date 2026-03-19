@@ -29,5 +29,15 @@ export async function DELETE(
   if (dbJob.status !== 'processing') return NextResponse.json({ error: 'Chỉ hủy được báo cáo đang xử lý' }, { status: 400 })
 
   await cancelJob(id)
+
+  // Premium/lifetime users don't pay per-order — cancel the order so it never shows in alerts
+  const planType = (session?.user as Record<string, unknown>)?.planType as string | undefined
+  if (planType === 'premium' || planType === 'lifetime') {
+    await prisma.order.updateMany({
+      where: { jobId: id, status: { not: 'completed' } },
+      data: { status: 'cancelled', adminCancelledAt: new Date() },
+    })
+  }
+
   return NextResponse.json({ ok: true })
 }

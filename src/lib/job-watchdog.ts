@@ -27,9 +27,9 @@ declare global {
 
 export async function runWatchdog(): Promise<void> {
   try {
-    // Find all orders currently in processing state
+    // Find all orders currently in processing state (exclude admin-cancelled)
     const processingOrders = await prisma.order.findMany({
-      where: { status: 'processing' },
+      where: { status: 'processing', adminCancelledAt: null },
       select: { id: true, jobId: true, service: true, email: true, profileData: true, pdfUrl: true },
     })
 
