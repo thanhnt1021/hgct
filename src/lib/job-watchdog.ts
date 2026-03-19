@@ -30,7 +30,7 @@ export async function runWatchdog(): Promise<void> {
     // Find all orders currently in processing state (exclude admin-cancelled)
     const processingOrders = await prisma.order.findMany({
       where: { status: 'processing', adminCancelledAt: null },
-      select: { id: true, jobId: true, service: true, email: true, profileData: true, pdfUrl: true },
+      select: { id: true, jobId: true, service: true, email: true, profileData: true, pdfUrl: true, paymentStatus: true, createdAt: true },
     })
 
     if (processingOrders.length === 0) return
@@ -38,7 +38,30 @@ export async function runWatchdog(): Promise<void> {
     const now = Date.now()
 
     for (const order of processingOrders) {
-      if (!order.jobId) continue
+      // TC-L: paid order stuck in 'processing' with no job (crash between payment confirmation and job creation)
+      if (!order.jobId) {
+        if (order.paymentStatus === 'paid') {
+          const age = now - order.createdAt.getTime()
+          if (age > threshold(order.service) + 5 * 60 * 1000) {
+            console.log(`[watchdog] Order ${order.id} (${order.service}) stuck processing+paid+no-job — triggering smartRetry`)
+            const result = await smartRetryOrder(order.id, 'watchdog')
+            if (!result.skipped) {
+              const name = ((order.profileData as Record<string, unknown>)?.name as string) || ''
+              const svcName: Record<string, string> = { career: 'Hướng Nghiệp', love: 'Tình Duyên', synastry: 'Cặp Đôi', transit: 'Vận Hạn' }
+              const svc = svcName[order.service] || order.service
+              if (result.retrying) {
+                await sendAdminAlert(`⏰ <b>Watchdog: đơn #${order.id} paid+no-job — auto-retry</b>\n📦 ${svc} | ${name}`).catch(() => {})
+              } else if (result.quotaExceeded) {
+                await sendAdminAlert(
+                  `⏰ <b>Watchdog: đơn #${order.id} paid+no-job — hết quota retry</b>\n📦 ${svc} | ${name}`,
+                  [[{ text: `🔄 Admin retry #${order.id}`, callback_data: `o_retry_${order.id}` }]],
+                ).catch(() => {})
+              }
+            }
+          }
+        }
+        continue
+      }
 
       const inMemJob = global.__hgctJobs?.get(order.jobId)
 
