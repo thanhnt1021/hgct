@@ -190,6 +190,16 @@ async function sweepStuckJobsOnce() {
         continue
       }
 
+      // TC-G2: order already completed (job never updated to 'done' before crash)
+      // → mark orphaned job as done so processing page redirects to success
+      if (order.status === 'completed') {
+        await prisma.job.update({
+          where: { id: dbJob.id },
+          data: { status: 'done', label: 'Hoàn thành', result: { orderCompleted: true } },
+        }).catch(() => {})
+        continue
+      }
+
       const iData = (order.profileData as Record<string, unknown>) || {}
       const name = (iData.name as string) || (iData.ten as string) || ''
 
@@ -333,7 +343,7 @@ async function sweepStuckRetryingOrders() {
 async function sweepPaidPendingOrders() {
   try {
     const paidPending = await prisma.order.findMany({
-      where: { paymentStatus: 'paid', status: 'pending', jobId: null },
+      where: { paymentStatus: 'paid', status: { in: ['pending', 'processing'] }, jobId: null },
     })
     if (paidPending.length === 0) return
 
