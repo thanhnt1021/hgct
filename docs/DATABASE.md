@@ -135,18 +135,37 @@ CREATE TABLE jobs (
 
 ```sql
 CREATE TABLE orders (
-  id           SERIAL PRIMARY KEY,
-  user_uid     VARCHAR,
-  service      VARCHAR NOT NULL,
-  profile_data JSONB NOT NULL,
-  email        VARCHAR NOT NULL,
-  status       VARCHAR DEFAULT 'pending',
-  pdf_url      VARCHAR,
-  created_at   TIMESTAMP DEFAULT NOW()
+  id                      SERIAL PRIMARY KEY,
+  user_uid                VARCHAR,
+  service                 VARCHAR NOT NULL,
+  profile_data            JSONB NOT NULL,
+  profile_data_b          JSONB,
+  profile_uid_a           VARCHAR,
+  profile_uid_b           VARCHAR,
+  email                   VARCHAR NOT NULL,
+  status                  VARCHAR DEFAULT 'pending',
+  pdf_url                 VARCHAR,
+  transfer_code           VARCHAR UNIQUE,
+  amount                  INTEGER,
+  payment_status          VARCHAR DEFAULT 'unpaid',
+  paid_at                 TIMESTAMP,
+  sepay_txn_id            INTEGER UNIQUE,
+  job_id                  VARCHAR,
+  start_date              VARCHAR,
+  end_date                VARCHAR,
+  recovery_token          VARCHAR UNIQUE,
+  retry_count             INTEGER DEFAULT 0,
+  claimed_at              TIMESTAMP,
+  claim_info              JSONB,
+  retarget_email_sent_at  TIMESTAMP,
+  admin_cancelled_at      TIMESTAMP,   -- set khi admin hủy chủ động; loại khỏi mọi alert
+  created_at              TIMESTAMP DEFAULT NOW()
 );
 ```
 
-**Trạng thái:** Bảng tồn tại nhưng **chưa ghi** trong report flow. Cần tích hợp payment.
+**status values:** `pending` | `processing` | `retrying` | `completed` | `failed` | `cancelled`
+**payment_status values:** `unpaid` | `paid`
+**admin_cancelled_at:** khi set → order bị exclude khỏi toàn bộ orderCheck alerts và smartRetry sẽ skip
 
 ---
 

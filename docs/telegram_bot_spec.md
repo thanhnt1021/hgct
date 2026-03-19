@@ -331,8 +331,10 @@ Trigger: khi `processReport()` throw trong `createReportJob()` — `src/lib/astr
 💥 <error message ngắn gọn>
 
 [ 🔄 Retry ngay ]  [ 📧 Gửi email recovery ]
+[ 🗑 Hủy đơn #N ]
 ```
-→ Buttons callback về Admin Bot webhook: `o_retry_N` / `o_email_N`
+→ Buttons callback về Admin Bot webhook: `o_retry_N` / `o_email_N` / `o_cancel_N`
+→ Gửi qua **admin bot token** (không phải notify bot) để callbacks hoạt động
 
 #### Underpayment — `sendUnderpaymentAlert()`
 
@@ -346,8 +348,10 @@ Nhận: X.XXXđ
 Thiếu: Xđ
 
 [ ✅ Mark Paid & Tạo báo cáo ]
+[ 🗑 Hủy đơn #N ]
 ```
-→ Button callback về Admin Bot webhook: `o_pay_N`
+→ Buttons callback về Admin Bot webhook: `o_pay_N` / `o_cancel_N`
+→ Gửi qua **admin bot token**
 
 #### Startup sweep — `sendAdminAlert()`
 
@@ -383,8 +387,10 @@ Trigger: `src/app/api/payment/claim-transfer/route.ts` — khi khách điền fo
 ⏰ Lúc: HH:MM DD/MM
 
 [ ✅ Mark Paid #N ]
+[ 🗑 Hủy đơn #N ]
 ```
-→ Button callback về Admin Bot webhook: `o_pay_N`
+→ Buttons callback về Admin Bot webhook: `o_pay_N` / `o_cancel_N`
+→ Gửi qua **admin bot token**
 
 #### Thanh toán không khớp — `sendUnmatchedPaymentAlert()`
 
