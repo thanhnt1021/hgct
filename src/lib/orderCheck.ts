@@ -161,20 +161,20 @@ export async function runOrderCheck(): Promise<void> {
   // 💤 CHƯA THANH TOÁN group (summary + inline list)
   if (pendingUnpaid.length > 0) {
     const alreadyMarked = pendingUnpaid.filter(o => o.retargetEmailSentAt).length
-    const notMarked = pendingUnpaid.length - alreadyMarked - retargetSentCount
-    const retargetNote = retargetSentCount > 0 ? ` · 🔖 Vừa đánh dấu: ${retargetSentCount}` : ''
+    const totalRetargeted = alreadyMarked + retargetSentCount
+    const notSent = Math.max(0, pendingUnpaid.length - totalRetargeted)
     lines.push(`\n💤 <b>CHƯA THANH TOÁN (${pendingUnpaid.length} đơn):</b>`)
-    // Inline list (max 5)
-    const shown = pendingUnpaid.slice(0, 5)
+    // Inline list — chỉ hiện đơn CHƯA retarget (max 5)
+    const unretargeted = pendingUnpaid.filter(o => !o.retargetEmailSentAt)
+    const shown = unretargeted.slice(0, 5)
     for (const o of shown) {
       const svc = SERVICE_LABELS[o.service] ?? o.service
       const amt = o.amount ? `${o.amount.toLocaleString('vi-VN')}đ` : '?đ'
       const ago = timeAgo(new Date(o.createdAt))
-      const retargetMark = o.retargetEmailSentAt ? ' 🔖' : ''
-      lines.push(`• #${o.id} — ${svc} — ${o.email} — ${amt} — ${ago} trước${retargetMark}`)
+      lines.push(`• #${o.id} — ${svc} — ${o.email} — ${amt} — ${ago} trước`)
     }
-    if (pendingUnpaid.length > 5) lines.push(`... và ${pendingUnpaid.length - 5} đơn nữa`)
-    lines.push(`Đã đánh dấu: ${alreadyMarked + retargetSentCount} · Chưa xử lý: ${Math.max(0, notMarked)}${retargetNote}`)
+    if (unretargeted.length > 5) lines.push(`... và ${unretargeted.length - 5} đơn nữa`)
+    lines.push(`Đã retarget: ${totalRetargeted} · Chưa gửi: ${notSent}`)
     keyboard.push([
       { text: `📋 Chi tiết ${pendingUnpaid.length} đơn →`, callback_data: 'o_pending_detail' },
     ])
