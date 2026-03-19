@@ -33,13 +33,9 @@ git -C "$DEMO_DIR" checkout "$BRANCH" 2>/dev/null || git -C "$DEMO_DIR" checkout
 git -C "$DEMO_DIR" reset --hard "origin/$BRANCH"
 echo "    Branch: $BRANCH @ $(git -C $DEMO_DIR rev-parse --short HEAD)"
 
-# 2. Install dependencies if needed
-if [ ! -d "$DEMO_DIR/node_modules" ]; then
-  echo "[2/6] Installing dependencies..."
-  cd "$DEMO_DIR" && npm install --production=false
-else
-  echo "[2/6] Dependencies OK (skip install)"
-fi
+# 2. Install dependencies (always run to pick up new packages)
+echo "[2/6] Installing dependencies..."
+cd "$DEMO_DIR" && npm install --production=false
 
 # 3. Create demo .env.local if not exists
 if [ ! -f "$DEMO_DIR/.env.local" ]; then
