@@ -2,7 +2,6 @@
 // (Next.js can re-evaluate modules per route bundle — global is always shared)
 
 import prisma from './db'
-import { sendRecoveryEmail } from './email'
 import { sendAdminAlert } from './notify'
 
 export interface JobResult {
@@ -162,11 +161,13 @@ export async function cancelJob(id: string): Promise<void> {
 export const MAX_RETRIES = 3
 
 // Startup sweep: recover orphaned jobs from previous server run
-// Logic: jobs in DB with status='processing' NOT in in-memory map → from previous run → mark failed + recovery token
+// New behavior: auto-retry immediately via smartRetryOrder instead of just marking failed
 async function sweepStuckJobsOnce() {
   try {
     const processingJobs = await prisma.job.findMany({ where: { status: 'processing' } })
     let fixedCount = 0
+    let autoRetried = 0
+    let quotaHit = 0
 
     for (const dbJob of processingJobs) {
       // Skip jobs this server instance created (they're in memory)
@@ -174,77 +175,82 @@ async function sweepStuckJobsOnce() {
 
       fixedCount++
 
-      // Find linked order (needed for autoRetry decision)
+      // Find linked order
       const order = await prisma.order.findFirst({
         where: { jobId: dbJob.id },
       }).catch(() => null)
 
-      const retryCount = order?.retryCount ?? 0
-      // autoRetry: true only on first failure (retryCount=0), silent redirect on processing page
-      const autoRetry = retryCount === 0
-
-      // Generate new recovery token (rotate — clears stale token from previous attempt)
-      const token = order ? generateRecoveryToken() : null
-
-      // Fix C: Update Order FIRST — only embed token in job.result if Order update succeeds
-      // → prevents token mismatch (job.result has token but Order doesn't)
-      let orderUpdated = false
-      if (order && token) {
-        try {
-          await prisma.order.update({
-            where: { id: order.id },
-            data: { status: 'failed', recoveryToken: token },
-            // Note: retryCount is incremented in /api/recover when user retries, not here
-          })
-          orderUpdated = true
-        } catch (err) {
-          console.error(`[jobs] Sweep: order update failed for ${order.id}:`, err)
-        }
+      if (!order || order.adminCancelledAt) {
+        // No order or admin-cancelled — just mark job as error, no email
+        await prisma.job.update({
+          where: { id: dbJob.id },
+          data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR },
+        }).catch(() => {})
+        continue
       }
 
-      // Mark orphaned job as error — embed token in result ONLY if order was updated successfully
+      const iData = (order.profileData as Record<string, unknown>) || {}
+      const name = (iData.name as string) || (iData.ten as string) || ''
+
+      // Pre-set recovery token on order (used as fallback if quota exceeded in smartRetryOrder)
+      const token = generateRecoveryToken()
+      try {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { recoveryToken: token },
+        })
+      } catch (err) {
+        console.error(`[jobs] Sweep: failed to set recovery token for order ${order.id}:`, err)
+      }
+
+      // Mark old orphaned job as error
       await prisma.job.update({
         where: { id: dbJob.id },
-        data: {
-          status: 'error',
-          label: 'Lỗi',
-          error: STUCK_ERROR,
-          result: orderUpdated && token ? { recoveryToken: token, autoRetry } : undefined,
-        },
+        data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR },
       }).catch(() => {})
 
-      if (!order || !token || !orderUpdated) continue
+      // Lazy import to avoid circular dependency
+      const { smartRetryOrder } = await import('./smart-retry')
+      const result = await smartRetryOrder(order.id, 'sweep')
 
-      // Fix G: Send recovery email only on 2nd+ failure (autoRetry=false)
-      // First failure: processing page auto-redirects silently → email confuses user
-      // If auto-retry also fails, next sweep sends email (retryCount=1, autoRetry=false)
-      if (!autoRetry) {
-        try {
-          const iData = (order.profileData as Record<string, unknown>) || {}
-          const name = (iData.name as string) || (iData.ten as string) || ''
-          await sendRecoveryEmail({ to: order.email, service: order.service, token, name })
-          console.log(`[jobs] Sweep: recovery email sent for order ${order.id} (token: ${token})`)
-        } catch (err) {
-          console.error(`[jobs] Recovery email failed for order ${order.id}:`, err)
+      if (result.retrying) {
+        // Get new jobId from updated order
+        const updated = await prisma.order.findUnique({ where: { id: order.id }, select: { jobId: true } })
+        const newJobId = updated?.jobId
+        if (newJobId) {
+          const { sendAutoRetryEmail } = await import('./email')
+          await sendAutoRetryEmail({ to: order.email, service: order.service, name, jobId: newJobId }).catch(() => {})
         }
+        autoRetried++
+        console.log(`[jobs] Sweep: order ${order.id} → auto-retry job ${newJobId?.slice(0, 8)}, email sent`)
+      } else if (result.quotaExceeded) {
+        // smartRetryOrder already sent recovery email using our pre-set token
+        quotaHit++
+        console.log(`[jobs] Sweep: order ${order.id} → quota exceeded, recovery email sent (token: ${token})`)
+      } else if (result.pdfResent) {
+        console.log(`[jobs] Sweep: order ${order.id} → PDF existed, email resent`)
+      } else if (result.skipped) {
+        console.log(`[jobs] Sweep: order ${order.id} → skipped (cancelled or locked by another process)`)
       }
-
-      console.log(`[jobs] Sweep: order ${order.id} → token rotated, autoRetry=${autoRetry}, retryCount=${retryCount}`)
     }
 
     if (fixedCount > 0) {
-      console.log(`[jobs] Startup sweep: fixed ${fixedCount} orphaned job(s)`)
-      sendAdminAlert(`🔄 <b>Startup sweep: recovered ${fixedCount} đơn bị gián đoạn</b>\nCác khách hàng sẽ nhận email recovery để thử lại.`).catch(() => {})
+      const parts = []
+      if (autoRetried > 0) parts.push(`${autoRetried} đơn đang tự retry`)
+      if (quotaHit > 0) parts.push(`${quotaHit} đơn hết quota (đã gửi recovery email)`)
+      const detail = parts.length > 0 ? `\n${parts.join(', ')}` : ''
+      console.log(`[jobs] Startup sweep: fixed ${fixedCount} orphaned job(s) (${autoRetried} retried, ${quotaHit} quota)`)
+      sendAdminAlert(`🔄 <b>Startup sweep: xử lý ${fixedCount} đơn bị gián đoạn</b>${detail}`).catch(() => {})
     }
 
-    // Fix D: Also clean up orders stuck in 'retrying' state (from crashed /api/recover calls)
+    // Also clean up orders stuck in 'retrying' state (from crashed smartRetry calls)
     await sweepStuckRetryingOrders()
   } catch (err) {
     console.error('[jobs] sweepStuckJobsOnce error:', err)
   }
 }
 
-// Fix D: Find orders stuck at 'retrying' without an active job → reset to 'failed' so recovery can proceed
+// Find orders stuck at 'retrying' without an active job → reset + auto-retry
 async function sweepStuckRetryingOrders() {
   try {
     const retryingOrders = await prisma.order.findMany({ where: { status: 'retrying' } })
@@ -263,32 +269,48 @@ async function sweepStuckRetryingOrders() {
         if (job?.status === 'processing') continue
       }
 
-      // Order is stuck in 'retrying' without an active job → reset to 'failed' + new token
-      const token = generateRecoveryToken()
-      const retryCount = order.retryCount ?? 0
-      const autoRetry = retryCount === 0
+      if (order.adminCancelledAt) continue
 
+      const iData = (order.profileData as Record<string, unknown>) || {}
+      const name = (iData.name as string) || (iData.ten as string) || ''
+
+      // Pre-set recovery token, reset to 'failed' so smartRetryOrder can lock it
+      const token = generateRecoveryToken()
       try {
         await prisma.order.update({
           where: { id: order.id },
           data: { status: 'failed', recoveryToken: token },
         })
-        // Update job result with new token (best-effort)
+        // Mark linked job as error (best-effort)
         if (order.jobId) {
           await prisma.job.update({
             where: { id: order.jobId },
-            data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR, result: { recoveryToken: token, autoRetry } },
+            data: { status: 'error', label: 'Lỗi', error: STUCK_ERROR },
           }).catch(() => {})
         }
-        // Fix G applied here too: email only on 2nd+ failure
-        if (!autoRetry) {
-          const iData = (order.profileData as Record<string, unknown>) || {}
-          const name = (iData.name as string) || (iData.ten as string) || ''
-          await sendRecoveryEmail({ to: order.email, service: order.service, token, name }).catch(() => {})
-        }
-        console.log(`[jobs] Sweep: cleaned stuck retrying order ${order.id} (retryCount=${retryCount}, autoRetry=${autoRetry})`)
       } catch (err) {
-        console.error(`[jobs] Failed to clean stuck retrying order ${order.id}:`, err)
+        console.error(`[jobs] Failed to reset stuck retrying order ${order.id}:`, err)
+        continue
+      }
+
+      // Auto-retry
+      const { smartRetryOrder } = await import('./smart-retry')
+      const result = await smartRetryOrder(order.id, 'sweep')
+
+      if (result.retrying) {
+        const updated = await prisma.order.findUnique({ where: { id: order.id }, select: { jobId: true } })
+        const newJobId = updated?.jobId
+        if (newJobId) {
+          const { sendAutoRetryEmail } = await import('./email')
+          await sendAutoRetryEmail({ to: order.email, service: order.service, name, jobId: newJobId }).catch(() => {})
+        }
+        console.log(`[jobs] Sweep: cleaned stuck retrying order ${order.id} → auto-retry job ${newJobId?.slice(0, 8)}`)
+      } else if (result.quotaExceeded) {
+        console.log(`[jobs] Sweep: cleaned stuck retrying order ${order.id} → quota exceeded, recovery email sent`)
+      } else if (result.pdfResent) {
+        console.log(`[jobs] Sweep: cleaned stuck retrying order ${order.id} → PDF existed, email resent`)
+      } else {
+        console.log(`[jobs] Sweep: cleaned stuck retrying order ${order.id} → skipped`)
       }
     }
   } catch (err) {

@@ -9,7 +9,7 @@ import { sendReportEmail, makePdfFilename } from './email'
 import { MAX_RETRIES } from './jobs'
 import { sendRecoveryEmail } from './email'
 
-export type RetryTrigger = 'watchdog' | 'admin' | 'customer'
+export type RetryTrigger = 'watchdog' | 'admin' | 'customer' | 'sweep'
 
 export interface SmartRetryResult {
   skipped?: boolean      // already locked or not in retryable state
