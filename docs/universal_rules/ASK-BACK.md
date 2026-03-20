@@ -121,23 +121,30 @@ Claude KHÔNG output câu hỏi dạng text. Thay vào đó: **generate + run m�
 
 ### 6.1 Quy trình
 
-**Bước 1 — Đảm bảo deps:**
+> **Giới hạn kỹ thuật:** Claude Code CLI Bash tool không forward interactive stdin. Script phải được user chạy trực tiếp trong terminal — Claude không tự run được.
+
+**Bước 1 — Đảm bảo deps (Claude tự chạy):**
 ```bash
-# Claude tự chạy nếu chưa có
 mkdir -p /tmp/ask-back-deps && cd /tmp/ask-back-deps && npm init -y --quiet && npm install @clack/prompts --silent
 ```
 
 **Bước 2 — Generate script:**
 Claude write file `/tmp/ask-back-[timestamp].mjs` với tất cả questions đã phân tích ở Phase 3.
 
-**Bước 3 — Run:**
-```bash
-node /tmp/ask-back-[timestamp].mjs
+**Bước 3 — Claude nói với user:**
 ```
-→ User thấy interactive prompt trong terminal, navigate bằng arrow keys, Enter để chọn.
+Chạy lệnh này trong terminal của mày:
 
-**Bước 4 — Đọc kết quả:**
-Script in ra `ASKBACK_RESULT:{...}` trên dòng cuối cùng (JSON). Claude parse → proceed.
+  node /tmp/ask-back-[timestamp].mjs
+
+Sau đó paste dòng ASKBACK_RESULT:... trở lại đây.
+```
+
+**Bước 4 — User chạy + paste kết quả:**
+User navigate arrow keys → Enter chọn → copy dòng cuối `ASKBACK_RESULT:{...}` → paste vào chat.
+
+**Bước 5 — Claude đọc kết quả + proceed:**
+Claude parse JSON → tạo execution plan → implement.
 
 ---
 
@@ -145,7 +152,7 @@ Script in ra `ASKBACK_RESULT:{...}` trên dòng cuối cùng (JSON). Claude pars
 
 ```javascript
 // /tmp/ask-back-[timestamp].mjs
-import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-back-deps/node_modules/@clack/prompts/index.js'
+import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-back-deps/node_modules/@clack/prompts/dist/index.mjs'
 import pc from '/tmp/ask-back-deps/node_modules/@clack/prompts/node_modules/picocolors/picocolors.js'
 
 const answers = {}
@@ -218,7 +225,7 @@ Toggle ở header. Lưu preference vào localStorage.
 
 ```javascript
 // /tmp/ask-back-1703123456.mjs
-import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-back-deps/node_modules/@clack/prompts/index.js'
+import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-back-deps/node_modules/@clack/prompts/dist/index.mjs'
 
 const answers = {}
 
