@@ -96,7 +96,7 @@ Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy 
 - **Track B — Goal (OUTCOME):** So plan vs `GOAL.md` → serve milestone nào? conflict goal nào? goal drift không? Quy tắc: xem `OUTCOME.md`.
 - **Track C — Implementation:** Dependencies, technical decisions còn mở, test strategy cho từng bước.
 
-**Bước 4.** Gom tất cả findings từ 3 tracks → **1 batch Q&A duy nhất** theo ASK-BACK format (numbered CLI menu, progress `[N/TOTAL]`, `★` khuyến nghị, description line per option). Bắt đầu bằng tóm tắt 3-5 dòng (scope + files affected + số findings).
+**Bước 4.** Gom tất cả findings từ 3 tracks → generate + run **1 interactive CLI script** (`@clack/prompts`) với tất cả questions (tối đa 7, ưu tiên 🔴>🟡>🟠>🔵>⚪, mỗi question có option `Other`, `★` đánh dấu recommended). Xem script format: `ASK-BACK.md` §6.
 
 **Bước 5.** User chọn options → nhận answers.
 

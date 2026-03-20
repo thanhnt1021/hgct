@@ -52,7 +52,7 @@ User gửi plan
              │
              ▼
 ┌─────────────────────────┐
-│  PHASE 4: HỎI NGƯỢC     │  Tạo câu hỏi với selectable options
+│  PHASE 4: HỎI NGƯỢC     │  Generate + run interactive CLI prompt (Clack)
 └────────────┬────────────┘
              │
              ▼
@@ -115,108 +115,80 @@ Claude phân loại findings vào 6 categories:
 
 ---
 
-## 6. PHASE 4 — HỎI NGƯỢC
+## 6. PHASE 4 — HỎI NGƯỢC (Interactive CLI)
 
-### 6.1 Format câu hỏi
+Claude KHÔNG output câu hỏi dạng text. Thay vào đó: **generate + run một interactive CLI script** dùng `@clack/prompts` — user navigate bằng arrow keys, Enter để chọn.
 
-Mỗi câu hỏi hiển thị theo **CLI menu format** — numbered list + description line + footer nav:
+### 6.1 Quy trình
 
-```
-? [N/TOTAL] 🔴 CONFLICT — [Mô tả ngắn]
-
-  [1-2 dòng context: plan nói gì vs code thực tế, hoặc mô tả ambiguity]
-
-  1. [Tên option ngắn]  ★
-     [1 dòng hệ quả / mô tả cụ thể]
-  2. [Tên option]
-     [1 dòng hệ quả / mô tả cụ thể]
-  3. [Tên option]
-     [1 dòng hệ quả / mô tả cụ thể]
-
-─────────────────────────────────────────────────────────────────
-Enter to select · Tab/Arrow keys to navigate · Esc to skip
+**Bước 1 — Đảm bảo deps:**
+```bash
+# Claude tự chạy nếu chưa có
+mkdir -p /tmp/ask-back-deps && cd /tmp/ask-back-deps && npm init -y --quiet && npm install @clack/prompts --silent
 ```
 
-**Quy ước cho từng loại:**
+**Bước 2 — Generate script:**
+Claude write file `/tmp/ask-back-[timestamp].mjs` với tất cả questions đã phân tích ở Phase 3.
 
+**Bước 3 — Run:**
+```bash
+node /tmp/ask-back-[timestamp].mjs
 ```
-? [N/TOTAL] 🔴 CONFLICT — [Mô tả ngắn]
-  Plan nói [X] — code hiện tại đang là [Y].
+→ User thấy interactive prompt trong terminal, navigate bằng arrow keys, Enter để chọn.
 
-  1. Theo plan — xóa code cũ, làm mới
-     [hệ quả]
-  2. Giữ code cũ — bỏ qua phần này của plan
-     [hệ quả]
-  3. Merge — giữ cũ + thêm mới
-     [mô tả cách merge]
-```
+**Bước 4 — Đọc kết quả:**
+Script in ra `ASKBACK_RESULT:{...}` trên dòng cuối cùng (JSON). Claude parse → proceed.
 
-```
-? [N/TOTAL] 🟡 AMBIGUITY — [Mô tả ngắn]
-  Plan nói "[câu mơ hồ]" — có thể hiểu theo nhiều cách.
+---
 
-  1. [Cách hiểu 1]
-     [hệ quả cụ thể]
-  2. [Cách hiểu 2]
-     [hệ quả cụ thể]
-  3. [Cách hiểu 3 nếu có]
-     [hệ quả cụ thể]
-```
+### 6.2 Script template
 
-```
-? [N/TOTAL] 🟠 RISK — [Mô tả ngắn]
-  Nếu làm [X] theo plan → có thể break [Y].
+```javascript
+// /tmp/ask-back-[timestamp].mjs
+import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-back-deps/node_modules/@clack/prompts/index.js'
+import pc from '/tmp/ask-back-deps/node_modules/@clack/prompts/node_modules/picocolors/picocolors.js'
 
-  1. Làm luôn — chấp nhận risk, fix sau nếu cần
-     [hệ quả]
-  2. Làm nhưng thêm safeguard  ★
-     [mô tả safeguard cụ thể]
-  3. Bỏ qua phần này
-     [hệ quả]
-```
+const answers = {}
 
-```
-? [N/TOTAL] 🔵 GAP — [Mô tả ngắn]
-  Plan không nói rõ [Z] — cần biết để implement.
+intro(pc.bgCyan(pc.black(' ASK-BACK ')))
 
-  1. [Option mặc định hợp lý nhất]  ★
-     [hệ quả]
-  2. [Option thay thế]
-     [hệ quả]
-  3. Để tao mô tả cụ thể hơn
-     [user tự gõ]
-```
+note(
+  '[1 câu mô tả mục tiêu]\nẢnh hưởng: [X files] · Phát hiện: [N] điểm cần xác nhận',
+  'Tóm tắt plan'
+)
 
-```
-? [N/TOTAL] ⚪ ASSUMPTION — [Mô tả ngắn]
-  Plan không nhắc — tao sẽ giả định: [assumption].
+// === QUESTION TEMPLATE ===
+answers.q1 = await select({
+  message: '[1/N] 🟡 AMBIGUITY — [Mô tả ngắn]\n  [1-2 dòng context]',
+  options: [
+    { value: '1', label: '[Option 1]  ★', hint: '[Hệ quả — recommended]' },
+    { value: '2', label: '[Option 2]',    hint: '[Hệ quả]' },
+    { value: '3', label: '[Option 3]',    hint: '[Hệ quả]' },
+    { value: 'other', label: 'Other — tự mô tả', hint: 'Nhập câu trả lời riêng' },
+  ],
+})
+if (isCancel(answers.q1)) { cancel('Cancelled'); process.exit(0) }
+if (answers.q1 === 'other') {
+  answers.q1_custom = await text({ message: 'Mô tả:' })
+}
 
-  1. OK, đúng rồi  ★
-  2. Không — [user giải thích]
+// ... thêm câu hỏi theo pattern trên
+
+outro(pc.green('Đã ghi nhận tất cả.'))
+process.stdout.write('\nASKBACK_RESULT:' + JSON.stringify(answers) + '\n')
 ```
 
-### 6.2 Quy tắc format
+---
 
-- **Tối đa 7 câu hỏi** mỗi lần. Nếu có nhiều hơn → nhóm lại hoặc ưu tiên 🔴 > 🟡 > 🟠 > 🔵 > ⚪
-- **`★` đánh dấu recommended** — chỉ 1 option mỗi câu, đặt sau tên option trên cùng dòng
-- **Description line bắt buộc** cho mỗi option — 1 dòng, mô tả hệ quả cụ thể (ngoại trừ ⚪ ASSUMPTION ngắn có thể bỏ)
-- **Option title ngắn** — scan được trong 2 giây; detail ở description line
-- **Footer `─────` + `Enter to select...`** — in ở cuối mỗi câu hỏi, ngăn cách với câu tiếp theo
-- **Progress `[N/TOTAL]`** — user biết còn bao nhiêu câu
-- **Cho phép multi-select** nếu câu hỏi cho phép nhiều đáp án — ghi rõ `(chọn nhiều được)` trong header
+### 6.3 Quy tắc generate script
 
-### 6.3 Tóm tắt trước khi hỏi
-
-Trước danh sách câu hỏi, Claude show bản tóm tắt 3-5 dòng:
-
-```
-## Tóm tắt plan
-
-Tao hiểu mày muốn: [1 câu mô tả mục tiêu]
-Ảnh hưởng: [X files, Y components, Z endpoints]
-Ước lượng: [nhỏ/vừa/lớn]
-Phát hiện: [N] điểm cần xác nhận trước khi làm.
-```
+- **`★` recommended** — thêm vào cuối `label`, chỉ 1 option mỗi câu
+- **`hint`** — 1 dòng hệ quả/mô tả cụ thể, bắt buộc cho mọi option (trừ `Other`)
+- **`Other — tự mô tả`** — option cuối **BẮT BUỘC** trong mọi câu hỏi, theo sau bằng `text()` prompt nếu được chọn
+- **`isCancel()` check** — sau mỗi `select()` / `text()`; cancel → `process.exit(0)`
+- **`note()` summary** — đặt sau `intro()`, trước câu hỏi đầu tiên
+- **Tối đa 7 câu hỏi** — ưu tiên 🔴 > 🟡 > 🟠 > 🔵 > ⚪ nếu nhiều hơn
+- **Output cuối** — `process.stdout.write('\nASKBACK_RESULT:' + JSON.stringify(answers) + '\n')` — luôn là dòng cuối cùng script, Claude dùng để parse answers
 
 ---
 
@@ -242,70 +214,87 @@ Thêm tính năng dark mode cho app. Dùng CSS variables.
 Toggle ở header. Lưu preference vào localStorage.
 ```
 
-### Claude phân tích → phát hiện:
+### Claude phân tích → generate + chạy script:
+
+```javascript
+// /tmp/ask-back-1703123456.mjs
+import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-back-deps/node_modules/@clack/prompts/index.js'
+
+const answers = {}
+
+intro(' ASK-BACK ')
+
+note(
+  'Thêm dark mode toggle, CSS vars, persist localStorage\nẢnh hưởng: globals.css, App.jsx, Header.jsx, 8+ components · Phát hiện: 4 điểm',
+  'Tóm tắt plan'
+)
+
+answers.q1 = await select({
+  message: '[1/4] 🟡 AMBIGUITY — Scope dark mode\n  Plan nói "CSS variables" nhưng 12 files dùng Tailwind hardcoded colors.',
+  options: [
+    { value: '1', label: 'Chỉ đổi CSS vars',             hint: 'Ít code — phần lớn app vẫn giữ light' },
+    { value: '2', label: 'Refactor toàn bộ  ★',           hint: 'Sạch, đúng intent — nhiều file hơn' },
+    { value: '3', label: 'Chỉ top-level (body/header)',   hint: 'Nhanh, ít risk — dark mode không hoàn chỉnh' },
+    { value: 'other', label: 'Other — tự mô tả',         hint: 'Nhập câu trả lời riêng' },
+  ],
+})
+if (isCancel(answers.q1)) { cancel('Cancelled'); process.exit(0) }
+if (answers.q1 === 'other') { answers.q1_custom = await text({ message: 'Mô tả:' }) }
+
+answers.q2 = await select({
+  message: '[2/4] 🟠 RISK — 5 SVG icons dùng fill="black" sẽ invisible trên dark bg',
+  options: [
+    { value: '1', label: 'Đổi SVG sang currentColor  ★', hint: '1 dòng/icon, tự adapt — recommended' },
+    { value: '2', label: 'Giữ nguyên',                   hint: 'Zero effort — icon khó thấy trên dark' },
+    { value: '3', label: 'Tạo 2 bộ icon light/dark',     hint: 'Đẹp nhất — double asset' },
+    { value: 'other', label: 'Other — tự mô tả' },
+  ],
+})
+if (isCancel(answers.q2)) { cancel('Cancelled'); process.exit(0) }
+if (answers.q2 === 'other') { answers.q2_custom = await text({ message: 'Mô tả:' }) }
+
+answers.q3 = await select({
+  message: '[3/4] 🔵 GAP — Default mode khi user mở app lần đầu?',
+  options: [
+    { value: '1', label: 'Default light  ★',               hint: 'Predictable, không bất ngờ' },
+    { value: '2', label: 'Theo system preference',         hint: 'Respect OS — cần test thêm' },
+    { value: '3', label: 'Bắt user chọn lần đầu',         hint: 'Explicit — thêm friction onboarding' },
+    { value: 'other', label: 'Other — tự mô tả' },
+  ],
+})
+if (isCancel(answers.q3)) { cancel('Cancelled'); process.exit(0) }
+if (answers.q3 === 'other') { answers.q3_custom = await text({ message: 'Mô tả:' }) }
+
+answers.q4 = await select({
+  message: '[4/4] ⚪ ASSUMPTION — Thêm transition 200ms khi toggle để tránh flash?',
+  options: [
+    { value: '1', label: 'OK, thêm vào  ★' },
+    { value: '2', label: 'Không cần, đổi ngay lập tức' },
+    { value: 'other', label: 'Other — tự mô tả' },
+  ],
+})
+if (isCancel(answers.q4)) { cancel('Cancelled'); process.exit(0) }
+if (answers.q4 === 'other') { answers.q4_custom = await text({ message: 'Mô tả:' }) }
+
+outro('Đã ghi nhận tất cả.')
+process.stdout.write('\nASKBACK_RESULT:' + JSON.stringify(answers) + '\n')
+```
+
+### Claude chạy script:
+
+```bash
+node /tmp/ask-back-1703123456.mjs
+```
+
+→ User thấy interactive prompt trong terminal, navigate arrow keys.
+
+### Output script → Claude đọc:
 
 ```
-Tao hiểu mày muốn: Thêm dark mode toggle, CSS vars, persist localStorage.
-Ảnh hưởng: globals.css, App.jsx, Header.jsx, 8+ components có hardcoded colors
-Ước lượng: vừa — Phát hiện: 4 điểm cần xác nhận.
-
-
-? [1/4] 🟡 AMBIGUITY — Scope dark mode
-
-  Plan nói "CSS variables" nhưng 12 files dùng Tailwind hardcoded colors
-  (bg-white, text-gray-900, etc.) — không tự switch khi đổi CSS var.
-
-  1. Chỉ đổi CSS vars — component nào dùng vars thì auto-dark
-     Ít code nhất, nhưng phần lớn app vẫn giữ light
-  2. Refactor toàn bộ — đổi tất cả hardcoded colors sang vars  ★
-     Đúng intent plan nhất, sạch — nhưng nhiều file hơn
-  3. Chỉ đổi top-level (body, header, footer) — nội dung giữ light
-     Nhanh, ít risk, dark mode không hoàn chỉnh
-
-─────────────────────────────────────────────────────────────────
-Enter to select · Tab/Arrow keys to navigate · Esc to skip
-
-
-? [2/4] 🟠 RISK — Existing icons biến mất trên dark bg
-
-  5 SVG icons dùng fill="black" — sẽ invisible khi nền tối.
-
-  1. Đổi SVG sang currentColor — tự adapt theo text color  ★
-     1 dòng thay đổi mỗi icon, không cần maintain 2 bộ
-  2. Giữ nguyên — chấp nhận icon khó thấy trên dark
-     Zero effort, nhưng UX xấu
-  3. Tạo 2 bộ icon light/dark
-     Đẹp nhất, nhưng double asset
-
-─────────────────────────────────────────────────────────────────
-Enter to select · Tab/Arrow keys to navigate · Esc to skip
-
-
-? [3/4] 🔵 GAP — Default mode khi user mở app lần đầu
-
-  Plan không nói: mặc định light, dark, hay theo system preference?
-
-  1. Default light  ★
-     Predictable, không bất ngờ với user lần đầu
-  2. Theo system preference (prefers-color-scheme)
-     Respect OS setting, nhưng cần test thêm
-  3. Bắt user chọn lần đầu
-     Explicit nhất, nhưng thêm friction onboarding
-
-─────────────────────────────────────────────────────────────────
-Enter to select · Tab/Arrow keys to navigate · Esc to skip
-
-
-? [4/4] ⚪ ASSUMPTION — Transition khi toggle
-
-  Tao sẽ thêm transition 200ms khi toggle (tránh flash).
-
-  1. OK, thêm vào  ★
-  2. Không cần, đổi ngay lập tức
-
-─────────────────────────────────────────────────────────────────
-Enter to select · Tab/Arrow keys to navigate · Esc to skip
+ASKBACK_RESULT:{"q1":"2","q2":"1","q3":"1","q4":"1"}
 ```
+
+### Claude thực thi theo: refactor toàn bộ colors + SVG currentColor + default light + transition 200ms.
 
 ### User trả lời:
 
