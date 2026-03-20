@@ -41,6 +41,7 @@ _Lý do: build pass không đảm bảo app chạy đúng. Runtime errors (API s
 - [ ] Tất cả files trong list đã được update
 - [ ] `docs/MD_FILES_TO_UPDATE.md` đã được clear sau khi update xong
 - [ ] Nếu có env var / service / dependency mới → `docs/REQUIREMENTS_CHECK.md` đã update
+- [ ] Nếu commit này hoàn thành milestone → `docs/GOAL.md` đã được update (tick `[x]`, cập nhật "Hiện tại đang ở đâu")
 
 _Lý do: đây là quality gate vì code và docs phải đi cùng nhau trong một commit. Nếu merge code mà docs cũ, người deploy server mới sau này sẽ thiếu thông tin và app sẽ crash._
 

@@ -1,5 +1,7 @@
 # ASK-BACK
 
+> **Auto-trigger trong `feature:` workflow:** Cơ chế phân tích này (Track A) tự động chạy trong Phase 1 Analysis — không cần prefix `ask back`. Dùng standalone bằng prefix `ask back` khi muốn phân tích ngoài feature workflow.
+
 ## Cơ Chế Phản Hồi Ngược Trước Khi Thực Thi
 
 ---
@@ -278,35 +280,7 @@ B, A, B, A
 
 ---
 
-## 9. ADAPT CHO DỰ ÁN CỤ THỂ
-
-File này là **generic**. Để adapt cho 1 dự án cụ thể:
-
-### Bước 1: Thêm file này vào project
-
-```bash
-cp ASK-BACK.md /path/to/project/
-```
-
-### Bước 2: Bảo Claude CLI adapt
-
-```
-Đọc file ASK-BACK.md và CLAUDE.md (hoặc README).
-Hiểu codebase này. Từ giờ khi tao nói "ask back" trước bất kỳ
-prompt nào, hãy tuân theo quy trình trong ASK-BACK.md.
-```
-
-### Bước 3: Dùng
-
-```
-ask back
-
-[paste plan/prompt dài ngoằng vào đây]
-```
-
----
-
-## 10. TUNING
+## 9. TUNING
 
 ### Điều chỉnh độ "hỏi nhiều"
 

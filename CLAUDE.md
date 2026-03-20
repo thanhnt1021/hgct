@@ -50,10 +50,12 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 - **"commit"** → commit + push nhánh hiện tại + update MD files (chỉ làm khi được lệnh)
 - **"merge main"** hoặc **"lên production"** → merge + push + deploy production (chỉ làm khi được lệnh)
 - **"deploy demo"** → full deploy từ GitHub (dùng sau khi đã commit)
+- **"check goal"** → đọc `GOAL.md` → show tóm tắt: mục tiêu + milestone đang ở đâu + pending items + đề xuất bước tiếp theo
+- **"update goal"** → đọc `GOAL.md` → đề xuất những gì nên cập nhật dựa trên việc vừa làm trong session (tick milestone, cập nhật "đang ở đâu", giải quyết pending items)
 - **"branch hiện tại là gì"** → `git branch --show-current`
 - **"check requirements"** → đọc `docs/universal_rules/NEW_PROJECT_SETUP.md`, kiểm tra + tạo files còn thiếu
 - **"update workflow"** → review + đề xuất cải tiến các file trong `docs/universal_rules/`
-- **"read context"** → đọc để hiểu project: `CLAUDE.md` + tất cả files trong `docs/` + `docs/universal_rules/`. Tuỳ task đọc thêm: `prisma/schema.prisma` (models), `src/app/api/astrology/report/route.ts` (report flow), `src/lib/jobs.ts` (job system), `src/lib/astrology/calculations.ts` (chart engine). **Sau khi đọc xong → báo ngắn "Đã hiểu, sẵn sàng nhận lệnh." → DỪNG. Không output gì thêm.**
+- **"read context"** → đọc để hiểu project: `CLAUDE.md` + tất cả files trong `docs/` (gồm `GOAL.md`) + `docs/universal_rules/` (gồm `OUTCOME.md`, `ASK-BACK.md`). Tuỳ task đọc thêm: `prisma/schema.prisma` (models), `src/app/api/astrology/report/route.ts` (report flow), `src/lib/jobs.ts` (job system), `src/lib/astrology/calculations.ts` (chart engine). Sau đó: **Goal Check** theo `docs/universal_rules/OUTCOME.md` + `UNIVERSAL_WORKFLOW.md` mục Goal Tracking Protocol. **Xong → báo ngắn "Đã hiểu, sẵn sàng nhận lệnh." → DỪNG. Không output gì thêm.**
 - **"report context"** → giống `read context` nhưng sau khi đọc xong → output full structured summary theo format trong `docs/universal_rules/UNIVERSAL_WORKFLOW.md` mục "report context — Output Format".
 
 **Universal-workflow repo (cho Rule 7):**

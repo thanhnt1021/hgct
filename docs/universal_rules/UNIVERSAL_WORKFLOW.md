@@ -16,6 +16,9 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | Trước khi commit | `QUALITY_GATES.md` |
 | Project có UI/web/mobile | `UI_MOBILE_RULES.md` |
 | Setup project mới / `check requirements` | `NEW_PROJECT_SETUP.md` |
+| Hỏi ngược trước khi thực thi (standalone) | `ASK-BACK.md` |
+| Theo dõi mục tiêu / goal drift | `OUTCOME.md` |
+| Tạo GOAL.md cho project mới | `GOAL_TEMPLATE.md` |
 
 ---
 
@@ -30,7 +33,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `deploy demo` | Full deploy từ GitHub (sau khi đã commit) |
 | `check requirements` | Kiểm tra và setup mọi thứ còn thiếu theo `NEW_PROJECT_SETUP.md` |
 | `update workflow` | Review + đề xuất cải tiến các file trong `universal_rules/` |
-| `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) + source files project-specific (xem CLAUDE.md của từng project). Hiểu project xong → báo ngắn "Đã hiểu, sẵn sàng nhận lệnh." → **DỪNG. Không output gì thêm.** |
+| `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) + source files project-specific (xem CLAUDE.md của từng project). Sau đó: **Goal Check** theo protocol trong `OUTCOME.md` (xem mục Goal Tracking Protocol bên dưới). Xong → báo ngắn "Đã hiểu, sẵn sàng nhận lệnh." → **DỪNG. Không output gì thêm.** |
 | `report context` | Giống `read context` nhưng sau khi đọc xong → **output full structured summary** theo format định nghĩa trong mục **"report context — Output Format"** bên dưới. |
 
 ---
@@ -78,24 +81,38 @@ Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy 
 > Vẫn phải đọc context, hỏi Q&A, và **chờ user confirm rõ ràng** trước khi viết bất kỳ dòng code nào.
 >
 > - **SAI:** `feature: [tên]` + plan → tạo branch → implement ngay.
-> - **ĐÚNG:** `feature: [tên]` + plan → tạo branch → đọc context → hỏi Q&A → **chờ user trả lời** → implement.
+> - **ĐÚNG:** `feature: [tên]` + plan → tạo branch → đọc context → **Analysis Phase** (Q&A unified + update GOAL) → **print Full Plan** → **chờ user confirm** → implement.
 
-### Phase 1 — Hiểu rõ trước khi làm
+### Phase 1 — Analysis Phase
 
-1. Đọc plan/prompt từ user.
-2. **Re-read context project** — đọc các file liên quan đến feature (schema, API routes, components, types...) để đối chiếu với plan.
-3. **Identify blind spots** — liệt kê những điểm chưa rõ: quyết định kỹ thuật còn mở, edge cases chưa được cover, rủi ro, dependency giữa các bước.
-4. **Gom tất cả câu hỏi vào 1 message duy nhất** — hỏi user để làm rõ, bao gồm:
-   - Những quyết định kỹ thuật cần xác nhận
-   - Edge cases cần biết cách xử lý
-   - Chiến lược test cho từng thay đổi (xác định trước để sau khi làm xong mỗi bước có thể verify ngay)
-5. Nếu câu trả lời vẫn còn điểm mù — hỏi tiếp, **nhưng luôn gom thành 1 batch**, không hỏi lẻ từng câu.
-6. **Bắt đầu implement khi — phải thỏa MỌI điều kiện sau:**
-   - User đã **trả lời batch Q&A** (không phải chỉ đính kèm plan)
-   - User xác nhận rõ ràng bằng tín hiệu như `làm đi`, `make it`, `go ahead`, `proceed`, `ok làm`, hoặc tương đương
-   - **Lưu ý:** "tương đương" ở đây nghĩa là câu chủ động ra lệnh — **KHÔNG phải** chỉ đính kèm plan chi tiết, KHÔNG phải im lặng sau Q&A.
+> ⚠️ **RULE CỨNG:** Không bao giờ bỏ qua Phase 1, dù user đính kèm plan chi tiết đến đâu. Plan là input để đối chiếu — **KHÔNG phải lệnh implement.**
 
-> **Mục tiêu của Phase 1:** Sau khi Q&A xong, có thể implement một mạch từ đầu đến cuối mà không cần dừng lại hỏi thêm.
+**Bước 1.** Đọc plan/prompt của user.
+
+**Bước 2.** Re-read context: các files codebase liên quan (schema, API routes, components, types...) + `GOAL.md` nếu có.
+
+**Bước 3.** Chạy 3 tracks phân tích song song (ngầm, không output ra):
+- **Track A — Codebase (ASK-BACK):** So plan vs code thực tế → classify findings: 🔴 CONFLICT / 🟡 AMBIGUITY / 🟠 RISK / 🔵 GAP / ⚪ ASSUMPTION. Quy tắc + format: xem `ASK-BACK.md`.
+- **Track B — Goal (OUTCOME):** So plan vs `GOAL.md` → serve milestone nào? conflict goal nào? goal drift không? Quy tắc: xem `OUTCOME.md`.
+- **Track C — Implementation:** Dependencies, technical decisions còn mở, test strategy cho từng bước.
+
+**Bước 4.** Gom tất cả findings từ 3 tracks → **1 batch Q&A duy nhất** theo ASK-BACK format (selectable options, max 7, có `← khuyến nghị`). Bắt đầu bằng tóm tắt 3-5 dòng (scope + files affected + số findings).
+
+**Bước 5.** User chọn options → nhận answers.
+
+**Bước 6.** Nếu có `GOAL.md` → update ngay dựa trên answers: link milestone, resolve conflicts, cập nhật `_Last reviewed_`.
+
+**Bước 7.** Print **Full Implementation Plan** — đủ chi tiết để implement không cần hỏi thêm:
+- Approach tổng thể
+- Các bước theo thứ tự (mỗi bước test được độc lập)
+- Files sẽ thay đổi
+- Edge cases + cách xử lý (đã xác nhận ở bước 5)
+
+**Bước 8.** Chờ user confirm (`làm đi`, `proceed`, `ok`, hoặc tương đương) → chuyển Phase 2.
+
+> **Mục tiêu Phase 1:** Sau khi xong, implement được một mạch từ đầu đến cuối không cần dừng hỏi thêm.
+
+> **Exception:** Plan đơn giản (< 3 files, không có ambiguity, không ảnh hưởng goal) → gom bước 3–5 thành 1 confirm ngắn, skip bước 7 nếu approach đã rõ.
 
 ### Phase 2 — Implement từng bước, test ngay
 
@@ -107,6 +124,42 @@ Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy 
 4. Khi tất cả xong → quick deploy lần cuối → **báo cáo tổng kết** → **DỪNG chờ feedback**.
 
 > **Exception:** Nếu gặp vấn đề không giải quyết được hoặc loop >2 lần → **dừng, tham vấn user ngay** — không tự thử mãi.
+
+---
+
+## Goal Tracking Protocol
+
+Áp dụng khi project có `docs/GOAL.md` + `docs/OUTCOME.md`. Chi tiết từ góc độ user: xem `OUTCOME.md` mục **CÁCH VẬN HÀNH**.
+
+### Trigger A — `read context`
+
+Sau khi đọc xong tất cả docs:
+
+1. Đọc `GOAL.md` → extract mục tiêu cuối + milestone hiện tại
+2. Output 1 dòng: `📌 Goal: [X] | 📍 Đang ở: [milestone]`
+3. Nếu `_Last reviewed_` > 7 ngày **hoặc** có `Pending / Cần Quyết Định` chưa giải quyết → hiện danh sách + hỏi user có gì cần update không (options A/B/C theo format trong OUTCOME.md)
+4. Nếu user confirm OK → cập nhật `_Last reviewed_` thành ngày hôm nay trong `GOAL.md`
+5. Nếu không có `GOAL.md` → hỏi muốn tạo không (theo OUTCOME.md mục 7)
+6. **Sau đó mới báo "Đã hiểu, sẵn sàng nhận lệnh."**
+
+### Trigger B — `feature: [tên]` (Track B trong Analysis Phase)
+
+Chạy song song với Track A trong Phase 1 bước 3. Claude so plan vs `GOAL.md`:
+1. Feature serve milestone nào? Nếu không có → flag để thêm mới.
+2. Plan có conflict với goal hiện tại không?
+3. Plan có nằm ngoài scope goals không (goal drift)?
+
+Findings gom vào batch Q&A chung (bước 4). Sau khi user confirm → **update `GOAL.md` ngay** (bước 6): link milestone, resolve conflicts, cập nhật `_Last reviewed_`.
+
+### Trigger C — `commit`
+
+Trước khi viết commit message, check: commit này có hoàn thành milestone nào không?
+- **Có** → đề xuất update `GOAL.md` (tick `[x]`, cập nhật "Hiện tại đang ở đâu") — user confirm trước khi include trong commit
+- **Không** → skip hoàn toàn, không hỏi thừa
+
+### Goal-Check và Drift-Check (implicit, không trigger bởi lệnh)
+
+Mỗi khi nhận task bất kỳ: tự check ngầm task có dẫn đến goal không. Nếu lệch → cảnh báo + options. Xem đầy đủ trong `OUTCOME.md` mục 3-4.
 
 ---
 
@@ -128,6 +181,11 @@ Chỉ list các flow quan trọng, không cần list hết.
 ### 4. Current Status
 - **Done:** các tính năng đã hoàn chỉnh và tested (chỉ list những cái quan trọng)
 - **TODO / In Progress:** những gì còn cần làm hoặc đang dở
+
+### 4b. Goals (nếu project có GOAL.md)
+- **Mục tiêu cuối:** [1 câu]
+- **Milestone đang ở:** [tên milestone + % ước tính]
+- **Pending:** [danh sách items nếu có, hoặc "không có"]
 
 ### 5. Workflow Quick Ref
 - Branch hiện tại + strategy

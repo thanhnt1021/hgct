@@ -17,6 +17,7 @@ Chạy lệnh `check requirements` — Claude đọc file này và tự động:
 - [ ] `docs/universal_rules/` — folder này (đã copy vào là có)
 - [ ] `docs/MD_FILES_TO_UPDATE.md` — nếu chưa có: tự tạo với nội dung template trống
 - [ ] `docs/REQUIREMENTS_CHECK.md` — nếu chưa có: tự tạo template, hỏi user điền thông tin server
+- [ ] `docs/GOAL.md` — nếu chưa có: hỏi user có muốn tạo không; nếu có → copy từ `docs/universal_rules/GOAL_TEMPLATE.md` và hỏi user điền 3 câu (mục tiêu / thành công / không làm gì)
 
 ### Template `docs/MD_FILES_TO_UPDATE.md` (khi tạo mới)
 
