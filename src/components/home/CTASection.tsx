@@ -2,7 +2,14 @@
 
 import Link from 'next/link'
 
-export default function CTASection() {
+const CTA_DEFAULTS = {
+  body: 'Bạn không tình cờ lạc vào trang này đâu. Có thể vũ trụ đã sắp xếp một chút... hoặc một người bạn nào đó đưa bạn đến đây..\nNhưng nếu bạn đang đọc đến dòng này, có lẽ trong lòng bạn cũng đang có vài câu hỏi băn khoăn về bản thân, tình yêu hay con đường phía trước. Và biết đâu, câu trả lời đó đang nằm trong bản đồ sao của bạn.',
+  buttonText: 'Khám phá tại đây',
+}
+
+export default function CTASection({ body, buttonText }: { body?: string; buttonText?: string }) {
+  const ctaBody = body || CTA_DEFAULTS.body
+  const ctaBtn = buttonText || CTA_DEFAULTS.buttonText
   return (
     <section className="relative z-10 py-28 sm:py-36">
       <div className="max-w-4xl mx-auto px-4">
@@ -32,12 +39,13 @@ export default function CTASection() {
               <div className="mb-8" style={{ width: '60px', height: '1px', background: 'linear-gradient(90deg, transparent, #d9ab55, transparent)' }} />
 
               <p className="mb-10 max-w-2xl" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem', lineHeight: 1.9 }}>
-                Bạn không tình cờ lạc vào trang này đâu. Có thể vũ trụ đã sắp xếp một chút... hoặc một người bạn nào đó đưa bạn đến đây..<br />
-                Nhưng nếu bạn đang đọc đến dòng này, có lẽ trong lòng bạn cũng đang có vài câu hỏi băn khoăn về bản thân, tình yêu hay con đường phía trước. Và biết đâu, câu trả lời đó đang nằm trong bản đồ sao của bạn.
+                {ctaBody.split('\n').map((line, i) => (
+                  <span key={i}>{line}{i < ctaBody.split('\n').length - 1 && <br />}</span>
+                ))}
               </p>
 
               <Link href="/services" className="btn-cta-main mb-6">
-                Khám phá tại đây
+                {ctaBtn}
               </Link>
 
               <p style={{ color: '#9090a8', fontSize: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>

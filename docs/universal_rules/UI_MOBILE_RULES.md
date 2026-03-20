@@ -2,6 +2,14 @@
 
 Áp dụng khi project có giao diện người dùng (web, mobile app, PWA).
 
+## ❌ Font Blacklist — KHÔNG BAO GIỜ dùng
+
+| Font | Lý do |
+|---|---|
+| **Cinzel** / Cinzel Decorative | Không hỗ trợ diacritics tiếng Việt — chữ có dấu bị vỡ hoặc render xấu. Dùng `var(--font-vietnam)` (Be Vietnam Pro) hoặc `var(--font-playfair)` thay thế. |
+
+---
+
 ## Mobile-First
 
 - Thiết kế và test mobile trước, sau đó mở rộng ra desktop
