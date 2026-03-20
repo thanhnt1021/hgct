@@ -119,71 +119,91 @@ Claude phân loại findings vào 6 categories:
 
 ### 6.1 Format câu hỏi
 
-Mỗi câu hỏi PHẢI có **selectable options** để user chọn nhanh (không cần gõ):
+Mỗi câu hỏi hiển thị theo **CLI menu format** — numbered list + description line + footer nav:
 
 ```
-### 🔴 CONFLICT: [Mô tả ngắn]
+? [N/TOTAL] 🔴 CONFLICT — [Mô tả ngắn]
 
-Plan nói: [X]
-Code hiện tại: [Y]
+  [1-2 dòng context: plan nói gì vs code thực tế, hoặc mô tả ambiguity]
 
-→ Chọn:
-  A) Theo plan — xóa code cũ, làm mới
-  B) Giữ code cũ — bỏ qua phần này của plan
-  C) Merge — giữ cũ + thêm mới [mô tả cách merge]
+  1. [Tên option ngắn]  ★
+     [1 dòng hệ quả / mô tả cụ thể]
+  2. [Tên option]
+     [1 dòng hệ quả / mô tả cụ thể]
+  3. [Tên option]
+     [1 dòng hệ quả / mô tả cụ thể]
+
+─────────────────────────────────────────────────────────────────
+Enter to select · Tab/Arrow keys to navigate · Esc to skip
 ```
 
-```
-### 🟡 AMBIGUITY: [Mô tả ngắn]
-
-Plan nói: "[câu mơ hồ]"
-Có thể hiểu:
-
-→ Chọn:
-  A) [Cách hiểu 1 — mô tả cụ thể]
-  B) [Cách hiểu 2 — mô tả cụ thể]
-  C) [Cách hiểu 3 — nếu có]
-```
+**Quy ước cho từng loại:**
 
 ```
-### 🟠 RISK: [Mô tả ngắn]
+? [N/TOTAL] 🔴 CONFLICT — [Mô tả ngắn]
+  Plan nói [X] — code hiện tại đang là [Y].
 
-Nếu làm [X] theo plan → có thể break [Y].
-
-→ Chọn:
-  A) Làm luôn — chấp nhận risk, fix sau nếu cần
-  B) Làm nhưng thêm safeguard [mô tả]
-  C) Bỏ qua phần này
+  1. Theo plan — xóa code cũ, làm mới
+     [hệ quả]
+  2. Giữ code cũ — bỏ qua phần này của plan
+     [hệ quả]
+  3. Merge — giữ cũ + thêm mới
+     [mô tả cách merge]
 ```
 
 ```
-### 🔵 GAP: [Mô tả ngắn]
+? [N/TOTAL] 🟡 AMBIGUITY — [Mô tả ngắn]
+  Plan nói "[câu mơ hồ]" — có thể hiểu theo nhiều cách.
 
-Plan không nói rõ [Z]. Cần biết để implement.
-
-→ Chọn:
-  A) [Option mặc định hợp lý nhất]
-  B) [Option thay thế]
-  C) Để tao mô tả cụ thể: [user tự gõ]
+  1. [Cách hiểu 1]
+     [hệ quả cụ thể]
+  2. [Cách hiểu 2]
+     [hệ quả cụ thể]
+  3. [Cách hiểu 3 nếu có]
+     [hệ quả cụ thể]
 ```
 
 ```
-### ⚪ ASSUMPTION: [Mô tả ngắn]
+? [N/TOTAL] 🟠 RISK — [Mô tả ngắn]
+  Nếu làm [X] theo plan → có thể break [Y].
 
-Plan không nhắc nhưng tao sẽ giả định: [assumption].
+  1. Làm luôn — chấp nhận risk, fix sau nếu cần
+     [hệ quả]
+  2. Làm nhưng thêm safeguard  ★
+     [mô tả safeguard cụ thể]
+  3. Bỏ qua phần này
+     [hệ quả]
+```
 
-→ Chọn:
-  A) OK, đúng rồi
-  B) Không — [user giải thích]
+```
+? [N/TOTAL] 🔵 GAP — [Mô tả ngắn]
+  Plan không nói rõ [Z] — cần biết để implement.
+
+  1. [Option mặc định hợp lý nhất]  ★
+     [hệ quả]
+  2. [Option thay thế]
+     [hệ quả]
+  3. Để tao mô tả cụ thể hơn
+     [user tự gõ]
+```
+
+```
+? [N/TOTAL] ⚪ ASSUMPTION — [Mô tả ngắn]
+  Plan không nhắc — tao sẽ giả định: [assumption].
+
+  1. OK, đúng rồi  ★
+  2. Không — [user giải thích]
 ```
 
 ### 6.2 Quy tắc format
 
 - **Tối đa 7 câu hỏi** mỗi lần. Nếu có nhiều hơn → nhóm lại hoặc ưu tiên 🔴 > 🟡 > 🟠 > 🔵 > ⚪
-- **Options ngắn gọn** — mỗi option ≤ 1 dòng. User phải scan được trong 3 giây.
-- **Có default recommendation** — đánh dấu option Claude khuyến nghị bằng ` ← khuyến nghị`
-- **Cho phép multi-select** nếu câu hỏi cho phép chọn nhiều
-- **Option cuối luôn là thoát** nếu phù hợp: "Bỏ qua, tao không quan tâm cái này"
+- **`★` đánh dấu recommended** — chỉ 1 option mỗi câu, đặt sau tên option trên cùng dòng
+- **Description line bắt buộc** cho mỗi option — 1 dòng, mô tả hệ quả cụ thể (ngoại trừ ⚪ ASSUMPTION ngắn có thể bỏ)
+- **Option title ngắn** — scan được trong 2 giây; detail ở description line
+- **Footer `─────` + `Enter to select...`** — in ở cuối mỗi câu hỏi, ngăn cách với câu tiếp theo
+- **Progress `[N/TOTAL]`** — user biết còn bao nhiêu câu
+- **Cho phép multi-select** nếu câu hỏi cho phép nhiều đáp án — ghi rõ `(chọn nhiều được)` trong header
 
 ### 6.3 Tóm tắt trước khi hỏi
 
@@ -225,49 +245,66 @@ Toggle ở header. Lưu preference vào localStorage.
 ### Claude phân tích → phát hiện:
 
 ```
-## Tóm tắt plan
-
 Tao hiểu mày muốn: Thêm dark mode toggle, CSS vars, persist localStorage.
 Ảnh hưởng: globals.css, App.jsx, Header.jsx, 8+ components có hardcoded colors
-Ước lượng: vừa
-Phát hiện: 4 điểm cần xác nhận.
+Ước lượng: vừa — Phát hiện: 4 điểm cần xác nhận.
 
----
 
-### 🟡 AMBIGUITY: Scope dark mode
+? [1/4] 🟡 AMBIGUITY — Scope dark mode
 
-Plan nói "CSS variables" nhưng code hiện tại có 12 files dùng Tailwind hardcoded colors (bg-white, text-gray-900, etc.)
+  Plan nói "CSS variables" nhưng 12 files dùng Tailwind hardcoded colors
+  (bg-white, text-gray-900, etc.) — không tự switch khi đổi CSS var.
 
-→ Chọn:
-  A) Chỉ đổi CSS vars — component nào dùng vars thì auto-dark, còn lại giữ nguyên
-  B) Refactor toàn bộ — đổi tất cả hardcoded colors sang vars luôn ← khuyến nghị
-  C) Chỉ đổi top-level (body, header, footer) — nội dung giữ light
+  1. Chỉ đổi CSS vars — component nào dùng vars thì auto-dark
+     Ít code nhất, nhưng phần lớn app vẫn giữ light
+  2. Refactor toàn bộ — đổi tất cả hardcoded colors sang vars  ★
+     Đúng intent plan nhất, sạch — nhưng nhiều file hơn
+  3. Chỉ đổi top-level (body, header, footer) — nội dung giữ light
+     Nhanh, ít risk, dark mode không hoàn chỉnh
 
-### 🟠 RISK: Existing images/icons
+─────────────────────────────────────────────────────────────────
+Enter to select · Tab/Arrow keys to navigate · Esc to skip
 
-Có 5 SVG icons dùng fill="black". Dark mode sẽ khiến chúng biến mất trên dark bg.
 
-→ Chọn:
-  A) Đổi SVG sang currentColor — tự adapt ← khuyến nghị
-  B) Giữ nguyên — chấp nhận icon khó thấy trên dark
-  C) Tạo 2 bộ icon light/dark
+? [2/4] 🟠 RISK — Existing icons biến mất trên dark bg
 
-### 🔵 GAP: Default mode
+  5 SVG icons dùng fill="black" — sẽ invisible khi nền tối.
 
-User mở app lần đầu → light hay dark hay theo system?
+  1. Đổi SVG sang currentColor — tự adapt theo text color  ★
+     1 dòng thay đổi mỗi icon, không cần maintain 2 bộ
+  2. Giữ nguyên — chấp nhận icon khó thấy trên dark
+     Zero effort, nhưng UX xấu
+  3. Tạo 2 bộ icon light/dark
+     Đẹp nhất, nhưng double asset
 
-→ Chọn:
-  A) Default light ← khuyến nghị
-  B) Default theo system preference (prefers-color-scheme)
-  C) Bắt user chọn lần đầu
+─────────────────────────────────────────────────────────────────
+Enter to select · Tab/Arrow keys to navigate · Esc to skip
 
-### ⚪ ASSUMPTION: Transition
 
-Tao sẽ thêm transition 200ms khi toggle (tránh flash). OK?
+? [3/4] 🔵 GAP — Default mode khi user mở app lần đầu
 
-→ Chọn:
-  A) OK ← khuyến nghị
-  B) Không cần transition, đổi ngay
+  Plan không nói: mặc định light, dark, hay theo system preference?
+
+  1. Default light  ★
+     Predictable, không bất ngờ với user lần đầu
+  2. Theo system preference (prefers-color-scheme)
+     Respect OS setting, nhưng cần test thêm
+  3. Bắt user chọn lần đầu
+     Explicit nhất, nhưng thêm friction onboarding
+
+─────────────────────────────────────────────────────────────────
+Enter to select · Tab/Arrow keys to navigate · Esc to skip
+
+
+? [4/4] ⚪ ASSUMPTION — Transition khi toggle
+
+  Tao sẽ thêm transition 200ms khi toggle (tránh flash).
+
+  1. OK, thêm vào  ★
+  2. Không cần, đổi ngay lập tức
+
+─────────────────────────────────────────────────────────────────
+Enter to select · Tab/Arrow keys to navigate · Esc to skip
 ```
 
 ### User trả lời:
