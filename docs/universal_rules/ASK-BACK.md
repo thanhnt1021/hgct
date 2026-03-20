@@ -115,87 +115,52 @@ Claude phân loại findings vào 6 categories:
 
 ---
 
-## 6. PHASE 4 — HỎI NGƯỢC (Interactive CLI)
+## 6. PHASE 4 — HỎI NGƯỢC (AskUserQuestion tool)
 
-Claude KHÔNG output câu hỏi dạng text. Thay vào đó: **generate + run một interactive CLI script** dùng `@clack/prompts` — user navigate bằng arrow keys, Enter để chọn.
+Claude KHÔNG output câu hỏi dạng text. Thay vào đó: dùng **`AskUserQuestion` tool** — native trong Claude Code CLI, hiện thị interactive UI với selectable options, auto có "Other" option.
 
 ### 6.1 Quy trình
 
-> **Giới hạn kỹ thuật:** Claude Code CLI Bash tool không forward interactive stdin. Script phải được user chạy trực tiếp trong terminal — Claude không tự run được.
+**Bước 1 — Gom questions:**
+Từ Phase 3, collect tất cả findings cần hỏi (tối đa 7, ưu tiên 🔴 > 🟡 > 🟠 > 🔵 > ⚪).
 
-**Bước 1 — Đảm bảo deps (Claude tự chạy):**
-```bash
-mkdir -p /tmp/ask-back-deps && cd /tmp/ask-back-deps && npm init -y --quiet && npm install @clack/prompts --silent
-```
+**Bước 2 — Call AskUserQuestion:**
+- Tối đa **4 câu hỏi mỗi lần gọi** (giới hạn tool)
+- Nếu có 5-7 câu → chia 2 lần gọi (nhóm critical trước)
+- "Other" option tự động có — không cần thêm thủ công
 
-**Bước 2 — Generate script:**
-Claude write file `/tmp/ask-back-[timestamp].mjs` với tất cả questions đã phân tích ở Phase 3.
-
-**Bước 3 — Claude nói với user:**
-```
-Chạy lệnh này trong terminal của mày:
-
-  node /tmp/ask-back-[timestamp].mjs
-
-Sau đó paste dòng ASKBACK_RESULT:... trở lại đây.
-```
-
-**Bước 4 — User chạy + paste kết quả:**
-User navigate arrow keys → Enter chọn → copy dòng cuối `ASKBACK_RESULT:{...}` → paste vào chat.
-
-**Bước 5 — Claude đọc kết quả + proceed:**
-Claude parse JSON → tạo execution plan → implement.
+**Bước 3 — Đọc answers + proceed:**
+Tool trả về answers dạng object. Claude đọc → tạo Full Plan → implement.
 
 ---
 
-### 6.2 Script template
+### 6.2 Quy tắc dùng AskUserQuestion
 
-```javascript
-// /tmp/ask-back-[timestamp].mjs
-import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-back-deps/node_modules/@clack/prompts/dist/index.mjs'
-import pc from '/tmp/ask-back-deps/node_modules/@clack/prompts/node_modules/picocolors/picocolors.js'
+- **`header`** — tối đa 12 ký tự, label ngắn cho câu hỏi (ví dụ: `"Scope"`, `"Auth"`, `"Deploy"`)
+- **`options`** — 2-4 options, mỗi option có `label` (ngắn) + `description` (hệ quả cụ thể)
+- **Recommended option** — đặt **đầu tiên** trong list + thêm `"(Recommended)"` vào cuối `description`
+- **`multiSelect: true`** — dùng khi câu hỏi cho phép chọn nhiều (ví dụ: "chọn features muốn enable")
+- **"Other"** — tự động có, user có thể type custom text — không cần thêm vào options
+- **Tóm tắt plan** — output dạng text trước khi gọi tool (1-3 dòng: mục tiêu + số findings)
 
-const answers = {}
+### 6.3 Template
 
-intro(pc.bgCyan(pc.black(' ASK-BACK ')))
+```
+// Trước khi gọi tool — output tóm tắt:
+"Tao hiểu mày muốn: [X]. Ảnh hưởng: [Y files]. Phát hiện [N] điểm cần xác nhận."
 
-note(
-  '[1 câu mô tả mục tiêu]\nẢnh hưởng: [X files] · Phát hiện: [N] điểm cần xác nhận',
-  'Tóm tắt plan'
-)
-
-// === QUESTION TEMPLATE ===
-answers.q1 = await select({
-  message: '[1/N] 🟡 AMBIGUITY — [Mô tả ngắn]\n  [1-2 dòng context]',
+// Gọi AskUserQuestion với 1-4 questions:
+{
+  question: "[N/TOTAL] 🔴 CONFLICT — [Mô tả ngắn]. [1-2 câu context]",
+  header: "[Label ≤12 ký tự]",
+  multiSelect: false,
   options: [
-    { value: '1', label: '[Option 1]  ★', hint: '[Hệ quả — recommended]' },
-    { value: '2', label: '[Option 2]',    hint: '[Hệ quả]' },
-    { value: '3', label: '[Option 3]',    hint: '[Hệ quả]' },
-    { value: 'other', label: 'Other — tự mô tả', hint: 'Nhập câu trả lời riêng' },
-  ],
-})
-if (isCancel(answers.q1)) { cancel('Cancelled'); process.exit(0) }
-if (answers.q1 === 'other') {
-  answers.q1_custom = await text({ message: 'Mô tả:' })
+    { label: "[Option 1]", description: "[Hệ quả] (Recommended)" },
+    { label: "[Option 2]", description: "[Hệ quả]" },
+    { label: "[Option 3]", description: "[Hệ quả]" },  // tối đa 4
+  ]
 }
-
-// ... thêm câu hỏi theo pattern trên
-
-outro(pc.green('Đã ghi nhận tất cả.'))
-process.stdout.write('\nASKBACK_RESULT:' + JSON.stringify(answers) + '\n')
 ```
-
----
-
-### 6.3 Quy tắc generate script
-
-- **`★` recommended** — thêm vào cuối `label`, chỉ 1 option mỗi câu
-- **`hint`** — 1 dòng hệ quả/mô tả cụ thể, bắt buộc cho mọi option (trừ `Other`)
-- **`Other — tự mô tả`** — option cuối **BẮT BUỘC** trong mọi câu hỏi, theo sau bằng `text()` prompt nếu được chọn
-- **`isCancel()` check** — sau mỗi `select()` / `text()`; cancel → `process.exit(0)`
-- **`note()` summary** — đặt sau `intro()`, trước câu hỏi đầu tiên
-- **Tối đa 7 câu hỏi** — ưu tiên 🔴 > 🟡 > 🟠 > 🔵 > ⚪ nếu nhiều hơn
-- **Output cuối** — `process.stdout.write('\nASKBACK_RESULT:' + JSON.stringify(answers) + '\n')` — luôn là dòng cuối cùng script, Claude dùng để parse answers
 
 ---
 
@@ -221,7 +186,7 @@ Thêm tính năng dark mode cho app. Dùng CSS variables.
 Toggle ở header. Lưu preference vào localStorage.
 ```
 
-### Claude phân tích → generate + chạy script:
+### Claude phân tích → output tóm tắt + gọi AskUserQuestion:
 
 ```javascript
 // /tmp/ask-back-1703123456.mjs
@@ -229,87 +194,53 @@ import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-bac
 
 const answers = {}
 
-intro(' ASK-BACK ')
-
-note(
-  'Thêm dark mode toggle, CSS vars, persist localStorage\nẢnh hưởng: globals.css, App.jsx, Header.jsx, 8+ components · Phát hiện: 4 điểm',
-  'Tóm tắt plan'
-)
-
-answers.q1 = await select({
-  message: '[1/4] 🟡 AMBIGUITY — Scope dark mode\n  Plan nói "CSS variables" nhưng 12 files dùng Tailwind hardcoded colors.',
-  options: [
-    { value: '1', label: 'Chỉ đổi CSS vars',             hint: 'Ít code — phần lớn app vẫn giữ light' },
-    { value: '2', label: 'Refactor toàn bộ  ★',           hint: 'Sạch, đúng intent — nhiều file hơn' },
-    { value: '3', label: 'Chỉ top-level (body/header)',   hint: 'Nhanh, ít risk — dark mode không hoàn chỉnh' },
-    { value: 'other', label: 'Other — tự mô tả',         hint: 'Nhập câu trả lời riêng' },
-  ],
-})
-if (isCancel(answers.q1)) { cancel('Cancelled'); process.exit(0) }
-if (answers.q1 === 'other') { answers.q1_custom = await text({ message: 'Mô tả:' }) }
-
-answers.q2 = await select({
-  message: '[2/4] 🟠 RISK — 5 SVG icons dùng fill="black" sẽ invisible trên dark bg',
-  options: [
-    { value: '1', label: 'Đổi SVG sang currentColor  ★', hint: '1 dòng/icon, tự adapt — recommended' },
-    { value: '2', label: 'Giữ nguyên',                   hint: 'Zero effort — icon khó thấy trên dark' },
-    { value: '3', label: 'Tạo 2 bộ icon light/dark',     hint: 'Đẹp nhất — double asset' },
-    { value: 'other', label: 'Other — tự mô tả' },
-  ],
-})
-if (isCancel(answers.q2)) { cancel('Cancelled'); process.exit(0) }
-if (answers.q2 === 'other') { answers.q2_custom = await text({ message: 'Mô tả:' }) }
-
-answers.q3 = await select({
-  message: '[3/4] 🔵 GAP — Default mode khi user mở app lần đầu?',
-  options: [
-    { value: '1', label: 'Default light  ★',               hint: 'Predictable, không bất ngờ' },
-    { value: '2', label: 'Theo system preference',         hint: 'Respect OS — cần test thêm' },
-    { value: '3', label: 'Bắt user chọn lần đầu',         hint: 'Explicit — thêm friction onboarding' },
-    { value: 'other', label: 'Other — tự mô tả' },
-  ],
-})
-if (isCancel(answers.q3)) { cancel('Cancelled'); process.exit(0) }
-if (answers.q3 === 'other') { answers.q3_custom = await text({ message: 'Mô tả:' }) }
-
-answers.q4 = await select({
-  message: '[4/4] ⚪ ASSUMPTION — Thêm transition 200ms khi toggle để tránh flash?',
-  options: [
-    { value: '1', label: 'OK, thêm vào  ★' },
-    { value: '2', label: 'Không cần, đổi ngay lập tức' },
-    { value: 'other', label: 'Other — tự mô tả' },
-  ],
-})
-if (isCancel(answers.q4)) { cancel('Cancelled'); process.exit(0) }
-if (answers.q4 === 'other') { answers.q4_custom = await text({ message: 'Mô tả:' }) }
-
-outro('Đã ghi nhận tất cả.')
-process.stdout.write('\nASKBACK_RESULT:' + JSON.stringify(answers) + '\n')
+Tao hiểu mày muốn: Thêm dark mode toggle, CSS vars, persist localStorage.
+Ảnh hưởng: globals.css, App.jsx, Header.jsx, 8+ components. Phát hiện 4 điểm cần xác nhận.
 ```
 
-### Claude chạy script:
-
-```bash
-node /tmp/ask-back-1703123456.mjs
-```
-
-→ User thấy interactive prompt trong terminal, navigate arrow keys.
-
-### Output script → Claude đọc:
+### Claude gọi AskUserQuestion (4 câu 1 lần):
 
 ```
-ASKBACK_RESULT:{"q1":"2","q2":"1","q3":"1","q4":"1"}
+questions: [
+  {
+    question: "[1/4] 🟡 AMBIGUITY — Scope dark mode. Plan nói 'CSS variables' nhưng 12 files dùng Tailwind hardcoded colors.",
+    header: "Scope",
+    options: [
+      { label: "Chỉ đổi CSS vars",          description: "Ít code — phần lớn app vẫn giữ light" },
+      { label: "Refactor toàn bộ",           description: "Đúng intent plan, sạch nhất (Recommended)" },
+      { label: "Chỉ top-level body/header",  description: "Nhanh, ít risk — dark mode không hoàn chỉnh" },
+    ]
+  },
+  {
+    question: "[2/4] 🟠 RISK — 5 SVG icons dùng fill='black' sẽ invisible trên dark bg.",
+    header: "SVG icons",
+    options: [
+      { label: "Đổi sang currentColor", description: "1 dòng/icon, tự adapt (Recommended)" },
+      { label: "Giữ nguyên",            description: "Zero effort — icon khó thấy trên dark" },
+      { label: "Tạo 2 bộ icon",         description: "Đẹp nhất — double asset" },
+    ]
+  },
+  {
+    question: "[3/4] 🔵 GAP — Default mode khi user mở app lần đầu?",
+    header: "Default mode",
+    options: [
+      { label: "Default light",           description: "Predictable, không bất ngờ (Recommended)" },
+      { label: "Theo system preference",  description: "Respect OS setting" },
+      { label: "Bắt user chọn lần đầu",  description: "Explicit — thêm friction" },
+    ]
+  },
+  {
+    question: "[4/4] ⚪ ASSUMPTION — Thêm transition 200ms khi toggle để tránh flash?",
+    header: "Transition",
+    options: [
+      { label: "OK, thêm vào",        description: "Smooth UX (Recommended)" },
+      { label: "Không cần transition", description: "Đổi ngay lập tức" },
+    ]
+  }
+]
 ```
 
-### Claude thực thi theo: refactor toàn bộ colors + SVG currentColor + default light + transition 200ms.
-
-### User trả lời:
-
-```
-B, A, B, A
-```
-
-### Claude thực thi theo: refactor toàn bộ colors + SVG currentColor + system default + transition 200ms.
+### User chọn → Claude thực thi theo answers nhận được.
 
 ---
 
