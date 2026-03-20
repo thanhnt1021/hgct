@@ -2,7 +2,14 @@
 
 import Link from 'next/link'
 
-export default function HeroSection() {
+const HERO_DEFAULTS = {
+  subtitle: 'Bầu trời lúc bạn chào đời không hề ngẫu nhiên. Mỗi hành tinh là một dấu ấn – mỗi góc chiếu là một câu chuyện về bạn. Bản đồ sao chính là hạt giống tiềm năng đang chờ bạn khám phá và đánh thức. Hiểu bản đồ sao là bắt đầu hành trình hiểu mình – để chọn đúng đường, đi đúng hướng và tìm đúng người đồng hành.',
+  ctaText: 'Khám phá ngay tại đây',
+}
+
+export default function HeroSection({ subtitle, ctaText }: { subtitle?: string; ctaText?: string }) {
+  const sub = subtitle || HERO_DEFAULTS.subtitle
+  const cta = ctaText || HERO_DEFAULTS.ctaText
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -83,13 +90,13 @@ export default function HeroSection() {
           className="max-w-3xl mx-auto mb-14 animate-fade-up-delay-1 text-center"
           style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: 'clamp(1.05rem, 2vw, 1.25rem)', lineHeight: 1.9, fontWeight: 400 }}
         >
-          Bầu trời lúc bạn chào đời không hề ngẫu nhiên. Mỗi hành tinh là một dấu ấn – mỗi góc chiếu là một câu chuyện về bạn. Bản đồ sao chính là hạt giống tiềm năng đang chờ bạn khám phá và đánh thức. Hiểu bản đồ sao là bắt đầu hành trình hiểu mình – để chọn đúng đường, đi đúng hướng và tìm đúng người đồng hành.
+          {sub}
         </p>
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-fade-up-delay-2">
           <Link href="/services" className="btn-hero-primary">
-            Khám phá ngay tại đây
+            {cta}
           </Link>
         </div>
 

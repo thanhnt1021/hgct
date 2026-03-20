@@ -40,6 +40,20 @@ export const authOptions: NextAuthOptions = {
       : []),
   ],
   session: { strategy: 'jwt' as const, maxAge: 30 * 24 * 60 * 60 },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production'
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        domain: process.env.NODE_ENV === 'production' ? '.hatgiongchiemtinh.com' : undefined,
+      },
+    },
+  },
   pages: {
     signIn: '/auth/login',
     newUser: '/auth/register',

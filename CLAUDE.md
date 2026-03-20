@@ -218,6 +218,16 @@ src/
 - [x] Premium/lifetime cancel order — `DELETE /api/job/[id]`: sau `cancelJob`, nếu `planType === 'premium'/'lifetime'` thì updateMany order `{ jobId: id, status: { not: 'completed' } }` → set `status: 'cancelled', adminCancelledAt: now()` — order không còn hiện trong ❌ LỖI alert; `/api/astrology/report` order tạo với `status: 'processing'` + `jobId` (fix root cause: trước đó `status: 'pending'` + `jobId: null` nên cancel không tìm được); watchdog thêm `adminCancelledAt: null` guard
 - [x] TC-G2 fix — orphaned `processing` job linked to `completed` order (crash after order update but before job→done): `sweepStuckJobsOnce` check `order.status === 'completed'` → mark job `done` với `result: { orderCompleted: true }` thay vì `error` — processing page redirect to success bình thường
 - [x] TC-L fix — `processing+paid+jobId=null` stuck forever (crash between payment confirm and job creation): `sweepPaidPendingOrders` catch thêm `status: 'processing'` (không chỉ `pending`); `job-watchdog.ts` handle `jobId=null+paid+age>threshold` → `smartRetryOrder(watchdog)`
+- [x] **Admin Dashboard** — `dashboard.hatgiongchiemtinh.com` (subdomain riêng, Nginx + SSL Certbot); `src/middleware.ts` rewrite host → `/dashboard/*`; cookie domain `.hatgiongchiemtinh.com` chia sẻ session; `src/lib/dashboard-auth.ts` (`isAdminSession`: lifetime planType || ADMIN_EMAILS env); route group `dashboard/(app)/` auth-guarded, `dashboard/login/` public; 6 tabs:
+  - **Operations** — toggle site_mode (normal/maintenance) qua `config` table; hiệu lực ngay (force-dynamic)
+  - **Pricing** — inline edit per-service price (`price_career/love/synastry/transit`) → `PUT /api/admin/config`
+  - **Content** — edit 12 fields chia 2 section (Trang Chủ: hero_subtitle/hero_cta_text/cta_body/cta_button_text; Trang Dịch Vụ: service_{type}_name/desc × 4); error display rõ ràng khi API fail; grouped UI
+  - **Orders** — `GET /api/admin/orders` có pagination + filter status/service; `OrdersTable` client component
+  - **Deploy** — `POST /api/admin/deploy` SSE stream từ bash script; health poll `/api/health` sau production deploy, auto-reload
+  - **Settings** — `/api/admin/system-info`: uptime, heap/RSS/RAM, Node version, DB counts
+- [x] Services maintenance mode — `services/page.tsx` force-dynamic đọc `site_mode`; lifetime users bypass hoàn toàn; màn hình "Sắp ra mắt / Đang hoàn thiện thêm" dùng `var(--font-vietnam)` (không dùng Cinzel)
+- [x] ServicesClient extracted — `src/app/services/ServicesClient.tsx`; nhận `serviceConfigs` prop từ server; `buildServices()` merge DB values vào DEFAULT_SERVICES (fallback nếu chưa set)
+- [x] Cinzel font blacklist — `docs/universal_rules/UI_MOBILE_RULES.md` thêm `## ❌ Font Blacklist`; Cinzel/Cinzel Decorative bị cấm vì diacritics tiếng Việt bị vỡ; dùng `var(--font-vietnam)` hoặc `var(--font-playfair)` thay thế
 
 ## What's TODO
 

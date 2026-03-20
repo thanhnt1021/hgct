@@ -116,6 +116,9 @@ TELEGRAM_BOT_TOKEN=              # Token của @nguyclaudebot (notify bot)
 TELEGRAM_ADMIN_BOT_TOKEN=        # Token của @hatgiongchiemtinhbot (admin bot)
 TELEGRAM_ADMIN_WEBHOOK_SECRET=   # Random hex: node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
 # Chi tiết setup cả 2 bot: xem docs/telegram_bot_spec.md
+
+# Admin Dashboard
+ADMIN_EMAILS=                    # Comma-separated emails được phép truy cập dashboard (ngoài lifetime users), vd: admin@gmail.com
 ```
 
 Sau khi tạo `.env.local`, copy vào standalone:
@@ -148,7 +151,7 @@ sudo nginx -t && sudo nginx -s reload
 ## 8. SSL (Certbot)
 
 ```bash
-sudo certbot --nginx -d yourdomain.com -d demo.yourdomain.com
+sudo certbot --nginx -d yourdomain.com -d demo.yourdomain.com -d dashboard.yourdomain.com
 ```
 
 ---
