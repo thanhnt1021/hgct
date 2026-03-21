@@ -45,6 +45,8 @@ class StreamInterruptedError extends Error {
 
 function isRetryableError(err: unknown): boolean {
   if (err instanceof StreamInterruptedError) return true
+  // Bug #13 fix: HTTP 429/5xx from OpenRouter throw regular Error, not TypeError
+  if (err instanceof Error && /OpenRouter streaming error: (429|500|502|503|504)/.test(err.message)) return true
   if (!(err instanceof TypeError)) return false
   if (err.message === 'terminated' || err.message.includes('terminated')) return true
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

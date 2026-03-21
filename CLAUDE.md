@@ -238,7 +238,20 @@ src/
 ## What's TODO
 
 ## Known Fixes Applied
-- RRI-T v2.3 bug sweep (12 bugs): `report/route.ts` Bug#1 (missing profileDataB/profileUidA/B/startDate/endDate in order.create) + Bug#3 (manual createJob+processReport → createReportJob); `reportProcessor.ts` Bug#2 (savePdf orderId suffix ngăn PDF overwrite) + Bug#8 (await order update trước updateJob done); `pdf/[id]/route.ts` Bug#2 (regex accept `_\d+` suffix); `job-watchdog.ts` Bug#4 (OOM hint: inMemJob.error không phải .result.error) + Bug#6 (DB fallback khi job bị evict khỏi memory); `smart-retry.ts` Bug#5 (pdfResent path gọi updateJob done); `deploy/route.ts` Bug#9 (keepalive ping 20s + closed guard); `middleware.ts` Bug#10 (host trước x-forwarded-host); `sepay-webhook/route.ts` Bug#11 (timingSafeEqual); `admin/config/route.ts` Bug#12 (key allowlist + numeric validation)
+- RRI-T v2.3 bug sweep (31 bugs total, 2 sessions):
+  - Bugs #1–#12: `report/route.ts` Bug#1 + Bug#3; `reportProcessor.ts` Bug#2 + Bug#8; `pdf/[id]/route.ts` Bug#2; `job-watchdog.ts` Bug#4 + Bug#6; `smart-retry.ts` Bug#5; `deploy/route.ts` Bug#9; `middleware.ts` Bug#10; `sepay-webhook/route.ts` Bug#11 (timingSafeEqual); `admin/config/route.ts` Bug#12 (key allowlist + numeric validation)
+  - Bug#13: `openrouter.ts` — HTTP 429/5xx retry (RegExp match trên Error message, không phải TypeError)
+  - Bug#15: `telegram/admin.ts` — `handleMarkPaid` kiểm tra `adminCancelledAt` trước khi mark paid
+  - Bug#16: `profiles/route.ts` — IDOR: PUT/DELETE không verify ownership → thêm `userUid` check
+  - Bug#17: `sepay-webhook/route.ts` — race condition duplicate job: atomic lock `updateMany` (unpaid→paid)
+  - Bug#18: `jobs.ts` — `generateRecoveryToken` dùng `Math.random()` → đổi sang `crypto.randomBytes` (CSPRNG)
+  - Bug#19: `auth/change-password/route.ts` — không yêu cầu mật khẩu hiện tại khi đổi mật khẩu
+  - Bug#21: `cron/order-check/route.ts` + `cron/cleanup/route.ts` — CRON_SECRET dùng string compare → `timingSafeEqual`
+  - Bug#25: `notify.ts` `sendCustomerClaimAlert` — `transferContent` chèn raw vào `<code>` tag → `escHtml()`
+  - Bug#26: `api/email/send/route.ts` — dead stub endpoint không có auth guard → thêm `getServerSession`
+  - Bug#27: `api/payment/confirm/route.ts` — placeholder endpoint không có auth guard → thêm `getServerSession`
+  - Bug#28: `lib/pricing.ts` — `getPrice`/`getAllPrices` dùng `> 0` → `>= 0` (admin có thể set price=0)
+  - Bug#31: `lib/email.ts` — `name`/`nameB` user-supplied chèn raw vào HTML trong tất cả email templates → `escHtml()`
 - `siderealTime` → `siderialTime` (swisseph library typo)
 - House cusps: 0-indexed (swisseph returns array[0..11])
 - Prisma model: `knowledgeBase` (camelCase auto-mapping from knowledge_base table)

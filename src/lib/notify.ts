@@ -223,12 +223,14 @@ export async function sendCustomerClaimAlert(params: {
   transferContent?: string
 }): Promise<void> {
   const { orderId, transferCode, claimedAmount, transferContent } = params
+  // Bug #25 fix: escape HTML special chars to prevent injection via user-supplied transferContent
+  const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const amountStr = claimedAmount ? `${claimedAmount.toLocaleString('vi-VN')}đ` : 'không rõ'
   const lines = [
     `🔔 <b>Khách báo đã CK — Đơn #${orderId}</b>`,
     `🏷 Mã đơn: <code>${transferCode}</code>`,
     `💰 Số tiền: ${amountStr}`,
-    transferContent ? `📝 Nội dung CK: <code>${transferContent}</code>` : null,
+    transferContent ? `📝 Nội dung CK: <code>${escHtml(transferContent)}</code>` : null,
     `👉 Kiểm tra lịch sử CK và xác nhận nếu đúng.`,
   ]
   const text = lines.filter(Boolean).join('\n')

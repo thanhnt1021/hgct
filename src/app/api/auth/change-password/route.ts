@@ -13,12 +13,21 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions)
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { newPassword } = await request.json()
+    const { currentPassword, newPassword } = await request.json()
     if (!newPassword || newPassword.length < 6) {
       return NextResponse.json({ error: 'Mật khẩu ít nhất 6 ký tự' }, { status: 400 })
     }
 
     const uid = (session.user as Record<string, unknown>).uid as string
+    const user = await prisma.user.findUnique({ where: { userUid: uid }, select: { passwordHash: true } })
+
+    // Bug #19 fix: if user already has a password, require current password to change it
+    if (user?.passwordHash) {
+      if (!currentPassword || hashPassword(currentPassword) !== user.passwordHash) {
+        return NextResponse.json({ error: 'Mật khẩu hiện tại không đúng' }, { status: 400 })
+      }
+    }
+
     await prisma.user.update({
       where: { userUid: uid },
       data: { passwordHash: hashPassword(newPassword) },

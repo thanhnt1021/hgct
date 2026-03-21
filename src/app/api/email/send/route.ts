@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function POST(request: Request) {
+  // Bug #26 fix: auth guard — dead stub, but must not be publicly accessible
+  const session = await getServerSession(authOptions)
+  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   try {
     const body = await request.json()
     const { to, subject, html, attachments } = body

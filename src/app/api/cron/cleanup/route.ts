@@ -9,9 +9,15 @@ const SOON_DELETE_DIR = '/var/hgct/pdfs/soon_delete'
 const GRACE_DAYS = 7  // days to keep PDF in soon_delete after temp profile expires
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  const secret = process.env.CRON_SECRET
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  const authHeader = request.headers.get('authorization') || ''
+  const secret = process.env.CRON_SECRET || ''
+  const expected = `Bearer ${secret}`
+  // Bug #21 fix: use timingSafeEqual to prevent timing-based secret enumeration
+  const { timingSafeEqual } = await import('crypto')
+  const keyMatch = secret.length > 0
+    && authHeader.length === expected.length
+    && timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected))
+  if (!keyMatch) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

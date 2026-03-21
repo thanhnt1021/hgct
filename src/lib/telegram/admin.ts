@@ -366,6 +366,7 @@ export async function handleMarkPaid(ctx: Ctx, orderId: number) {
   try {
     const order = await prisma.order.findUnique({ where: { id: orderId } })
     if (!order) { await respond(ctx, `❌ Không tìm thấy đơn #${orderId}.`); return }
+    if (order.adminCancelledAt) { await respond(ctx, `❌ Đơn #${orderId} đã bị admin hủy — không thể mark paid.`); return }
     if (order.paymentStatus === 'paid') { await respond(ctx, `⚠️ Đơn #${orderId} đã được thanh toán rồi.`); return }
     if (order.status === 'completed') { await respond(ctx, `⚠️ Đơn #${orderId} đã hoàn thành rồi.`); return }
 

@@ -1,6 +1,7 @@
 // In-memory job store using global to survive module re-evaluation
 // (Next.js can re-evaluate modules per route bundle — global is always shared)
 
+import { randomBytes } from 'crypto'
 import prisma from './db'
 import { sendAdminAlert } from './notify'
 
@@ -94,10 +95,11 @@ export function updateJob(id: string, updates: Partial<Omit<Job, 'id' | 'created
 const STUCK_TIMEOUT_MS = 15 * 60 * 1000
 export const STUCK_ERROR = 'Đơn hàng gặp lỗi. Vui lòng thử lại.'
 
-// Chars dễ đọc — loại bỏ O/0/I/1 dễ nhầm
+// Chars dễ đọc — loại bỏ O/0/I/1 dễ nhầm (32 chars, divides 256 evenly → no modulo bias)
 const TOKEN_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+// Bug #18 fix: use crypto.randomBytes instead of Math.random() (CSPRNG)
 export function generateRecoveryToken(): string {
-  return Array.from({ length: 8 }, () => TOKEN_CHARS[Math.floor(Math.random() * TOKEN_CHARS.length)]).join('')
+  return Array.from(randomBytes(8), b => TOKEN_CHARS[b % TOKEN_CHARS.length]).join('')
 }
 
 function markStuckIfNeeded(job: Job): void {

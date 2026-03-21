@@ -36,9 +36,10 @@ export async function getPrice(service: string): Promise<number> {
     })
     const map = Object.fromEntries(rows.map(r => [r.key, parseInt(r.value, 10)]))
     const specific = map[priceKey(service)]
-    if (!isNaN(specific) && specific > 0) return specific
+    // Bug #28 fix: use >= 0 so admin-set price=0 is returned instead of falling through to default
+    if (!isNaN(specific) && specific >= 0) return specific
     const global = map['service_price']
-    if (!isNaN(global) && global > 0) return global
+    if (!isNaN(global) && global >= 0) return global
   } catch { /* ignore */ }
   return DEFAULTS[service] ?? 3333
 }
@@ -54,10 +55,11 @@ export async function getAllPrices(): Promise<Record<string, number>> {
     return Object.fromEntries(
       SERVICES.map(svc => {
         const v = map[priceKey(svc)]
+        // Bug #28 fix: use >= 0 so admin-set price=0 is returned instead of falling through to default
         const price =
-          !isNaN(v) && v > 0
+          !isNaN(v) && v >= 0
             ? v
-            : !isNaN(globalFb) && globalFb > 0
+            : !isNaN(globalFb) && globalFb >= 0
               ? globalFb
               : DEFAULTS[svc]
         return [svc, price]

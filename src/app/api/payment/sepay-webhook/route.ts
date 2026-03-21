@@ -91,9 +91,10 @@ export async function POST(request: Request) {
       // Policy: still mark paid and process — admin can review via Telegram alert
     }
 
-    // 8. Mark order as paid
-    await prisma.order.update({
-      where: { id: order.id },
+    // 8. Mark order as paid — Bug #17 fix: atomic lock via updateMany to prevent duplicate job creation
+    // on concurrent webhook calls (SePay may retry if it gets a timeout before receiving 200)
+    const locked = await prisma.order.updateMany({
+      where: { id: order.id, paymentStatus: 'unpaid' },
       data: {
         paymentStatus: 'paid',
         paidAt: new Date(),
@@ -101,6 +102,10 @@ export async function POST(request: Request) {
         status: 'processing',
       },
     })
+    if (locked.count === 0) {
+      console.log(`[sepay-webhook] Order ${order.id} already marked paid — skipping duplicate job creation`)
+      return OK()
+    }
 
     // 9. Build body and start report job via createReportJob (includes full error recovery)
     const body: Record<string, unknown> = {

@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import prisma from '@/lib/db'
 import { runOrderCheck } from '@/lib/orderCheck'
 
 const CRON_SECRET = process.env.CRON_SECRET || ''
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  const secret = CRON_SECRET
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  const authHeader = request.headers.get('authorization') || ''
+  const expected = `Bearer ${CRON_SECRET}`
+  // Bug #21 fix: use timingSafeEqual to prevent timing-based secret enumeration
+  const keyMatch = CRON_SECRET.length > 0
+    && authHeader.length === expected.length
+    && timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected))
+  if (!keyMatch) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

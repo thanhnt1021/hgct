@@ -1,5 +1,10 @@
 import nodemailer from 'nodemailer'
 
+// Bug #31 fix: escape HTML special chars for user-supplied values inserted into email HTML templates
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 const smtpPort = parseInt(process.env.SMTP_PORT || '465')
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.hostinger.com',
@@ -125,11 +130,12 @@ export function buildReportEmailHtml(name: string, service: string, nameB?: stri
 
   // HTML block tên khách — synastry căn trái 3 dòng, còn lại 1 dòng
   const nameStyle = `font-size:${nameFontSize};font-weight:600;color:${color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;`
+  // Bug #31 fix: escape user-supplied names before HTML insertion
   const nameHtml = isSynastry
-    ? `<p style="margin:0;${nameStyle}">${name}</p>
+    ? `<p style="margin:0;${nameStyle}">${escHtml(name)}</p>
         <p style="margin:4px 0;font-size:16px;font-weight:400;color:${color};">&amp;</p>
-        <p style="margin:0;${nameStyle}">${nameB}</p>`
-    : `<p style="margin:0;${nameStyle}">${name}</p>`
+        <p style="margin:0;${nameStyle}">${escHtml(nameB!)}</p>`
+    : `<p style="margin:0;${nameStyle}">${escHtml(name)}</p>`
 
   return `<!DOCTYPE html>
 <html>
@@ -215,7 +221,8 @@ export async function sendRecoveryEmail({
   const svc = SERVICE_CONFIG[service] || SERVICE_CONFIG['career']
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hatgiongchiemtinh.com'
   const recoveryUrl = `${appUrl}/recover?token=${token}`
-  const greeting = name ? `Xin chào ${name},` : 'Xin chào,'
+  // Bug #31 fix: escape user-supplied name before HTML insertion
+  const greeting = name ? `Xin chào ${escHtml(name)},` : 'Xin chào,'
 
   const html = `<!DOCTYPE html>
 <html>
@@ -281,7 +288,8 @@ export async function sendAutoRetryEmail({
   const svc = SERVICE_CONFIG[service] || SERVICE_CONFIG['career']
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hatgiongchiemtinh.com'
   const trackingUrl = `${appUrl}/processing?job=${jobId}&service=${service}&name=${encodeURIComponent(name || '')}`
-  const greeting = name ? `Xin chào ${name},` : 'Xin chào,'
+  // Bug #31 fix: escape user-supplied name before HTML insertion
+  const greeting = name ? `Xin chào ${escHtml(name)},` : 'Xin chào,'
 
   const html = `<!DOCTYPE html>
 <html>
@@ -362,7 +370,7 @@ export async function sendRetargetEmail({
       <div style="display:inline-block;padding:6px 20px;border-radius:999px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);margin-bottom:24px;">
         <span style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#c9a84c;">Nhắc nhở đơn hàng</span>
       </div>
-      <p style="margin:0 0 8px;font-size:17px;color:#9ca3af;">${name ? `Xin chào ${name},` : 'Xin chào,'}</p>
+      <p style="margin:0 0 8px;font-size:17px;color:#9ca3af;">${name ? `Xin chào ${escHtml(name)},` : 'Xin chào,'}</p>
       <p style="margin:0 0 20px;font-size:16px;line-height:1.8;color:#b8a99a;">
         Bạn đã đặt <strong style="color:#f5f0e8;">Báo cáo ${svc.label}</strong> nhưng chưa hoàn tất thanh toán.
         Đơn hàng vẫn đang chờ — chỉ cần chuyển khoản để nhận báo cáo ngay.

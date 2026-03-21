@@ -80,7 +80,14 @@ export async function runWatchdog(): Promise<void> {
           where: { id: order.jobId },
           select: { status: true, createdAt: true, error: true },
         })
-        if (dbJob && dbJob.status === 'processing') {
+        if (!dbJob) {
+          // Bug #14 fix: job DB record was never created (fire-and-forget prisma.job.create failed)
+          // order has a jobId but no matching job row — treat as stuck after threshold
+          const age = now - order.createdAt.getTime()
+          if (age > threshold(order.service) + 5 * 60 * 1000) {
+            isStuck = true
+          }
+        } else if (dbJob.status === 'processing') {
           const age = now - dbJob.createdAt.getTime()
           if (age > threshold(order.service) + 5 * 60 * 1000) {
             isStuck = true

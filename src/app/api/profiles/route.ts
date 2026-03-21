@@ -65,11 +65,18 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const uid = (session.user as Record<string, unknown>).uid as string
   const body = await request.json()
   const { id, name, gender, data } = body
 
   if (!id) {
     return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+  }
+
+  // Bug #16 fix: verify ownership before update (IDOR)
+  const existing = await prisma.profile.findUnique({ where: { id: parseInt(id) }, select: { userUid: true } })
+  if (!existing || existing.userUid !== uid) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const profile = await prisma.profile.update({
@@ -86,11 +93,16 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const uid = (session.user as Record<string, unknown>).uid as string
   const { searchParams } = new URL(request.url)
   const id = parseInt(searchParams.get('id') || '0')
 
   if (id) {
-    const profile = await prisma.profile.findUnique({ where: { id }, select: { profileUid: true, name: true } })
+    // Bug #16 fix: verify ownership before delete (IDOR)
+    const profile = await prisma.profile.findUnique({ where: { id }, select: { profileUid: true, name: true, userUid: true } })
+    if (!profile || profile.userUid !== uid) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     if (profile?.profileUid) {
       const deletedUid = profile.profileUid
       const deletedName = profile.name
