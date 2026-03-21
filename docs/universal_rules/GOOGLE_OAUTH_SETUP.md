@@ -2,6 +2,8 @@
 
 > **Dùng cho:** Bất kỳ dự án Next.js nào cần Google Login qua NextAuth.js.
 > Bao gồm toàn bộ quy trình: Google Cloud Console → OAuth credentials → Brand verification → NextAuth config → Go live.
+>
+> **Lưu ý phiên bản:** Guide này dùng NextAuth.js **v4** (package `next-auth`). Nếu dùng Auth.js **v5** (package `next-auth@beta`), xem https://authjs.dev/getting-started — API config và callback patterns khác.
 
 ---
 
@@ -136,6 +138,21 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/login',      // Trang login tùy chỉnh (optional)
     error: '/auth/error',       // Trang lỗi (optional)
   },
+}
+```
+
+### Type augmentation (bắt buộc nếu dùng TypeScript)
+
+Mặc định `session.user` không có field `id`. Thêm file này để TypeScript không báo lỗi:
+
+```typescript
+// src/types/next-auth.d.ts
+import { DefaultSession } from 'next-auth'
+
+declare module 'next-auth' {
+  interface Session {
+    user: { id: string } & DefaultSession['user']
+  }
 }
 ```
 

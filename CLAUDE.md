@@ -1,12 +1,18 @@
 # HGCT - Hạt Giống Chiêm Tinh
 
+## ⚠️ CRITICAL WORKFLOW RULES (KHÔNG BAO GIỜ vi phạm)
+
+1. **`feature: [tên]`** → tạo branch → đọc context → hỏi Q&A 1 batch → **DỪNG chờ user confirm rõ ràng** (`làm đi`, `go ahead`...) → mới được code. Plan đính kèm là INPUT để đối chiếu, **KHÔNG phải lệnh implement**.
+2. **KHÔNG tự** `git commit`, `git push`, `git merge`, deploy production — chỉ khi user ra lệnh rõ.
+3. **Sau quick deploy** → báo cáo kết quả → **DỪNG**, không làm gì thêm.
+
+> Chi tiết đầy đủ: docs/universal_rules/UNIVERSAL_WORKFLOW.md
+
 ## Project Overview
 Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc lập, hoàn chỉnh.
 **KHÔNG liên quan** đến bất kỳ source code cũ nào nữa. Chỉ làm việc trong `/root/hgct`.
 
 **Quy tắc file MD:** Mọi file `.md` mới (trừ `CLAUDE.md`) đều mặc định tạo trong `/docs/`. `CLAUDE.md` bắt buộc ở root (Claude Code CLI yêu cầu).
-
-> Đọc `docs/universal_rules/UNIVERSAL_WORKFLOW.md` để áp dụng universal workflow rules cho project này.
 
 ## Tech Stack
 - Next.js 15.2.3, React 19, App Router, Tailwind v4
@@ -227,7 +233,7 @@ src/
   - **Settings** — `/api/admin/system-info`: uptime, heap/RSS/RAM, Node version, DB counts
 - [x] Services maintenance mode — `services/page.tsx` force-dynamic đọc `site_mode`; lifetime users bypass hoàn toàn; màn hình "Sắp ra mắt / Đang hoàn thiện thêm" dùng `var(--font-vietnam)` (không dùng Cinzel)
 - [x] ServicesClient extracted — `src/app/services/ServicesClient.tsx`; nhận `serviceConfigs` prop từ server; `buildServices()` merge DB values vào DEFAULT_SERVICES (fallback nếu chưa set)
-- [x] Cinzel font blacklist — `docs/universal_rules/UI_MOBILE_RULES.md` thêm `## ❌ Font Blacklist`; Cinzel/Cinzel Decorative bị cấm vì diacritics tiếng Việt bị vỡ; dùng `var(--font-vietnam)` hoặc `var(--font-playfair)` thay thế
+- [x] Cinzel font blacklist — Cinzel/Cinzel Decorative bị cấm vì diacritics tiếng Việt bị vỡ; dùng `var(--font-vietnam)` hoặc `var(--font-playfair)` thay thế (rule project-specific, không còn trong universal rules)
 
 ## What's TODO
 

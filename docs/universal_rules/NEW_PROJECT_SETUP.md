@@ -13,7 +13,7 @@ Chạy lệnh `check requirements` — Claude đọc file này và tự động:
 ### Files bắt buộc
 
 - [ ] `CLAUDE.md` ở root — nếu chưa có: tạo template cơ bản, hỏi user điền thông tin project. **KHÔNG overwrite nếu đã có** (file chứa thông tin project-specific, overwrite = mất hết context).
-- [ ] Dòng trong `CLAUDE.md`: `Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.` — nếu chưa có: tự thêm vào (append). **KHÔNG sửa nội dung khác.**
+- [ ] Dòng trong `CLAUDE.md`: `> Chi tiết đầy đủ: docs/universal_rules/UNIVERSAL_WORKFLOW.md` — nếu chưa có: tự thêm vào (append). **KHÔNG sửa nội dung khác.**
 - [ ] `docs/universal_rules/` — folder này (đã copy vào là có)
 - [ ] `docs/MD_FILES_TO_UPDATE.md` — nếu chưa có: tự tạo với nội dung template trống
 - [ ] `docs/REQUIREMENTS_CHECK.md` — nếu chưa có: tự tạo template, hỏi user điền thông tin server
@@ -78,9 +78,15 @@ _(trống)_
 - [ ] iOS: `cd ios && pod install`
 - [ ] Test: `npx react-native run-android` / `run-ios`
 
-**[BOT/API/Node]**
+**[BOT/API -- Node]**
 - [ ] `npm install`
 - [ ] Test start: `npm start` hoặc `node index.js`
+
+**[BOT/API -- Python]**
+- [ ] Tạo venv: `python3 -m venv venv && source venv/bin/activate`
+- [ ] `pip install -r requirements.txt`
+- [ ] Test start: `python <main_file>` hoặc `systemctl start <service>`
+- [ ] Verify syntax: `python -m py_compile <main_file>`
 
 ---
 

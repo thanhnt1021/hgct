@@ -7,6 +7,19 @@
 - Tên branch: `feature/short-kebab-description`
 - Main branch luôn là `main` (dùng cho PR nếu có)
 
+### Setup branch mới (bắt buộc khi tạo repo hoặc clone lần đầu)
+
+Local branch và remote branch **PHẢI cùng tên `main`**. Kiểm tra bằng `git branch -vv`:
+- Nếu thấy `[origin/master]` → remote dùng tên cũ. Đổi:
+  ```
+  git push origin main          # tạo main trên remote
+  gh repo edit --default-branch main   # đổi default branch
+  git push origin --delete master      # xoá master
+  git branch -u origin/main           # set tracking
+  ```
+- Nếu thấy `[origin/main]` → OK, không cần làm gì.
+_Lý do: local/remote tên khác nhau khiến `git push` fail hoặc tạo branch thừa. Thống nhất `main` ở cả 2 phía = không bao giờ gặp lỗi này._
+
 ## Feature Flow
 
 ```
@@ -24,13 +37,24 @@ commit
   → clear docs/MD_FILES_TO_UPDATE.md
   → nếu commit hoàn thành milestone → đề xuất update docs/GOAL.md (tick + cập nhật "đang ở đâu")
   → nếu có sửa docs/universal_rules/* → push lên universal-workflow repo trước
-  → git commit + push nhánh feature
+  → git add [files] && git commit
+  → git push -u origin HEAD                   ← BẮT BUỘC push (set tracking tự động)
+  → git status                                ← BẮT BUỘC verify "up to date"
 
 merge main / lên production
-  → git merge feature/... vào main
-  → git push origin main
-  → deploy production
+  → git checkout main && git merge --no-ff feature/[tên]
+  → git push                                  ← BẮT BUỘC push (tự push tới tracked upstream)
+  → git status                                ← BẮT BUỘC verify "up to date"
+  → deploy production (restart service)
 ```
+
+> **RULE CỨNG — git push:**
+> - **KHÔNG BAO GIỜ** dùng `git push origin main` hoặc `git push origin [tên-branch-cụ-thể]`.
+>   _Lý do: nếu remote branch tên khác (vd: `master` vs `main`), lệnh này tạo branch mới trên remote thay vì push đúng chỗ._
+>   **Ngoại lệ duy nhất:** lần đầu setup `main` trên remote (xem mục "Setup branch mới" ở trên) — one-time command để tạo branch `main` khi remote chưa có.
+> - **LUÔN** dùng `git push` (không args) cho branch đã có tracking, hoặc `git push -u origin HEAD` cho branch mới.
+>   _Lý do: `git push` tự push tới tracked upstream — đúng 100% bất kể remote branch tên gì._
+> - Sau mỗi `git push`, BẮT BUỘC chạy `git status` — output phải chứa "up to date". Nếu thấy "ahead of" → push sai, dừng lại kiểm tra.
 
 ## Deploy — 2 chế độ
 
@@ -73,7 +97,7 @@ cp docs/universal_rules/*.md /tmp/universal-workflow/
 cd /tmp/universal-workflow
 git add [files đã thay đổi]
 git commit -m "docs: ..."
-GIT_SSH_COMMAND="ssh -i [SSH_KEY]" git push origin main
+GIT_SSH_COMMAND="ssh -i [SSH_KEY]" git push
 ```
 
 **Lưu ý:**
@@ -97,5 +121,5 @@ GIT_SSH_COMMAND="ssh -i [SSH_KEY]" git push origin main
 - **Commit message: mô tả "why" không chỉ "what"**.
   _Lý do: "what" đã có trong diff. "why" là thứ 6 tháng sau cần biết khi debug — "fix bug" vô nghĩa, "fix iOS zoom khi focus input vì font-size < 16px" mới có giá trị._
 
-- **Luôn thêm `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`** vào cuối commit message.
+- **Luôn thêm `Co-Authored-By: Claude <model> <noreply@anthropic.com>`** vào cuối commit message (thay `<model>` bằng model đang dùng, vd: Opus 4.6, Sonnet 4.6).
   _Lý do: ghi nhận AI đã tham gia viết code trong commit history — minh bạch về cách code được tạo ra._

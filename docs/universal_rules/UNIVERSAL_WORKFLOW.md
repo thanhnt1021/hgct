@@ -15,10 +15,14 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | Có liên quan đến file MD | `MD_SYSTEM.md` |
 | Trước khi commit | `QUALITY_GATES.md` |
 | Project có UI/web/mobile | `UI_MOBILE_RULES.md` |
+| Project là bot (Telegram/Discord/...) | `BOT_COMMAND_RULES.md` |
 | Setup project mới / `check requirements` | `NEW_PROJECT_SETUP.md` |
 | Hỏi ngược trước khi thực thi (standalone) | `ASK-BACK.md` |
 | Theo dõi mục tiêu / goal drift | `OUTCOME.md` |
 | Tạo GOAL.md cho project mới | `GOAL_TEMPLATE.md` |
+| Tích hợp Google Login (NextAuth.js) | `GOOGLE_OAUTH_SETUP.md` |
+| Tích hợp thanh toán QR (SePay) | `SEPAY_PAYMENT.md` |
+| Bootstrap universal rules vào project mới | `BOOTSTRAP.md` |
 
 ---
 
@@ -35,6 +39,8 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `update workflow` | Review + đề xuất cải tiến các file trong `universal_rules/` |
 | `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) + source files project-specific (xem CLAUDE.md của từng project). Sau đó: **Goal Check** theo protocol trong `OUTCOME.md` (xem mục Goal Tracking Protocol bên dưới). Xong → báo ngắn "Đã hiểu, sẵn sàng nhận lệnh." → **DỪNG. Không output gì thêm.** |
 | `report context` | Giống `read context` nhưng sau khi đọc xong → **output full structured summary** theo format định nghĩa trong mục **"report context — Output Format"** bên dưới. |
+| `check goal` | Show tóm tắt GOAL.md + tiến độ + đề xuất bước tiếp theo (xem `OUTCOME.md` mục "Bất kỳ lúc nào") |
+| `update goal` | Claude đề xuất những gì nên update GOAL.md dựa trên việc vừa làm trong session (xem `OUTCOME.md`) |
 
 ---
 
@@ -96,7 +102,7 @@ Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy 
 - **Track B — Goal (OUTCOME):** So plan vs `GOAL.md` → serve milestone nào? conflict goal nào? goal drift không? Quy tắc: xem `OUTCOME.md`.
 - **Track C — Implementation:** Dependencies, technical decisions còn mở, test strategy cho từng bước.
 
-**Bước 4.** Gom tất cả findings từ 3 tracks → generate + run **1 interactive CLI script** (`@clack/prompts`) với tất cả questions (tối đa 7, ưu tiên 🔴>🟡>🟠>🔵>⚪, mỗi question có option `Other`, `★` đánh dấu recommended). Xem script format: `ASK-BACK.md` §6.
+**Bước 4.** Gom tất cả findings từ 3 tracks → dùng **AskUserQuestion tool** với tất cả questions (tối đa 7, ưu tiên 🔴>🟡>🟠>🔵>⚪, tối đa 4 câu/lần gọi, recommended option đặt đầu tiên, "Other" tự động có). Xem format chi tiết: `ASK-BACK.md` §6.
 
 **Bước 5.** User chọn options → nhận answers.
 

@@ -188,59 +188,60 @@ Toggle ở header. Lưu preference vào localStorage.
 
 ### Claude phân tích → output tóm tắt + gọi AskUserQuestion:
 
-```javascript
-// /tmp/ask-back-1703123456.mjs
-import { intro, outro, select, text, note, isCancel, cancel } from '/tmp/ask-back-deps/node_modules/@clack/prompts/dist/index.mjs'
-
-const answers = {}
-
+```
 Tao hiểu mày muốn: Thêm dark mode toggle, CSS vars, persist localStorage.
 Ảnh hưởng: globals.css, App.jsx, Header.jsx, 8+ components. Phát hiện 4 điểm cần xác nhận.
 ```
 
-### Claude gọi AskUserQuestion (4 câu 1 lần):
+### Claude gọi AskUserQuestion tool (tối đa 4 câu/lần):
 
-```
-questions: [
-  {
-    question: "[1/4] 🟡 AMBIGUITY — Scope dark mode. Plan nói 'CSS variables' nhưng 12 files dùng Tailwind hardcoded colors.",
-    header: "Scope",
-    options: [
-      { label: "Chỉ đổi CSS vars",          description: "Ít code — phần lớn app vẫn giữ light" },
-      { label: "Refactor toàn bộ",           description: "Đúng intent plan, sạch nhất (Recommended)" },
-      { label: "Chỉ top-level body/header",  description: "Nhanh, ít risk — dark mode không hoàn chỉnh" },
-    ]
-  },
-  {
-    question: "[2/4] 🟠 RISK — 5 SVG icons dùng fill='black' sẽ invisible trên dark bg.",
-    header: "SVG icons",
-    options: [
-      { label: "Đổi sang currentColor", description: "1 dòng/icon, tự adapt (Recommended)" },
-      { label: "Giữ nguyên",            description: "Zero effort — icon khó thấy trên dark" },
-      { label: "Tạo 2 bộ icon",         description: "Đẹp nhất — double asset" },
-    ]
-  },
-  {
-    question: "[3/4] 🔵 GAP — Default mode khi user mở app lần đầu?",
-    header: "Default mode",
-    options: [
-      { label: "Default light",           description: "Predictable, không bất ngờ (Recommended)" },
-      { label: "Theo system preference",  description: "Respect OS setting" },
-      { label: "Bắt user chọn lần đầu",  description: "Explicit — thêm friction" },
-    ]
-  },
-  {
-    question: "[4/4] ⚪ ASSUMPTION — Thêm transition 200ms khi toggle để tránh flash?",
-    header: "Transition",
-    options: [
-      { label: "OK, thêm vào",        description: "Smooth UX (Recommended)" },
-      { label: "Không cần transition", description: "Đổi ngay lập tức" },
-    ]
-  }
-]
+```json
+{
+  "questions": [
+    {
+      "question": "[1/4] AMBIGUITY — Scope dark mode. Plan nói 'CSS variables' nhưng 12 files dùng Tailwind hardcoded colors. Refactor toàn bộ hay chỉ CSS vars?",
+      "header": "Scope",
+      "multiSelect": false,
+      "options": [
+        { "label": "Refactor toàn bộ", "description": "Đúng intent plan, sạch nhất (Recommended)" },
+        { "label": "Chỉ đổi CSS vars", "description": "Ít code — phần lớn app vẫn giữ light" },
+        { "label": "Chỉ top-level body/header", "description": "Nhanh, ít risk — dark mode không hoàn chỉnh" }
+      ]
+    },
+    {
+      "question": "[2/4] RISK — 5 SVG icons dùng fill='black' sẽ invisible trên dark bg. Xử lý thế nào?",
+      "header": "SVG icons",
+      "multiSelect": false,
+      "options": [
+        { "label": "Đổi sang currentColor", "description": "1 dòng/icon, tự adapt (Recommended)" },
+        { "label": "Giữ nguyên", "description": "Zero effort — icon khó thấy trên dark" },
+        { "label": "Tạo 2 bộ icon", "description": "Đẹp nhất — double asset" }
+      ]
+    },
+    {
+      "question": "[3/4] GAP — Default mode khi user mở app lần đầu?",
+      "header": "Default mode",
+      "multiSelect": false,
+      "options": [
+        { "label": "Default light", "description": "Predictable, không bất ngờ (Recommended)" },
+        { "label": "Theo system preference", "description": "Respect OS setting" },
+        { "label": "Bắt user chọn lần đầu", "description": "Explicit — thêm friction" }
+      ]
+    },
+    {
+      "question": "[4/4] ASSUMPTION — Thêm transition 200ms khi toggle để tránh flash?",
+      "header": "Transition",
+      "multiSelect": false,
+      "options": [
+        { "label": "OK, thêm vào", "description": "Smooth UX (Recommended)" },
+        { "label": "Không cần transition", "description": "Đổi ngay lập tức" }
+      ]
+    }
+  ]
+}
 ```
 
-### User chọn → Claude thực thi theo answers nhận được.
+### User chọn options → Claude nhận answers → thực thi theo lựa chọn.
 
 ---
 

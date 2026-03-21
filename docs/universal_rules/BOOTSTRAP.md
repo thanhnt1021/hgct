@@ -60,10 +60,16 @@ if [ ! -f CLAUDE.md ]; then
   cat > CLAUDE.md << 'EOF'
 # [Tên Project]
 
+## ⚠️ CRITICAL WORKFLOW RULES (KHÔNG BAO GIỜ vi phạm)
+
+1. **`feature: [tên]`** → tạo branch → đọc context → hỏi Q&A 1 batch → **DỪNG chờ user confirm rõ ràng** (`làm đi`, `go ahead`...) → mới được code. Plan đính kèm là INPUT để đối chiếu, **KHÔNG phải lệnh implement**.
+2. **KHÔNG tự** `git commit`, `git push`, `git merge`, deploy production — chỉ khi user ra lệnh rõ.
+3. **Sau quick deploy** → báo cáo kết quả → **DỪNG**, không làm gì thêm.
+
+> Chi tiết đầy đủ: docs/universal_rules/UNIVERSAL_WORKFLOW.md
+
 ## Overview
 [Mô tả ngắn]
-
-> Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.
 
 ## Tech Stack
 [Liệt kê tech stack]
@@ -77,13 +83,26 @@ EOF
   echo "✅ Created CLAUDE.md"
 fi
 
-# Nếu đã có CLAUDE.md — chỉ thêm reference line nếu chưa có
-if ! grep -q "UNIVERSAL_WORKFLOW" CLAUDE.md; then
-  echo "" >> CLAUDE.md
-  echo '> Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.' >> CLAUDE.md
-  echo "✅ Added reference line"
+# Nếu đã có CLAUDE.md — thêm CRITICAL WORKFLOW RULES nếu chưa có
+if ! grep -q "CRITICAL WORKFLOW RULES" CLAUDE.md; then
+  # Insert critical rules block at the top (after first heading line)
+  RULES_BLOCK='
+## ⚠️ CRITICAL WORKFLOW RULES (KHÔNG BAO GIỜ vi phạm)
+
+1. **`feature: [tên]`** → tạo branch → đọc context → hỏi Q\&A 1 batch → **DỪNG chờ user confirm rõ ràng** (`làm đi`, `go ahead`...) → mới được code. Plan đính kèm là INPUT để đối chiếu, **KHÔNG phải lệnh implement**.
+2. **KHÔNG tự** `git commit`, `git push`, `git merge`, deploy production — chỉ khi user ra lệnh rõ.
+3. **Sau quick deploy** → báo cáo kết quả → **DỪNG**, không làm gì thêm.
+
+> Chi tiết đầy đủ: docs/universal_rules/UNIVERSAL_WORKFLOW.md
+'
+  # Use sed to insert after first line that starts with "# "
+  # Lưu ý: syntax 0,/pattern/ chỉ hoạt động trên GNU sed (Linux).
+  # macOS cần: brew install gnu-sed, sau đó dùng gsed thay sed.
+  sed -i "0,/^# /{/^# /a\\${RULES_BLOCK}
+  }" CLAUDE.md
+  echo "✅ Added CRITICAL WORKFLOW RULES to CLAUDE.md"
 else
-  echo "✅ CLAUDE.md already has reference line"
+  echo "✅ CLAUDE.md already has CRITICAL WORKFLOW RULES"
 fi
 ```
 
@@ -124,14 +143,19 @@ Claude tự tạo các file còn thiếu (`docs/MD_FILES_TO_UPDATE.md`, `docs/RE
 
 ## Nội dung bộ rules
 
+Danh sách đầy đủ: xem [`README.md`](./README.md). Dưới đây là các file core:
+
 | File | Mô tả |
 |------|-------|
 | `UNIVERSAL_WORKFLOW.md` | Index + core rules + command table |
 | `GIT_WORKFLOW.md` | Branch strategy, feature flow, deploy modes |
 | `MD_SYSTEM.md` | Cấu trúc /docs, quy tắc MD files, templates |
-| `UI_MOBILE_RULES.md` | Mobile-first, touch targets, Web Share API, iOS quirks |
-| `QUALITY_GATES.md` | TypeScript check, build pass, commit format |
+| `QUALITY_GATES.md` | Type check, build pass, commit format |
 | `NEW_PROJECT_SETUP.md` | Logic của lệnh `check requirements` |
+| `ASK-BACK.md` | Cơ chế hỏi ngược trước khi thực thi |
+| `OUTCOME.md` | Goal tracking protocol |
+
+Các file chuyên biệt (dùng khi project cần): `UI_MOBILE_RULES.md`, `BOT_COMMAND_RULES.md`, `GOOGLE_OAUTH_SETUP.md`, `SEPAY_PAYMENT.md`
 
 ---
 

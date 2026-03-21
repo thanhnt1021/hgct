@@ -90,9 +90,12 @@ const transferCode = `${PREFIX}${order.id.toString().padStart(6, '0')}`
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  // 1. Verify API key
+  // 1. Verify API key (timing-safe comparison to prevent timing attacks)
   const auth = request.headers.get('Authorization') || ''
-  if (auth !== `Apikey ${process.env.SEPAY_API_KEY}`) {
+  const expected = `Apikey ${process.env.SEPAY_API_KEY}`
+  const isValid = auth.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(auth), Buffer.from(expected))
+  if (!isValid) {
     return Response.json({ success: false }, { status: 401 })
   }
 
@@ -338,7 +341,8 @@ async function smartRetryOrder(orderId: number, triggeredBy: TriggeredBy): Promi
   })
   if (locked.count === 0) return 'skipped'  // Ai đó đã lấy lock trước
 
-  const order = await db.order.findUnique({ where: { id: orderId } })!
+  const order = await db.order.findUnique({ where: { id: orderId } })
+  if (!order) return 'skipped'  // Race condition: order bị xóa giữa lock và query
 
   // 2. Check PDF đã tồn tại — nếu có chỉ cần resend email (tiết kiệm API cost)
   const pdfPath = resolvePdfPath(order.pdfUrl)  // /var/[project]/pdfs/{id}.pdf

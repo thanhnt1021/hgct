@@ -2,20 +2,12 @@
 
 Áp dụng khi project có giao diện người dùng (web, mobile app, PWA).
 
-## ❌ Font Blacklist — KHÔNG BAO GIỜ dùng
-
-| Font | Lý do |
-|---|---|
-| **Cinzel** / Cinzel Decorative | Không hỗ trợ diacritics tiếng Việt — chữ có dấu bị vỡ hoặc render xấu. Dùng `var(--font-vietnam)` (Be Vietnam Pro) hoặc `var(--font-playfair)` thay thế. |
-
----
-
 ## Mobile-First
 
 - Thiết kế và test mobile trước, sau đó mở rộng ra desktop
 - Breakpoints chuẩn: mobile < 768px, tablet 768–1024px, desktop > 1024px
-- Font size tối thiểu: 14px trên mobile (tránh iOS auto-zoom khi focus input)
-- Input fields: `font-size >= 16px` để tránh iOS zoom
+- Font size tối thiểu: **14px** cho body text trên mobile (đảm bảo readability)
+- Input fields: `font-size >= 16px` để tránh iOS auto-zoom khi focus (iOS trigger zoom ở < 16px, không phải < 14px)
 
 ## Fluid Typography & Spacing
 

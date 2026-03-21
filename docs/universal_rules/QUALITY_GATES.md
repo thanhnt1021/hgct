@@ -53,8 +53,10 @@ type: short description (imperative, present tense)
 
 Longer explanation if needed — tập trung vào WHY, không phải WHAT.
 
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Co-Authored-By: Claude <model> <noreply@anthropic.com>
 ```
+
+Thay `<model>` bằng model đang dùng: Opus 4.6, Sonnet 4.6, Haiku 4.5.
 
 Types và ý nghĩa:
 | Type | Dùng khi |
@@ -78,6 +80,13 @@ Types và ý nghĩa:
 - [ ] Build debug pass
 - [ ] Test trên device thật — emulator không reproduce được hết lỗi hardware/OS
 
-### [BOT/API]
+### [BOT/API — Node]
 - [ ] Unit tests pass (nếu có)
 - [ ] Health check endpoint respond 200
+- [ ] **Command Registration Check:** Mọi CommandHandler đều có BotCommand tương ứng trong menu (xem `BOT_COMMAND_RULES.md` mục 1 + 4). Số handler phải khớp số menu command (trừ /start).
+
+### [BOT/API — Python]
+- [ ] `python -m py_compile <main_file>` pass (syntax check)
+- [ ] `pip install -r requirements.txt` thành công trong venv
+- [ ] Service restart thành công: `sudo systemctl restart <service> && sudo systemctl status <service>`
+- [ ] **Command Registration Check:** Tương tự Node — xem `BOT_COMMAND_RULES.md` mục 1 + 4.
