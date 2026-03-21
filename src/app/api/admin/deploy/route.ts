@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { isAdminSession } from '@/lib/dashboard-auth'
+import { checkAdminToken } from '@/lib/dashboard-auth'
 import { spawn } from 'child_process'
 import path from 'path'
 
@@ -11,10 +9,8 @@ const ALLOWED_SCRIPTS = {
 } as const
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!isAdminSession(session)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authErr = await checkAdminToken(req)
+  if (authErr) return authErr
 
   const body = await req.json()
   const target = body.target as keyof typeof ALLOWED_SCRIPTS
@@ -28,13 +24,36 @@ export async function POST(req: NextRequest) {
 
   const stream = new ReadableStream({
     start(controller) {
+      let closed = false
       const proc = spawn('sudo', ['bash', scriptPath], {
         cwd: path.dirname(scriptPath),
         env: { ...process.env, FORCE_COLOR: '0' },
       })
 
       const send = (line: string) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ line })}\n\n`))
+        if (closed) return
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ line })}\n\n`))
+        } catch { /* controller already closed */ }
+      }
+
+      // Bug #9 fix: keepalive ping every 20s to prevent Nginx 60s proxy timeout
+      const keepalive = setInterval(() => {
+        if (closed) { clearInterval(keepalive); return }
+        try {
+          controller.enqueue(encoder.encode(': ping\n\n'))
+        } catch { clearInterval(keepalive) }
+      }, 20_000)
+
+      const cleanup = (code: number | null) => {
+        if (closed) return
+        closed = true
+        clearInterval(keepalive)
+        send(`[done] exit code: ${code}`)
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, code })}\n\n`))
+          controller.close()
+        } catch { /* already closed */ }
       }
 
       proc.stdout.on('data', (chunk: Buffer) => {
@@ -51,17 +70,16 @@ export async function POST(req: NextRequest) {
         }
       })
 
-      proc.on('close', (code) => {
-        send(`[done] exit code: ${code}`)
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, code })}\n\n`))
-        controller.close()
-      })
+      proc.on('close', (code) => cleanup(code))
 
       proc.on('error', (err) => {
         send(`[error] ${err.message}`)
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, code: -1 })}\n\n`))
-        controller.close()
+        cleanup(-1)
       })
+    },
+    cancel() {
+      // Bug #9 fix: client disconnected — nothing to kill since proc is scoped inside start()
+      // The process will finish naturally; keepalive interval will self-clear on next tick.
     },
   })
 

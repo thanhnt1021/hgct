@@ -9,9 +9,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  // Validate: UUID | UUID_service | UUID_UUID_service — prevent path traversal
+  // Validate: UUID | UUID_service | UUID_UUID_service | UUID_service_orderId — prevent path traversal
+  // Bug #2 fix: also accept numeric orderId suffix (_\d+) after service name
   const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
-  if (!new RegExp(`^${UUID}(_${UUID})?(_[a-z]+)?$`, 'i').test(id)) {
+  if (!new RegExp(`^${UUID}(_${UUID})?(_[a-z]+(_\\d+)?)?$`, 'i').test(id)) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 

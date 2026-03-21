@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import prisma from '@/lib/db'
 import { createReportJob } from '@/lib/astrology/reportProcessor'
 import { sendUnderpaymentAlert, sendPaymentReceivedNotification, sendUnmatchedPaymentAlert } from '@/lib/notify'
@@ -12,9 +13,17 @@ const OK = () => NextResponse.json({ success: true })
 export async function POST(request: Request) {
   try {
     // 1. Verify API key from SePay
+    // Bug #11 fix: use timingSafeEqual to prevent timing-attack enumeration of API key
     const authHeader = request.headers.get('Authorization') || ''
     const expectedKey = `Apikey ${process.env.SEPAY_API_KEY || ''}`
-    if (!process.env.SEPAY_API_KEY || authHeader !== expectedKey) {
+    if (!process.env.SEPAY_API_KEY) {
+      console.warn('[sepay-webhook] SEPAY_API_KEY not set')
+      return NextResponse.json({ success: false }, { status: 401 })
+    }
+    const aBytes = Buffer.from(authHeader)
+    const eBytes = Buffer.from(expectedKey)
+    const keyMatch = aBytes.length === eBytes.length && timingSafeEqual(aBytes, eBytes)
+    if (!keyMatch) {
       console.warn('[sepay-webhook] Unauthorized — bad API key')
       return NextResponse.json({ success: false }, { status: 401 })
     }

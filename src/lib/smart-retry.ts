@@ -6,7 +6,7 @@ import path from 'path'
 import prisma from './db'
 import { createReportJob, PDF_DIR } from './astrology/reportProcessor'
 import { sendReportEmail, makePdfFilename } from './email'
-import { MAX_RETRIES } from './jobs'
+import { MAX_RETRIES, updateJob } from './jobs'
 import { sendRecoveryEmail } from './email'
 
 export type RetryTrigger = 'watchdog' | 'admin' | 'customer' | 'sweep'
@@ -72,6 +72,15 @@ export async function smartRetryOrder(
           where: { id: orderId },
           data: { status: 'completed' },
         })
+        // Bug #5 fix: update job to done so processing page can redirect to success
+        if (fresh.jobId) {
+          updateJob(fresh.jobId, {
+            status: 'done',
+            progress: 100,
+            label: 'Hoàn thành!',
+            result: { pdfUrl: fresh.pdfUrl ?? undefined, pdfFilename: filename, emailSent: true, email: fresh.email },
+          })
+        }
         console.log(`[smartRetry] Order ${orderId} — PDF existed, resent email (${triggeredBy})`)
         return { pdfResent: true }
       } catch (err) {

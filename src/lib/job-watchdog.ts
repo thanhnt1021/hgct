@@ -92,13 +92,10 @@ export async function runWatchdog(): Promise<void> {
 
       console.log(`[watchdog] Order ${order.id} (${order.service}) stuck — triggering smartRetry`)
 
-      // Check for OOM hint in job error
+      // Bug #4 fix: OOM hint is in inMemJob.error, not inMemJob.result.error
       let errorHint = ''
-      if (inMemJob?.result) {
-        const err = (inMemJob.result as Record<string, unknown>).error as string | undefined
-        if (err && /OOM|ENOMEM|Chromium|out of memory/i.test(err)) {
-          errorHint = '⚠️ Có thể thiếu RAM (OOM/Chromium)'
-        }
+      if (inMemJob?.error && /OOM|ENOMEM|Chromium|out of memory/i.test(inMemJob.error)) {
+        errorHint = '⚠️ Có thể thiếu RAM (OOM/Chromium)'
       }
 
       const result = await smartRetryOrder(order.id, 'watchdog')
@@ -140,15 +137,30 @@ export async function runWatchdog(): Promise<void> {
     for (const order of completedOrders) {
       if (!order.jobId || !order.pdfUrl) continue
       const inMemJob = global.__hgctJobs?.get(order.jobId)
-      if (!inMemJob) continue
-      if (inMemJob.status !== 'done') continue
 
-      const result = inMemJob.result as { emailSent?: boolean; pdfUrl?: string } | undefined
-      if (!result || result.emailSent !== false) continue
+      let jobResult: { emailSent?: boolean; pdfUrl?: string } | undefined
+      let doneSince = 0
+
+      if (inMemJob) {
+        if (inMemJob.status !== 'done') continue
+        jobResult = inMemJob.result as { emailSent?: boolean; pdfUrl?: string } | undefined
+        doneSince = inMemJob.lastActivity ?? 0
+      } else {
+        // Bug #6 fix: DB fallback when job evicted from in-memory store (>1h)
+        const dbJob = await prisma.job.findUnique({
+          where: { id: order.jobId },
+          select: { status: true, result: true, createdAt: true },
+        })
+        if (!dbJob || dbJob.status !== 'done') continue
+        jobResult = dbJob.result as { emailSent?: boolean; pdfUrl?: string } | undefined
+        // Job was evicted from memory (>1h) — definitely past the 5-min threshold
+        doneSince = dbJob.createdAt.getTime()
+      }
+
+      if (!jobResult || jobResult.emailSent !== false) continue
 
       // emailSent=false and job has been done for > 5 min
-      const lastSeen = inMemJob.lastActivity ?? 0
-      if (lastSeen === 0 || now - lastSeen < 5 * 60 * 1000) continue
+      if (doneSince === 0 || now - doneSince < 5 * 60 * 1000) continue
 
       // Try resend email
       try {
@@ -162,8 +174,8 @@ export async function runWatchdog(): Promise<void> {
         const name = (profileData?.name as string) || ''
         const { sendReportEmail } = await import('./email')
         await sendReportEmail(order.email, name, order.service, pdfBuffer)
-        // Update job result in memory
-        inMemJob.result = { ...result, emailSent: true }
+        // Update job result in memory (only if job is still in memory store)
+        if (inMemJob) inMemJob.result = { ...jobResult, emailSent: true }
         console.log(`[watchdog] Order ${order.id} — email resent (was emailSent=false)`)
       } catch (err) {
         console.error(`[watchdog] Order ${order.id} — email resend failed:`, err)

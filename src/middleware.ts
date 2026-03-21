@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(req: NextRequest) {
-  const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || ''
+  // Bug #10 fix: prefer 'host' (set by Nginx, trusted) over 'x-forwarded-host'
+  // which can be spoofed by clients to bypass dashboard routing checks.
+  const host = req.headers.get('host') || req.headers.get('x-forwarded-host') || ''
   const isDashboard = host.startsWith('dashboard.')
 
   if (isDashboard) {

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
-import { randomUUID } from 'crypto'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { createJob } from '@/lib/jobs'
-import { processReport } from '@/lib/astrology/reportProcessor'
+import { createReportJob } from '@/lib/astrology/reportProcessor'
 import prisma from '@/lib/db'
 
 // ── Route handler — returns jobId immediately ──────────────────────
@@ -28,22 +26,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing data' }, { status: 400 })
     }
 
-    const jobId = randomUUID()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userUid = (session?.user as any)?.uid as string | undefined
-    const { service: svc, inputData: iData, email: emailVal, name: displayName, profileUid: pUidA, profileUidB: pUidB } = body as Record<string, unknown>
-    const meta = {
-      userUid: userUid || undefined,
-      service: typeof svc === 'string' ? svc : undefined,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      name: typeof displayName === 'string' ? displayName : (typeof (iData as any)?.name === 'string' ? (iData as any).name : undefined),
-      email: typeof emailVal === 'string' ? emailVal : undefined,
-      profileUidA: typeof pUidA === 'string' ? pUidA : undefined,
-      profileUidB: typeof pUidB === 'string' ? pUidB : undefined,
-    }
-    createJob(jobId, meta)
+    const {
+      service: svc,
+      inputData: iData,
+      inputDataB: iDataB,
+      email: emailVal,
+      profileUid: pUidA,
+      profileUidB: pUidB,
+      startDate: sDate,
+      endDate: eDate,
+    } = body as Record<string, unknown>
 
-    // Create order record in DB
+    // Bug #1 fix: save ALL order fields so retry/recovery can reconstruct full body
     let orderId: number | undefined
     try {
       const order = await prisma.order.create({
@@ -51,21 +47,35 @@ export async function POST(request: Request) {
           userUid: userUid ?? null,
           service: typeof svc === 'string' ? svc : service,
           profileData: (iData as object) ?? {},
+          profileDataB: (iDataB as object) ?? null,
+          profileUidA: typeof pUidA === 'string' ? pUidA : null,
+          profileUidB: typeof pUidB === 'string' ? pUidB : null,
+          startDate: typeof sDate === 'string' ? sDate : null,
+          endDate: typeof eDate === 'string' ? eDate : null,
           email: typeof emailVal === 'string' ? emailVal : '',
           status: 'processing',
           paymentStatus: 'paid', // premium users don't pay per-order
-          jobId: jobId,
         },
       })
       orderId = order.id
     } catch (err) {
-      console.error(`[JOB ${jobId}] Order create failed:`, err)
+      console.error('[report] Order create failed:', err)
     }
 
-    // Fire and forget — background continues after response is sent
-    processReport(jobId, body, orderId, 0).catch((err) => {
-      console.error(`[JOB ${jobId}] processReport error:`, err)
+    // Bug #3 fix: use createReportJob (includes error recovery: Telegram alert + recovery email + updateJob)
+    const jobId = createReportJob({
+      service: typeof svc === 'string' ? svc : service,
+      body,
+      userUid,
+      orderId,
+      amount: 0,
     })
+
+    if (orderId) {
+      prisma.order.update({ where: { id: orderId }, data: { jobId } }).catch((err) =>
+        console.error('[report] Order jobId link failed:', err),
+      )
+    }
 
     return NextResponse.json({ jobId })
   } catch (error) {

@@ -238,6 +238,7 @@ src/
 ## What's TODO
 
 ## Known Fixes Applied
+- RRI-T v2.3 bug sweep (12 bugs): `report/route.ts` Bug#1 (missing profileDataB/profileUidA/B/startDate/endDate in order.create) + Bug#3 (manual createJob+processReport → createReportJob); `reportProcessor.ts` Bug#2 (savePdf orderId suffix ngăn PDF overwrite) + Bug#8 (await order update trước updateJob done); `pdf/[id]/route.ts` Bug#2 (regex accept `_\d+` suffix); `job-watchdog.ts` Bug#4 (OOM hint: inMemJob.error không phải .result.error) + Bug#6 (DB fallback khi job bị evict khỏi memory); `smart-retry.ts` Bug#5 (pdfResent path gọi updateJob done); `deploy/route.ts` Bug#9 (keepalive ping 20s + closed guard); `middleware.ts` Bug#10 (host trước x-forwarded-host); `sepay-webhook/route.ts` Bug#11 (timingSafeEqual); `admin/config/route.ts` Bug#12 (key allowlist + numeric validation)
 - `siderealTime` → `siderialTime` (swisseph library typo)
 - House cusps: 0-indexed (swisseph returns array[0..11])
 - Prisma model: `knowledgeBase` (camelCase auto-mapping from knowledge_base table)

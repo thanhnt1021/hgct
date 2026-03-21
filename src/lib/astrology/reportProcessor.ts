@@ -57,13 +57,17 @@ function savePdf(
   profileUidA?: string,
   profileUidB?: string,
   service?: string,
+  orderId?: number,
 ): string {
   if (!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR, { recursive: true })
   let id: string
   if (profileUidA && service) {
-    id = profileUidB
+    // Bug #2 fix: append orderId suffix to prevent PDF overwrite when the same
+    // profile requests multiple reports of the same service type.
+    const base = profileUidB
       ? `${profileUidA}_${profileUidB}_${service}`
       : `${profileUidA}_${service}`
+    id = orderId != null ? `${base}_${orderId}` : base
   } else {
     id = randomUUID()
   }
@@ -287,8 +291,8 @@ export async function processReport(
   if (pdfBuffer) {
     const isSynastry = service === 'synastry' || service === 'relationship'
     const pdfId = isSynastry
-      ? savePdf(pdfBuffer, profileUidA, profileUidBBody, 'synastry')
-      : savePdf(pdfBuffer, profileUidA, undefined, service)
+      ? savePdf(pdfBuffer, profileUidA, profileUidBBody, 'synastry', orderId)
+      : savePdf(pdfBuffer, profileUidA, undefined, service, orderId)
     pdfFilename = makePdfFilename(service, name, nameB || undefined)
     pdfUrl = `/api/pdf/${pdfId}?filename=${encodeURIComponent(pdfFilename)}`
   }
@@ -306,6 +310,20 @@ export async function processReport(
     }
   }
 
+  // Bug #8 fix: await order update BEFORE updateJob(done) so DB reflects
+  // completed state before the in-memory job record is marked done.
+  // smart-retry pdfResent path reads pdfUrl from DB — must be persisted first.
+  if (orderId) {
+    try {
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { status: 'completed', pdfUrl: pdfUrl ?? null },
+      })
+    } catch (err) {
+      console.error(`[JOB ${jobId}] Order update failed:`, err)
+    }
+  }
+
   updateJob(jobId, {
     status: 'done',
     progress: 100,
@@ -317,15 +335,6 @@ export async function processReport(
       email: email || '',
     },
   })
-
-  if (orderId) {
-    prisma.order
-      .update({
-        where: { id: orderId },
-        data: { status: 'completed', pdfUrl: pdfUrl ?? null },
-      })
-      .catch((err) => console.error(`[JOB ${jobId}] Order update failed:`, err))
-  }
 
   console.log(
     `[JOB ${jobId}] Done — ${service} for ${name}, essay ${essayText.length} chars`,
