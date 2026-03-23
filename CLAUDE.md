@@ -235,6 +235,9 @@ src/
 - [x] Services maintenance mode — `services/page.tsx` force-dynamic đọc `site_mode`; lifetime users bypass hoàn toàn; màn hình "Sắp ra mắt / Đang hoàn thiện thêm" dùng `var(--font-vietnam)` (không dùng Cinzel)
 - [x] ServicesClient extracted — `src/app/services/ServicesClient.tsx`; nhận `serviceConfigs` prop từ server; `buildServices()` merge DB values vào DEFAULT_SERVICES (fallback nếu chưa set)
 - [x] Cinzel font blacklist — Cinzel/Cinzel Decorative bị cấm vì diacritics tiếng Việt bị vỡ; dùng `var(--font-vietnam)` hoặc `var(--font-playfair)` thay thế (rule project-specific, không còn trong universal rules)
+- [x] **Career age split** — báo cáo nghề nghiệp chia 2 phiên bản theo tuổi: `≥22` → `career-adult.txt` (7 sections, giọng chuyên nghiệp), `<22` → `career-young.txt` (5 sections, giọng peer-to-peer trẻ trung); `buildCareerPrompt()` tính tuổi chính xác từ DOB; Jupiter + Mercury bổ sung vào career brief (Mục 1)
+- [x] PDF keyword enforcement — `format_subheading` (lines bắt đầu `[#`) và `bold_summary` (lines `[bold]...[/]`) là 2 line types mới trong generator.ts; buffer cùng `subheadingBuffer` để tránh orphan/widow; `trimSegments()` giới hạn ≤3 âm/cụm + max 3 cụm; `trimKeywordBoldLine()` xử lý 3 pattern: standalone, 2-block (red+keywords), 3-block (red+zodiac+keywords); `bold_summary` capitalize chữ đầu
+- [x] career-young.txt Cung Mọc/Mặt Trời/Mặt Trăng format — 2 bold blocks: `[bold]TênCung:[/] [bold]kw, kw, kw[/]` (thay vì 1 block thiếu tên cung)
 
 ## What's TODO
 

@@ -32,7 +32,27 @@ function isAbsenceLine(s: string): boolean {
 }
 
 function isBracketNote(s: string): boolean {
+  if (s.includes('[/]')) return false  // contains format tag closing — not a bracket note
   return s.startsWith('[') && s.endsWith(']') && !s.startsWith('[KTLUẬN]') && !s.startsWith('[KTTIỂU]') && !s.startsWith('[SUBTITLE]') && s !== '[CLOSING]' && s.length > 2
+}
+
+/**
+ * Parse inline format tags in text (AFTER escapeHtml).
+ * Supported: [bold]text[/]  [italic]text[/]  [underline]text[/]
+ *            [#rrggbb]text[/]  [#rrggbb+bold]text[/]
+ * Malformed / unclosed tags → left as plain text (regex won't match).
+ */
+function parseFormatTags(text: string): string {
+  return text.replace(
+    /\[(#[0-9a-fA-F]{6}(?:\+bold)?|bold|italic|underline)\]([^\[]*?)\[\/\]/g,
+    (_, tag: string, content: string) => {
+      if (tag === 'bold')      return `<strong>${content}</strong>`
+      if (tag === 'italic')    return `<em>${content}</em>`
+      if (tag === 'underline') return `<span style="text-decoration:underline">${content}</span>`
+      if (tag.includes('+bold')) return `<strong style="color:${tag.split('+')[0]}">${content}</strong>`
+      return `<span style="color:${tag}">${content}</span>`
+    }
+  )
 }
 
 /**
@@ -132,7 +152,35 @@ export function cleanForPdf(text: string): string {
   }
   text = result.join('\n')
   text = text.replace(/\n{3,}/g, '\n\n')
+
+  // Trim overly long keyword segments in [bold] keyword lines
+  text = text.split('\n').map(trimKeywordBoldLine).join('\n')
+
   return text.trim()
+}
+
+// Trim comma-separated segments in [bold] keyword lines: if a segment > 3 syllables → keep first 2
+function trimSegments(content: string): string {
+  return content.split(',').map(seg => {
+    const words = seg.trim().split(/\s+/)
+    if (words.length <= 3) return seg.trim()
+    return words.slice(0, 2).join(' ')
+  }).filter(s => s.length > 0).slice(0, 3).join(', ')
+}
+
+function trimKeywordBoldLine(line: string): string {
+  const s = line.trim()
+  if (s.startsWith('[bold]') && s.endsWith('[/]')) {
+    const inner = s.slice('[bold]'.length, s.length - '[/]'.length)
+    return `[bold]${trimSegments(inner)}[/]`
+  }
+  // 3-block: [red header][/] [bold]name:[/] [bold]keywords[/] — trim only keywords block
+  const m3 = s.match(/^(\[#[^\]]+\][^\[]*\[\/\]\s*\[bold\][^\[]*\[\/\]\s*)\[bold\](.*?)\[\/\]$/)
+  if (m3) return `${m3[1]}[bold]${trimSegments(m3[2])}[/]`
+  // 2-block: [red header][/] [bold]keywords[/]
+  const m = s.match(/^(\[#[^\]]+\][^\[]*\[\/\]\s*)\[bold\](.*?)\[\/\]$/)
+  if (m) return `${m[1]}[bold]${trimSegments(m[2])}[/]`
+  return line
 }
 
 const VN_CONJUNCTIONS = new Set(['và','với','của','về','trong','cho','hay','hoặc','là','nhưng','từ','đến','tới','ra','vào','lên','xuống','qua','lại','cùng','theo'])
@@ -167,6 +215,8 @@ function classifyLine(line: string): string {
   if (SIGN_KEYS.some(k => s.startsWith(k))) return 'signature'
   if (s.endsWith(':') && s.length < 90) return 'subheading'
   if (isVnTitleHeading(s)) return 'title_heading'
+  if (s.startsWith('[#')) return 'format_subheading'
+  if (s.startsWith('[bold]') && s.endsWith('[/]')) return 'bold_summary'
   return 'body'
 }
 
@@ -209,20 +259,25 @@ function lineToHtml(kind: string, s: string): string {
     case 'section_heading':  return `<h2 class="section">${safe}</h2>`
     case 'title_heading':    return `<h2 class="section">${safe}</h2><hr class="section-rule">`
     case 'section_subtitle': return `<p class="section-subtitle">${safe.replace(/^\[SUBTITLE\]\s*/, '')}</p>`
-    case 'subheading':       return `<h3 class="subheading">${safe}</h3>`
-    case 'opener':           return `<p class="opener">${safe}</p>`
-    case 'bullet':           return `<p class="bullet">${safe}</p>`
-    case 'bullet_indent':    return `<p class="bullet-indent">${safe}</p>`
-    case 'dash_bullet':      return `<p class="dash-bullet">${safe}</p>`
+    case 'subheading':          return `<h3 class="subheading">${parseFormatTags(safe)}</h3>`
+    case 'format_subheading':   return `<p class="body">${parseFormatTags(safe)}</p>`
+    case 'bold_summary': {
+      const cap = safe.replace(/^\[bold\](.)/, (_, c) => `[bold]${c.toUpperCase()}`)
+      return `<p class="body">${parseFormatTags(cap)}</p>`
+    }
+    case 'opener':           return `<p class="opener">${parseFormatTags(safe)}</p>`
+    case 'bullet':           return `<p class="bullet">${parseFormatTags(safe)}</p>`
+    case 'bullet_indent':    return `<p class="bullet-indent">${parseFormatTags(safe)}</p>`
+    case 'dash_bullet':      return `<p class="dash-bullet">${parseFormatTags(safe)}</p>`
     case 'red_box': {
       const content = s.slice('[KTLUẬN]'.length).trim()
-      return `<div class="red-box">${escapeHtml(content)}</div>`
+      return `<div class="red-box">${parseFormatTags(escapeHtml(content))}</div>`
     }
     case 'mini_box': {
       const content = s.slice('[KTTIỂU]'.length).trim()
-      return `<div class="mini-box">${escapeHtml(content)}</div>`
+      return `<div class="mini-box">${parseFormatTags(escapeHtml(content))}</div>`
     }
-    default: return `<p class="body">${safe}</p>`
+    default: return `<p class="body">${parseFormatTags(safe)}</p>`
   }
 }
 
@@ -285,7 +340,7 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     if (closingMode && kind !== 'closing_start') kind = 'signature'
     if (kind === 'closing_start') { flushSubheadingBuffer(); flushSigs(); closingMode = true; continue }
     // Intro section (before first numbered heading): no subheadings
-    if (kind === 'subheading' && !seenSectionHeading) kind = 'body'
+    if ((kind === 'subheading' || kind === 'format_subheading' || kind === 'bold_summary') && !seenSectionHeading) kind = 'body'
     if (kind === 'section_heading') seenSectionHeading = true
 
     if (kind === 'signature') {
@@ -299,12 +354,12 @@ function buildHtml(essayText: string, options: PdfOptions): string {
     // Buffer consecutive h3 subheadings, then wrap them together with the first
     // following content element in a page-break-inside:avoid div.
     // The print engine keeps the whole block on one page — no JS measurement needed.
-    if (kind === 'subheading') {
+    if (kind === 'subheading' || kind === 'format_subheading' || kind === 'bold_summary') {
       if (pendingRule) {
         groupHtmlLines[groupHtmlLines.length - 1].push('<hr class="section-rule">')
         pendingRule = false
       }
-      subheadingBuffer.push(lineToHtml('subheading', s))
+      subheadingBuffer.push(lineToHtml(kind, s))
       continue
     }
 
