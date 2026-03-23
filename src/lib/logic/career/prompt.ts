@@ -45,6 +45,8 @@ interface CareerBrief {
     dominants: { label: string; content: string }[]
     weaks: { label: string; content: string }[]
     houses: { num: number; meaning: string }[]
+    jupiter: PlanetPos | null
+    mercury: PlanetPos | null
   }
   muc2: {
     zodiacs: { name: string; content: string }[]
@@ -191,6 +193,8 @@ export function buildCareerBrief(
     meta: { name, fullName, pronoun, dobStr },
 
     muc1: {
+      jupiter: getPlanetPos('Jupiter'),
+      mercury: getPlanetPos('Mercury'),
       core: coreData.map(item => ({
         label: String(item.label || ''),
         zodiac: String(item.zodiac || ''),
@@ -347,6 +351,22 @@ export function formatCareerBriefForPrompt(brief: CareerBrief): string {
     for (const h of muc1.houses) {
       if (h.meaning) L.push(`    Nhà ${h.num}: ${h.meaning}`)
     }
+  }
+
+  // Jupiter + Mercury (dùng cho phong cách học tập và nạp năng lượng)
+  if (muc1.jupiter) {
+    L.push(briefLine(
+      'Sao Mộc (lạc quan, mở rộng, may mắn — nạp năng lượng)',
+      `Cung ${muc1.jupiter.zodiac}, Nhà ${muc1.jupiter.house}`,
+      'Luận về lĩnh vực nạp năng lượng, nguồn cảm hứng và sự hào hứng tự nhiên.'
+    ))
+  }
+  if (muc1.mercury) {
+    L.push(briefLine(
+      'Sao Thủy (tư duy, giao tiếp, học hỏi — phong cách học)',
+      `Cung ${muc1.mercury.zodiac}, Nhà ${muc1.mercury.house}`,
+      'Luận về phong cách tư duy và phương pháp học hỏi tự nhiên.'
+    ))
   }
 
   // ══ MỤC 2: Điểm mạnh bẩm sinh ══
@@ -607,7 +627,8 @@ export function buildCareerPrompt(
     ? `GIỌNG VĂN BẮT BUỘC (người đọc là học sinh/sinh viên dưới 22 tuổi):\nViết với giọng văn trẻ trung, gần gũi, dễ hiểu, như đang trò chuyện với một bạn học sinh/sinh viên. Tạo cảm giác khám phá bản thân thú vị, không áp lực, không phán xét. Nội dung mang tính định hướng nhẹ nhàng, giúp người đọc hiểu mình và có thêm lựa chọn, không mang tính áp đặt, không nặng nề về chiều sâu tâm lý.`
     : ''
 
-  const instructions = loadPromptTemplate('career')
+  const templateName = age >= 22 ? 'career-adult' : 'career-young'
+  const instructions = loadPromptTemplate(templateName)
     .replace(/{tone_instruction}\n?/g, toneInstruction ? toneInstruction + '\n\n' : '')
     .replace(/{greeting}/g, greeting)
     .replace(/{pronoun}/g, pronoun)

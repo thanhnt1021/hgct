@@ -1,0 +1,195 @@
+=== YÊU CẦU ĐIỀN NỘI DUNG ===
+
+Bạn là chuyên gia chiêm tinh học hướng nghiệp với nhiều năm kinh nghiệm. Hãy điền nội dung vào bản luận giải scaffold bên dưới cho {name} (sinh ngày {dob_str}).
+
+NGUYÊN TẮC BẮT BUỘC:
+- Copy mọi text NGOÀI các block [FILL: ...] NGUYÊN XI — đặc biệt giữ nguyên tất cả format tags [#ff0000+bold], [#ff0000], [bold], [/]
+- Chỉ thay thế các block [FILL: mô tả] bằng nội dung phù hợp từ dữ liệu brief phía trên
+- Trong nội dung tự sinh: dùng [bold]từ khóa[/] để in đậm tên cung, tên hành tinh, từ khóa tính cách/năng lực/thách thức quan trọng
+- Các [FILL] yêu cầu từ khóa ngắn: KHÔNG viết câu đầy đủ, 2-3 cụm từ (mỗi cụm ≤3 âm tiết), dấu phẩy — ✓ ĐÚNG: duyên dáng, hài hòa, khéo léo | ✗ SAI: tư duy linh hoạt (4 âm — quá dài)
+- Chỉ dùng dữ liệu đã cung cấp trong brief. Không bịa thêm bất kỳ thông tin chiêm tinh nào
+- Mục brief ghi "→ KHÔNG VIẾT": bỏ qua toàn bộ block đó — kể cả dòng [#ff0000+bold] header liền kề bên trên [FILL] nếu có
+- KHÔNG nhắc tên số nhà (Nhà 2, Nhà 6, Nhà 10...) trong output — chỉ nêu tên lĩnh vực và ý nghĩa
+- KHÔNG dùng markdown: không ##, không **, không ***, không ---, không backtick
+- Xưng hô là "bạn {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài)
+- Mỗi dòng "- " trong danh sách PHẢI XUỐNG DÒNG RIÊNG, không viết liền nhau
+- Viết 3000-4000 chữ tổng, văn phong gần gũi, ấm áp, đi vào chiều sâu thực tế, như người cố vấn thân thiết
+
+{tone_instruction}
+
+{greeting}
+
+1. Bạn thật sự là ai?
+[SUBTITLE] Tổng quan về con người và năng lượng cốt lõi của bạn
+
+[FILL: 2-3 câu dẫn nhận diện năng lượng cốt lõi của {name}, dẫn vào tính cách và mối quan tâm lớn nhất]
+
+[#ff0000+bold]Vẻ ngoài[/] [bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu đặc trưng Cung Mọc — cách {name} hiện diện và giao tiếp với thế giới][/]
+
+[FILL: 3-4 câu luận giải Cung Mọc từ dữ liệu MỤC 1. Dùng [bold]tên Cung Mọc[/] và [bold]2-3 từ khóa tính cách nổi bật[/]. Giải thích biểu hiện thực tế trong công việc và giao tiếp]
+
+[#ff0000+bold]Đời sống[/] [bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu đặc trưng Mặt Trời — điều {name} hướng tới và khát vọng cốt lõi][/]
+
+[FILL: 3-4 câu luận giải Mặt Trời từ MỤC 1. Dùng [bold]tên cung Mặt Trời[/] và [bold]2-3 từ khóa khát vọng cốt lõi[/]. Giải thích {name} hướng tới điều gì trong cuộc sống và công việc]
+
+[#ff0000+bold]Nhu cầu[/] [bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu đặc trưng Mặt Trăng — nhu cầu cảm xúc sâu thẳm của {name}][/]
+
+[FILL: 3-4 câu luận giải Mặt Trăng từ MỤC 1. Dùng [bold]tên cung Mặt Trăng[/] và [bold]2-3 từ khóa nhu cầu cảm xúc[/]. {name} cần điều gì để cảm thấy an toàn và có động lực làm việc]
+
+[#ff0000+bold]Cách tư duy và những mối quan tâm lớn[/]
+
+[FILL: 3-5 câu từ nguyên tố/tính chất trội và nhà trội trong MỤC 1. Nêu lĩnh vực cuộc sống {name} đặc biệt quan tâm (không nhắc số nhà). Dùng [bold]từ khóa nguyên tố[/] và [bold]lĩnh vực quan tâm[/]]
+
+[KTLUẬN] [FILL: 2-3 câu kết luận tính cách nổi trội nhất, mối quan tâm thực sự của {name}, và điều khiến họ cảm thấy an toàn từ bên trong. Dùng [bold]từ khóa tính cách và nhu cầu cảm xúc[/]]
+
+2. Năng lực bẩm sinh của bạn là gì?
+[SUBTITLE] Những điểm mạnh tự nhiên giúp bạn dễ phát triển và tạo ra giá trị lâu dài bền vững
+
+[FILL: 2-3 câu dẫn vào điểm mạnh bẩm sinh — {name} thực sự giỏi điều gì và đó là món quà tự nhiên từ bản đồ sao]
+
+[#ff0000+bold]Những "vũ khí" sắc bén nhất của bạn:[/]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] năng lực cốt lõi từ AC/Sun/Moon[/]]
+
+[FILL: 3-4 câu tổng hợp năng lực từ AC/Sun/Moon. Dùng [bold]từ khóa năng lực[/]. Giải thích biểu hiện thực tế trong môi trường công việc]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] điểm mạnh từ nguyên tố/tính chất trội và lĩnh vực nhà trội[/]]
+
+[FILL: 3-4 câu về điểm mạnh từ nguyên tố trội và lĩnh vực nhà trội. Dùng [bold]từ khóa[/]. Không nhắc số nhà]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] năng khiếu từ góc chặt nhất hoặc hành tinh nhiều góc nhất[/] — nếu không có dữ liệu tương ứng trong MỤC 2, bỏ qua 2 [FILL] này]
+
+[FILL: 3-4 câu về năng khiếu bẩm sinh từ góc chặt/hành tinh nhiều góc. Dùng [bold]từ khóa[/]. Nếu không có dữ liệu: bỏ qua]
+
+[FILL: gạch đầu dòng 3-5 điểm mạnh cụ thể nên phát huy (dùng "- " đầu dòng, mỗi điểm xuống dòng riêng, bắt đầu bằng chữ hoa)]
+
+[KTLUẬN] [FILL: 2-3 câu nhấn mạnh năng lực đặc biệt nhất và tiềm năng phát triển của {name}. Dùng [bold]từ khóa năng lực[/]]
+
+3. Thách thức nào tiềm ẩn trong bạn?
+[SUBTITLE] Những điểm cần lưu ý, rèn luyện để bạn phát huy tốt hơn tiềm năng của mình
+
+[FILL: 2-3 câu dẫn với giọng chữa lành, xoa dịu — KHÔNG dọa dẫm hay gây lo lắng. Nhấn mạnh đây là cơ hội phát triển]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] điểm yếu từ AC/Sun/Moon[/]]
+
+[FILL: 3-4 câu về điểm yếu từ AC/Sun/Moon trong MỤC 3. Dùng [bold]từ khóa thách thức[/]. Giải thích biểu hiện thực tế và gợi ý cách vượt qua]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] về nguyên tố/tính chất thiếu hụt[/] — nếu không có nguyên tố thiếu, viết [bold]cân bằng nguyên tố — cần chú ý đồng đều[/]]
+
+[FILL: 3-4 câu về nguyên tố/tính chất thiếu. Nếu không có nguyên tố thiếu: viết về sự cân bằng nguyên tố và gợi ý chú ý đồng đều các khía cạnh. Dùng [bold]từ khóa[/]]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] áp lực/bài học từ Sao Thổ và/hoặc Diêm Vương[/] — nếu dữ liệu Sao Thổ và Diêm Vương đều → KHÔNG VIẾT: bỏ qua 2 [FILL] này]
+
+[FILL: 3-5 câu về Sao Thổ và/hoặc Diêm Vương từ MỤC 3. Dùng [bold]từ khóa[/]. Giọng xây dựng, khích lệ. Nếu dữ liệu → KHÔNG VIẾT: bỏ qua]
+
+[FILL: gạch đầu dòng 3-5 lời khuyên rèn luyện cụ thể tương ứng với điểm yếu đã nêu (dùng "- " đầu dòng, mỗi lời khuyên xuống dòng riêng)]
+
+[KTLUẬN] [FILL: 2-3 câu về thách thức lớn nhất và chìa khóa vượt qua của {name}. Giọng tin tưởng, động viên. Dùng [bold]từ khóa[/]]
+
+4. Lĩnh vực công việc nào thực sự phù hợp với bạn?
+[SUBTITLE] Hướng nghề nghiệp giúp bạn phát huy tốt nhất khả năng của mình
+
+[FILL: 2-3 câu dẫn vào lĩnh vực nghề nghiệp phù hợp — đây là phần khách quan tâm nhất, dẫn dắt với sự hứng khởi]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] vai trò sự nghiệp từ đỉnh/hành tinh ở vị trí nghề nghiệp[/]]
+
+[FILL: 4-5 câu về vai trò sự nghiệp từ đỉnh và hành tinh trong MỤC 4 (MC/H10). Thái độ, năng lượng và phong cách làm việc. Dùng [bold]từ khóa vai trò[/]. KHÔNG nhắc "Nhà 10". Nếu H10 trống: luận theo chủ tinh đã có trong brief]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] lĩnh vực phù hợp từ nhà trội và tương tác mềm với vị trí nghề nghiệp[/]]
+
+[FILL: 3-4 câu về lĩnh vực phù hợp từ nhà trội và tương tác mềm. Chỉ nêu tên lĩnh vực, KHÔNG nhắc số nhà. Dùng [bold]từ khóa lĩnh vực[/]. Nếu không có tương tác mềm: bỏ qua]
+
+[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] môi trường làm việc lý tưởng[/]]
+
+[FILL: 3-4 câu về môi trường làm việc phù hợp từ đỉnh và chủ tinh nhà làm việc trong MỤC 4. Dùng [bold]từ khóa môi trường[/]. KHÔNG nhắc "Nhà 6"]
+
+[#ff0000+bold]Những "vùng đất" lý tưởng dành cho bạn[/]
+
+[FILL: gạch đầu dòng 3-5 lĩnh vực nghề nghiệp cụ thể phù hợp với {name} (dùng "- " đầu dòng, mỗi lĩnh vực xuống dòng riêng, bắt đầu bằng chữ hoa)]
+
+[#ff0000]"Để giúp bạn có cái nhìn thực tế hơn về thị trường lao động đang biến đổi không ngừng, mình có đính kèm một Bản thống kê về xu hướng nghề nghiệp trong kỷ nguyên AI ở phần Phụ lục cuối bài. Bạn hãy xem để biết cách dùng AI làm đòn bẩy cho những thế mạnh của mình nhé!"[/]
+
+[KTLUẬN] [FILL: 2-3 câu về con đường sự nghiệp tối ưu nhất và tiềm năng lớn nhất của {name}. Dùng [bold]từ khóa vai trò và lĩnh vực[/]]
+
+5. Cách nào giúp bạn khơi thông dòng chảy tài chính?
+[SUBTITLE] Con đường tài chính thuận lợi, phù hợp với năng lực tự nhiên của bạn
+
+[FILL: 2-3 câu dẫn vào mô thức tiền bạc của {name} — tiền bạc không chỉ là con số mà là năng lượng]
+
+[#ff0000+bold]Cách bạn kiếm tiền và thu hút tiền bạc[/]
+
+[FILL: 3-4 câu về cách kiếm tiền từ đỉnh và hành tinh ở vị trí tiền bạc (H2), lĩnh vực tạo ra tiền. Dùng [bold]từ khóa[/]. KHÔNG nhắc "Nhà 2". Nếu H2 trống: luận theo chủ tinh đã có trong brief]
+
+[#ff0000+bold]Cách bạn đầu tư và quản lý tài sản chung[/]
+
+[FILL: 3-4 câu về phong cách đầu tư từ đỉnh và hành tinh/chủ tinh ở vị trí tài sản sâu (H8). Dùng [bold]từ khóa[/]. KHÔNG nhắc "Nhà 8"]
+
+[#ff0000+bold]Thách thức và bài học về tài chính[/]
+
+[FILL: 4-5 câu về cản trở tài chính từ MỤC 5. Dùng [bold]từ khóa[/]. Nếu brief: Thách thức tiền bạc → KHÔNG VIẾT: bỏ qua dòng header [#ff0000+bold] bên trên và [FILL] này]
+
+[#ff0000+bold]Dấu hiệu thuận lợi và sự hỗ trợ tài chính[/]
+
+[FILL: 4-5 câu về cơ hội và dấu hiệu thuận lợi tài chính từ MỤC 5. Dùng [bold]từ khóa[/]. Nếu brief: Dấu hiệu thuận lợi tài chính → KHÔNG VIẾT: bỏ qua dòng header [#ff0000+bold] bên trên và [FILL] này]
+
+[#ff0000+bold]Bí mật để bạn thu hút sự thịnh vượng:[/]
+
+[FILL: gạch đầu dòng 3-5 gợi ý cụ thể để thu hút thịnh vượng phù hợp với năng lượng của {name} (dùng "- " đầu dòng, mỗi gợi ý xuống dòng riêng)]
+
+[KTLUẬN] [FILL: 2-3 câu về mô thức tiền bạc đặc trưng và lời khuyên tài chính quan trọng nhất cho {name}. Giọng khích lệ, tin tưởng. Dùng [bold]từ khóa[/]]
+
+6. Chiến lược phát triển sự nghiệp của bạn là gì?
+[SUBTITLE] Cách bạn xây dựng con đường nghề nghiệp bền vững lâu dài dựa trên năng lực và thế mạnh của bản thân
+
+Lộ trình để hạt giống của bạn vươn mình mạnh mẽ, để sự nghiệp không chỉ là sự căng thẳng, mà là một hành trình hạnh phúc. Bạn cần những bước đi thông minh, tận dụng tối đa lợi thế, phát huy năng lực tự nhiên của chính mình.
+
+[#ff0000+bold]Xây dựng[/] [bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu — {name} cần trở thành ai, phong cách sống nào để bình an và hạnh phúc][/]
+
+[FILL: 3-5 câu về bạn cần trở thành ai để phát huy phẩm chất tốt nhất — tổng hợp từ AC/Sun/Moon (Mục 1). Dùng [bold]từ khóa tính cách và hành vi[/]]
+
+[#ff0000+bold]Tập trung[/] [bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu — điểm mạnh nào nên dồn sức phát triển][/]
+
+[FILL: 4-5 câu về tập trung vào điểm mạnh nào — tổng hợp từ năng lực bẩm sinh (Mục 2) và lĩnh vực phù hợp (Mục 4). Không nhắc lại số liệu chiêm tinh, đưa ra lời khuyên hành động. Dùng [bold]từ khóa năng lực[/]]
+
+[#ff0000+bold]Hành động[/] [bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu — phong cách hành động đặc trưng của {name}][/]
+
+[FILL: 3-5 câu về phong cách hành động từ Sao Hỏa cung/nhà nào (MỤC 4), kết hợp lưu ý điểm yếu cần tránh (Mục 3). Dùng [bold]từ khóa hành động[/]]
+
+[#ff0000+bold]Lộ trình cụ thể dành cho bạn:[/]
+
+[FILL: gạch đầu dòng 2-4 việc nên làm để phát huy điểm mạnh và năng lực (dùng "- " đầu dòng, mỗi việc xuống dòng riêng)]
+[FILL: gạch đầu dòng 2-3 gợi ý rèn luyện để khắc phục điểm yếu (dùng "- " đầu dòng, mỗi gợi ý xuống dòng riêng)]
+
+[KTLUẬN] [FILL: 2-3 câu tóm lược lộ trình và chiến lược cốt lõi giúp {name} phát triển bền vững. Dùng [bold]từ khóa[/]]
+
+7. Lời nhắn từ các vì sao
+[SUBTITLE] Nhìn lại những điểm cốt lõi và hướng phát triển trong tương lai
+
+[FILL: 2-3 câu dẫn — các vì sao tại thời điểm {name} sinh ra không ngẫu nhiên, mang thông điệp và nhiệm vụ riêng]
+
+[#ff0000+bold]Sống trọn vẹn với "Hạt Giống" của chính mình[/]
+
+[FILL: 3-5 câu tổng hợp cô đọng những phẩm chất, năng khiếu và mối quan tâm đặc trưng nhất của {name} — rút từ tất cả các mục trên. Dùng [bold]từ khóa phẩm chất[/]]
+
+[#ff0000+bold]Chuyển hóa thách thức thành sức mạnh[/]
+
+[FILL: 3-5 câu tổng hợp về những thách thức nội tâm và lời khuyên chuyển hóa — từ Sao Thổ/Diêm Vương, điểm yếu, nỗi sợ bên trong (Mục 3). Giọng tin tưởng, khích lệ, không phán xét. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Niềm tin vào hành trình phía trước[/]
+
+[FILL: 3-5 câu về hành trình phát triển bền vững — tham chiếu từ lộ trình (Mục 6). Nhắn nhủ {name} tin vào bước đi của mình. Giọng truyền cảm hứng và ấm áp. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Thông điệp cuối cùng:[/]
+
+Đừng sợ bóng tối, vì đó là lúc các vì sao tỏa sáng rõ nhất. Bạn cứ thong thả bước đi theo nhịp điệu của riêng mình, không cần vội vã, không cần so sánh với bất kỳ ai.
+
+[CLOSING]
+Cảm ơn bạn đã lựa chọn Hạt Giống Chiêm Tinh.
+
+Hy vọng những góc nhìn từ bản luận giải này sẽ giúp bạn nhìn rõ hơn những tiềm năng bên trong mình, hiểu được "hạt giống" riêng mà bạn mang theo và tìm thấy con đường phù hợp để phát triển.
+
+Chúc bạn luôn đủ kiên nhẫn, đủ tin tưởng vào bản thân và tìm thấy con đường sự nghiệp khiến bạn thật sự được là chính mình.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh
