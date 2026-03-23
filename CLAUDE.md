@@ -2,7 +2,7 @@
 
 ## ⚠️ CRITICAL WORKFLOW RULES (KHÔNG BAO GIỜ vi phạm)
 
-1. **`feature: [tên]`** → tạo branch → đọc context → hỏi Q&A 1 batch → **DỪNG chờ user confirm rõ ràng** (`làm đi`, `go ahead`...) → mới được code. Plan đính kèm là INPUT để đối chiếu, **KHÔNG phải lệnh implement**.
+1. **`feature: [tên]`** → tạo branch → đọc context → hỏi bằng **AskUserQuestion tool** — KHÔNG output Q1/Q2/Q3 text → **DỪNG chờ user confirm rõ ràng** (`làm đi`, `go ahead`...) → mới được code. Plan đính kèm là INPUT để đối chiếu, **KHÔNG phải lệnh implement**.
 2. **KHÔNG tự** `git commit`, `git push`, `git merge`, deploy production — chỉ khi user ra lệnh rõ.
 3. **Sau quick deploy** → báo cáo kết quả → **DỪNG**, không làm gì thêm.
 
@@ -51,7 +51,7 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
    - Pull từ GitHub, build từ đầu — dùng khi muốn share link demo hoặc sau khi commit
 
 **Shorthand commands (dùng trong chat):**
-- **"feature: [tên]"** → **[BƯỚC 0] tạo branch `feature/tên` NGAY, dù user có đính kèm code/plan** → re-read context → **hỏi Q&A (BẮT BUỘC, kể cả khi đã có plan đính kèm)** → chờ user confirm rõ ràng → implement + test từng bước → quick deploy → **DỪNG chờ feedback** (xem chi tiết: `docs/universal_rules/UNIVERSAL_WORKFLOW.md` mục **`feature:` Workflow**)
+- **"feature: [tên]"** → **[BƯỚC 0] tạo branch `feature/tên` NGAY, dù user có đính kèm code/plan** → re-read context → **hỏi bằng AskUserQuestion tool (BẮT BUỘC — KHÔNG output Q1/Q2/Q3 text)** → chờ user confirm rõ ràng → implement + test từng bước → quick deploy → **DỪNG chờ feedback** (xem chi tiết: `docs/universal_rules/UNIVERSAL_WORKFLOW.md` mục **`feature:` Workflow**)
 - **"test demo"** hoặc **"quick deploy"** → build + deploy demo → **DỪNG chờ feedback**
 - **"commit"** → commit + push nhánh hiện tại + update MD files (chỉ làm khi được lệnh)
 - **"merge main"** hoặc **"lên production"** → merge + push + deploy production (chỉ làm khi được lệnh)

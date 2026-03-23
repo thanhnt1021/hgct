@@ -117,6 +117,18 @@ Claude phân loại findings vào 6 categories:
 
 ## 6. PHASE 4 — HỎI NGƯỢC (AskUserQuestion tool)
 
+> ⛔ **HARD RULE — enforcement tự động qua hook:**
+> Claude **PHẢI** dùng `AskUserQuestion` tool. **KHÔNG BAO GIỜ** output câu hỏi dạng text thuần túy.
+>
+> ❌ **SAI — tuyệt đối không làm thế này:**
+> ```
+> Q1 — Template files: Tách thành 2 file hay giữ 1 file?
+> Q2 — Jupiter trong brief: Cần thêm hay không?
+> Q3 — [#ff0000+italic]: Chọn (a) hay (b)?
+> ```
+>
+> ✅ **ĐÚNG:** Gọi `AskUserQuestion` tool với structured options — không có text Q1/Q2/Q3.
+
 Claude KHÔNG output câu hỏi dạng text. Thay vào đó: dùng **`AskUserQuestion` tool** — native trong Claude Code CLI, hiện thị interactive UI với selectable options, auto có "Other" option.
 
 ### 6.1 Quy trình

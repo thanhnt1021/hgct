@@ -13,9 +13,10 @@ curl -fsSL https://raw.githubusercontent.com/hentaiikidd/universal-workflow/main
 ```
 
 Script tự động:
-- Copy toàn bộ rules vào `docs/universal_rules/`
-- Tạo hoặc cập nhật `CLAUDE.md`
+- Copy toàn bộ rules + hooks vào `docs/universal_rules/`
+- Tạo hoặc cập nhật `CLAUDE.md` (bao gồm AskUserQuestion tool requirement)
 - Dọn dẹp file thừa
+- **Cài hooks vào `~/.claude/hooks/` + cập nhật `~/.claude/settings.json`** — global, có hiệu lực ngay cho mọi Claude Code session trên máy này
 
 > **SSH key khác mặc định?**
 > ```bash
