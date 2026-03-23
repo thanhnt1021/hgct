@@ -43,6 +43,7 @@ Xem [BOOTSTRAP.md](./BOOTSTRAP.md) để biết thêm cách setup (thủ công t
 | [`QUALITY_GATES.md`](./QUALITY_GATES.md) | Trước mỗi commit |
 | [`UI_MOBILE_RULES.md`](./UI_MOBILE_RULES.md) | Project có UI / web / mobile |
 | [`BOT_COMMAND_RULES.md`](./BOT_COMMAND_RULES.md) | Project là bot (Telegram/Discord/...) |
+| [`VIETNAMESE_DIACRITICS.md`](./VIETNAMESE_DIACRITICS.md) | Dự án sử dụng tiếng Việt (ZERO TOLERANCE) |
 | [`NEW_PROJECT_SETUP.md`](./NEW_PROJECT_SETUP.md) | Logic của lệnh `check requirements` |
 | [`BOOTSTRAP.md`](./BOOTSTRAP.md) | Hướng dẫn bootstrap đầy đủ (3 cách) |
 | [`ASK-BACK.md`](./ASK-BACK.md) | Cơ chế hỏi ngược trước khi thực thi (standalone + Track A trong `feature:`) |

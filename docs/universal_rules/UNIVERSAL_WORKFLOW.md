@@ -16,6 +16,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | Trước khi commit | `QUALITY_GATES.md` |
 | Project có UI/web/mobile | `UI_MOBILE_RULES.md` |
 | Project là bot (Telegram/Discord/...) | `BOT_COMMAND_RULES.md` |
+| Dự án sử dụng tiếng Việt | `VIETNAMESE_DIACRITICS.md` |
 | Setup project mới / `check requirements` | `NEW_PROJECT_SETUP.md` |
 | Hỏi ngược trước khi thực thi (standalone) | `ASK-BACK.md` |
 | Theo dõi mục tiêu / goal drift | `OUTCOME.md` |
@@ -41,6 +42,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `report context` | Giống `read context` nhưng sau khi đọc xong → **output full structured summary** theo format định nghĩa trong mục **"report context — Output Format"** bên dưới. |
 | `check goal` | Show tóm tắt GOAL.md + tiến độ + đề xuất bước tiếp theo (xem `OUTCOME.md` mục "Bất kỳ lúc nào") |
 | `update goal` | Claude đề xuất những gì nên update GOAL.md dựa trên việc vừa làm trong session (xem `OUTCOME.md`) |
+| `full update` | **One-shot cuối task**: update MD files → commit + push → merge main → restart service → report (xem **`full update` Workflow** bên dưới) |
 
 ---
 
@@ -130,6 +132,57 @@ Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy 
 4. Khi tất cả xong → quick deploy lần cuối → **báo cáo tổng kết** → **DỪNG chờ feedback**.
 
 > **Exception:** Nếu gặp vấn đề không giải quyết được hoặc loop >2 lần → **dừng, tham vấn user ngay** — không tự thử mãi.
+
+---
+
+## full update Workflow
+
+One-shot command cuối task — gom toàn bộ `commit` + `merge main` + restart service + report thành 1 lệnh duy nhất. User nói `full update` = ủy quyền Claude thực hiện tất cả các bước bên dưới **không cần hỏi thêm**.
+
+> **Lệnh `full update` là lệnh rõ ràng của user** — không vi phạm Core Rule 1 (KHÔNG tự ý commit/push/merge). Khi user nói `full update`, Claude ĐƯỢC PHÉP commit, push, merge, restart.
+
+### Các bước (thực hiện tuần tự)
+
+**Bước 1 — Update MD files**
+- Đọc `docs/MD_FILES_TO_UPDATE.md` → update tất cả MD files trong danh sách
+- Update `CLAUDE.md` nếu có thay đổi kiến trúc / commands / config
+- Nếu commit hoàn thành milestone → update `GOAL.md` (tick `[x]`, cập nhật "đang ở đâu")
+- Clear `docs/MD_FILES_TO_UPDATE.md` sau khi update xong
+
+**Bước 2 — Commit + push**
+- `git add [files cụ thể]` (KHÔNG `git add -A`)
+- `git commit` với message mô tả "why"
+- Nếu có sửa `docs/universal_rules/*` → push lên repo `universal-workflow` trước (theo `GIT_WORKFLOW.md`)
+- `git push -u origin HEAD` (feature branch) hoặc `git push` (main)
+- `git status` → verify "up to date"
+
+**Bước 3 — Merge main** (chỉ khi đang trên feature branch)
+- `git checkout main && git merge --no-ff feature/[tên]`
+- `git push`
+- `git status` → verify "up to date"
+- Nếu đang trên `main` → skip bước này
+
+**Bước 4 — Restart service** (chỉ khi project có service)
+- `sudo systemctl restart [service-name]`
+- Verify service running: `sudo systemctl is-active [service-name]`
+- Nếu project không có service / không có systemd config → skip bước này
+
+**Bước 5 — Report**
+- Output tóm tắt ngắn gọn:
+  ```
+  -- full update --
+  Branch: [branch] -> main
+  Commit: [hash] [message ngắn]
+  Service: [tên] restarted / N/A
+  MD files updated: [danh sách]
+  ```
+
+### Lưu ý
+
+- Nếu bất kỳ bước nào fail → **DỪNG ngay**, báo lỗi, KHÔNG tiếp tục bước sau
+- Nếu có merge conflict → **DỪNG**, báo user, KHÔNG tự resolve
+- `full update` KHÔNG bao gồm deploy demo — chỉ restart service (production)
+- Nếu cần deploy demo trước khi commit → dùng `quick deploy` riêng trước
 
 ---
 

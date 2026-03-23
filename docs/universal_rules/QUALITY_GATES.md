@@ -45,7 +45,17 @@ _Lý do: build pass không đảm bảo app chạy đúng. Runtime errors (API s
 
 _Lý do: đây là quality gate vì code và docs phải đi cùng nhau trong một commit. Nếu merge code mà docs cũ, người deploy server mới sau này sẽ thiếu thông tin và app sẽ crash._
 
-## 5. Commit Message
+## 5. Vietnamese Diacritics Check (Dự án tiếng Việt)
+
+- [ ] Grep tất cả strings tiếng Việt trong files vừa sửa
+- [ ] Mọi user-facing string đều có dấu đầy đủ (messages, buttons, captions, image labels, AI prompts)
+- [ ] Không có string nào dạng "Trai bai", "Quay lai", "Khach hang" (thiếu dấu)
+
+→ **ZERO TOLERANCE.** Chi tiết: xem `BOT_COMMAND_RULES.md` mục 7.
+
+_Lý do: Tiếng Việt không dấu là lỗi phổ biến nhất khi AI viết code. Mỗi commit phải verify -- không tin vào "đã viết đúng từ đầu"._
+
+## 6. Commit Message
 
 Format:
 ```
@@ -90,3 +100,15 @@ Types và ý nghĩa:
 - [ ] `pip install -r requirements.txt` thành công trong venv
 - [ ] Service restart thành công: `sudo systemctl restart <service> && sudo systemctl status <service>`
 - [ ] **Command Registration Check:** Tương tự Node — xem `BOT_COMMAND_RULES.md` mục 1 + 4.
+
+## 7. RRI-T (Khi user yêu cầu)
+
+Khi user gọi `check RRI-T` → chạy kiểm thử toàn diện theo `RRI-T_METHODOLOGY.md`:
+
+1. **Đọc** `docs/universal_rules/RRI-T_METHODOLOGY.md` để nắm methodology
+2. **Chọn mode:** RRI-T Lite (solo dev, < 2h) hoặc Full (team, nửa ngày)
+3. **Phase 1.5 — Code-Path Analysis** (bắt buộc): Trace data flow, state mutation, DB queries, calculations, external calls, callbacks, authorization trong code thực tế
+4. **5 Personas × 7 Dimensions:** Chạy checklist theo từng persona (End User, BA, QA Destroyer, DevOps, Security Auditor)
+5. **Output:** Danh sách bugs/issues theo severity (P0-P3), coverage score, recommended fixes
+
+_Lý do: RRI-T bổ sung cho unit test bằng cách kiểm thử từ góc nhìn người dùng thật + phá hệ thống + security + infrastructure — những thứ unit test không cover được._

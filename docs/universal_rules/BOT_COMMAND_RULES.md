@@ -108,37 +108,70 @@ _Lý do: Bot chạy như daemon/service. Code mới chỉ có hiệu lực sau k
 
 ---
 
-## 7. Tiếng Việt Có Dấu (MUST -- không được bỏ qua)
+## 7. Tiếng Việt Có Dấu (CRITICAL VIOLATION nếu thiếu -- ZERO TOLERANCE)
 
-**BẮT BUỘC:** Mọi text hiển thị cho user (reply_text, edit_message_text, InlineKeyboardButton label, BotCommand description) PHẢI dùng tiếng Việt CÓ DẤU đầy đủ.
+### TUYỆT ĐỐI KHÔNG BAO GIỜ viết tiếng Việt không dấu trong bất kỳ string nào user có thể nhìn thấy.
 
-**SAI:**
+**BẮT BUỘC:** MỌI text tiếng Việt trong code PHẢI có dấu đầy đủ. Không có ngoại lệ. Không có "sẽ sửa sau". Mỗi string PHẢI đúng ngay từ khi viết.
+
+**Phạm vi -- BẮT BUỘC có dấu (KHÔNG ngoại lệ):**
+- `reply_text()`, `edit_message_text()`, `reply_photo(caption=)` -- mọi message gửi user
+- `InlineKeyboardButton(text=)` -- mọi button label
+- `BotCommand(description=)` -- mọi menu description
+- Captions, titles, labels trong ảnh (Pillow `draw.text()`, image generation)
+- AI system prompt, user prompt, continuation prompt -- mọi prompt gửi AI
+- Hardcoded data labels (position labels, combo labels, category names)
+- Dict/list values sẽ hiển thị cho user (summary text, memory display, etc.)
+- f-string, format string chứa tiếng Việt
+
+**KHÔNG áp dụng (CHỈ những thứ này):**
+- Variable names, function names (tiếng Anh)
+- Log messages (`logger.info/warning/error`)
+- Code comments
+- Regex patterns
+- Dict keys dùng nội bộ (không hiển thị)
+
+**SAI (vi phạm nghiêm trọng):**
 ```python
 await update.message.reply_text("Chua co trai bai nao.")
 InlineKeyboardButton("Quay lai", ...)
-"Thieu thong tin. Gui theo format nhieu dong."
+caption=f"Trai bai: {name}"
+draw.text((x, y), "Thuan loi & Thach thuc", ...)
+"Cau hoi va boi canh khach hang"
 ```
 
 **ĐÚNG:**
 ```python
 await update.message.reply_text("Chưa có trải bài nào.")
 InlineKeyboardButton("Quay lại", ...)
-"Thiếu thông tin. Gửi theo format nhiều dòng."
+caption=f"Trải bài: {name}"
+draw.text((x, y), "Thuận lợi & Thách thức", ...)
+"Câu hỏi và bối cảnh khách hàng"
 ```
 
-**Áp dụng cho:**
-- Tất cả user-facing strings trong bot (messages, buttons, menus, help text, error messages)
-- AI prompt/continuation instructions (để AI hiểu và trả lời đúng tiếng Việt)
-- BotCommand descriptions trong set_my_commands
+### Quy trình bắt buộc sau mỗi file edit:
 
-**KHÔNG áp dụng cho:**
-- Variable names, function names, comments (dùng tiếng Anh hoặc không dấu tùy convention)
-- Log messages (không hiển thị cho user)
-- Regex patterns
+1. Grep toàn bộ strings tiếng Việt trong file vừa sửa
+2. Kiểm tra TỪNG string có đủ dấu chưa
+3. Nếu phát hiện thiếu dấu -> sửa NGAY, không commit
 
-_Lý do: Tiếng Việt không dấu rất khó đọc và thiếu chuyên nghiệp. User Việt Nam mong đợi bot nói tiếng Việt có dấu. Đây là lỗi phổ biến nhất khi AI viết code -- luôn quên dấu khi viết string literal._
+### Từ hay bị thiếu dấu nhất (phải nhớ):
 
-> **Mẹo:** Khi viết string tiếng Việt trong code Python, dùng Unicode trực tiếp (editor hỗ trợ UTF-8) hoặc Unicode escape (\u00e0, \u1ebf...). Kiểm tra lại TOÀN BỘ strings sau khi viết xong -- không tin vào "làm đúng từ đầu".
+| Sai | Đúng | Sai | Đúng |
+|-----|------|-----|------|
+| Trai bai | Trải bài | Quay lai | Quay lại |
+| Huy | Hủy | Dang | Đang |
+| Khach hang | Khách hàng | La bai | Lá bài |
+| Bo bai | Bộ bài | Cau hoi | Câu hỏi |
+| Luan giai | Luận giải | Ket qua | Kết quả |
+| Thuan loi | Thuận lợi | Kho khan | Khó khăn |
+| Thach thuc | Thách thức | Hanh dong | Hành động |
+| Phat trien | Phát triển | Hien tai | Hiện tại |
+| Tuong lai | Tương lai | Lua chon | Lựa chọn |
+| Tam guong | Tấm gương | Dau ra | Đầu ra |
+| Tinh hinh | Tình hình | Du kien | Dự kiến |
+
+_Vi phạm rule này = lỗi nghiêm trọng. Tiếng Việt không dấu không thể chấp nhận được trong sản phẩm chuyên nghiệp._
 
 ---
 

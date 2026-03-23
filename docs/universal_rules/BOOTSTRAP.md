@@ -155,7 +155,7 @@ Danh sách đầy đủ: xem [`README.md`](./README.md). Dưới đây là các 
 | `ASK-BACK.md` | Cơ chế hỏi ngược trước khi thực thi |
 | `OUTCOME.md` | Goal tracking protocol |
 
-Các file chuyên biệt (dùng khi project cần): `UI_MOBILE_RULES.md`, `BOT_COMMAND_RULES.md`, `GOOGLE_OAUTH_SETUP.md`, `SEPAY_PAYMENT.md`
+Các file chuyên biệt (dùng khi project cần): `UI_MOBILE_RULES.md`, `BOT_COMMAND_RULES.md`, `VIETNAMESE_DIACRITICS.md`, `GOOGLE_OAUTH_SETUP.md`, `SEPAY_PAYMENT.md`
 
 ---
 
