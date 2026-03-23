@@ -285,6 +285,10 @@ export async function processReport(
     chromiumSemaphore.release()
   }
 
+  if (!pdfBuffer) {
+    throw new Error('PDF generation failed — no buffer returned (likely render timeout)')
+  }
+
   // Step 6: Save PDF
   let pdfUrl: string | null = null
   let pdfFilename: string | null = null

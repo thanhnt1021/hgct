@@ -491,7 +491,7 @@ export default function HistoryReports() {
                       cursor: pdfAvailable ? 'pointer' : 'not-allowed',
                       minHeight: 36,
                     }}
-                    title={isExpired ? 'PDF đã hết hạn' : isDone ? 'Tải PDF' : 'Báo cáo chưa hoàn thành'}
+                    title={isExpired ? 'PDF đã hết hạn' : isDone && !st?.result?.pdfUrl ? 'Lỗi tạo PDF — vui lòng liên hệ hỗ trợ' : isDone ? 'Tải PDF' : 'Báo cáo chưa hoàn thành'}
                   >
                     <Download size={12} /> Tải PDF
                   </button>

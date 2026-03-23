@@ -271,6 +271,8 @@ src/
 - Telegram admin bot group chat — ForceReply `selective: true` không trigger khi bot gửi message mới (không reply message của user) trong group → thay bằng preset inline buttons cho `CHECKINTERVAL`; giữ ForceReply cho `CUSTPRICE` (chỉ dùng trong private chat context)
 - Telegram group commands có suffix `@botname` — `/check@hatgiongchiemtinhbot` không match `/^\/check$/i` → fix regex thành `/^\/check(@\w+)?$/i` và tương tự cho `/setcheckinterval`
 - Admin bot ForceReply handler: bỏ `replyFrom?.is_bot` gate → match trực tiếp bằng text marker (`replyText.includes('CHECKINTERVAL')`) — an toàn vì chỉ admin user ID mới reach được handler
+- PDF generation silent fail: `generatePdf()` catch lỗi → trả `null` → `processReport()` mark order `completed` với `pdfUrl=null`, không retry, email không có PDF → fix: throw error khi `pdfBuffer` null (sau try-finally) để job fail → auto-retry đúng cách; thêm `page.setDefaultNavigationTimeout(60000)` trước render reference page
+- HistoryReports.tsx: button "Tải PDF" bị disabled nhưng không báo lỗi khi `isDone && !pdfUrl` → fix tooltip "Lỗi tạo PDF — vui lòng liên hệ hỗ trợ"
 
 ## Important Notes
 - Run dev server: `PORT=65498 npm run dev`

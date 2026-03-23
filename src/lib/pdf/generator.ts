@@ -971,6 +971,7 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
     // Career: render static reference page (second-to-last) with same margins/footer
     let refPageBuffer: Buffer | undefined
     if (options.service === 'career') {
+      page.setDefaultNavigationTimeout(60000)
       await page.setContent(buildCareerReferenceHtml(), { waitUntil: 'load', timeout: 60000 })
       const refPdf = await page.pdf({
         format: 'A4',
