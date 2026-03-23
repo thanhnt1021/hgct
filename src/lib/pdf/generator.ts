@@ -2,6 +2,9 @@
 // Replaces Python ReportLab EssayPDFGenerator
 import fs from 'fs'
 import path from 'path'
+import { execFileSync } from 'child_process'
+import { randomBytes } from 'crypto'
+import { tmpdir } from 'os'
 
 const FONTS_DIR = path.join(process.cwd(), 'public', 'fonts')
 
@@ -986,13 +989,39 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
 
     await browser.close()
 
-    if (imgPrefix) {
-      return await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix, refPageBuffer)
-    }
+    const finalPdf = imgPrefix
+      ? await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix, refPageBuffer)
+      : Buffer.from(contentPdf)
 
-    return Buffer.from(contentPdf)
+    return await compressPdf(finalPdf)
   } catch (e) {
     console.error('[PDF ERROR]', e)
     return null
+  }
+}
+
+async function compressPdf(buffer: Buffer): Promise<Buffer> {
+  const id = randomBytes(8).toString('hex')
+  const inFile = path.join(tmpdir(), `hgct-pdf-in-${id}.pdf`)
+  const outFile = path.join(tmpdir(), `hgct-pdf-out-${id}.pdf`)
+  try {
+    fs.writeFileSync(inFile, buffer)
+    execFileSync('gs', [
+      '-dBATCH', '-dNOPAUSE', '-dQUIET',
+      '-sDEVICE=pdfwrite',
+      '-dPDFSETTINGS=/printer',
+      '-dCompatibilityLevel=1.7',
+      `-sOutputFile=${outFile}`,
+      inFile,
+    ])
+    const result = fs.readFileSync(outFile)
+    console.log(`[PDF] gs compress: ${buffer.length} → ${result.length} bytes (${Math.round(result.length / buffer.length * 100)}%)`)
+    return result
+  } catch (err) {
+    console.error('[PDF] gs compress failed, returning uncompressed:', err)
+    return buffer
+  } finally {
+    try { fs.unlinkSync(inFile) } catch {}
+    try { fs.unlinkSync(outFile) } catch {}
   }
 }

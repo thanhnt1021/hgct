@@ -273,6 +273,7 @@ src/
 - Admin bot ForceReply handler: bỏ `replyFrom?.is_bot` gate → match trực tiếp bằng text marker (`replyText.includes('CHECKINTERVAL')`) — an toàn vì chỉ admin user ID mới reach được handler
 - PDF generation silent fail: `generatePdf()` catch lỗi → trả `null` → `processReport()` mark order `completed` với `pdfUrl=null`, không retry, email không có PDF → fix: throw error khi `pdfBuffer` null (sau try-finally) để job fail → auto-retry đúng cách; thêm `page.setDefaultNavigationTimeout(60000)` trước render reference page
 - HistoryReports.tsx: button "Tải PDF" bị disabled nhưng không báo lỗi khi `isDone && !pdfUrl` → fix tooltip "Lỗi tạo PDF — vui lòng liên hệ hỗ trợ"
+- PDF font deduplication — career PDF bị ~3× font embed (main render + reference page render mỗi cái embed full font set, pdf-lib không deduplicate) → 7.9MB thay vì 2.3MB; fix: `compressPdf()` dùng `ghostscript -dPDFSETTINGS=/printer` sau khi build xong PDF cuối (áp dụng tất cả service); 7.9MB → 2.9MB (63% giảm); fallback: nếu gs lỗi trả PDF gốc; `apt install ghostscript` thêm vào server
 
 ## Important Notes
 - Run dev server: `PORT=65498 npm run dev`
