@@ -103,9 +103,13 @@ NGUYÊN TẮC BẮT BUỘC:
 
 [FILL: 3-4 câu về môi trường làm việc phù hợp từ đỉnh và chủ tinh nhà làm việc trong MỤC 4. Dùng [bold]từ khóa môi trường[/]. KHÔNG nhắc "Nhà 6"]
 
-[#ff0000+bold]Những "vùng đất" lý tưởng dành cho bạn[/]
+[#ff0000+bold]Những tính chất công việc bạn có lợi thế:[/]
 
-[FILL: gạch đầu dòng 3-5 lĩnh vực nghề nghiệp cụ thể phù hợp với {name} (dùng "- " đầu dòng, mỗi lĩnh vực xuống dòng riêng, bắt đầu bằng chữ hoa)]
+[FILL: gạch đầu dòng 3-5 tính chất công việc phát huy hết năng khiếu bẩm sinh của {name}, dựa vào những thông tin đã luận giải phía trên. Mỗi tính chất: [bold]tiêu đề ngắn[/] + 1-2 câu giải thích tại sao phù hợp (dùng "- " đầu dòng, mỗi tính chất xuống dòng riêng)]
+
+[#ff0000+bold]Những lĩnh vực/ngành nghề bạn nên ưu tiên:[/]
+
+[FILL: gạch đầu dòng 3-5 nhóm ngành/lĩnh vực nghề nghiệp phù hợp với {name}, mỗi nhóm: [bold]tên nhóm ngành[/] + gợi ý 2-3 vị trí/lĩnh vực con cụ thể (dùng "- " đầu dòng, mỗi nhóm xuống dòng riêng)]
 
 [#ff0000]"Để giúp bạn có cái nhìn thực tế hơn về thị trường lao động đang biến đổi không ngừng, mình có đính kèm một Bản thống kê về xu hướng nghề nghiệp trong kỷ nguyên AI ở phần Phụ lục cuối bài. Bạn hãy xem để biết cách dùng AI làm đòn bẩy cho những thế mạnh của mình nhé!"[/]
 

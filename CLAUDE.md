@@ -238,6 +238,8 @@ src/
 - [x] **Career age split** — báo cáo nghề nghiệp chia 2 phiên bản theo tuổi: `≥22` → `career-adult.txt` (7 sections, giọng chuyên nghiệp), `<22` → `career-young.txt` (5 sections, giọng peer-to-peer trẻ trung); `buildCareerPrompt()` tính tuổi chính xác từ DOB; Jupiter + Mercury bổ sung vào career brief (Mục 1)
 - [x] PDF keyword enforcement — `format_subheading` (lines bắt đầu `[#`) và `bold_summary` (lines `[bold]...[/]`) là 2 line types mới trong generator.ts; buffer cùng `subheadingBuffer` để tránh orphan/widow; `trimSegments()` giới hạn ≤3 âm/cụm + max 3 cụm; `trimKeywordBoldLine()` xử lý 3 pattern: standalone, 2-block (red+keywords), 3-block (red+zodiac+keywords); `bold_summary` capitalize chữ đầu
 - [x] career-young.txt Cung Mọc/Mặt Trời/Mặt Trăng format — 2 bold blocks: `[bold]TênCung:[/] [bold]kw, kw, kw[/]` (thay vì 1 block thiếu tên cung)
+- [x] career-adult Mục 4 rewrite — bỏ "Những vùng đất lý tưởng", thay bằng 2 sections: (1) "Những tính chất công việc bạn có lợi thế" (3-5 tính chất + bold tiêu đề + giải thích), (2) "Những lĩnh vực/ngành nghề bạn nên ưu tiên" (3-5 nhóm ngành + bold tên nhóm + 2-3 vị trí con)
+- [x] PDF career reference page — trang "TÀI LIỆU THAM KHẢO" tĩnh, chèn áp cuối (trước end page) trong cả 2 phiên bản career (≥22 và <22); `buildCareerReferenceHtml()` render inline base64 ảnh 0x.jpg + 3-column kết luận AI nhóm; composited với 02.jpg bg qua pdf-lib; Puppeteer render riêng (`waitUntil: 'load', timeout: 60000`); style section title (19.5pt MontserratBold đỏ italic + 1 đường kẻ đỏ bên dưới)
 
 ## What's TODO
 

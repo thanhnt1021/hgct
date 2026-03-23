@@ -551,7 +551,50 @@ const SERVICE_IMG_PREFIX: Record<string, string> = {
  * bgImg embedded ONCE, reused across all content pages — pdf-lib
  * references the same XObject, so bg is stored only once regardless of page count.
  */
-async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string): Promise<Buffer> {
+function buildCareerReferenceHtml(): string {
+  const imgB64 = fs.readFileSync(path.join(PDF_IMGS_DIR, 'pdf-HuongNghiep-0x.jpg')).toString('base64')
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+${buildFontFaces()}
+@page { size: A4; }
+body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #1f2937; line-height: 1.55; }
+.ref-title { font-family: 'MontserratBold'; font-size: 19.5pt; color: #dc2626; margin: 0 0 6pt; }
+.ref-rule  { border: none; border-top: 1pt solid #dc2626; margin: 0 0 8pt; }
+.ref-sub   { font-family: 'MontserratBold'; font-size: 13pt; color: #1f2937; margin: 0 0 3pt; }
+.ref-cap   { font-family: 'NunitoItalic'; font-size: 11pt; color: #6b7280; margin: 0 0 6pt; }
+.ref-img   { display: block; max-height: 150mm; width: auto; max-width: 100%; margin: 0 auto 6pt; }
+.ref-conc-title { font-family: 'MontserratBold'; font-size: 16.5pt; color: #dc2626; margin: 0 0 5pt; }
+.ref-cols  { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.ref-col   { padding: 0 7pt; font-size: 8.5pt; line-height: 1.35; }
+.ref-col:not(:first-child) { border-left: 0.5pt solid #d1d5db; }
+.ref-col-title { font-family: 'MontserratBold'; font-size: 8.5pt; color: #dc2626; margin: 0 0 3pt; line-height: 1.3; }
+.ref-col-body  { font-family: 'Nunito'; font-size: 8pt; color: #1f2937; line-height: 1.35; margin: 0; }
+</style></head><body>
+<div class="ref-title">TÀI LIỆU THAM KHẢO</div>
+<hr class="ref-rule">
+<div class="ref-sub">"La bàn nghề nghiệp trong kỷ nguyên trí tuệ nhân tạo (AI)"</div>
+<div class="ref-cap">Dữ liệu mới nhất do Anthropic (một công ty nghiên cứu và phát triển trí tuệ nhân tạo) công bố vào tháng 3/2026</div>
+<img class="ref-img" src="data:image/jpeg;base64,${imgB64}" alt="">
+<div class="ref-conc-title">Kết luận:</div>
+<div class="ref-cols">
+  <div class="ref-col">
+    <div class="ref-col-title">Nhóm 1: Những công việc AI khó thay thế</div>
+    <div class="ref-col-body">- Tính chất: Cần sự thấu cảm sâu sắc, tư vấn tâm lý, xử lý các tình huống cảm xúc phức tạp, và các công việc sáng tạo dựa trên trải nghiệm, tay nghề cá nhân, thợ lành nghề.</div>
+  </div>
+  <div class="ref-col">
+    <div class="ref-col-title">Nhóm 2: Những công việc AI sẽ hỗ trợ</div>
+    <div class="ref-col-body">- Tính chất: Tổng hợp thông tin, viết lách cơ bản, thiết kế sơ bộ hoặc quản lý dữ liệu.</div>
+  </div>
+  <div class="ref-col">
+    <div class="ref-col-title">Nhóm 3: Những công việc có nguy cơ bị thay thế cao</div>
+    <div class="ref-col-body">- Tính chất: Các công việc lặp đi lặp lại, nhập liệu đơn thuần hoặc các quy trình logic khô khan không cần sự sáng tạo hay linh hoạt.</div>
+  </div>
+</div>
+</body></html>`
+}
+
+async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string, refPageBuffer?: Buffer): Promise<Buffer> {
   const { PDFDocument } = await import('pdf-lib')
   const W = 595.28, H = 841.89  // A4 in points
 
@@ -572,6 +615,17 @@ async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string): Pr
     const p = finalDoc.addPage([W, H])
     p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })       // layer 1: background
     p.drawPage(embeddedPage, { x: 0, y: 0, width: W, height: H }) // layer 2: text content
+  }
+
+  // ── Reference page (career only) — second-to-last ──────────────────────────
+  if (refPageBuffer) {
+    const refDoc = await PDFDocument.load(refPageBuffer)
+    for (const idx of refDoc.getPageIndices()) {
+      const [embRef] = await finalDoc.embedPages([refDoc.getPage(idx)])
+      const p = finalDoc.addPage([W, H])
+      p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })
+      p.drawPage(embRef, { x: 0, y: 0, width: W, height: H })
+    }
   }
 
   // ── Last page: end ─────────────────────────────────────────────────────────
@@ -913,10 +967,26 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       footerTemplate: FOOTER_TEMPLATE,
       margin: { top: '25mm', right: '20mm', bottom: '28mm', left: '20mm' },
     })
+
+    // Career: render static reference page (second-to-last) with same margins/footer
+    let refPageBuffer: Buffer | undefined
+    if (options.service === 'career') {
+      await page.setContent(buildCareerReferenceHtml(), { waitUntil: 'load', timeout: 60000 })
+      const refPdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        displayHeaderFooter: true,
+        headerTemplate: '<div></div>',
+        footerTemplate: FOOTER_TEMPLATE,
+        margin: { top: '25mm', right: '20mm', bottom: '28mm', left: '20mm' },
+      })
+      refPageBuffer = Buffer.from(refPdf)
+    }
+
     await browser.close()
 
     if (imgPrefix) {
-      return await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix)
+      return await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix, refPageBuffer)
     }
 
     return Buffer.from(contentPdf)
