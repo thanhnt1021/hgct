@@ -128,7 +128,7 @@ export async function smartRetryOrder(
 
   await prisma.order.update({
     where: { id: orderId },
-    data: { jobId, retryCount: { increment: 1 }, recoveryToken: null },
+    data: { jobId, retryCount: { increment: 1 } },
   })
 
   console.log(`[smartRetry] Order ${orderId} — full retry started, job ${jobId.slice(0, 8)} (${triggeredBy}, retryCount→${(fresh.retryCount ?? 0) + 1})`)
