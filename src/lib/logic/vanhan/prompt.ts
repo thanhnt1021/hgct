@@ -395,7 +395,7 @@ function formatHouseBlock(hs: HouseScore, vkb?: VanhanKB): string {
   const theme = HOUSE_THEMES[hs.house] || ''
   const classLabel =
     hs.classification === 'TIM_DO' ? 'THUẬN LỢI' :
-    hs.classification === 'TIM_DEN' ? 'THÁCH THỨC' : 'ỔN ĐỊNH'
+    hs.classification === 'TIM_DEN' ? 'THÁCH THỨC' : 'THUẬN LỢI'
 
   lines.push(`\n--- Nhà ${hs.house} (${theme}) /${classLabel} (điểm: ${hs.score}) ---`)
 
@@ -425,43 +425,17 @@ function formatHouseBlock(hs: HouseScore, vkb?: VanhanKB): string {
     }
   }
 
-  // Soft aspects
-  if (hs.softAspects.length > 0) {
-    for (const asp of hs.softAspects) {
-      let line =
-        `* ${asp.transitPlanetVn} Transit tạo góc ${asp.aspectVn} với ` +
-        `${asp.natalPlanetVn} Natal`
-
-      if (asp.exactDates.length > 0) {
-        if (asp.exactDates.length === 1) {
-          line += `. Đặc biệt vào ngày ${asp.exactDates[0]}`
-        } else {
-          line += `. Đặc biệt vào các ngày ${asp.exactDates.join(', ')}`
-        }
-      }
-      lines.push(line)
-    }
+  // Aspects: THUẬN LỢI → only soft (góc mềm); THÁCH THỨC → only hard (góc cứng)
+  // No exact dates passed — AI must not mention specific dates
+  const relevantAspects = classLabel === 'THÁCH THỨC' ? hs.hardAspects : hs.softAspects
+  for (const asp of relevantAspects) {
+    lines.push(
+      `* ${asp.transitPlanetVn} Transit tạo góc ${asp.aspectVn} với ` +
+      `${asp.natalPlanetVn} Natal`
+    )
   }
 
-  // Hard aspects
-  if (hs.hardAspects.length > 0) {
-    for (const asp of hs.hardAspects) {
-      let line =
-        `* ${asp.transitPlanetVn} Transit tạo góc ${asp.aspectVn} với ` +
-        `${asp.natalPlanetVn} Natal`
-
-      if (asp.exactDates.length > 0) {
-        if (asp.exactDates.length === 1) {
-          line += `. Đặc biệt vào ngày ${asp.exactDates[0]}`
-        } else {
-          line += `. Đặc biệt vào các ngày ${asp.exactDates.join(', ')}`
-        }
-      }
-      lines.push(line)
-    }
-  }
-
-  if (hs.transits.length === 0 && hs.softAspects.length === 0 && hs.hardAspects.length === 0) {
+  if (hs.transits.length === 0 && relevantAspects.length === 0) {
     lines.push('(Không có transit đáng kể trong giai đoạn này)')
   }
 
@@ -513,14 +487,9 @@ function formatTongQuan(houseScores: HouseScore[], vkb?: VanhanKB): string {
     .sort((a, b) => a.score - b.score)
   const timVang = houseScores.filter(h => h.classification === 'TIM_VANG')
 
-  // Year conclusion formula:
-  // timDỏ + timVàng > timĐen → THUẬN LỢI
-  // timĐen > timĐỏ + timVàng → THÁCH THỨC
-  // timĐen = timĐỏ + timVàng → ỔN ĐỊNH
+  // Year conclusion: timĐỏ + timVàng ≥ timĐen → THUẬN LỢI; < → THÁCH THỨC
   const positiveCount = timDo.length + timVang.length
-  const yearConclusion = timDen.length > positiveCount ? 'THÁCH THỨC'
-    : timDen.length === positiveCount ? 'ỔN ĐỊNH'
-    : 'THUẬN LỢI'
+  const yearConclusion = positiveCount >= timDen.length ? 'THUẬN LỢI' : 'THÁCH THỨC'
 
   lines.push(`Kết luận tổng quan: ${yearConclusion}`)
   const thuanLoiLabel = timDo.length > 1 ? 'những lĩnh vực' : 'lĩnh vực'
@@ -638,8 +607,8 @@ export function buildVanhanEssayPrompt(
   dataLines.push('Tiền tự kiếm (Nhà 2):')
   dataLines.push(formatSectionData('tien', houseScores, [2], vkb))
   dataLines.push('')
-  dataLines.push('Đầu tư – kinh doanh (Nhà 8, 11):')
-  dataLines.push(formatSectionData('dau_tu', houseScores, [8, 11], vkb))
+  dataLines.push('Đầu tư – kinh doanh (Nhà 8):')
+  dataLines.push(formatSectionData('dau_tu', houseScores, [8], vkb))
   dataLines.push('')
 
   // Section 4: Tình yêu
@@ -662,11 +631,11 @@ export function buildVanhanEssayPrompt(
   // Section 6: Sức khỏe
   dataLines.push('=== PHẦN 6: SỨC KHỎE ===')
   dataLines.push('')
-  dataLines.push('Sức khỏe thể chất (Nhà 6, 1):')
-  dataLines.push(formatSectionData('the_chat', houseScores, [6, 1], vkb))
+  dataLines.push('Sức khỏe thể chất (Nhà 6):')
+  dataLines.push(formatSectionData('the_chat', houseScores, [6], vkb))
   dataLines.push('')
-  dataLines.push('Sức khỏe tinh thần (Nhà 8, 12):')
-  dataLines.push(formatSectionData('tinh_than', houseScores, [8, 12], vkb))
+  dataLines.push('Sức khỏe tinh thần (Nhà 12):')
+  dataLines.push(formatSectionData('tinh_than', houseScores, [12], vkb))
   dataLines.push('')
 
   // Section 7: Tổng kết

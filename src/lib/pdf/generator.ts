@@ -447,10 +447,10 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 .section-rule { border: none; border-top: 1pt solid #dc2626; margin: 0 0 8pt; page-break-after: avoid; break-after: avoid; }
 .subheading { font-family: 'MontserratBold'; font-size: 16.5pt; color: #1f2937; margin: 8pt 0 4pt; page-break-after: avoid; break-after: avoid; }
 .opener { font-family: 'NunitoItalic'; font-size: 14.9pt; margin: 4pt 0 6pt; }
-.body { text-align: justify; margin: 2pt 0 5pt; }
+.body { text-align: justify; margin: 2pt 0 5pt; orphans: 3; widows: 3; }
 .bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; }
 .bullet-indent { font-family: 'NunitoItalic'; font-size: 13.5pt; color: #dc2626; margin: 1pt 0 2pt; padding-left: 28pt; text-indent: -12pt; }
-.dash-bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; font-style: italic; }
+.dash-bullet { margin: 2pt 0 3pt; padding-left: 12pt; text-indent: -12pt; font-style: italic; orphans: 3; widows: 3; }
 .signature { font-family: 'NunitoItalic'; font-size: 11pt; color: #6b7280; margin: 8pt 0 3pt; }
 .spacer { height: 4pt; }
 .red-box { font-family: 'MontserratBold'; font-size: 13.5pt; border: 1.5pt solid #dc2626; background: #fff5f5; padding: 18px 32px; margin: 20px 20px; text-align: justify; page-break-inside: avoid; break-inside: avoid; }
