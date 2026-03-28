@@ -15,116 +15,161 @@ echo ""
 echo "=== Universal Workflow Bootstrap ==="
 echo ""
 
-# ── Step 1: Clone and copy rules ──────────────────────────────────────────────
-echo "[1/4] Copying universal rules to docs/universal_rules/..."
-mkdir -p docs/universal_rules/hooks
+# Step 1: Clone and copy rules
+echo "[1/5] Copying universal rules to docs/universal_rules/..."
+mkdir -p docs/universal_rules
 
-CLONE_OK=0
+CLONE_DIR="/tmp/_uw_$$"
+
 if GIT_SSH_COMMAND="ssh -i $SSH_KEY -o StrictHostKeyChecking=no" \
-   git clone --quiet git@github.com:hentaiikidd/universal-workflow.git /tmp/_uw 2>/dev/null; then
-  CLONE_OK=1
-  CLONE_METHOD="SSH"
+   git clone --quiet git@github.com:hentaiikidd/universal-workflow.git "$CLONE_DIR" 2>/dev/null; then
+  echo "✅ Cloned (via SSH)"
 else
-  if git clone --quiet https://github.com/hentaiikidd/universal-workflow.git /tmp/_uw 2>/dev/null; then
-    CLONE_OK=1
-    CLONE_METHOD="HTTPS"
+  echo "   SSH failed, trying HTTPS..."
+  if git clone --quiet https://github.com/hentaiikidd/universal-workflow.git "$CLONE_DIR" 2>/dev/null; then
+    echo "✅ Cloned (via HTTPS)"
+  else
+    echo "❌ Clone failed. Check network / SSH key."
+    echo "   SSH key used: $SSH_KEY"
+    echo "   Override: BOOTSTRAP_SSH_KEY=/path/to/key bash bootstrap.sh"
+    exit 1
   fi
 fi
 
-if [ "$CLONE_OK" -eq 0 ]; then
-  echo "❌ Clone failed. Check network / SSH key."
-  echo "   SSH key used: $SSH_KEY"
-  echo "   Override: BOOTSTRAP_SSH_KEY=/path/to/key bash bootstrap.sh"
-  exit 1
-fi
+# Copy rules (*.md + bootstrap.sh + subdirectories)
+cp "$CLONE_DIR"/*.md docs/universal_rules/
+cp "$CLONE_DIR"/bootstrap.sh docs/universal_rules/
+[ -d "$CLONE_DIR/hooks" ] && cp -r "$CLONE_DIR/hooks" docs/universal_rules/
+[ -d "$CLONE_DIR/tdk" ] && cp -r "$CLONE_DIR/tdk" docs/universal_rules/
 
-cp /tmp/_uw/*.md docs/universal_rules/
-cp /tmp/_uw/hooks/*.py docs/universal_rules/hooks/ 2>/dev/null || true
-cp /tmp/_uw/bootstrap.sh docs/universal_rules/ 2>/dev/null || true
-rm -rf /tmp/_uw
-echo "✅ Rules copied (via $CLONE_METHOD)"
+# Remove uni repo's own README from project's universal_rules (it's not a rule file)
+rm -f docs/universal_rules/README.md
 
-# ── Step 2: CLAUDE.md ─────────────────────────────────────────────────────────
-echo "[2/4] Checking CLAUDE.md..."
+echo "✅ Rules copied to docs/universal_rules/"
+
+# Step 2: CLAUDE.md
+echo "[2/5] Checking CLAUDE.md..."
 if [ ! -f CLAUDE.md ]; then
   cat > CLAUDE.md << 'CLAUDEEOF'
-# [Ten Project]
+# [Tên Project]
 
-## CRITICAL WORKFLOW RULES (KHONG BAO GIO vi pham)
+## ⚠️ CRITICAL WORKFLOW RULES
 
-1. **`feature: [ten]`** → tao branch → doc context → hoi bang **AskUserQuestion tool** (KHONG output text) → **DUNG cho user confirm ro rang** → moi duoc code.
-2. **KHONG tu** `git commit`, `git push`, `git merge`, deploy production — chi khi user ra lenh ro.
-3. **Sau quick deploy** → bao cao ket qua → **DUNG**, khong lam gi them.
+1. **`feature: [tên]` workflow bắt buộc:** Tạo branch `feature/tên` NGAY → đọc context → Q&A → chờ user confirm → rồi mới code. KHÔNG nhảy thẳng vào code.
+2. **KHÔNG tự ý** `git commit`, `git push`, `git merge`, hay deploy production — chỉ khi user ra lệnh rõ ràng (`full update`, `commit`, `merge main`).
+3. **Sau `quick deploy`** → báo cáo kết quả → **DỪNG**, không làm gì thêm. Chờ user feedback.
 
-> Chi tiet day du: docs/universal_rules/UNIVERSAL_WORKFLOW.md
+> Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.
 
 ## Overview
-[Mo ta ngan ve project]
+[Mô tả ngắn về project]
 
 ## Tech Stack
-[Liet ke tech stack]
+[Liệt kê tech stack]
 
-## What's DONE
+## What's DONE ✓
 - [x] Project scaffolding
 
 ## What's TODO
 - [ ] ...
 CLAUDEEOF
-  echo "✅ Created CLAUDE.md"
+  echo "✅ Created CLAUDE.md (điền thông tin project vào)"
 else
-  if ! grep -q "AskUserQuestion" CLAUDE.md; then
-    # Patch existing CLAUDE.md: replace plain "Q&A" wording if present
-    sed -i 's/hỏi Q\&A (BẮT BUỘC/hỏi bằng AskUserQuestion tool — KHÔNG output text (BẮT BUỘC/g' CLAUDE.md 2>/dev/null || true
-    sed -i 's/hỏi Q\&A 1 batch/hỏi bằng AskUserQuestion tool (KHÔNG output text)/g' CLAUDE.md 2>/dev/null || true
-    echo "✅ Patched CLAUDE.md: added AskUserQuestion tool requirement"
+  if ! grep -q "UNIVERSAL_WORKFLOW" CLAUDE.md; then
+    echo "" >> CLAUDE.md
+    echo '> Đọc docs/universal_rules/UNIVERSAL_WORKFLOW.md để áp dụng universal workflow rules.' >> CLAUDE.md
+    echo "✅ Added reference line to CLAUDE.md"
   else
-    echo "✅ CLAUDE.md already mentions AskUserQuestion"
+    echo "✅ CLAUDE.md already has reference line"
   fi
 fi
 
-# ── Step 3: Cleanup ───────────────────────────────────────────────────────────
-echo "[3/4] Cleanup..."
+# Step 3: README.md (project-specific, từ template)
+echo "[3/5] Checking README.md..."
+if [ ! -f README.md ]; then
+  if [ -f docs/universal_rules/README_TEMPLATE.md ]; then
+    cp docs/universal_rules/README_TEMPLATE.md README.md
+    echo "✅ Created README.md from template (điền thông tin project vào)"
+  else
+    cat > README.md << 'READMEEOF'
+# [Tên Project]
+
+[Mô tả ngắn về project]
+
+## Tech Stack
+[Liệt kê tech stack]
+
+## Cài Đặt & Chạy
+[Hướng dẫn setup]
+READMEEOF
+    echo "✅ Created README.md (điền thông tin project vào)"
+  fi
+else
+  echo "✅ README.md already exists"
+fi
+
+# Step 4: docs/GOAL.md (project-specific, từ GOAL_TEMPLATE.md)
+echo "[4/5] Checking docs/GOAL.md..."
+mkdir -p docs
+if [ ! -f docs/GOAL.md ]; then
+  if [ -f docs/universal_rules/GOAL_TEMPLATE.md ]; then
+    cp docs/universal_rules/GOAL_TEMPLATE.md docs/GOAL.md
+    echo "✅ Created docs/GOAL.md from template (điền mục tiêu project vào)"
+  else
+    cat > docs/GOAL.md << 'GOALEOF'
+# GOAL
+
+## Mục tiêu cuối cùng
+[Viết 1-2 câu rõ ràng]
+
+## Thành công trông như thế nào
+- [Tiêu chí 1]
+
+## KHÔNG phải mục tiêu
+- [Thứ để sau]
+
+## Milestones
+- [ ] Milestone 1
+
+## Hiện tại đang ở đâu
+[Trạng thái hiện tại]
+GOALEOF
+    echo "✅ Created docs/GOAL.md (điền mục tiêu project vào)"
+  fi
+else
+  echo "✅ docs/GOAL.md already exists"
+fi
+
+# Step 5: Cleanup
+echo "[5/5] Cleanup..."
+CLEANED=0
 if [ -f "BOOTSTRAP.md" ] && [ -f "docs/universal_rules/BOOTSTRAP.md" ]; then
   rm -f BOOTSTRAP.md
   echo "✅ Removed BOOTSTRAP.md from project root"
-else
-  echo "✅ No cleanup needed"
+  CLEANED=1
 fi
-
-# ── Step 4: Install hooks globally ────────────────────────────────────────────
-echo "[4/4] Installing hooks to ~/.claude/hooks/..."
-HOOKS_DEST="$HOME/.claude/hooks"
-mkdir -p "$HOOKS_DEST"
-
-# Copy hook scripts
-HOOKS_SRC="docs/universal_rules/hooks"
-INSTALLED=0
-for hook in "$HOOKS_SRC"/*.py; do
-  [ -f "$hook" ] || continue
-  cp "$hook" "$HOOKS_DEST/"
-  chmod +x "$HOOKS_DEST/$(basename "$hook")"
-  INSTALLED=$((INSTALLED + 1))
-done
-
-if [ "$INSTALLED" -eq 0 ]; then
-  echo "⚠️  No hook scripts found in $HOOKS_SRC"
-else
-  echo "   Copied $INSTALLED hook script(s) to $HOOKS_DEST"
+if [ -f "GOAL_TEMPLATE.md" ]; then
+  rm -f GOAL_TEMPLATE.md
+  echo "✅ Removed GOAL_TEMPLATE.md from project root"
+  CLEANED=1
 fi
-
-# Register hooks in settings.json
-if command -v python3 >/dev/null 2>&1; then
-  python3 "$HOOKS_DEST/install_hooks.py" --hooks-dir "$HOOKS_DEST"
-  echo "✅ Hooks registered in ~/.claude/settings.json"
-else
-  echo "⚠️  python3 not found — skipping settings.json update."
-  echo "   Run manually: python3 $HOOKS_DEST/install_hooks.py"
+if [ -f "README_TEMPLATE.md" ]; then
+  rm -f README_TEMPLATE.md
+  echo "✅ Removed README_TEMPLATE.md from project root"
+  CLEANED=1
 fi
+[ $CLEANED -eq 0 ] && echo "✅ No cleanup needed"
+
+rm -rf "$CLONE_DIR"
 
 echo ""
 echo "=== Bootstrap complete! ==="
 echo ""
-echo "Hooks installed globally — enforcement active for ALL Claude Code sessions."
+echo "Files created/updated:"
+echo "  docs/universal_rules/  — workflow rules"
+echo "  CLAUDE.md              — project config for Claude Code"
+echo "  README.md              — project README"
+echo "  docs/GOAL.md           — project goals & milestones"
 echo ""
 echo "Next: open Claude Code in this project and run:"
 echo "  check requirements"

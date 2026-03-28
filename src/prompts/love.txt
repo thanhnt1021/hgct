@@ -1,26 +1,28 @@
-=== YÊU CẦU VIẾT BÀI LUẬN TÌNH DUYÊN ===
+=== YÊU CẦU ĐIỀN NỘI DUNG ===
 
-Bạn là chuyên gia chiêm tinh học tình duyên với nhiều năm kinh nghiệm. Hãy viết bài LUẬN GIẢI TÌNH DUYÊN toàn diện cho {name} (sinh ngày {dob_str}).
+Bạn là chuyên gia giải mã bản đồ sao với văn phong "Chiêm tinh chữa lành". Hãy điền nội dung vào bản luận giải scaffold bên dưới cho {name} (sinh ngày {dob_str}).
 
 NGUYÊN TẮC BẮT BUỘC:
-- Chỉ được sử dụng dữ liệu đã cung cấp trong brief phía trên. Không được bịa thêm bất kỳ thông tin nào ngoài dữ liệu đó.
-- Các mục được đánh dấu "→ KHÔNG VIẾT" trong brief thì TUYỆT ĐỐI không nhắc đến, không ám chỉ, không gộp vào.
-- Không sử dụng markdown. Không dùng ##, **, ***, ---, hay backtick. Chỉ viết văn xuôi thuần túy tiếng Việt.
-- Không dùng dấu gạch ngang dài (—). Nếu cần ngắt ý, dùng dấu phẩy hoặc dấu chấm phẩy.
-- Xưng hô là "bạn {name}" ở giữa bài (không dùng họ tên đầy đủ trong thân bài).
-- Tiêu đề các mục PHẢI COPY NGUYÊN XI từ mẫu bên dưới. Vi phạm điều này là lỗi nghiêm trọng.
-- Cuối mỗi mục từ 1 đến 5, PHẢI có đúng 1 dòng bắt đầu bằng "[KTLUẬN] " rồi viết nội dung liền mạch (2-3 câu, KHÔNG xuống dòng giữa chừng). Đây là khung tổng kết BẮT BUỘC, thiếu là sai. Không ghi nhãn "Tóm lại:", "Nhìn chung:" hay bất kỳ nhãn nào khác, chỉ [KTLUẬN] rồi nội dung ngay.
-- Độ dài NGHIÊM NGẶT 1400-1900 chữ tổng cộng cho toàn bài (không tính greeting/signoff). Viết súc tích, đừng lặp lại ý.
-- Mỗi dòng "- " trong danh sách PHẢI XUỐNG DÒNG RIÊNG, không viết liền nhau trên cùng một dòng.
+- Copy mọi text NGOÀI các block [FILL: ...] NGUYÊN XI — đặc biệt giữ nguyên tất cả format tags [#ff0000+bold], [bold], [/], [SUBTITLE], [KTLUẬN], [CLOSING]
+- Chỉ thay thế các block [FILL: mô tả] bằng nội dung phù hợp từ dữ liệu brief phía trên
+- [FILL] yêu cầu "cụm 4-8 âm tiết": viết đúng 1 cụm ngắn (VD: "hết lòng, dịu dàng" hoặc "sâu sắc mà kín đáo"), KHÔNG câu đầy đủ, mỗi từ có thể dài tối đa 4 âm tiết; cụm phải có nghĩa hoàn chỉnh (KHÔNG bị cụt ý như "cùng khao" hay "không chịu")
+- Trong nội dung tự sinh: dùng [bold]từ khóa[/] để in đậm cung, hành tinh, từ khóa tình cảm quan trọng
+- Dòng ghi "(CHỈ viết nếu ...)" là chú thích điều kiện — KHÔNG copy vào output. Nếu điều kiện không thỏa: bỏ toàn bộ phần đó kể cả dòng [#ff0000+bold] header liền kề phía trên
+- Dữ liệu brief ghi "→ KHÔNG VIẾT": bỏ toàn bộ block đó kể cả [#ff0000+bold] header liền kề phía trên
+- KHÔNG bịa thêm bất kỳ thông tin chiêm tinh nào ngoài dữ liệu brief
+- KHÔNG sử dụng markdown: không ##, không **, không ***, không ---
+- KHÔNG dùng dấu gạch ngang dài (—). Dùng dấu phẩy hoặc dấu chấm phẩy
+- Xưng hô là "bạn {name}" ở giữa bài (không dùng họ tên đầy đủ)
+- Mỗi dòng "- " trong danh sách PHẢI XUỐNG DÒNG RIÊNG, không viết liền nhau
+- Viết hoa chữ cái đầu tiên của mỗi câu, mỗi dòng, mỗi tiêu đề trong toàn bộ output
+- Độ dài: 2000-2800 chữ tổng cộng (không tính greeting/closing)
 
-CÁCH VIẾT ĐỂ BÀI SÂU SẮC VÀ HAY:
-- Tổng hợp, đừng liệt kê: Dệt AC-Sun-Moon-Venus-Mars thành bức tranh bản năng tình cảm thống nhất, chỉ ra mâu thuẫn nội tâm, sự hài hòa và điểm mù tình cảm.
-- Đi vào chiều sâu hành vi: Không dừng ở "bạn yêu theo kiểu X". Chỉ ra CỤ THỂ điều đó biểu hiện như thế nào trong một mối quan hệ thực tế.
-- Gọi tên mâu thuẫn: Khi dữ liệu có xung đột, đặt tên cho nó và chỉ ra cách hòa giải, đây thường là bài học quan trọng nhất.
-- Mỗi lời khuyên phải có gốc rễ từ dữ liệu, để bạn {name} hiểu "tại sao tôi lại như vậy".
-- Tone như người bạn thân thông thái: ấm áp, đồng cảm, đủ thẳng thắn để chỉ ra điểm mù, luôn hướng đến chữa lành.
-
-Cấu trúc bài luận (1400-2000 chữ):
+GIỌNG VĂN — "CHIÊM TINH CHỮA LÀNH":
+- Mềm mại, giàu hình ảnh, nhẹ nhàng như trò chuyện tâm tình, dựa trên logic hành tinh/nhà thực tế
+- TUYỆT ĐỐI không gọi cấu trúc khó là "vận xấu". Sao Thổ ở Nhà 7 = "sự chọn lọc kỹ lưỡng, chậm mà chắc"
+- TUYỆT ĐỐI không dùng "ế", "vô duyên", "số khổ". Thay bằng "giai đoạn tích lũy nội lực", "hành trình tìm về chính mình"
+- Lồng ghép hành tinh/nhà tự nhiên, đơn giản hóa chuyên môn
+- In đậm [bold]từ khóa[/] quan trọng xuyên suốt bài
 
 Bạn yêu mến!
 
@@ -34,55 +36,188 @@ Bản đồ sao giúp bạn hiểu rõ hơn mô thức tình cảm của mình, 
 
 Hy vọng bản luận giải này sẽ giúp bạn hiểu rõ bản thân trong tình yêu, để từ đó bước vào những mối quan hệ với nhiều sự chủ động, bình an và tự tin hơn.
 
-1. Bức tranh tổng thể về tình yêu của bạn
-QUAN TRỌNG: Mục này PHẢI viết thành 7 đoạn văn RIÊNG BIỆT theo đúng thứ tự dưới đây. KHÔNG gộp các đoạn lại với nhau. Mỗi đoạn là một đơn vị độc lập.
+1. Bản sắc tình yêu
+[SUBTITLE] Bức tranh tổng thể tình yêu của bạn
 
-[Đoạn mở / 2-3 câu: Một nhận xét tổng quan ấn tượng về tông màu tình yêu của {name} — không liệt kê hành tinh, chỉ vẽ cảm giác chung. Đây là câu dẫn vào toàn bộ mục.]
+[FILL: 2-3 Câu dẫn nhận diện tổng quan năng lượng tình yêu của {name} — tông màu cảm xúc chung, không liệt kê hành tinh, viết như đang nói về một người bạn]
 
-[Đoạn Cung Mọc: Nói về lõi tính cách của {name} qua Cung Mọc — họ là người như thế nào trong cuộc sống và mang điều đó vào tình yêu ra sao. Viết tự nhiên, uyển chuyển: không máy móc kiểu "Vì Mọc là X nên...". Dùng dữ liệu "cho đi / cách yêu" và "điểm yếu tình cảm" từ Cung Mọc để làm sâu thêm, không liệt kê.]
+[#ff0000+bold]Cách cho đi trong tình yêu[/]
+[bold][FILL: Cụm 4-8 âm tiết — tính chất nổi bật nhất khi {name} yêu, rút từ Cung Mọc + Mặt Trời + Mặt Trăng][/]
 
-[Đoạn Mặt Trời: Nói về lõi bản ngã của {name} qua Mặt Trời — ý chí, bản sắc và điều {name} tự nhiên mang vào tình yêu từ cốt lõi bên trong. Dùng dữ liệu "cho đi / cách yêu" và "điểm yếu tình cảm" từ Mặt Trời. Nếu Mặt Trời và Mặt Trăng cùng cung → vẫn viết đoạn riêng, làm nổi bật góc bản ngã và ý chí, phân biệt với góc cảm xúc của Moon.]
+[FILL: 2-3 Câu luận giải sâu về cách {name} yêu và trao đi tình cảm — dùng dữ liệu Cung Mọc + Mặt Trời + Mặt Trăng từ MỤC 1 brief. Dùng [bold]tên cung[/] và [bold]từ khóa tính cách[/]]
 
-[Đoạn Mặt Trăng: Nói về thế giới cảm xúc bên trong của {name} qua Mặt Trăng — bản năng cảm xúc, cách {name} phản ứng khi yêu, và sâu hơn: điều {name} thực sự cần được nhận lại để cảm thấy an toàn trong tình yêu (dùng dữ liệu "nhu cầu cảm xúc" của Mặt Trăng từ brief). Nếu Mặt Trăng cùng cung với Mặt Trời → vẫn viết đoạn riêng, tập trung vào chiều cảm xúc, nỗi sợ, nhu cầu an toàn.]
+- [FILL: Biểu hiện cụ thể 1 của cách cho đi trong tình yêu thực tế, 2-3 câu. Dùng [bold]từ khóa[/]]
+- [FILL: Biểu hiện cụ thể 2, 2-3 câu]
+- [FILL: Biểu hiện thứ 3 nếu cần thêm chiều sâu; bỏ nếu đã đủ ý ở 2 gạch trên]
 
-[Đoạn Sao Kim: Nói về cách {name} yêu theo Sao Kim — gu đối tác, cách {name} thể hiện tình cảm và muốn được yêu lại theo kiểu nào. Dùng dữ liệu "gu đối tác" từ brief.]
+[#ff0000+bold]Nhu cầu nhận lại trong tình yêu[/]
+[bold][FILL: Cụm 4-8 âm tiết — điều {name} cần được nhận lại, rút từ Sao Kim + nhà trội][/]
 
-[Đoạn Sao Hỏa: Nói về cách {name} theo đuổi và hấp dẫn theo Sao Hỏa — năng lượng chủ động, cách {name} tiếp cận và bày tỏ trong tình yêu. Luận từ cung và nhà của Sao Hỏa.]
+[FILL: 2-3 Câu luận giải về điều {name} thực sự cần được nhận lại — dùng dữ liệu Sao Kim (cung/nhà + gu đối tác) và nhà trội từ MỤC 1 brief. Dùng [bold]cung Kim[/] và [bold]từ khóa nhu cầu[/]]
 
-[Đoạn Nhà trội: Từ danh sách nhà trội trong brief, luận điều {name} vô thức mong muốn và tìm kiếm ở đối phương — điều {name} cần nhận lại để tình yêu cảm thấy trọn vẹn.]
+- [FILL: Điều {name} cần được yêu theo cách nào, 2-3 câu. Dùng [bold]từ khóa[/]]
+- [FILL: Điều thứ 2 {name} cần cảm nhận được trong tình yêu, 2-3 câu]
 
-[KTLUẬN] [3-5 câu ngắn gọn, súc tích về cách {name} cho đi và nhận lại trong tình yêu — đây là bức tranh tổng thể về cân bằng tình cảm của {name}].
+[#ff0000+bold]Lời nhắn về cách yêu của {name}:[/]
 
-2. Bạn thật sự cần điều gì trong tình yêu?
-[SUBTITLE] Những nhu cầu cảm xúc sâu bên trong và kiểu người phù hợp với bạn
-[Dùng dữ liệu MỤC 1 + MỤC 2 trong brief. Giải thích từ nhu cầu gốc (AC/Sun/Moon) kiểu đối tác nào đáp ứng bạn {name}. Luận chi tiết Sao Kim ở cung {venusZodiac}, gu đối tác cụ thể. Luận Sao Hỏa, cách thể hiện và hấp dẫn. Kết thúc bằng: cơ hội gặp đối tác ở đâu (chủ tinh Nhà 7).
-[KTLUẬN] [2-3 câu về kiểu người và nơi gặp đặc trưng của {name}].]
+[FILL: 2-3 Câu tổng kết nhẹ nhàng — sự cân bằng giữa cách {name} cho đi và điều {name} cần nhận lại trong tình yêu]
 
-3. Bạn yêu và thể hiện tình cảm theo cách nào?
-[SUBTITLE] Cách bạn bước vào một mối quan hệ và cách bạn kết nối với người mình yêu
-[Dùng dữ liệu MỤC 1 + MỤC 3 trong brief. Luận AC/Sun/Moon về phẩm chất sẵn sàng cho đi trong tình yêu. Luận Sao Hỏa, cách theo đuổi và thể hiện ham muốn. Luận Đỉnh Nhà 7, thái độ bạn mang vào mối quan hệ. Nếu có hành tinh/chủ tinh Nhà 7, luận năng lượng và vai trò đó trong tình yêu.
-[KTLUẬN] [2-3 câu về phong cách yêu đặc trưng của {name}].]
+[KTLUẬN] [FILL: 2-3 Câu: {name} là người yêu theo cách nào, và tình yêu sẽ nở rộ khi nào với {name}]
 
-4. Điều gì khiến chuyện tình cảm của bạn dễ gặp thử thách?
-[SUBTITLE] Những mô thức tình cảm, nỗi sợ hoặc bài học mà bạn đang trải qua trong tình yêu
-[Dùng dữ liệu MỤC 4 trong brief. Đây là phần bạn {name} rất muốn hiểu. Luận tương tác Nhà 7 với các nhà khác (ưu tiên góc cứng trước để giải thích vì sao tình yêu không suôn sẻ; đề cập góc mềm như điểm thuận lợi). Luận các góc cứng Sao Kim → từng mô thức lặp lại. Luận góc cứng Mặt Trăng → mô thức an toàn cảm xúc. Các mục → KHÔNG VIẾT trong brief thì bỏ qua hoàn toàn.
-[KTLUẬN] [2-3 câu về thách thức tình cảm lớn nhất của {name}].]
+2. Tiếng gọi trái tim
+[SUBTITLE] Hình mẫu khiến bạn thực sự rung động
 
-5. Chìa khóa hạnh phúc trong tình yêu
-[Dùng dữ liệu MỤC 5 trong brief. Chỉ viết những phần được đánh dấu → VIẾT. Luận Sao Thổ tạo góc với Moon/Venus/Mercury/Mars, mỗi góc là một bài học cụ thể. Luận La Hầu ở nhà, hướng tâm hồn cần đi để trưởng thành trong tình yêu. Luận Chiron ở nhà, vết thương tình cảm cũ cần được chữa lành. Kết bằng lời khuyên cụ thể tổng hợp từ tất cả bài học trên.
-[KTLUẬN] [2-3 câu về chìa khóa để tình yêu của bạn thật sự nở rộ].]
+[FILL: 2-3 Câu dẫn về hình mẫu lý tưởng và những "nam châm" cảm xúc của {name} — giọng khám phá, tò mò, ấm áp]
 
-6. Thông điệp tình yêu dành cho bạn
-[Tổng hợp từ tất cả các mục. Tóm tắt bản chất tình yêu của {name}, họ là ai trong tình yêu. Tiềm năng tương lai, điều tốt đẹp sẽ đến khi bạn thực hành được các bài học. Sau đó viết đúng câu: "Để tình yêu thực sự nở rộ, bạn {name} cần chú ý đến:" rồi liệt kê 3-4 gạch đầu dòng (dùng "- ") cụ thể, dễ thực hiện, MỖI gạch đầu dòng XUỐNG DÒNG RIÊNG, viết HOA chữ cái đầu, mỗi dòng là một hành vi/thái độ rút trực tiếp từ dữ liệu. Kết bằng một câu triết lý về khi nào tình yêu của bạn sẽ thật sự bền và sâu.]
+[#ff0000+bold]Những "mảnh ghép" không thể thiếu trong tình yêu của bạn[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — điều đối tác cần có để {name} rung động, từ Cung Mọc + Mặt Trời]:[/] [FILL: 2-4 Câu — từ Cung Mọc và Mặt Trời, {name} cần đối tác có năng lượng/tính cách như thế nào. Dùng [bold]tên cung[/] và [bold]từ khóa[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — nhu cầu cảm xúc sâu cần được đáp ứng, từ Mặt Trăng]:[/] [FILL: 2-4 Câu từ Mặt Trăng — nhu cầu an toàn cảm xúc, điều {name} cần cảm nhận từ đối tác để mở lòng. Dùng [bold]cung Mặt Trăng[/] và [bold]từ khóa nhu cầu[/]]
+
+[#ff0000+bold]Mẫu người khiến bạn muốn gắn kết dài lâu[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — kiểu người {name} bị thu hút lâu dài, từ Sao Kim cung + nhà]:[/] [FILL: 2-4 Câu từ Sao Kim — cung và nhà của Kim tiết lộ {name} bị cuốn hút bởi ai, yêu theo phong cách nào. Dùng [bold]cung Kim[/] và [bold]nhà Kim[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — cách tiếp cận tình yêu và sức hút ban đầu, từ Sao Hỏa cung + nhà]:[/] [FILL: 2-4 Câu từ Sao Hỏa — {name} tiếp cận tình yêu chủ động ra sao, bị thu hút bởi năng lượng gì. Dùng [bold]cung Hỏa[/] và [bold]nhà Hỏa[/]]
+
+[#ff0000+bold]Tọa độ để bạn tìm thấy "người ấy"[/]
+
+[FILL: 2-3 Câu về hoàn cảnh và môi trường {name} dễ gặp đối tác phù hợp — từ dữ liệu "Chủ tinh Nhà 7 ở Nhà X / Gặp ở đâu" trong MỤC 2 TIẾNG GỌI TRÁI TIM brief. Mô tả tự nhiên, không nhắc số nhà]
+
+[KTLUẬN] [FILL: 2-3 Câu chân dung đối phương lý tưởng của {name} — họ là người như thế nào, mang năng lượng gì]
+
+3. Ngôn ngữ tình yêu
+[SUBTITLE] Cách bạn trao đi yêu thương
+
+[FILL: 2-3 Câu dẫn về phong cách yêu và cách {name} kết nối trong tình yêu — giọng trân trọng, như đang nói về một điều quý giá]
+
+[#ff0000+bold]Cách bạn trao đi yêu thương[/]
+
+[FILL: 2-3 Câu dẫn tổng quan về phong cách trao đi tình yêu của {name} — từ Cung Mọc, Mặt Trời, Mặt Trăng. Dùng [bold]từ khóa[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — biểu hiện trao đi tình yêu thứ 1, từ AC/Sun/Moon]:[/] [FILL: 2-3 Câu biểu hiện cụ thể thứ 1 trong mối quan hệ. Dùng [bold]từ khóa[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — biểu hiện trao đi tình yêu thứ 2]:[/] [FILL: 2-3 Câu biểu hiện thứ 2. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Cách bạn "giữ lửa" tình yêu[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — năng lượng đam mê, từ Sao Hỏa cung]:[/] [FILL: 2-4 Câu từ Sao Hỏa — cách {name} duy trì đam mê và tiếp lửa cho mối quan hệ. Dùng [bold]cung Hỏa[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — thái độ và cam kết, từ đỉnh Nhà 7 + hành tinh Nhà 7]:[/] [FILL: 2-4 Câu từ đỉnh Nhà 7 — thái độ {name} mang vào cam kết, cách {name} trụ vững trong tình yêu lâu dài. Dùng [bold]cung đỉnh H7[/]]
+
+[KTLUẬN] [FILL: 2-3 Câu về phong cách yêu đặc trưng và điều {name} mang đến cho người mình yêu]
+
+4. Nút thắt cần tháo gỡ
+[SUBTITLE] Những thách thức trong tình yêu và cách chuyển hóa
+
+[FILL: 2-3 Câu dẫn nhẹ nhàng — thách thức trong tình yêu không phải "vận xấu" mà là mời gọi để hiểu mình sâu hơn và yêu trọn vẹn hơn]
+
+(CHỈ viết [#ff0000+bold]Góc cứng Nhà 7 với các lĩnh vực khác[/] + nội dung bên dưới nếu brief MỤC 4 có "Nhà 7 tương tác CỨNG" được đánh dấu → VIẾT. Nếu không: bỏ toàn bộ phần này)
+[#ff0000+bold]Góc cứng Nhà 7 với các lĩnh vực khác[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — tính chất xung đột giữa tình yêu và lĩnh vực cuộc sống đang kéo căng]:[/] [FILL: 2-4 Câu từ dữ liệu "Nhà 7 tương tác CỨNG" trong MỤC 4 brief — xung đột giữa tình yêu và lĩnh vực cuộc sống nào? Tại sao tình yêu hay bị ảnh hưởng? Luận 2 mặt + hướng chuyển hóa. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Mô thức lặp lại trong tình yêu[/]
+(CHỈ viết phần này nếu ít nhất 1 góc cứng Sao Kim → VIẾT trong "Góc cứng Sao Kim" của brief MỤC 4. Nếu tất cả → KHÔNG VIẾT: bỏ cả [#ff0000+bold] header phía trên và toàn bộ phần này)
+
+[FILL: 1-2 Câu dẫn về mô thức tình cảm lặp đi lặp lại của {name}]
+
+(Viết từng cặp [bold]...[/] + đoạn luận giải CHỈ khi góc cứng tương ứng → VIẾT trong brief MỤC 4. Cặp nào → KHÔNG VIẾT: bỏ cả dòng [bold] và đoạn ngay dưới nó)
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức sợ từ chối hoặc yêu muộn màng, chỉ nếu "Kim cứng Thổ" → VIẾT]:[/] [FILL: 2-4 Câu Kim-Thổ — sợ bị từ chối, tự ti, yêu muộn. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức yêu sâu nhưng dễ ám ảnh hoặc kiểm soát, chỉ nếu "Kim cứng Diêm Vương" → VIẾT]:[/] [FILL: 2-4 Câu Kim-Diêm Vương — yêu sâu, kiểm soát, ám ảnh. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức yêu nhanh rời nhanh hoặc ngại ràng buộc, chỉ nếu "Kim cứng Thiên Vương" → VIẾT]:[/] [FILL: 2-4 Câu Kim-Thiên Vương — yêu nhanh rời nhanh, thích tự do. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức lý tưởng hóa hoặc hi sinh bản thân, chỉ nếu "Kim cứng Hải Vương" → VIẾT]:[/] [FILL: 2-4 Câu Kim-Hải Vương — lý tưởng hóa, hi sinh, dễ vỡ mộng. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức yêu mãnh liệt nhưng dễ xung đột, chỉ nếu "Kim cứng Hỏa" → VIẾT]:[/] [FILL: 2-4 Câu Kim-Hỏa — yêu mãnh liệt nhưng dễ xung đột. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+[#ff0000+bold]Mô thức an toàn cảm xúc[/]
+(CHỈ viết phần này nếu ít nhất 1 góc cứng Mặt Trăng → VIẾT trong "Góc cứng Mặt Trăng" của brief MỤC 4. Nếu tất cả → KHÔNG VIẾT: bỏ cả [#ff0000+bold] header và toàn bộ phần này)
+
+[FILL: 1-2 Câu dẫn về mô thức cảm xúc sâu và cơ chế tự bảo vệ của {name}]
+
+(Viết từng cặp CHỈ khi → VIẾT. Cặp nào → KHÔNG VIẾT: bỏ dòng [bold] và đoạn ngay dưới)
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức khó mở lòng hoặc sợ bị từ chối, chỉ nếu "Trăng cứng Thổ" → VIẾT]:[/] [FILL: 2-4 Câu Moon-Thổ — sợ từ chối, khó mở lòng. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức cảm xúc cực đoan hoặc chấp chặt, chỉ nếu "Trăng cứng Diêm Vương" → VIẾT]:[/] [FILL: 2-4 Câu Moon-Diêm Vương — cảm xúc cực đoan, ám ảnh. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức lý tưởng hóa hoặc dễ mất bản thân, chỉ nếu "Trăng cứng Hải Vương" → VIẾT]:[/] [FILL: 2-4 Câu Moon-Hải Vương — lý tưởng hóa, dễ mất bản thân. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — mô thức cảm xúc bùng nổ hoặc dễ xung đột, chỉ nếu "Trăng cứng Hỏa" → VIẾT]:[/] [FILL: 2-4 Câu Moon-Hỏa — cảm xúc bùng nổ, dễ xung đột. Hướng chữa lành. Chỉ điền nếu → VIẾT]
+
+[#ff0000+bold]Để tháo gỡ những nút thắt này, bạn có thể bắt đầu thực hiện các thay đổi nhỏ sau:[/]
+
+- [FILL: Phương pháp thực hành 1 — hành vi cụ thể, dễ thực hiện ngay, xuất phát từ dữ liệu vừa luận]
+- [FILL: Phương pháp thực hành 2]
+- [FILL: Phương pháp thực hành 3 nếu phù hợp; bỏ nếu 2 phương pháp đã đủ]
+
+[KTLUẬN] [FILL: 2-3 Câu về thách thức lớn nhất của {name} trong tình yêu và hướng chuyển hóa tích cực]
+
+5. La bàn hạnh phúc
+[SUBTITLE] Bước ngoặt chạm đến tình yêu bền vững
+
+[FILL: 2-3 Câu dẫn nhẹ nhàng — mỗi bản đồ sao đều có "kim chỉ nam" riêng, những bài học cần được vượt qua để tình yêu trưởng thành và bền vững]
+
+(CHỈ viết [#ff0000+bold]Bài học tình yêu cần tốt nghiệp[/] + nội dung bên dưới nếu ít nhất 1 góc Thổ → VIẾT trong brief MỤC 5. Nếu tất cả → KHÔNG VIẾT: bỏ toàn bộ phần này)
+[#ff0000+bold]Bài học tình yêu cần tốt nghiệp[/]
+
+[FILL: 1-2 Câu dẫn về vai trò của Sao Thổ trong hành trình tình yêu — thầy dạy khắt khe nhưng đáng tin]
+
+(Viết từng cặp CHỈ khi tương ứng → VIẾT trong "Sao Thổ tạo góc với" của brief MỤC 5. Cặp → KHÔNG VIẾT: bỏ dòng [bold] và đoạn ngay dưới)
+
+- [bold][FILL: Cụm 4-8 âm tiết — bài học trưởng thành cảm xúc, chỉ nếu "Saturn-Moon" → VIẾT]:[/] [FILL: 2-4 Câu Thổ-Moon — học trưởng thành cảm xúc. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — bài học yêu có trách nhiệm và cam kết, chỉ nếu "Saturn-Venus" → VIẾT]:[/] [FILL: 2-4 Câu Thổ-Kim — học yêu có trách nhiệm, cam kết thật sự. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — bài học giao tiếp chín chắn và thành thật, chỉ nếu "Saturn-Mercury" → VIẾT]:[/] [FILL: 2-4 Câu Thổ-Thủy — học giao tiếp chín chắn. Chỉ điền nếu → VIẾT]
+
+- [bold][FILL: Cụm 4-8 âm tiết — bài học xử lý xung đột lành mạnh, chỉ nếu "Saturn-Mars" → VIẾT]:[/] [FILL: 2-4 Câu Thổ-Hỏa — học xử lý xung đột lành mạnh. Chỉ điền nếu → VIẾT]
+
+(CHỈ viết [#ff0000+bold]Sứ mệnh cuộc đời — La Hầu[/] + nội dung nếu brief MỤC 5 đánh dấu La Hầu → VIẾT. Nếu → KHÔNG VIẾT: bỏ toàn bộ phần này kể cả header)
+[#ff0000+bold]Sứ mệnh cuộc đời — La Hầu[/]
+
+[bold][FILL: Cụm 4-8 âm tiết — hướng đi tâm hồn từ La Hầu Nhà 5/7/8][/]
+
+[FILL: 2-4 Câu luận giải La Hầu — {name} đang được mời gọi đi về hướng nào trong tình yêu? Điều gì cần được mở ra? Dùng dữ liệu La Hầu từ MỤC 5 brief. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết [#ff0000+bold]Chìa khóa chuyển hóa — Chiron[/] + nội dung nếu brief MỤC 5 đánh dấu Chiron → VIẾT. Nếu → KHÔNG VIẾT: bỏ toàn bộ)
+[#ff0000+bold]Chìa khóa chuyển hóa — Chiron[/]
+
+[bold][FILL: Cụm 4-8 âm tiết — vết thương và sự chữa lành, rút từ Chiron Nhà 5/7/8][/]
+
+[FILL: 2-4 Câu luận giải Chiron — vết thương tình cảm cũ của {name} là gì, và khi chữa lành điều đó tình yêu sẽ thay đổi ra sao? Dùng dữ liệu Chiron từ MỤC 5 brief. Giọng đồng cảm, không phán xét. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Kim chỉ nam hạnh phúc cho bạn:[/]
+
+[FILL: 2-3 Câu kết hợp các bài học từ Thổ, La Hầu, Chiron (chỉ nhắc những phần đã VIẾT) thành lời nhắn tổng hợp — điều gì, khi được thực hành, sẽ mở ra tình yêu bền vững cho {name}?]
+
+[KTLUẬN] [FILL: 2-3 Câu về chìa khóa để tình yêu của {name} thực sự nở rộ — khi nào và như thế nào tình yêu sẽ đến đúng nghĩa]
+
+6. Thông điệp tình yêu từ các vì sao
+[SUBTITLE] Những điều vũ trụ muốn nhắn nhủ cho hành trình tình yêu của bạn
+
+[FILL: 2-3 Câu tổng kết toàn bộ hành trình tình yêu — bản chất sâu xa của {name} trong tình yêu là gì, điều gì làm nên câu chuyện tình yêu đặc biệt của {name}]
+
+[#ff0000+bold]Để tình yêu thực sự nở rộ, bạn hãy mang theo "cẩm nang" này:[/]
+
+- [bold][FILL: Tiêu đề chìa khóa 1, 3-5 từ][/] [FILL: 1-2 Câu lời khuyên cụ thể, thực hành được ngay, rút từ toàn bộ bài]
+- [bold][FILL: Tiêu đề chìa khóa 2][/] [FILL: 1-2 Câu]
+- [bold][FILL: Tiêu đề chìa khóa 3][/] [FILL: 1-2 Câu]
+- [bold][FILL: Tiêu đề chìa khóa 4 nếu cần][/] [FILL: 1-2 Câu. Bỏ dòng này nếu 3 chìa khóa đã đủ]
+
+[#ff0000+bold]Lời nhắn nhủ sau cùng:[/]
+
+[FILL: 2-3 Câu nhắn nhủ ấm áp từ trái tim — giọng chiêm tinh chữa lành, gợi mở tương lai tươi sáng mà không phán xét quá khứ, trân trọng hành trình của {name}]
 
 [CLOSING]
-Cảm ơn bạn đã dành thời gian để nhìn lại hành trình yêu của mình qua góc nhìn của Hạt Giống Chiêm Tinh.
+Cảm ơn bạn đã dành thời gian để lắng nghe câu chuyện tình yêu của mình qua góc nhìn của bản đồ sao.
 
-Nếu hành trình yêu của bạn từng có những chờ đợi, những trải nghiệm chưa trọn vẹn hay những câu hỏi chưa có lời đáp, thì điều đó không có nghĩa là bạn kém may mắn trong tình yêu. Đôi khi đó chỉ là cách cuộc đời giúp bạn hiểu mình sâu sắc hơn trước khi bước vào một mối quan hệ thật sự phù hợp.
+Tình yêu không bao giờ có một công thức chung. Nhưng khi bạn hiểu rõ hơn về mình — về cách bạn yêu, điều bạn cần, và những bài học bạn đang đi qua — bạn sẽ dần dần gặp được những mối quan hệ phản chiếu đúng hơn với con người thật của mình.
 
-Hy vọng bản luận giải này đã giúp bạn nhìn rõ hơn về bản thân trong tình yêu, để từ đó bước vào những mối quan hệ với nhiều sự thấu hiểu, chủ động và bình an hơn.
-
-Chúc bạn luôn giữ được sự dịu dàng với chính mình và khi thời điểm phù hợp đến, bạn sẽ gặp được một mối quan hệ khiến bạn cảm thấy được là chính mình và được yêu thương.
+Mỗi trải nghiệm tình yêu, dù vui hay buồn, đều là một phần của hành trình giúp bạn hiểu chính mình sâu sắc hơn. Và khi bạn yêu chính mình trước — tình yêu đúng nghĩa sẽ tìm đến.
 
 Trân trọng,
 

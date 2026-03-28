@@ -101,14 +101,21 @@ Types và ý nghĩa:
 - [ ] Service restart thành công: `sudo systemctl restart <service> && sudo systemctl status <service>`
 - [ ] **Command Registration Check:** Tương tự Node — xem `BOT_COMMAND_RULES.md` mục 1 + 4.
 
-## 7. RRI-T (Khi user yêu cầu)
+## 7. RRI-T Quality Audit (Khi user yêu cầu)
 
-Khi user gọi `check RRI-T` → chạy kiểm thử toàn diện theo `RRI-T_METHODOLOGY.md`:
+Khi user gọi `check quality` hoặc `check RRI-T` → chạy kiểm thử toàn diện theo **TDK Pipeline**:
 
-1. **Đọc** `docs/universal_rules/RRI-T_METHODOLOGY.md` để nắm methodology
-2. **Chọn mode:** RRI-T Lite (solo dev, < 2h) hoặc Full (team, nửa ngày)
-3. **Phase 1.5 — Code-Path Analysis** (bắt buộc): Trace data flow, state mutation, DB queries, calculations, external calls, callbacks, authorization trong code thực tế
-4. **5 Personas × 7 Dimensions:** Chạy checklist theo từng persona (End User, BA, QA Destroyer, DevOps, Security Auditor)
-5. **Output:** Danh sách bugs/issues theo severity (P0-P3), coverage score, recommended fixes
+1. **Đọc** `docs/tdk/RRI-T_v1.md` — nắm methodology + multi-pass protocol
+2. **Chọn mode:** Lite (solo dev, 3 personas) hoặc Full (5 personas)
+3. **MULTI-PASS bắt buộc** (không chạy gộp personas):
+   - Pass 0: Phase 1.5 Code-Path Analysis → output Code-Path Map → user review
+   - Pass 1: 👤 End User (D1 UI/UX + D7 Edge) → output test cases
+   - Pass 2: 🔍 QA Destroyer (D2 API + D7 Edge) → output test cases
+   - Pass 3: 🔒 Security Auditor (D4 Security) → output test cases
+   - [Full mode: Pass 4-5 thêm 📋 BA + 🔧 DevOps]
+   - Pass Final: Self-Check (Common Misses checklist per dimension)
+4. **Output:** Test suite by pass, scoring dashboard, P0-P3 priority, recommended fixes
 
-_Lý do: RRI-T bổ sung cho unit test bằng cách kiểm thử từ góc nhìn người dùng thật + phá hệ thống + security + infrastructure — những thứ unit test không cover được._
+_Lý do: RRI-T bổ sung cho unit test bằng cách kiểm thử từ góc nhìn người dùng thật + phá hệ thống + security + infrastructure. Multi-pass đảm bảo mỗi persona được 100% focus, không bị lướt._
+
+> **File cũ `RRI-T_METHODOLOGY.md` trong universal_rules/ đã được thay thế bởi `docs/tdk/RRI-T_v1.md`** — bản mới có multi-pass enforcement, common misses registry, và self-check protocol.

@@ -11,53 +11,97 @@ Copy một lần, áp dụng cho tất cả project.
 curl -fsSL https://raw.githubusercontent.com/hentaiikidd/universal-workflow/main/bootstrap.sh | bash
 ```
 
-Chạy từ **root của project**. Script tự động copy rules, setup CLAUDE.md, dọn dẹp.
+Chạy từ **root của project**. Script tự động:
+- Copy rules vào `docs/universal_rules/`
+- Tạo `CLAUDE.md` (nếu chưa có)
+- Tạo `README.md` từ template (nếu chưa có)
+- Tạo `docs/GOAL.md` từ template (nếu chưa có)
 
-> **SSH key không phải `~/.ssh/id_rsa`?**
-> ```bash
-> curl -fsSL https://raw.githubusercontent.com/hentaiikidd/universal-workflow/main/bootstrap.sh \
->   | BOOTSTRAP_SSH_KEY=~/.ssh/my_key bash
-> ```
-
-Sau đó mở **Claude Code CLI** trong project và gõ:
-
-```
-check requirements
-```
+> Chi tiết: xem [BOOTSTRAP.md](./BOOTSTRAP.md)
 
 ---
 
-## Các cách khác
+## Cấu trúc sau khi bootstrap
 
-Xem [BOOTSTRAP.md](./BOOTSTRAP.md) để biết thêm cách setup (thủ công từng bước, copy file, 1-liner git clone).
+```
+my-project/
+├── CLAUDE.md                  ← project config cho Claude Code
+├── README.md                  ← project README (từ README_TEMPLATE.md)
+├── docs/
+│   ├── GOAL.md                ← project goal (từ GOAL_TEMPLATE.md)
+│   ├── REQUIREMENTS_CHECK.md  ← server requirements
+│   ├── MD_FILES_TO_UPDATE.md  ← tracking docs thay đổi
+│   └── universal_rules/       ← TẤT CẢ rules files
+│       ├── UNIVERSAL_WORKFLOW.md
+│       ├── GIT_WORKFLOW.md
+│       ├── ...
+│       ├── GOAL_TEMPLATE.md
+│       ├── README_TEMPLATE.md
+│       ├── hooks/
+│       └── tdk/
+└── src/ ...
+```
 
 ---
 
 ## Nội dung bộ rules
 
-| File | Khi nào đọc |
-|------|-------------|
-| [`UNIVERSAL_WORKFLOW.md`](./UNIVERSAL_WORKFLOW.md) | Index — đọc trước mọi thứ |
-| [`GIT_WORKFLOW.md`](./GIT_WORKFLOW.md) | Bắt đầu bất kỳ feature nào |
-| [`MD_SYSTEM.md`](./MD_SYSTEM.md) | Khi tạo / di chuyển file MD |
-| [`QUALITY_GATES.md`](./QUALITY_GATES.md) | Trước mỗi commit |
-| [`UI_MOBILE_RULES.md`](./UI_MOBILE_RULES.md) | Project có UI / web / mobile |
-| [`BOT_COMMAND_RULES.md`](./BOT_COMMAND_RULES.md) | Project là bot (Telegram/Discord/...) |
-| [`VIETNAMESE_DIACRITICS.md`](./VIETNAMESE_DIACRITICS.md) | Dự án sử dụng tiếng Việt (ZERO TOLERANCE) |
-| [`NEW_PROJECT_SETUP.md`](./NEW_PROJECT_SETUP.md) | Logic của lệnh `check requirements` |
-| [`BOOTSTRAP.md`](./BOOTSTRAP.md) | Hướng dẫn bootstrap đầy đủ (3 cách) |
-| [`ASK-BACK.md`](./ASK-BACK.md) | Cơ chế hỏi ngược trước khi thực thi (standalone + Track A trong `feature:`) |
-| [`OUTCOME.md`](./OUTCOME.md) | Cơ chế theo dõi mục tiêu — Goal tracking protocol |
-| [`GOAL_TEMPLATE.md`](./GOAL_TEMPLATE.md) | Template tạo `docs/GOAL.md` cho project mới |
-| [`GOOGLE_OAUTH_SETUP.md`](./GOOGLE_OAUTH_SETUP.md) | Tích hợp Google Login (NextAuth.js) |
-| [`SEPAY_PAYMENT.md`](./SEPAY_PAYMENT.md) | Tích hợp thanh toán QR (SePay) |
+### Core (mọi project đều dùng)
+
+| File | Mô tả |
+|------|-------|
+| `UNIVERSAL_WORKFLOW.md` | Index + core rules + command table |
+| `GIT_WORKFLOW.md` | Branch strategy, feature flow, deploy modes |
+| `MD_SYSTEM.md` | Cấu trúc /docs, quy tắc MD files |
+| `QUALITY_GATES.md` | Type check, build pass, commit format |
+| `NEW_PROJECT_SETUP.md` | Logic của lệnh `check requirements` |
+| `ASK-BACK.md` | Cơ chế hỏi ngược trước khi thực thi |
+| `OUTCOME.md` | Goal tracking protocol |
+
+### Templates (tạo file project-specific khi bootstrap)
+
+| Template | Tạo ra | Vị trí |
+|----------|--------|--------|
+| `GOAL_TEMPLATE.md` | `docs/GOAL.md` | Mục tiêu + milestones project |
+| `README_TEMPLATE.md` | `README.md` (root) | GitHub README project |
+
+### Chuyên biệt (dùng khi project cần)
+
+| File | Khi nào dùng |
+|------|------|
+| `UI_MOBILE_RULES.md` | Web/mobile UI |
+| `MOBILE_APP_STRICT_RULES.md` | Webapp native feel |
+| `BOT_COMMAND_RULES.md` | Telegram/Discord bot |
+| `VIETNAMESE_DIACRITICS.md` | Nội dung tiếng Việt |
+| `GOOGLE_OAUTH_SETUP.md` | Google OAuth login |
+| `SEPAY_PAYMENT.md` | Thanh toán SePay |
+
+### TDK Pipeline (`tdk/`)
+
+| File | Mô tả |
+|------|-------|
+| `MASTER_v1.md` | Orchestrator — parse input, route pipeline |
+| `PGA_v1.md` | Product Growth Analysis |
+| `INFRA_v1.md` | Infrastructure + CI/CD |
+| `RRI-T_v1.md` | Quality Assurance Testing |
+| `HDSD_v1.md` | Hướng dẫn sử dụng TDK |
+
+### Hooks (`hooks/`)
+
+| File | Mô tả |
+|------|-------|
+| `askback_enforce.py` | Enforce ASK-BACK trước khi code |
+| `viet_diacritics_check.py` | Check tiếng Việt có dấu |
+| `install_hooks.py` | Auto-install hooks |
 
 ---
 
 ## Cập nhật rules
 
+Chạy lại bootstrap — overwrite `docs/universal_rules/` bằng version mới nhất:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hentaiikidd/universal-workflow/main/bootstrap.sh | bash
 ```
 
-Chạy lại từ project root — các file trong `docs/universal_rules/` sẽ được cập nhật.
+> **Lưu ý:** Bootstrap KHÔNG overwrite `CLAUDE.md`, `README.md`, `docs/GOAL.md` — chỉ tạo mới nếu chưa có.
