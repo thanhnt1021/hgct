@@ -183,7 +183,7 @@ function buildLoveBrief(
   lines.push(`- Chủ tinh Nhà 7 (${rulerH7Vn}) ở Nhà ${rulerH7H}`)
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 1 / TỔNG QUAN NĂNG LƯỢNG TÌNH YÊU`)
+  lines.push(`MỤC 1 / BẢN SẮC TÌNH YÊU`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`(Dùng cho Mục 1: AC-Sun-Moon, Venus, Moon, Mars, Nhà trội)`)
 
@@ -215,7 +215,7 @@ function buildLoveBrief(
   }
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 2 / KIỂU NGƯỜI THU HÚT BẠN`)
+  lines.push(`MỤC 2 / TIẾNG GỌI TRÁI TIM`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`(Dùng dữ liệu MỤC 1 + thêm gặp ở đâu)`)
 
@@ -224,7 +224,7 @@ function buildLoveBrief(
   lines.push(`    ${meetContent || '(không có dữ liệu)'}`)
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 3 / CÁCH BẠN YÊU VÀ THỂ HIỆN CẢM XÚC`)
+  lines.push(`MỤC 3 / NGÔN NGỮ TÌNH YÊU`)
   lines.push(`${'═'.repeat(60)}`)
 
   lines.push(`\n  Đỉnh Nhà 7 (${h7Peak.zodiac || h7Z}) / thái độ trong tình yêu:`)
@@ -241,7 +241,7 @@ function buildLoveBrief(
   }
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 4 / KHÓ KHĂN VÀ MÔ THỨC LẶP LẠI`)
+  lines.push(`MỤC 4 / NÚT THẮT`)
   lines.push(`${'═'.repeat(60)}`)
 
   lines.push(`\n  Nhà 7 tương tác CỨNG với:`)
@@ -271,7 +271,7 @@ function buildLoveBrief(
   lines.push(moonHardLines.join('\n'))
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 5 / BÀI HỌC TÌNH YÊU (conditional / chỉ VIẾT phần có dữ liệu)`)
+  lines.push(`MỤC 5 / LA BÀN HẠNH PHÚC`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`LƯU Ý: Các dòng → KHÔNG VIẾT thì TUYỆT ĐỐI không nhắc tới trong bài.`)
 
@@ -285,7 +285,7 @@ function buildLoveBrief(
   lines.push(chironLine)
 
   lines.push(`\n${'═'.repeat(60)}`)
-  lines.push(`MỤC 6 / TỔNG KẾT HÀNH TRÌNH TÌNH YÊU`)
+  lines.push(`MỤC 6 / THÔNG ĐIỆP TỪ CÁC VÌ SAO`)
   lines.push(`${'═'.repeat(60)}`)
   lines.push(`(Tổng hợp từ tất cả các mục trên để viết phần kết luận)`)
 

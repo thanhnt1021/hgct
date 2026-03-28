@@ -15,6 +15,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | Có liên quan đến file MD | `MD_SYSTEM.md` |
 | Trước khi commit | `QUALITY_GATES.md` |
 | Project có UI/web/mobile | `UI_MOBILE_RULES.md` |
+| Project là mobile web app (webapp native feel) | `MOBILE_APP_STRICT_RULES.md` |
 | Project là bot (Telegram/Discord/...) | `BOT_COMMAND_RULES.md` |
 | Dự án sử dụng tiếng Việt | `VIETNAMESE_DIACRITICS.md` |
 | Setup project mới / `check requirements` | `NEW_PROJECT_SETUP.md` |
@@ -24,6 +25,11 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | Tích hợp Google Login (NextAuth.js) | `GOOGLE_OAUTH_SETUP.md` |
 | Tích hợp thanh toán QR (SePay) | `SEPAY_PAYMENT.md` |
 | Bootstrap universal rules vào project mới | `BOOTSTRAP.md` |
+| Tạo/update tài liệu dự án | `PROJECT_DOCS.md` |
+| **Phân tích sản phẩm / growth / positioning** | **`docs/tdk/MASTER_v1.md` → auto-route tới PGA** |
+| **Test chất lượng toàn diện (QA multi-pass)** | **`docs/tdk/RRI-T_v1.md`** |
+| **Setup server / deploy / infra / CI/CD** | **`docs/tdk/INFRA_v1.md`** |
+| **Đọc hướng dẫn bộ TDK Pipeline** | **`docs/tdk/HDSD.md`** |
 
 ---
 
@@ -37,12 +43,18 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `merge main` / `lên production` | Merge vào main + deploy production |
 | `deploy demo` | Full deploy từ GitHub (sau khi đã commit) |
 | `check requirements` | Kiểm tra và setup mọi thứ còn thiếu theo `NEW_PROJECT_SETUP.md` |
+| `sync uni` | Pull latest từ `hentaiikidd/universal-workflow` GitHub repo → cập nhật `docs/universal_rules/` → dọn file thừa. **KHÔNG overwrite** `CLAUDE.md`, `README.md`, `docs/GOAL.md` (xem **`sync uni` Workflow** bên dưới) |
+| `docs project` | Đọc code → tạo mới hoặc update tài liệu dự án (flow, UI/UX, events, summary...) theo `PROJECT_DOCS.md`. Chờ user review trước khi commit. |
 | `update workflow` | Review + đề xuất cải tiến các file trong `universal_rules/` |
 | `read context` | Đọc CLAUDE.md + toàn bộ files trong `docs/` (kể cả `universal_rules/`) + source files project-specific (xem CLAUDE.md của từng project). Sau đó: **Goal Check** theo protocol trong `OUTCOME.md` (xem mục Goal Tracking Protocol bên dưới). Xong → báo ngắn "Đã hiểu, sẵn sàng nhận lệnh." → **DỪNG. Không output gì thêm.** |
 | `report context` | Giống `read context` nhưng sau khi đọc xong → **output full structured summary** theo format định nghĩa trong mục **"report context — Output Format"** bên dưới. |
 | `check goal` | Show tóm tắt GOAL.md + tiến độ + đề xuất bước tiếp theo (xem `OUTCOME.md` mục "Bất kỳ lúc nào") |
 | `update goal` | Claude đề xuất những gì nên update GOAL.md dựa trên việc vừa làm trong session (xem `OUTCOME.md`) |
 | `full update` | **One-shot cuối task**: update MD files → commit + push → merge main → restart service → report (xem **`full update` Workflow** bên dưới) |
+| **`tdk: [câu hỏi thô]`** | **Đọc `docs/tdk/MASTER_v1.md` → parse input → route pipeline TDK (PGA/INFRA/RRI-T)** |
+| **`check quality`** | **Đọc `docs/tdk/RRI-T_v1.md` → chạy QA multi-pass theo TDK protocol** |
+| **`check growth`** | **Đọc `docs/tdk/PGA_v1.md` → product growth analysis** |
+| **`setup server`** | **Đọc `docs/tdk/INFRA_v1.md` → server setup / deploy / monitoring** |
 
 ---
 
@@ -71,6 +83,8 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
    → Xem `GIT_WORKFLOW.md` mục **"Push lên universal-workflow repo"** để biết cách thực hiện.
 
 8. Khi backup DB hoặc file quan trọng: **luôn lưu 2 nơi** — `/tmp/` (nhanh) + một thư mục persistent (`/var/[project]/backups/` hoặc tương đương) ngay trong cùng lệnh.
+
+9. **Package manager**: Dùng `pnpm` thay `npm` cho mọi project Node.js. pnpm dùng shared store (hardlink) nên nhiều project dùng chung packages mà không tốn thêm disk. Lệnh tương ứng: `pnpm install`, `pnpm run build`, `pnpm run dev`. Xem `NEW_PROJECT_SETUP.md` để biết chi tiết.
    _Lý do: `/tmp/` bị xóa khi server reboot. Backup trong `/tmp/` thôi là không có backup — mất dữ liệu khi cần nhất._
 
 ---
@@ -183,6 +197,36 @@ One-shot command cuối task — gom toàn bộ `commit` + `merge main` + restar
 - Nếu có merge conflict → **DỪNG**, báo user, KHÔNG tự resolve
 - `full update` KHÔNG bao gồm deploy demo — chỉ restart service (production)
 - Nếu cần deploy demo trước khi commit → dùng `quick deploy` riêng trước
+
+---
+
+## sync uni Workflow
+
+Cập nhật `docs/universal_rules/` từ repo gốc trên GitHub.
+
+**Repo gốc:** `https://github.com/hentaiikidd/universal-workflow`
+
+### Khi user nói `sync uni` (hoặc tương đương: "pull uni", "update uni rules", "đồng bộ universal rules"):
+
+1. **Clone** repo `hentaiikidd/universal-workflow` vào thư mục tạm
+2. **So sánh** file-by-file giữa repo mới và `docs/universal_rules/` hiện tại:
+   - File nào **thay đổi** (diff)
+   - File nào **mới thêm** trong repo
+   - File nào **đã xoá** khỏi repo (còn trong project nhưng không còn trong repo)
+3. **Báo cáo** danh sách thay đổi cho user xem trước
+4. **Thực hiện** cập nhật:
+   - Copy file mới/thay đổi từ repo → `docs/universal_rules/`
+   - Copy subdirectories (`hooks/`, `tdk/`) nếu có
+   - Xoá file không còn trong repo (trừ file project-specific)
+   - **KHÔNG copy** `README.md` của repo vào `docs/universal_rules/` (đó là README của repo, không phải rule file)
+5. **Tạo file project-specific nếu chưa có:**
+   - `README.md` ở root ← từ `README_TEMPLATE.md`
+   - `docs/GOAL.md` ← từ `GOAL_TEMPLATE.md`
+6. **KHÔNG overwrite** nếu đã tồn tại: `CLAUDE.md`, `README.md`, `docs/GOAL.md`
+7. **Dọn dẹp** thư mục tạm
+8. **Báo cáo** kết quả → **DỪNG**, chờ user confirm commit
+
+> **Lưu ý:** `sync uni` KHÔNG tự commit. User phải nói `commit` riêng.
 
 ---
 

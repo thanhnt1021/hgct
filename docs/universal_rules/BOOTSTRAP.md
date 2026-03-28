@@ -2,6 +2,49 @@
 
 Bộ workflow rules dùng chung cho mọi project làm việc với **Claude Code CLI**.
 
+> **QUAN TRONG — ĐỌC KỸ TRƯỚC KHI LÀM:**
+>
+> Tất cả file rules `.md` phải được đặt vào **`docs/universal_rules/`** của dự án đích.
+>
+> **TUYỆT ĐỐI KHÔNG copy/write file rules ra root project.**
+>
+> Cấu trúc đúng:
+> ```
+> my-project/
+> ├── CLAUDE.md              ← file duy nhất ở root (project-specific)
+> ├── docs/
+> │   └── universal_rules/   ← TẤT CẢ rules files vào đây
+> │       ├── UNIVERSAL_WORKFLOW.md
+> │       ├── GIT_WORKFLOW.md
+> │       ├── ASK-BACK.md
+> │       ├── OUTCOME.md
+> │       ├── ... (các file .md khác)
+> │       └── BOOTSTRAP.md
+> └── src/ ...
+> ```
+
+---
+
+## Hướng dẫn cho AI Agent (Claude Code)
+
+**Khi user bảo bootstrap project mới bằng file này:**
+
+1. **CHẠY script `bootstrap.sh`** — đây là cách đáng tin nhất:
+   ```bash
+   bash /path/to/bootstrap.sh
+   ```
+   hoặc clone repo rồi chạy script bên trong.
+
+2. **Nếu không chạy được script**, thực hiện THỦ CÔNG theo đúng thứ tự:
+   - `mkdir -p docs/universal_rules` trong dự án đích
+   - Copy tất cả `*.md` vào `docs/universal_rules/` — **KHÔNG PHẢI root**
+   - Tạo/cập nhật `CLAUDE.md` ở root với reference line
+
+3. **KHÔNG BAO GIỜ:**
+   - Copy/write file rules ra root project
+   - Đọc nội dung file rồi write lại thay vì copy nguyên file
+   - Bỏ qua bước tạo `docs/universal_rules/`
+
 ---
 
 ## 3 cách để bootstrap project mới
@@ -13,10 +56,11 @@ curl -fsSL https://raw.githubusercontent.com/hentaiikidd/universal-workflow/main
 ```
 
 Script tự động:
-- Copy toàn bộ rules + hooks vào `docs/universal_rules/`
-- Tạo hoặc cập nhật `CLAUDE.md` (bao gồm AskUserQuestion tool requirement)
+- Tạo `docs/universal_rules/` và copy toàn bộ rules vào đó (bao gồm `hooks/` và `tdk/`)
+- Tạo hoặc cập nhật `CLAUDE.md` ở root
+- Tạo `README.md` ở root từ `README_TEMPLATE.md` (nếu chưa có)
+- Tạo `docs/GOAL.md` từ `GOAL_TEMPLATE.md` (nếu chưa có)
 - Dọn dẹp file thừa
-- **Cài hooks vào `~/.claude/hooks/` + cập nhật `~/.claude/settings.json`** — global, có hiệu lực ngay cho mọi Claude Code session trên máy này
 
 > **SSH key khác mặc định?**
 > ```bash
@@ -26,13 +70,12 @@ Script tự động:
 
 ---
 
-### Cách 2 — Copy file này vào root project, rồi chạy từng bước
+### Cách 2 — Chạy từng bước thủ công
 
-Paste `BOOTSTRAP.md` vào root project → chạy từng lệnh bên dưới → script tự xóa file này sau khi xong.
-
-**Bước 1 — Copy rules:**
+**Bước 1 — Clone repo và copy rules vào `docs/universal_rules/`:**
 
 ```bash
+# Tạo thư mục đích — BẮT BUỘC phải là docs/universal_rules/
 mkdir -p docs/universal_rules
 
 # SSH (recommended cho server)
@@ -51,7 +94,7 @@ rm -rf /tmp/_uw
 > rm -rf /tmp/_uw
 > ```
 
-**Bước 2 — Tạo hoặc cập nhật CLAUDE.md:**
+**Bước 2 — Tạo hoặc cập nhật CLAUDE.md (ở root project):**
 
 `CLAUDE.md` là file bắt buộc của Claude Code CLI — phải đặt ở root project. **Không bao giờ overwrite nếu đã tồn tại.**
 
@@ -121,6 +164,7 @@ fi
 ### Cách 3 — 1 lệnh git clone (không cần curl)
 
 ```bash
+# Đích đến BẮT BUỘC: docs/universal_rules/ — KHÔNG PHẢI root
 mkdir -p docs/universal_rules
 GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa" \
   git clone git@github.com:hentaiikidd/universal-workflow.git /tmp/_uw \

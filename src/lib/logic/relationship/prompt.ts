@@ -223,9 +223,13 @@ export function buildRelationshipBrief(
 
   const titleA = 'Bạn', titleB = 'Bạn', pronounA = 'bạn', pronounB = 'bạn'
 
+  const isMale = (g: string) => g === 'Male'
+  const [nameMale, nameFemale] = isMaleFemale
+    ? (isMale(genderA) ? [nameA, nameB] : [nameB, nameA])
+    : [nameA, nameB]
   const genderNote = isMaleFemale
-    ? 'Cặp Nam-Nữ / luận theo vai trò năng lượng, xưng hô thống nhất là bạn'
-    : 'Cặp đồng giới / luận linh hoạt theo năng lượng hành tinh, KHÔNG gán vai trò'
+    ? `Cặp Nam-Nữ: bạn ${nameMale} là nam, bạn ${nameFemale} là nữ. Khi viết "Điều mỗi người mang đến" và "Vai trò mỗi người": thêm giới tính vào ngoặc đơn sau tên và dùng "giúp" thay "mang đến cho" — ví dụ: "Bạn ${nameMale} (nam) giúp bạn ${nameFemale} (nữ) – Cụm". Xưng hô thống nhất là "bạn".`
+    : 'Cặp đồng giới / không xác định giới: luận linh hoạt theo năng lượng hành tinh, KHÔNG thêm giới tính hay gán vai trò, dùng "mang đến cho" khi viết về ảnh hưởng 2 chiều.'
 
   // ── Planet position lines ──────────────────────────────────────────────────
 
@@ -625,7 +629,7 @@ export function formatBriefForPrompt(brief: RelBrief): string {
 
   // Muc 2
   L(`\n${'═'.repeat(60)}`)
-  L('MỤC 2 / VÌ SAO HAI NGƯỜI GẶP VÀ THU HÚT NHAU')
+  L('MỤC 2 / TIẾNG GỌI TRÁI TIM')
   L('Kết quả tính toán / DANH SÁCH ĐÓNG, chỉ viết mục có VIẾT:')
   L('═'.repeat(60))
 
@@ -665,7 +669,7 @@ export function formatBriefForPrompt(brief: RelBrief): string {
 
   // Muc 4
   L(`\n${'═'.repeat(60)}`)
-  L('MỤC 4 / HÒA HỢP VÀ XUNG ĐỘT')
+  L('MỤC 4 / CHUYỆN ĐÔI MÌNH')
   L('═'.repeat(60))
 
   const hh = brief.muc4.hoa_hop

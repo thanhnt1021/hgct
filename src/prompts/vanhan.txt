@@ -31,10 +31,10 @@ NGUYÊN TẮC BẮT BUỘC:
 === PATTERN LUẬN GIẢI MỖI NHÀ (bắt buộc cho mọi [FILL] nhà) ===
 
 Gạch 1 — CHỈ viết khi có dòng "* [Hành tinh] Transit qua Nhà X..." trong dữ liệu:
-- [bold]Cụm 4-8 âm tiết:[/] 2-3 câu luận giải ảnh hưởng lên lĩnh vực. CÓ THỂ nhắc tên hành tinh transit trong câu phân tích (VD: "Sao Mộc đang mang đến..."). KHÔNG nhắc tên hành tinh trong cụm từ đầu dòng. KHÔNG thêm thông tin góc hay tên hành tinh khác vào Gạch 1.
+- [bold]Cụm 4-8 âm tiết (mỗi từ tối đa 4 âm tiết):[/] 2-3 câu luận giải ảnh hưởng lên lĩnh vực. CÓ THỂ nhắc tên hành tinh transit trong câu phân tích (VD: "Sao Mộc đang mang đến..."). KHÔNG nhắc tên hành tinh trong cụm từ đầu dòng. KHÔNG thêm thông tin góc hay tên hành tinh khác vào Gạch 1.
 
 Gạch 2 — Tổng hợp ảnh hưởng góc (dữ liệu đã lọc: THUẬN LỢI → chỉ góc MỀM, THÁCH THỨC → chỉ góc CỨNG):
-- [bold]Cụm 4-8 âm tiết:[/] 2-3 câu mô tả ảnh hưởng/tính chất/lời khuyên. TUYỆT ĐỐI không nhắc tên bất kỳ hành tinh nào. KHÔNG nhắc tên góc. KHÔNG nhắc ngày cụ thể. KHÔNG dùng "tác động lên khu vực", "ảnh hưởng bởi", "đi qua khu vực" trong Gạch 2. Chỉ mô tả cảm xúc/trạng thái/lời khuyên hành động. Ví dụ ĐÚNG: "Bạn sẽ cảm thấy một áp lực đòi hỏi kỷ luật và sự tập trung cao hơn trong công việc. Hãy xem đây là cơ hội rèn nghề."
+- [bold]Cụm 4-8 âm tiết (mỗi từ tối đa 4 âm tiết):[/] 2-3 câu mô tả ảnh hưởng/tính chất/lời khuyên. TUYỆT ĐỐI không nhắc tên bất kỳ hành tinh nào. KHÔNG nhắc tên góc. KHÔNG nhắc ngày cụ thể. KHÔNG dùng "tác động lên khu vực", "ảnh hưởng bởi", "đi qua khu vực" trong Gạch 2. Chỉ mô tả cảm xúc/trạng thái/lời khuyên hành động. Ví dụ ĐÚNG: "Bạn sẽ cảm thấy một áp lực đòi hỏi kỷ luật và sự tập trung cao hơn trong công việc. Hãy xem đây là cơ hội rèn nghề."
 
 TRONG MỖI ĐOẠN PHÂN TÍCH 2-3 CÂU: In đậm 2-4 từ khóa quan trọng nhất bằng [bold]từ khóa[/].
 
