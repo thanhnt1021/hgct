@@ -74,6 +74,7 @@ interface NhaTrongItem {
   nha: number
   chu: string
   content: string
+  dom_content?: string  // nhà trội theme của CHỦ_NHÀ_TRỐNG (điều họ coi trọng)
 }
 
 interface DuyenSoData {
@@ -456,6 +457,19 @@ export function buildRelationshipBrief(
     ? twoWayTextFiltered('Venus', 'Moon', 'Sao Kim', 'Mặt Trăng', 'hard')
     : null
 
+  // Helper: lấy theme nhà trội của 1 người từ b1 data
+  function getDomHouseContent(personData: Record<string, unknown>, hNum: number): string {
+    const houses = (personData.houses || []) as Record<string, string>[]
+    for (const h of houses) {
+      const lbl = h.label || ''
+      const m = lbl.match(/Nh[aà]\s*(\d+)/i)
+      if (m && parseInt(m[1]) === hNum) {
+        return extractHouseThemes(h.content || '')
+      }
+    }
+    return ''
+  }
+
   // Empty special houses
   const emptySp = b2.empty_sp || []
   const nhaTrongItems: NhaTrongItem[] = []
@@ -476,10 +490,16 @@ export function buildRelationshipBrief(
       else if (inA) owner = nameA
       else if (inB) owner = nameB
       else owner = '?'
+      // Lấy theme nhà trội của CHỦ_NHÀ_TRỐNG
+      let domContent = ''
+      if (inA && !inB) domContent = getDomHouseContent(b1.A || {}, hNum)
+      else if (inB && !inA) domContent = getDomHouseContent(b1.B || {}, hNum)
+      else if (inA && inB) domContent = getDomHouseContent(b1.A || {}, hNum) || getDomHouseContent(b1.B || {}, hNum)
       nhaTrongItems.push({
         nha: hNum,
         chu: owner,
         content: (ct && ct !== '(Dữ liệu đang cập nhật...)') ? ct : '',
+        dom_content: domContent || undefined,
       })
     }
   }
@@ -713,7 +733,8 @@ export function formatBriefForPrompt(brief: RelBrief): string {
     L(`\n  Nhà trống cần chú ý: → VIẾT (${nhaTrong.length} nhà)`)
     for (const nt of nhaTrong) {
       L(`  - Nhà ${nt.nha} → CHỦ_NHÀ_TRỐNG: ${nt.chu}`)
-      if (nt.content) L(`    Nội dung: ${nt.content.substring(0, 200)}`)
+      if (nt.dom_content) L(`    Người này coi trọng: ${nt.dom_content.substring(0, 150)}`)
+      if (nt.content) L(`    Nhà trống synastry: ${nt.content.substring(0, 200)}`)
     }
   } else {
     L('\n  Nhà trống cần chú ý: → KHÔNG VIẾT (không có)')

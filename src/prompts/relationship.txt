@@ -173,7 +173,7 @@ Hy vọng bản luận giải này sẽ giúp bạn hiểu rõ hơn về mối q
 (CHỈ viết [#ff0000+bold]Những khoảng trống cần được lấp đầy[/] + nội dung nếu brief MỤC 4 có dữ liệu "Nhà trống cần chú ý: → VIẾT". Nếu không có: bỏ cả header và toàn bộ phần này)
 [#ff0000+bold]Những khoảng trống cần được lấp đầy[/]
 
-[FILL: Liệt kê từng nhà trống đặc biệt từ dữ liệu "Nhà trống cần chú ý" trong MỤC 4 brief. Mỗi nhà: 1 dòng bắt đầu bằng "- " rồi [bold]cụm 4-8 âm tiết trọn nghĩa mô tả lĩnh vực và tính chất thiếu hụt:[/] + 2-4 câu về xung đột tiềm ẩn và lời khuyên nhẹ nhàng (CHỦ_NHÀ_TRỐNG là ai thì người đó cần chủ động chia sẻ). Giọng đồng hành, không phán xét. Dùng [bold]từ khóa[/]]
+[FILL: Liệt kê từng nhà trống đặc biệt từ "Nhà trống cần chú ý" trong MỤC 4 brief. Mỗi nhà: 1 dòng "- " rồi [bold]cụm 4-8 âm tiết mô tả lĩnh vực + tính chất thiếu hụt:[/] + 2-3 câu theo cấu trúc bắt buộc: Câu 1 — "[CHỦ_NHÀ_TRỐNG] rất coi trọng [điều X] — từ "Người này coi trọng:" trong dữ liệu. Câu 2 — "Nhưng khi Nhà [Y] là nhà trống đặc biệt, [CHỦ] dễ [trạng thái cảm xúc cụ thể: cảm thấy 1 mình gánh vác, lạc lõng, không nhìn rõ vai trò đối phương...]" — từ "Nhà trống synastry:" trong dữ liệu. KHÔNG dùng "nên chủ động chia sẻ". Dùng [bold]từ khóa[/]]
 
 [KTLUẬN] [FILL: 2-3 Câu tổng kết hòa hợp và khác biệt — giọng cân bằng, mọi khác biệt đều là cơ hội để hiểu nhau sâu hơn và cùng trưởng thành]
 
