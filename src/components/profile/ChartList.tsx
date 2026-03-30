@@ -110,7 +110,6 @@ export default function ChartList() {
         })
         if (res.ok) {
           setProfiles(prev => prev.map(p => p.id === editingId ? { ...p, ...formData, name, note: formData.note || '' } : p))
-          setModalOpen(false)
         }
       } else {
         const res = await fetch('/api/profiles', {
@@ -127,11 +126,11 @@ export default function ChartList() {
             loc: p.data?.loc || formData.loc, note: p.data?.note || '',
             createdAt: p.createdAt || '',
           }, ...prev])
-          setModalOpen(false)
         }
       }
     } catch { /* ignore */ }
     setSaving(false)
+    setModalOpen(false)
   }
 
   const handleDelete = async (id: string) => {

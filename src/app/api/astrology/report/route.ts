@@ -11,8 +11,10 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isPremium = (session?.user as any)?.isPremium === true
+    const planType = (session?.user as any)?.planType as string | undefined
+    const isPremiumOrLifetime = isPremium || planType === 'lifetime'
 
-    if (!isPremium) {
+    if (!isPremiumOrLifetime) {
       return NextResponse.json(
         { error: 'Chỉ tài khoản Premium mới có thể tạo báo cáo. Vui lòng nâng cấp tài khoản.', requiresPremium: true },
         { status: 403 },

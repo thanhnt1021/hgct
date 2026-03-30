@@ -8,6 +8,7 @@ function SetupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const ctvId = searchParams.get('ctvId')
+  const setupEmail = searchParams.get('email') || ''
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -34,12 +35,13 @@ function SetupForm() {
     if (password !== confirm) { setError('Mật khẩu xác nhận không khớp'); return }
     if (password.length < 8) { setError('Mật khẩu phải ít nhất 8 ký tự'); return }
     setLoading(true)
+    if (!setupEmail) { setError('Thiếu thông tin xác thực — vui lòng đăng nhập lại'); return }
     setError('')
     try {
       const res = await fetch('/api/ctv/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ctvId: Number(ctvId), password, ctvCode }),
+        body: JSON.stringify({ ctvId: Number(ctvId), email: setupEmail, password, ctvCode }),
       })
       const data = await res.json()
       if (res.ok) {

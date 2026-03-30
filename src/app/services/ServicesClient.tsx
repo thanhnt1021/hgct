@@ -768,7 +768,7 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
         showSaveCheckbox
         submitLabel={getModalSubmitLabel()}
         onSave={handleModalSave}
-        onClose={() => setModalOpen(false)}
+        onClose={() => { setModalOpen(false); setModalTarget('A') }}
       />
 
       {/* Guest flow — 1-profile modal (career/love/transit) */}
@@ -778,6 +778,7 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
         hideNote
         initialData={guestInitialDataA}
         showSaveCheckbox={!!user}
+        defaultSaveChecked={!!user}
         submitLabel="Tiếp tục →"
         onSave={handleGuestModalSubmit}
         onClose={() => { setGuestModalOpen(false); setGuestService(null); setGuestInitialDataA(null) }}

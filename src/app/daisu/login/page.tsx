@@ -23,7 +23,7 @@ export default function DaisuLoginPage() {
       const data = await res.json()
       if (res.ok) {
         if (data.needsSetup) {
-          router.push(`/daisu/setup?ctvId=${data.ctvId}`)
+          router.push(`/daisu/setup?ctvId=${data.ctvId}&email=${encodeURIComponent(data.email || '')}`)
         } else {
           router.push('/daisu')
         }

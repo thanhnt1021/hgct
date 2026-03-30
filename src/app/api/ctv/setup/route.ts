@@ -10,9 +10,9 @@ function hashPassword(password: string): string {
 // POST /api/ctv/setup — set password + CTV code for pending_setup CTVs
 export async function POST(req: NextRequest) {
   try {
-    const { ctvId, password, ctvCode } = await req.json()
+    const { ctvId, email, password, ctvCode } = await req.json()
 
-    if (!ctvId || !password || !ctvCode) {
+    if (!ctvId || !email || !password || !ctvCode) {
       return NextResponse.json({ error: 'Thiếu thông tin' }, { status: 400 })
     }
 
@@ -28,6 +28,11 @@ export async function POST(req: NextRequest) {
     const ctv = await prisma.ctv.findUnique({ where: { id: Number(ctvId) } })
     if (!ctv) {
       return NextResponse.json({ error: 'Không tìm thấy tài khoản CTV' }, { status: 404 })
+    }
+
+    // Verify email matches to prevent account takeover by ID enumeration
+    if (ctv.email.toLowerCase() !== (email as string).trim().toLowerCase()) {
+      return NextResponse.json({ error: 'Thông tin xác thực không hợp lệ' }, { status: 403 })
     }
 
     if (ctv.status !== 'pending_setup') {

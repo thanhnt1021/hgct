@@ -122,12 +122,12 @@ export default function ProfileInfo() {
       if (res.ok) {
         setMainChart(formData)
         setMainChartProfileId(profileId)
-        setMainChartModalOpen(false)
         window.dispatchEvent(new CustomEvent('profiles:refresh', { detail: { mainProfileId: profileId } }))
         window.dispatchEvent(new CustomEvent('chart:updated', { detail: { ten: formData.ten?.trim() || '' } }))
       }
     } catch { /* ignore */ }
     setMainChartSaving(false)
+    setMainChartModalOpen(false)
   }
 
   const handleSaveMainChart = async (formData: ProfileFormData, _saveProfile?: boolean) => {

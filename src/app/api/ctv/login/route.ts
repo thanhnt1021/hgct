@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     // pending_setup CTV hasn't set a password yet — skip password check, guide to setup
     if (ctv.status === 'pending_setup') {
-      return NextResponse.json({ success: true, needsSetup: true, ctvId: ctv.id })
+      return NextResponse.json({ success: true, needsSetup: true, ctvId: ctv.id, email: ctv.email })
     }
 
     if (!password) {
