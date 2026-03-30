@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json()
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Vui lòng nhập email và mật khẩu' }, { status: 400 })
+    if (!email) {
+      return NextResponse.json({ error: 'Vui lòng nhập email' }, { status: 400 })
     }
 
     const ctv = await prisma.ctv.findUnique({
@@ -20,11 +20,20 @@ export async function POST(req: NextRequest) {
     })
 
     if (!ctv) {
-      return NextResponse.json({ error: 'Email hoặc mật khẩu không đúng' }, { status: 401 })
+      return NextResponse.json({ error: 'Email chưa đăng ký làm Đại Sứ. Vui lòng đăng ký tại trang chủ trước.' }, { status: 401 })
     }
 
     if (ctv.status === 'disabled') {
       return NextResponse.json({ error: 'Tài khoản đã bị vô hiệu hóa' }, { status: 403 })
+    }
+
+    // pending_setup CTV hasn't set a password yet — skip password check, guide to setup
+    if (ctv.status === 'pending_setup') {
+      return NextResponse.json({ success: true, needsSetup: true, ctvId: ctv.id })
+    }
+
+    if (!password) {
+      return NextResponse.json({ error: 'Vui lòng nhập mật khẩu' }, { status: 400 })
     }
 
     const valid = hashPassword(password) === ctv.passwordHash

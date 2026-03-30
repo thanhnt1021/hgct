@@ -34,6 +34,10 @@ export default function CtvRegisterModal({ open, onClose }: Props) {
       if (res.ok && data.success) {
         setCtvId(data.ctvId ?? null)
         setDone(true)
+        // Mở trang setup ngay lập tức trong tab mới (không phụ thuộc vào click link sau)
+        if (data.ctvId) {
+          window.open(`https://daisu.hatgiongchiemtinh.com/setup?ctvId=${data.ctvId}`, '_blank')
+        }
       } else {
         setError(data.error || 'Có lỗi xảy ra, vui lòng thử lại.')
       }

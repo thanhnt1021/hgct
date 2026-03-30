@@ -78,10 +78,12 @@ export default function DaisuLoginPage() {
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                required
                 placeholder="••••••••"
                 className="w-full"
               />
+              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginTop: '0.3rem' }}>
+                Đã đăng ký qua trang chủ nhưng chưa có mật khẩu? Nhập email và để trống mật khẩu rồi bấm Đăng nhập.
+              </p>
             </div>
 
             {error && (
