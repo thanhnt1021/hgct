@@ -5,6 +5,7 @@ import HeroSection from '@/components/home/HeroSection'
 import FeaturesSection from '@/components/home/FeaturesSection'
 import ProcessSection from '@/components/home/ProcessSection'
 import CTASection from '@/components/home/CTASection'
+import CtvBlock from '@/components/home/CtvBlock'
 import FloatingButtons from '@/components/home/FloatingButtons'
 import prisma from '@/lib/db'
 
@@ -24,6 +25,7 @@ export default async function HomePage() {
       <FeaturesSection />
       <ProcessSection />
       <CTASection body={cfg.cta_body} buttonText={cfg.cta_button_text} />
+      <CtvBlock />
       <Footer />
       <FloatingButtons />
     </main>

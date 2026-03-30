@@ -559,9 +559,29 @@ function ProcessingInner() {
   )
 }
 
+function ProcessingFallback() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: '#06060f' }}>
+      <div style={{
+        width: '48px',
+        height: '48px',
+        borderRadius: '50%',
+        border: '3px solid rgba(201,168,76,0.2)',
+        borderTopColor: '#c9a84c',
+        animation: 'spin 0.9s linear infinite',
+        marginBottom: '1.25rem',
+      }} />
+      <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+        Đang tải...
+      </p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
+
 export default function ProcessingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ background: '#06060f' }} />}>
+    <Suspense fallback={<ProcessingFallback />}>
       <ProcessingInner />
     </Suspense>
   )

@@ -108,7 +108,45 @@ model Order {
   // Admin intentional cancel (immune to status resets)
   adminCancelledAt    DateTime? @map("admin_cancelled_at")
 
+  // CTV referral
+  ctvCode             String?   @map("ctv_code")
+
+  ctvCommission       CtvCommission?
+
   @@map("orders")
+}
+
+model Ctv {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  name           String
+  phone          String
+  dob            String?
+  passwordHash   String    @map("password_hash")
+  ctvCode        String?   @unique @map("ctv_code")
+  status         String    @default("pending_setup")  // pending_setup | active | disabled
+  commissionRate Float     @default(0.10) @map("commission_rate")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  commissions    CtvCommission[]
+
+  @@map("ctv")
+}
+
+model CtvCommission {
+  id        Int       @id @default(autoincrement())
+  ctvId     Int       @map("ctv_id")
+  orderId   Int       @unique @map("order_id")
+  amount    Int
+  status    String    @default("pending")  // pending | paid
+  paidAt    DateTime? @map("paid_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  ctv   Ctv   @relation(fields: [ctvId], references: [id])
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("ctv_commissions")
 }
 
 model Config {

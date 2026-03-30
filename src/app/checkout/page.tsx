@@ -3,8 +3,8 @@
 // VISUAL ONLY — checkout page restyled to Celestial Sanctum design
 // All logic (handleConfirm, sessionStorage reads, API call, routing) untouched
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
 import { saveJobToHistory } from '@/lib/jobHistory'
@@ -42,8 +42,9 @@ const labelStyle: React.CSSProperties = {
 
 }
 
-export default function CheckoutPage() {
+function CheckoutInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, isLoading: authLoading } = useAuth()
   const isPremium = user?.isPremium ?? false
   const planType = user?.planType ?? 'free'
@@ -60,6 +61,23 @@ export default function CheckoutPage() {
   const [profileUidB, setProfileUidB] = useState('')
   const [transitStartDate, setTransitStartDate] = useState('')
   const [transitEndDate, setTransitEndDate] = useState('')
+  const [ctvCode, setCtvCode] = useState('')
+  const [ctvVerified, setCtvVerified] = useState<null | { valid: boolean; name?: string }>(null)
+  const [ctvVerifying, setCtvVerifying] = useState(false)
+
+  const verifyCtvCode = useCallback(async (code: string) => {
+    if (!code.trim()) { setCtvVerified(null); return }
+    setCtvVerifying(true)
+    try {
+      const res = await fetch(`/api/ctv/verify-code?code=${encodeURIComponent(code.trim())}`)
+      const data = await res.json()
+      setCtvVerified(data)
+    } catch {
+      setCtvVerified({ valid: false })
+    } finally {
+      setCtvVerifying(false)
+    }
+  }, [])
 
   useEffect(() => {
     const svc = sessionStorage.getItem('selectedService') || ''
@@ -81,6 +99,13 @@ export default function CheckoutPage() {
     if (data) setInputData(JSON.parse(data))
     if (dataB) setInputDataB(JSON.parse(dataB))
 
+    // Auto-fill CTV code from URL param or sessionStorage
+    const utmCtv = searchParams.get('ctv') || sessionStorage.getItem('ctvCode') || ''
+    if (utmCtv) {
+      setCtvCode(utmCtv)
+      verifyCtvCode(utmCtv)
+    }
+
     // Pre-fill with reportEmail if set, else account email
     fetch('/api/user/account', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
@@ -89,7 +114,7 @@ export default function CheckoutPage() {
         if (prefill) setEmail(prefill)
       })
       .catch(() => { if (user?.email) setEmail(user.email) })
-  }, [user, router])
+  }, [user, router, searchParams, verifyCtvCode])
 
   const fmtDate = (s: string) => { if (!s) return ''; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}` }
   const fmtDob = (dob: Record<string, number> | undefined) => {
@@ -118,6 +143,7 @@ export default function CheckoutPage() {
       ...(profileUidB ? { profileUidB } : {}),
       ...(service === 'transit' && transitStartDate && transitEndDate
         ? { startDate: transitStartDate, endDate: transitEndDate } : {}),
+      ...(ctvCode.trim() && ctvVerified?.valid ? { ctvCode: ctvCode.trim() } : {}),
     })
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) {
@@ -348,6 +374,45 @@ export default function CheckoutPage() {
             )}
           </div>
 
+          {/* CTV code field — only for free/guest users (not premium) */}
+          {!isPremiumOrLifetime && (
+            <div className="mb-6">
+              <label style={{ ...labelStyle, color: '#8a8399' }}>Mã giới thiệu (tuỳ chọn)</label>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  value={ctvCode}
+                  onChange={e => {
+                    setCtvCode(e.target.value)
+                    setCtvVerified(null)
+                  }}
+                  onBlur={() => verifyCtvCode(ctvCode)}
+                  placeholder="Nhập mã CTV nếu có"
+                  className="w-full"
+                  style={{
+                    borderColor: ctvCode
+                      ? ctvVerified?.valid ? 'rgba(74,222,128,0.5)' : ctvVerified?.valid === false ? 'rgba(196,82,82,0.5)' : 'rgba(200,148,63,0.2)'
+                      : 'rgba(200,148,63,0.1)',
+                    fontSize: '0.9rem',
+                  }}
+                />
+                {ctvVerifying && (
+                  <div className="w-5 h-5 rounded-full animate-spin flex-shrink-0" style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
+                )}
+              </div>
+              {ctvCode && ctvVerified?.valid && (
+                <p style={{ color: '#4ade80', fontSize: '0.75rem', marginTop: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
+                  ✓ Mã hợp lệ — giới thiệu bởi {ctvVerified.name}
+                </p>
+              )}
+              {ctvCode && ctvVerified?.valid === false && (
+                <p style={{ color: '#c8410a', fontSize: '0.75rem', marginTop: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
+                  ✕ Mã không hợp lệ
+                </p>
+              )}
+            </div>
+          )}
+
           {/* CTA: Premium/Lifetime → create report directly; Free/Guest → create order + go to payment */}
           {isPremiumOrLifetime ? (
             <>
@@ -411,5 +476,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense>
+      <CheckoutInner />
+    </Suspense>
   )
 }

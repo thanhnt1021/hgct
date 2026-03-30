@@ -8,7 +8,7 @@ import { getCareerBlocks } from '@/lib/logic/career/manager'
 import { buildCareerPrompt } from '@/lib/logic/career/prompt'
 import { generateEssayStreaming } from '@/lib/openrouter'
 import { generatePdf } from '@/lib/pdf/generator'
-import { sendReportEmail, makePdfFilename, sendRecoveryEmail } from '@/lib/email'
+import { sendReportEmail, makePdfFilename, sendRecoveryEmail, sendCtvCommissionEmail } from '@/lib/email'
 import { createJob, updateJob, isJobCancelled, generateRecoveryToken, STUCK_ERROR } from '@/lib/jobs'
 import { chromiumSemaphore } from '@/lib/job-queue'
 import prisma from '@/lib/db'
@@ -319,10 +319,40 @@ export async function processReport(
   // smart-retry pdfResent path reads pdfUrl from DB — must be persisted first.
   if (orderId) {
     try {
-      await prisma.order.update({
+      const updatedOrder = await prisma.order.update({
         where: { id: orderId },
         data: { status: 'completed', pdfUrl: pdfUrl ?? null },
+        select: { ctvCode: true, amount: true },
       })
+
+      // CTV commission: create record + notify CTV
+      if (updatedOrder.ctvCode && updatedOrder.amount) {
+        const ctv = await prisma.ctv.findUnique({
+          where: { ctvCode: updatedOrder.ctvCode },
+          select: { id: true, email: true, name: true, commissionRate: true, status: true },
+        })
+        if (ctv && ctv.status === 'active') {
+          const commissionAmount = Math.round(updatedOrder.amount * ctv.commissionRate)
+          await prisma.ctvCommission.create({
+            data: {
+              ctvId: ctv.id,
+              orderId,
+              amount: commissionAmount,
+              status: 'pending',
+            },
+          })
+          sendCtvCommissionEmail({
+            to: ctv.email,
+            ctvName: ctv.name,
+            customerName: name,
+            service,
+            orderAmount: updatedOrder.amount,
+            commissionAmount,
+            commissionRate: ctv.commissionRate,
+          }).catch((err) => console.error(`[JOB ${jobId}] CTV email failed:`, err))
+          console.log(`[JOB ${jobId}] CTV commission ${commissionAmount} created for CTV ${ctv.id}`)
+        }
+      }
     } catch (err) {
       console.error(`[JOB ${jobId}] Order update failed:`, err)
     }

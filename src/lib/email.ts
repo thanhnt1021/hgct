@@ -403,6 +403,85 @@ export async function sendRetargetEmail({
   })
 }
 
+export async function sendCtvCommissionEmail({
+  to,
+  ctvName,
+  customerName,
+  service,
+  orderAmount,
+  commissionAmount,
+  commissionRate,
+}: {
+  to: string
+  ctvName: string
+  customerName: string
+  service: string
+  orderAmount: number
+  commissionAmount: number
+  commissionRate: number
+}) {
+  const svc = SERVICE_CONFIG[service] || SERVICE_CONFIG['career']
+  const orderAmountStr = orderAmount.toLocaleString('vi-VN') + 'đ'
+  const commissionStr = commissionAmount.toLocaleString('vi-VN') + 'đ'
+  const rateStr = Math.round(commissionRate * 100) + '%'
+  const daisuUrl = process.env.NEXT_PUBLIC_DAISU_URL || 'https://daisu.hatgiongchiemtinh.com'
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#0a0a1a;font-family:Georgia,serif;">
+  <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
+    <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
+      <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:#c9a84c;">✦ ✦ ✦</p>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">Hạt Giống Chiêm Tinh</h1>
+      <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
+    </div>
+    <div style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
+    <div style="padding:36px 16px;background:#0f0f28;border:1px solid rgba(201,168,76,0.15);border-top:none;border-bottom:none;">
+      <div style="display:inline-block;padding:6px 20px;border-radius:999px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);margin-bottom:24px;">
+        <span style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#4ade80;">Hoa hồng mới từ đơn hàng</span>
+      </div>
+      <p style="margin:0 0 8px;font-size:17px;color:#9ca3af;">Xin chào ${escHtml(ctvName)},</p>
+      <p style="margin:0 0 20px;font-size:15px;line-height:1.8;color:#b8a99a;">
+        Bạn vừa nhận được hoa hồng từ một đơn hàng mới qua mã giới thiệu của bạn!
+      </p>
+      <div style="padding:24px;background:rgba(201,168,76,0.06);border-radius:12px;border:1px solid rgba(201,168,76,0.2);margin-bottom:24px;">
+        <table style="width:100%;border-collapse:collapse;font-size:14px;color:#b8a99a;">
+          <tr><td style="padding:6px 0;color:#6b7280;">Dịch vụ</td><td style="padding:6px 0;text-align:right;color:#f5f0e8;">Báo cáo ${svc.label}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280;">Khách hàng</td><td style="padding:6px 0;text-align:right;color:#f5f0e8;">${escHtml(customerName)}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280;">Giá trị đơn</td><td style="padding:6px 0;text-align:right;color:#f5f0e8;">${orderAmountStr}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280;">Tỷ lệ hoa hồng</td><td style="padding:6px 0;text-align:right;color:#c9a84c;">${rateStr}</td></tr>
+          <tr style="border-top:1px solid rgba(201,168,76,0.2);">
+            <td style="padding:12px 0 6px;font-size:16px;font-weight:600;color:#f5f0e8;">Hoa hồng của bạn</td>
+            <td style="padding:12px 0 6px;text-align:right;font-size:20px;font-weight:700;color:#4ade80;">${commissionStr}</td>
+          </tr>
+        </table>
+      </div>
+      <p style="margin:0 0 20px;font-size:14px;line-height:1.8;color:#6b7280;">
+        Hoa hồng sẽ được thanh toán định kỳ theo thỏa thuận.<br>
+        Xem chi tiết và theo dõi tất cả đơn hàng tại trang Đại Sứ.
+      </p>
+      <div style="text-align:center;">
+        <a href="${daisuUrl}" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#c8943f,#f0cc78);color:#06060f;font-weight:700;font-size:14px;text-decoration:none;border-radius:8px;letter-spacing:0.05em;">Xem trang Đại Sứ →</a>
+      </div>
+    </div>
+    <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
+      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Hạt Giống Chiêm Tinh © 2026</p>
+    </div>
+  </div>
+</body>
+</html>`
+
+  return sendEmail({
+    to,
+    subject: `💰 Hoa hồng mới ${commissionStr} — Báo cáo ${svc.label} | Hạt Giống Chiêm Tinh`,
+    html,
+  })
+}
+
 export async function sendReportEmail(
   email: string,
   name: string,

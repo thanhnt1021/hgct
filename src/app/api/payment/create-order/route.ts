@@ -11,7 +11,7 @@ const VALID_SERVICES = ['career', 'love', 'synastry', 'transit']
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { service, inputData, email, inputDataB, profileUidA, profileUidB, startDate, endDate } =
+    const { service, inputData, email, inputDataB, profileUidA, profileUidB, startDate, endDate, ctvCode } =
       body as {
         service: string
         inputData: Record<string, unknown>
@@ -21,6 +21,7 @@ export async function POST(request: Request) {
         profileUidB?: string
         startDate?: string
         endDate?: string
+        ctvCode?: string
       }
 
     if (!service || !inputData || !email) {
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
         status: 'pending',
         paymentStatus: 'unpaid',
         amount,
+        ctvCode: ctvCode || null,
       },
     })
 

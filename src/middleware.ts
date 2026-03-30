@@ -6,6 +6,7 @@ export function middleware(req: NextRequest) {
   // which can be spoofed by clients to bypass dashboard routing checks.
   const host = req.headers.get('host') || req.headers.get('x-forwarded-host') || ''
   const isDashboard = host.startsWith('dashboard.')
+  const isDaisu = host.startsWith('daisu.')
 
   if (isDashboard) {
     const url = req.nextUrl.clone()
@@ -15,6 +16,19 @@ export function middleware(req: NextRequest) {
       url.pathname = '/dashboard'
     } else if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/_next') && !pathname.startsWith('/api') && !pathname.startsWith('/auth')) {
       url.pathname = `/dashboard${pathname}`
+    }
+
+    return NextResponse.rewrite(url)
+  }
+
+  if (isDaisu) {
+    const url = req.nextUrl.clone()
+    const pathname = url.pathname
+
+    if (pathname === '/') {
+      url.pathname = '/daisu'
+    } else if (!pathname.startsWith('/daisu') && !pathname.startsWith('/_next') && !pathname.startsWith('/api')) {
+      url.pathname = `/daisu${pathname}`
     }
 
     return NextResponse.rewrite(url)

@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/pricing',    label: 'Giá',      icon: '💰' },
   { href: '/dashboard/content',    label: 'Nội Dung', icon: '✏️' },
   { href: '/dashboard/orders',     label: 'Đơn Hàng', icon: '📦' },
+  { href: '/dashboard/ctv',        label: 'Đại Sứ',   icon: '🤝' },
   { href: '/dashboard/deploy',     label: 'Deploy',   icon: '🚀' },
   { href: '/dashboard/settings',   label: 'Hệ Thống', icon: '🔧' },
 ]
