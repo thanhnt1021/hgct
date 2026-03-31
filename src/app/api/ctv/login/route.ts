@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { createHash } from 'crypto'
-import { signCtvToken, setCtvCookie } from '@/lib/ctv/auth'
-
-function hashPassword(password: string): string {
-  return createHash('sha256').update(password).digest('hex')
-}
+import { randomBytes } from 'crypto'
+import { signCtvToken, setCtvCookie, verifyCtvPassword, hashCtvPassword } from '@/lib/ctv/auth'
+import { checkCtvLoginRateLimit } from '@/lib/ratelimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const ip =
+      req.headers.get('x-real-ip') ||
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      'unknown'
+    const allowed = await checkCtvLoginRateLimit(ip)
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Quá nhiều lần thử. Vui lòng đợi 15 phút.' },
+        { status: 429 },
+      )
+    }
+
     const { email, password } = await req.json()
 
     if (!email) {
@@ -19,29 +28,41 @@ export async function POST(req: NextRequest) {
       where: { email: email.trim().toLowerCase() },
     })
 
+    // Generic error — do not reveal whether email exists
     if (!ctv) {
-      return NextResponse.json({ error: 'Email chưa đăng ký làm Đại Sứ. Vui lòng đăng ký tại trang chủ trước.' }, { status: 401 })
+      return NextResponse.json({ error: 'Email hoặc mật khẩu không đúng' }, { status: 401 })
     }
 
     if (ctv.status === 'disabled') {
       return NextResponse.json({ error: 'Tài khoản đã bị vô hiệu hóa' }, { status: 403 })
     }
 
-    // pending_setup CTV hasn't set a password yet — skip password check, guide to setup
+    // pending_setup: generate/return setupToken — never expose ctvId+email
     if (ctv.status === 'pending_setup') {
-      return NextResponse.json({ success: true, needsSetup: true, ctvId: ctv.id, email: ctv.email })
+      let token = ctv.setupToken
+      if (!token) {
+        token = randomBytes(32).toString('hex')
+        await prisma.ctv.update({ where: { id: ctv.id }, data: { setupToken: token } })
+      }
+      return NextResponse.json({ success: true, needsSetup: true, setupToken: token })
     }
 
     if (!password) {
       return NextResponse.json({ error: 'Vui lòng nhập mật khẩu' }, { status: 400 })
     }
 
-    const valid = hashPassword(password) === ctv.passwordHash
+    const { valid, needsRehash } = await verifyCtvPassword(password, ctv.passwordHash)
     if (!valid) {
       return NextResponse.json({ error: 'Email hoặc mật khẩu không đúng' }, { status: 401 })
     }
 
-    const token = await signCtvToken({
+    // Silent rehash: upgrade SHA256 → bcrypt12
+    if (needsRehash) {
+      const newHash = await hashCtvPassword(password)
+      await prisma.ctv.update({ where: { id: ctv.id }, data: { passwordHash: newHash } })
+    }
+
+    const jwtToken = await signCtvToken({
       ctvId: ctv.id,
       email: ctv.email,
       name: ctv.name,
@@ -49,12 +70,8 @@ export async function POST(req: NextRequest) {
       status: ctv.status,
     })
 
-    const res = NextResponse.json({
-      success: true,
-      needsSetup: ctv.status === 'pending_setup',
-      ctvId: ctv.id,
-    })
-    setCtvCookie(res, token)
+    const res = NextResponse.json({ success: true, needsSetup: false })
+    setCtvCookie(res, jwtToken)
     return res
   } catch (err) {
     console.error('[CTV login]', err)

@@ -83,3 +83,15 @@ if [ -n "$TG_TOKEN" ] && [ -n "$TG_SECRET" ]; then
   WEBHOOK_RESULT=$(curl -s "https://api.telegram.org/bot${TG_TOKEN}/setWebhook?url=https://hatgiongchiemtinh.com/api/telegram-admin/${TG_SECRET}/webhook&drop_pending_updates=true")
   echo "Telegram webhook: $(echo $WEBHOOK_RESULT | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get("description","?"))'  2>/dev/null || echo 'registered')"
 fi
+
+# Register cron jobs (cleanup 2AM daily, order-check every minute)
+CRON_SECRET_VAL=$(grep '^CRON_SECRET=' "$APP_DIR/.env.local" | cut -d= -f2- | tr -d '"')
+if [ -n "$CRON_SECRET_VAL" ]; then
+  (crontab -l 2>/dev/null | grep -v 'api/cron' ; \
+   echo "0 2 * * * curl -s -H 'Authorization: Bearer ${CRON_SECRET_VAL}' http://localhost:65498/api/cron/cleanup >> /var/log/hgct-cron.log 2>&1" ; \
+   echo "* * * * * curl -s -H 'Authorization: Bearer ${CRON_SECRET_VAL}' http://localhost:65498/api/cron/order-check >> /var/log/hgct-cron.log 2>&1" ; \
+   echo "0 9 * * * curl -s -H 'Authorization: Bearer ${CRON_SECRET_VAL}' http://localhost:65498/api/cron/retention >> /var/log/hgct-cron.log 2>&1") | crontab -
+  echo "Cron jobs registered (cleanup: 2AM, order-check: every minute, retention: 9AM daily)"
+else
+  echo "CRON_SECRET not set — skipping cron registration"
+fi

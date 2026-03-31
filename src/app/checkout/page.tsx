@@ -495,7 +495,7 @@ function CheckoutInner() {
             <>
               <button
                 onClick={handleConfirm}
-                disabled={!canSubmit}
+                disabled={!canSubmit || loading}
                 className="w-full py-4 font-bold text-sm tracking-wider"
                 style={{
                   background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
@@ -504,8 +504,8 @@ function CheckoutInner() {
                   borderRadius: '4px',
                   fontFamily: 'var(--font-vietnam)',
                   letterSpacing: '0.1em',
-                  opacity: !canSubmit ? 0.4 : 1,
-                  boxShadow: canSubmit ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
+                  opacity: (!canSubmit || loading) ? 0.4 : 1,
+                  boxShadow: (canSubmit && !loading) ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
@@ -519,7 +519,7 @@ function CheckoutInner() {
             <>
               <button
                 onClick={handlePayment}
-                disabled={!canSubmit}
+                disabled={!canSubmit || loading}
                 className="w-full py-4 font-bold text-sm tracking-wider"
                 style={{
                   background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
@@ -528,8 +528,8 @@ function CheckoutInner() {
                   borderRadius: '4px',
                   fontFamily: 'var(--font-vietnam)',
                   letterSpacing: '0.1em',
-                  opacity: !canSubmit ? 0.4 : 1,
-                  boxShadow: canSubmit ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
+                  opacity: (!canSubmit || loading) ? 0.4 : 1,
+                  boxShadow: (canSubmit && !loading) ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >

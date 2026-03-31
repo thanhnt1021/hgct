@@ -79,6 +79,17 @@ cp "$APP_DIR/server_conf/demo.hatgiongchiemtinh.com.conf" /etc/nginx/sites-avail
 ln -sf /etc/nginx/sites-available/hgct-demo.conf /etc/nginx/sites-enabled/hgct-demo.conf
 nginx -t && nginx -s reload
 
+# Register cron jobs for demo (cleanup 2AM daily, order-check every minute)
+CRON_SECRET_VAL=$(grep '^CRON_SECRET=' "$DEMO_DIR/.env.local" | cut -d= -f2- | tr -d '"')
+if [ -n "$CRON_SECRET_VAL" ]; then
+  (crontab -l 2>/dev/null | grep -v 'api/cron' ; \
+   echo "0 2 * * * curl -s -H 'Authorization: Bearer ${CRON_SECRET_VAL}' http://localhost:65500/api/cron/cleanup >> /var/log/hgct-cron.log 2>&1" ; \
+   echo "* * * * * curl -s -H 'Authorization: Bearer ${CRON_SECRET_VAL}' http://localhost:65500/api/cron/order-check >> /var/log/hgct-cron.log 2>&1") | crontab -
+  echo "Cron jobs registered (demo port 65500)"
+else
+  echo "CRON_SECRET not set — skipping cron registration"
+fi
+
 echo ""
 echo "=== Demo Deploy complete ==="
 echo "URL: https://demo.hatgiongchiemtinh.com | branch: $BRANCH"

@@ -171,6 +171,8 @@ function PaymentInner() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: Number(orderId), amount: Number(claimAmount) || undefined, transferContent: claimContent || undefined }),
       })
+      setClaimAmount('')
+      setClaimContent('')
       setClaimDone(true)
     } catch {
       setClaimDone(true)  // show success anyway — backend handles retry

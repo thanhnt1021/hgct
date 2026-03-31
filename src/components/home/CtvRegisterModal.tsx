@@ -15,7 +15,7 @@ export default function CtvRegisterModal({ open, onClose }: Props) {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
-  const [ctvId, setCtvId] = useState<number | null>(null)
+  const [setupToken, setSetupToken] = useState<string | null>(null)
 
   if (!open) return null
 
@@ -32,11 +32,11 @@ export default function CtvRegisterModal({ open, onClose }: Props) {
       })
       const data = await res.json()
       if (res.ok && data.success) {
-        setCtvId(data.ctvId ?? null)
+        setSetupToken(data.setupToken ?? null)
         setDone(true)
         // Mở trang setup ngay lập tức trong tab mới (không phụ thuộc vào click link sau)
-        if (data.ctvId) {
-          window.open(`https://daisu.hatgiongchiemtinh.com/setup?ctvId=${data.ctvId}`, '_blank')
+        if (data.setupToken) {
+          window.open(`https://daisu.hatgiongchiemtinh.com/setup?setupToken=${data.setupToken}`, '_blank')
         }
       } else {
         setError(data.error || 'Có lỗi xảy ra, vui lòng thử lại.')
@@ -136,7 +136,7 @@ export default function CtvRegisterModal({ open, onClose }: Props) {
               Hãy truy cập trang Đại Sứ để thiết lập mật khẩu và mã giới thiệu của bạn.
             </p>
             <a
-              href={ctvId ? `https://daisu.hatgiongchiemtinh.com/setup?ctvId=${ctvId}` : 'https://daisu.hatgiongchiemtinh.com'}
+              href={setupToken ? `https://daisu.hatgiongchiemtinh.com/setup?setupToken=${setupToken}` : 'https://daisu.hatgiongchiemtinh.com'}
               target="_blank"
               rel="noopener noreferrer"
               style={{
