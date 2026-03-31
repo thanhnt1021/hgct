@@ -6,7 +6,8 @@ NGUYÊN TẮC BẮT BUỘC:
 - Copy mọi text NGOÀI các block [FILL: ...] NGUYÊN XI — đặc biệt giữ nguyên tất cả format tags [#ff0000+bold], [bold], [/]
 - Chỉ thay thế các block [FILL: mô tả] bằng nội dung phù hợp từ dữ liệu brief phía trên
 - Trong nội dung tự sinh: dùng [bold]từ khóa[/] để in đậm tên cung, tên hành tinh, từ khóa tính cách/năng lực/thách thức quan trọng
-- Các [FILL] yêu cầu từ khóa ngắn: KHÔNG viết câu đầy đủ, 2-3 cụm từ (mỗi cụm ≤3 âm tiết), dấu phẩy — ✓ ĐÚNG: duyên dáng, hài hòa, khéo léo | ✗ SAI: tư duy linh hoạt (4 âm — quá dài)
+- [FILL] chip inline sau [#ff0000+bold]...[/] (Mục 1): KHÔNG câu đầy đủ, 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy — ✓ ĐÚNG: duyên dáng, hài hòa, khéo léo | ✗ SAI: tư duy linh hoạt (4 âm)
+- [FILL] dạng inline bullet `- [bold]Cụm:[/] prose` (Mục 2/3/4/5): Cụm 4-8 âm tiết mô tả chủ đề, kết thúc bằng dấu hai chấm — ✓ ĐÚNG: "Tư duy sắc bén, kết nối giỏi:" | ✗ SAI: "sắc bén:" (quá ngắn)
 - Chỉ dùng dữ liệu đã cung cấp trong brief. Không bịa thêm bất kỳ thông tin chiêm tinh nào
 - Mục brief ghi "→ KHÔNG VIẾT": bỏ qua toàn bộ block đó — kể cả dòng [#ff0000+bold] header liền kề bên trên [FILL] nếu có
 - KHÔNG nhắc tên số nhà (Nhà 2, Nhà 6, Nhà 10...) trong output — chỉ nêu tên lĩnh vực và ý nghĩa
@@ -54,17 +55,11 @@ GIỌNG VĂN BẮT BUỘC (người đọc là học sinh/sinh viên dưới 22 
 
 [#ff0000+bold]Top "Siêu năng lực" bạn nên tận dụng ngay:[/]
 
-[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] năng lực cốt lõi từ AC/Sun/Moon[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — năng lực cốt lõi từ AC/Sun/Moon, ví dụ "Tư duy sắc bén, kết nối giỏi:"]:​[/] [FILL: 3-4 câu tổng hợp năng lực từ AC/Sun/Moon. Context đời học sinh/SV (thuyết trình, nhóm học, dự án...). Dùng [bold]từ khóa năng lực[/]]
 
-[FILL: 3-4 câu tổng hợp năng lực từ AC/Sun/Moon. Context đời học sinh/SV (thuyết trình, nhóm học, dự án...). Dùng [bold]từ khóa năng lực[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — điểm mạnh từ nguyên tố/tính chất trội và nhà trội, ví dụ "Thực tế, bền bỉ, có trách nhiệm:"]:​[/] [FILL: 3-4 câu về điểm mạnh từ nguyên tố trội và nhà trội. Context học sinh. Không nhắc số nhà. Dùng [bold]từ khóa[/]]
 
-[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] điểm mạnh từ nguyên tố/tính chất trội và nhà trội[/]]
-
-[FILL: 3-4 câu về điểm mạnh từ nguyên tố trội và nhà trội. Context học sinh. Không nhắc số nhà. Dùng [bold]từ khóa[/]]
-
-[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] năng khiếu từ góc chặt nhất hoặc hành tinh nhiều góc nhất[/] — nếu không có dữ liệu MỤC 2, bỏ qua 2 [FILL] này]
-
-[FILL: 3-4 câu về năng khiếu bẩm sinh từ góc chặt/hành tinh nhiều góc. Context học sinh. Nếu không có dữ liệu: bỏ qua]
+- [bold][FILL: Cụm 4-8 âm tiết — năng khiếu từ góc chặt/hành tinh nhiều góc, ví dụ "Trực giác nhạy, sáng tạo linh hoạt:"]:​[/] [FILL: 3-4 câu về năng khiếu bẩm sinh từ góc chặt/hành tinh nhiều góc. Context học sinh. — nếu không có dữ liệu MỤC 2: bỏ qua dòng này]
 
 [FILL: gạch đầu dòng 3-5 "siêu năng lực" cụ thể, ngôn ngữ trẻ trung (dùng "- " đầu dòng, mỗi điểm xuống dòng riêng)]
 
@@ -75,17 +70,11 @@ GIỌNG VĂN BẮT BUỘC (người đọc là học sinh/sinh viên dưới 22 
 
 [FILL: 2-3 câu dẫn giọng xoa dịu nhưng trẻ trung. Context áp lực bạn bè, học tập, khẳng định bản thân — KHÔNG phải khủng hoảng sự nghiệp]
 
-[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] điểm yếu từ AC/Sun/Moon[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — điểm yếu từ AC/Sun/Moon, ví dụ "Dễ phân tâm, ngại xung đột:"]:​[/] [FILL: 3-4 câu về điểm yếu từ AC/Sun/Moon trong MỤC 3. Context đời SV (nhóm học, CLB, thuyết trình...). Dùng [bold]từ khóa thách thức[/]. Giọng xây dựng, không phán xét]
 
-[FILL: 3-4 câu về điểm yếu từ AC/Sun/Moon trong MỤC 3. Context đời SV (nhóm học, CLB, thuyết trình...). Dùng [bold]từ khóa thách thức[/]. Giọng xây dựng, không phán xét]
+- [bold][FILL: Cụm 4-8 âm tiết — nguyên tố/tính chất thiếu, ví dụ "Cần thêm đất, cần ổn định:"; nếu không có nguyên tố thiếu: "Cân bằng nguyên tố, chú ý đồng đều:"]:​[/] [FILL: 3-4 câu về nguyên tố/tính chất thiếu. Nếu không có: viết về sự cân bằng và gợi ý chú ý đồng đều. Dùng [bold]từ khóa[/]]
 
-[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] về nguyên tố/tính chất thiếu hụt[/] — nếu không có nguyên tố thiếu, viết [bold]cân bằng nguyên tố — chú ý đồng đều[/]]
-
-[FILL: 3-4 câu về nguyên tố/tính chất thiếu. Nếu không có: viết về sự cân bằng và gợi ý chú ý đồng đều. Dùng [bold]từ khóa[/]]
-
-[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] áp lực/bài học từ Sao Thổ và/hoặc Diêm Vương[/] — nếu dữ liệu Sao Thổ và Diêm Vương đều → KHÔNG VIẾT: bỏ qua 2 [FILL] này]
-
-[FILL: 3-5 câu về Sao Thổ và/hoặc Diêm Vương từ MỤC 3. Giọng xây dựng, khích lệ. Nếu dữ liệu → KHÔNG VIẾT: bỏ qua]
+- [bold][FILL: Cụm 4-8 âm tiết — bài học từ Sao Thổ/Diêm Vương, ví dụ "Học kỷ luật, bước qua giới hạn:"]:​[/] [FILL: 3-5 câu về Sao Thổ và/hoặc Diêm Vương từ MỤC 3. Giọng xây dựng, khích lệ. — nếu dữ liệu Sao Thổ và Diêm Vương đều → KHÔNG VIẾT: bỏ qua dòng này]
 
 [#ff0000+bold]Bí kíp để bạn "tháo gỡ" nút thắt thành công:[/]
 
@@ -98,13 +87,9 @@ GIỌNG VĂN BẮT BUỘC (người đọc là học sinh/sinh viên dưới 22 
 
 [FILL: 2-3 câu dẫn "Khám phá vùng đất hứa...", giọng gợi mở khai phóng — nhiều lựa chọn, không đóng khung 1 nghề]
 
-[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] vai trò phù hợp từ đỉnh/hành tinh ở vị trí sự nghiệp[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — vai trò phù hợp từ đỉnh/hành tinh vị trí sự nghiệp, ví dụ "Tổ chức, dẫn dắt, xây hệ thống:"]:​[/] [FILL: 4-5 câu về vai trò và năng lượng sự nghiệp từ đỉnh và hành tinh trong MỤC 4 (MC/H10). Context học sinh chọn ngành. Dùng [bold]từ khóa vai trò[/]. KHÔNG nhắc "Nhà 10". Nếu H10 trống: luận theo chủ tinh đã có trong brief]
 
-[FILL: 4-5 câu về vai trò và năng lượng sự nghiệp từ đỉnh và hành tinh trong MỤC 4 (MC/H10). Context học sinh chọn ngành. Dùng [bold]từ khóa vai trò[/]. KHÔNG nhắc "Nhà 10". Nếu H10 trống: luận theo chủ tinh đã có trong brief]
-
-[FILL: 2-4 từ khóa ngắn (dấu phẩy, mỗi ≤3 âm, KHÔNG câu): [bold] lĩnh vực phù hợp từ nhà trội và tương tác mềm[/]]
-
-[FILL: 3-4 câu về lĩnh vực phù hợp từ nhà trội và tương tác mềm. Chỉ nêu tên lĩnh vực, KHÔNG nhắc số nhà. Dùng [bold]từ khóa lĩnh vực[/]. Nếu không có tương tác mềm: bỏ qua]
+- [bold][FILL: Cụm 4-8 âm tiết — lĩnh vực phù hợp từ nhà trội và tương tác mềm, ví dụ "Nghệ thuật, truyền thông, giáo dục:"]:​[/] [FILL: 3-4 câu về lĩnh vực phù hợp từ nhà trội và tương tác mềm. Chỉ nêu tên lĩnh vực, KHÔNG nhắc số nhà. Dùng [bold]từ khóa lĩnh vực[/]. Nếu không có tương tác mềm: bỏ qua]
 
 [#ff0000+bold]Những tính chất công việc bạn có lợi thế:[/]
 
@@ -125,21 +110,15 @@ GIỌNG VĂN BẮT BUỘC (người đọc là học sinh/sinh viên dưới 22 
 
 [#ff0000+bold]Chiến thuật học tập:[/]
 
-[bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu chiến thuật học tập từ nguyên tố/tính chất trội + góc chặt + hành tinh tạo nhiều góc][/]
-
-[FILL: 3-5 câu luận giải chiến thuật học tập phù hợp với {name}. Từ nguyên tố tính chất trội (MỤC 1), góc chặt nhất và hành tinh tạo nhiều góc (MỤC 2). Dùng [bold]từ khóa phương pháp học[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — chiến thuật học tập từ nguyên tố/tính chất trội + góc chặt, ví dụ "Học nhóm, thực hành nhiều, ngắt quãng:"]:​[/] [FILL: 3-5 câu luận giải chiến thuật học tập phù hợp với {name}. Từ nguyên tố tính chất trội (MỤC 1), góc chặt nhất và hành tinh tạo nhiều góc (MỤC 2). Dùng [bold]từ khóa phương pháp học[/]]
 
 [#ff0000+bold]Bí kíp duy trì sự tập trung tuyệt đối:[/]
 
-[bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu bí kíp tập trung từ Mặt Trời + Mặt Trăng][/]
-
-[FILL: 3-5 câu luận giải bí kíp tập trung. Từ Mặt Trời (cuộc sống hướng tới) + Mặt Trăng (nhu cầu nội tâm) trong MỤC 1 — {name} tập trung tốt khi thỏa mãn nhu cầu gốc. Dùng [bold]từ khóa[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — bí kíp tập trung từ Mặt Trời + Mặt Trăng, ví dụ "Mục tiêu rõ, không gian yên tĩnh:"]:​[/] [FILL: 3-5 câu luận giải bí kíp tập trung. Từ Mặt Trời (cuộc sống hướng tới) + Mặt Trăng (nhu cầu nội tâm) trong MỤC 1 — {name} tập trung tốt khi thỏa mãn nhu cầu gốc. Dùng [bold]từ khóa[/]]
 
 [#ff0000+bold]Phương pháp nạp năng lượng:[/]
 
-[bold][FILL: 2-3 cụm (mỗi cụm ≤3 âm tiết), dấu phẩy, KHÔNG câu nạp năng lượng từ Mặt Trăng + Sao Mộc + nhà trội][/]
-
-[FILL: 3-5 câu luận giải cách nạp năng lượng. Từ Mặt Trăng (thỏa mãn cảm xúc gốc) + Sao Mộc (lĩnh vực lạc quan/hào hứng tự nhiên — xem brief MỤC 1) + nhà trội (lĩnh vực yêu thích). Dùng [bold]từ khóa[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — cách nạp năng lượng từ Mặt Trăng + Sao Mộc + nhà trội, ví dụ "Vận động, âm nhạc, không gian mở:"]:​[/] [FILL: 3-5 câu luận giải cách nạp năng lượng. Từ Mặt Trăng (thỏa mãn cảm xúc gốc) + Sao Mộc (lĩnh vực lạc quan/hào hứng tự nhiên — xem brief MỤC 1) + nhà trội (lĩnh vực yêu thích). Dùng [bold]từ khóa[/]]
 
 [#ff0000+bold]"Checklist" để bạn phát triển mỗi ngày:[/]
 

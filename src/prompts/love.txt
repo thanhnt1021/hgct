@@ -41,20 +41,15 @@ Hy vọng bản luận giải này sẽ giúp bạn hiểu rõ bản thân trong
 
 [FILL: 2-3 Câu dẫn nhận diện tổng quan năng lượng tình yêu của {name} — tông màu cảm xúc chung, không liệt kê hành tinh, viết như đang nói về một người bạn]
 
-[#ff0000+bold]Cách cho đi trong tình yêu[/]
-[bold][FILL: Cụm 4-8 âm tiết — tính chất nổi bật nhất khi {name} yêu, rút từ Cung Mọc + Mặt Trời + Mặt Trăng][/]
+[bold][FILL: Cụm 4-8 âm tiết — tính chất nổi bật nhất khi {name} yêu, rút từ Cung Mọc + Mặt Trời + Mặt Trăng]:[/]
 
-[FILL: 2-3 Câu luận giải sâu về cách {name} yêu và trao đi tình cảm — dùng dữ liệu Cung Mọc + Mặt Trời + Mặt Trăng từ MỤC 1 brief. Dùng [bold]tên cung[/] và [bold]từ khóa tính cách[/]]
-
+- [FILL: 2-3 Câu luận giải tổng hợp về cách {name} yêu và trao đi tình cảm — từ Cung Mọc + Mặt Trời + Mặt Trăng. Dùng [bold]tên cung[/] và [bold]từ khóa tính cách[/]]
 - [FILL: Biểu hiện cụ thể 1 của cách cho đi trong tình yêu thực tế, 2-3 câu. Dùng [bold]từ khóa[/]]
 - [FILL: Biểu hiện cụ thể 2, 2-3 câu]
-- [FILL: Biểu hiện thứ 3 nếu cần thêm chiều sâu; bỏ nếu đã đủ ý ở 2 gạch trên]
 
-[#ff0000+bold]Nhu cầu nhận lại trong tình yêu[/]
-[bold][FILL: Cụm 4-8 âm tiết — điều {name} cần được nhận lại, rút từ Sao Kim + nhà trội][/]
+[bold][FILL: Cụm 4-8 âm tiết — điều {name} cần được nhận lại, rút từ Sao Kim + nhà trội]:[/]
 
-[FILL: 2-3 Câu luận giải về điều {name} thực sự cần được nhận lại — dùng dữ liệu Sao Kim (cung/nhà + gu đối tác) và nhà trội từ MỤC 1 brief. Dùng [bold]cung Kim[/] và [bold]từ khóa nhu cầu[/]]
-
+- [FILL: 2-3 Câu luận giải về điều {name} thực sự cần được nhận lại — từ Sao Kim (cung/nhà + gu đối tác) và nhà trội. Dùng [bold]cung Kim[/] và [bold]từ khóa nhu cầu[/]]
 - [FILL: Điều {name} cần được yêu theo cách nào, 2-3 câu. Dùng [bold]từ khóa[/]]
 - [FILL: Điều thứ 2 {name} cần cảm nhận được trong tình yêu, 2-3 câu]
 
@@ -179,16 +174,12 @@ Hy vọng bản luận giải này sẽ giúp bạn hiểu rõ bản thân trong
 (CHỈ viết [#ff0000+bold]Sứ mệnh cuộc đời — La Hầu[/] + nội dung nếu brief MỤC 5 đánh dấu La Hầu → VIẾT. Nếu → KHÔNG VIẾT: bỏ toàn bộ phần này kể cả header)
 [#ff0000+bold]Sứ mệnh cuộc đời — La Hầu[/]
 
-[bold][FILL: Cụm 4-8 âm tiết — hướng đi tâm hồn từ La Hầu Nhà 5/7/8][/]
-
-[FILL: 2-4 Câu luận giải La Hầu — {name} đang được mời gọi đi về hướng nào trong tình yêu? Điều gì cần được mở ra? Dùng dữ liệu La Hầu từ MỤC 5 brief. Dùng [bold]từ khóa[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — hướng đi tâm hồn từ La Hầu Nhà 5/7/8]:[/] [FILL: 2-4 Câu luận giải La Hầu — {name} đang được mời gọi đi về hướng nào trong tình yêu? Điều gì cần được mở ra? Dùng dữ liệu La Hầu từ MỤC 5 brief. Dùng [bold]từ khóa[/]]
 
 (CHỈ viết [#ff0000+bold]Chìa khóa chuyển hóa — Chiron[/] + nội dung nếu brief MỤC 5 đánh dấu Chiron → VIẾT. Nếu → KHÔNG VIẾT: bỏ toàn bộ)
 [#ff0000+bold]Chìa khóa chuyển hóa — Chiron[/]
 
-[bold][FILL: Cụm 4-8 âm tiết — vết thương và sự chữa lành, rút từ Chiron Nhà 5/7/8][/]
-
-[FILL: 2-4 Câu luận giải Chiron — vết thương tình cảm cũ của {name} là gì, và khi chữa lành điều đó tình yêu sẽ thay đổi ra sao? Dùng dữ liệu Chiron từ MỤC 5 brief. Giọng đồng cảm, không phán xét. Dùng [bold]từ khóa[/]]
+- [bold][FILL: Cụm 4-8 âm tiết — vết thương và sự chữa lành, rút từ Chiron Nhà 5/7/8]:[/] [FILL: 2-4 Câu luận giải Chiron — vết thương tình cảm cũ của {name} là gì, và khi chữa lành điều đó tình yêu sẽ thay đổi ra sao? Dùng dữ liệu Chiron từ MỤC 5 brief. Giọng đồng cảm, không phán xét. Dùng [bold]từ khóa[/]]
 
 [#ff0000+bold]Kim chỉ nam hạnh phúc cho bạn:[/]
 

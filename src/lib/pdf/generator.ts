@@ -162,13 +162,11 @@ export function cleanForPdf(text: string): string {
   return text.trim()
 }
 
-// Trim comma-separated segments in [bold] keyword lines: if a segment > 3 syllables → keep first 2
+// Limit [bold] keyword lines to max 3 comma-separated segments, no trimming within segments.
+// Single-phrase (no comma): keep as-is.
 function trimSegments(content: string): string {
-  return content.split(',').map(seg => {
-    const words = seg.trim().split(/\s+/)
-    if (words.length <= 3) return seg.trim()
-    return words.slice(0, 2).join(' ')
-  }).filter(s => s.length > 0).slice(0, 3).join(', ')
+  if (!content.includes(',')) return content.trim()
+  return content.split(',').map(seg => seg.trim()).filter(s => s.length > 0).slice(0, 3).join(', ')
 }
 
 function trimKeywordBoldLine(line: string): string {
