@@ -19,7 +19,7 @@ export default function ProcessSection() {
             Chỉ 3 bước đơn giản
           </h2>
           <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem' }}>
-            Không phức tạp. Không mất nhiều thời gian.
+            Bạn sẽ tìm ra giải pháp, tháo gỡ những khúc mắc hiện tại
           </p>
         </div>
 

@@ -13,10 +13,10 @@ const features: Feature[] = [
 ]
 
 const services: Service[] = [
-  { type: 'career',   Icon: Briefcase,  title: 'Sự nghiệp & Tiền bạc',     desc: 'Hiểu rõ điểm mạnh của bản thân, định hướng nghề nghiệp phù hợp và những lĩnh vực tài chính thuận lợi để phát triển.',                                                                                  tag: 'Xác định đúng hướng đi',   accentColor: 'rgba(200,148,63,0.08)',  borderColor: 'rgba(200,148,63,0.22)', tagColor: '#c8943f' },
-  { type: 'love',     Icon: Heart,      title: 'Tình yêu & hôn nhân',       desc: 'Bạn yêu theo cách nào? Vì sao các mối quan hệ thường lặp lại một mô thức? Kiểu người phù hợp và cách xây dựng một mối quan hệ bền chặt.',                                                                   tag: 'Hiểu rõ phong cách yêu',   accentColor: 'rgba(185,77,112,0.08)',  borderColor: 'rgba(185,77,112,0.22)', tagColor: '#e87da0' },
-  { type: 'synastry', Icon: Users,      title: 'Bản đồ sao cặp đôi',        desc: 'Khám phá lý do hai người gặp nhau, những điểm đồng điệu và khác biệt trong mối quan hệ, cùng chìa khóa để xây dựng một mối quan hệ hạnh phúc và phát triển.',                                               tag: 'Thương yêu để đồng hành', accentColor: 'rgba(120,77,186,0.08)',  borderColor: 'rgba(120,77,186,0.22)', tagColor: '#b08ce8' },
-  { type: 'transit',  Icon: TrendingUp, title: 'Vận hạn sắp tới',           desc: 'Nhìn trước những xu hướng trong thời gian tới, lĩnh vực thuận lợi để phát triển và những điều cần lưu ý để chủ động chuẩn bị tốt hơn cho các quyết định quan trọng.',                                       tag: 'Chuẩn bị để sẵn sàng',    accentColor: 'rgba(64,112,184,0.08)',  borderColor: 'rgba(64,112,184,0.22)', tagColor: '#78a8f0' },
+  { type: 'career',   Icon: Briefcase,  title: 'Sự nghiệp & Tiền bạc',     desc: 'Bạn đang loay hoay trong việc lựa chọn ngành nghề phù hợp?\nBạn cảm thấy mắc kẹt trong công việc hiện tại, mông lung về tương lai hoặc nỗ lực rất nhiều nhưng tài chính vẫn không khởi sắc?\nBạn tự hỏi liệu mình có đang đi đúng đường?',                                                                              tag: 'Hướng đi',   accentColor: 'rgba(200,148,63,0.08)',  borderColor: 'rgba(200,148,63,0.22)', tagColor: '#c8943f' },
+  { type: 'love',     Icon: Heart,      title: 'Tình yêu & hôn nhân',       desc: 'Bạn mệt mỏi với những mối quan hệ "chẳng đi đến đâu", kịch bản "đổ vỡ" lặp đi lặp lại, cảm giác cô đơn kéo dài khiến bạn bắt đầu nghi ngờ bản thân?\nBạn hoài nghi về cách mình yêu, cách mình xây dựng mối quan hệ?\nBạn muốn tìm ra kiểu người phù hợp – nơi là bến đỗ bình yên dành cho bạn?',        tag: 'Phong cách',   accentColor: 'rgba(185,77,112,0.08)',  borderColor: 'rgba(185,77,112,0.22)', tagColor: '#e87da0' },
+  { type: 'synastry', Icon: Users,      title: 'Bản đồ sao cặp đôi',        desc: 'Những tranh cãi bế tắc, im lặng lạnh lùng hay cảm giác không được thấu hiểu đang khiến mối quan hệ của bạn đứng bên bờ vực?\nBạn sợ "chọn sai người" hay "đi sai hướng" và đây chính là rào cản khiến bạn không cảm thấy hạnh phúc?\nBạn cần biết những điều cần cải thiện từ cả hai để mối quan hệ tốt đẹp hơn?', tag: 'Đồng hành', accentColor: 'rgba(120,77,186,0.08)',  borderColor: 'rgba(120,77,186,0.22)', tagColor: '#b08ce8' },
+  { type: 'transit',  Icon: TrendingUp, title: 'Vận hạn sắp tới',           desc: 'Thời gian này bạn không biết khi nào là lúc nên tiến lên, khi nào nên lùi lại?\nBạn lo sợ những biến cố bất ngờ hoặc khó ra quyết định trước những thay đổi lớn của cuộc sống?',                                                                                                                               tag: 'Chuẩn bị',    accentColor: 'rgba(64,112,184,0.08)',  borderColor: 'rgba(64,112,184,0.22)', tagColor: '#78a8f0' },
 ]
 
 export default function FeaturesSection() {
@@ -63,12 +63,12 @@ export default function FeaturesSection() {
         {/* Services grid */}
         <div>
           <div className="text-center mb-14">
-            <p className="section-eyebrow mb-4">Bốn góc nhìn chiêm tinh</p>
+            <p className="section-eyebrow mb-4">Thời điểm hiện tại</p>
             <h2
               className="mb-3"
               style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: 'clamp(1.5rem, 4vw, 2.4rem)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}
             >
-              Bạn muốn biết điều gì?
+              Bạn đang gặp vấn đề gì cần tháo gỡ?
             </h2>
             <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
               Chọn một trong bốn góc nhìn chiêm tinh chuyên sâu dưới đây
@@ -94,7 +94,7 @@ export default function FeaturesSection() {
                     <h3 className="font-semibold mb-2" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.25rem' }}>
                       {s.title}
                     </h3>
-                    <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.85 }}>
+                    <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.85, whiteSpace: 'pre-line' }}>
                       {s.desc}
                     </p>
                   </div>

@@ -36,10 +36,10 @@ interface ServiceDef {
 }
 
 const DEFAULT_SERVICES: ServiceDef[] = [
-  { type: 'career',   name: 'Hướng Nghiệp', icon: '🎯', description: 'Bạn đang loay hoay giữa nhiều lựa chọn, không chắc mình thực sự phù hợp với điều gì và nên đi theo hướng nào để vừa phát triển vừa có thu nhập tốt?\n\n→ Mỗi người đều mang trong mình một "hạt giống" riêng. Hiểu đúng hạt giống của bạn để chọn đúng hướng đi, phát triển đúng cách và xây dựng sự nghiệp – tài chính bền vững.', color: 'rgba(200,148,63,0.08)',  border: 'rgba(200,148,63,0.22)',  tagColor: '#c8943f' },
-  { type: 'love',     name: 'Tình Duyên',   icon: '💝', description: 'Bạn yêu như thế nào, và đâu là kiểu người khiến trái tim bạn thực sự bình yên?\n\n→ Bản luận giải này giúp bạn hiểu cách mình yêu, người phù hợp và cách xây dựng một mối quan hệ sâu sắc, bền vững.',   color: 'rgba(185,77,112,0.08)',  border: 'rgba(185,77,112,0.22)',  tagColor: '#b84d70' },
-  { type: 'synastry', name: 'Cặp Đôi',      icon: '💑', description: 'Vì sao hai bạn gặp nhau, điều gì khiến hai người thu hút nhau và những thử thách nào đang ẩn dấu trong mối quan hệ này?\n\n→ Bản luận giải này giúp bạn nhìn rõ sự hòa hợp, khác biệt và chìa khóa để mối quan hệ phát triển bền vững hơn.', color: 'rgba(120,77,186,0.08)',  border: 'rgba(120,77,186,0.22)',  tagColor: '#7c4dba', needsTwo: true },
-  { type: 'transit',  name: 'Vận Hạn',      icon: '🔮', description: 'Thời gian này bạn nên mở rộng, hay cần chậm lại một chút để nhìn rõ hơn?\n\n→ Bản luận giải giúp bạn hiểu rõ giai đoạn mình đang trải qua và lựa chọn hướng đi phù hợp hơn.', color: 'rgba(64,112,184,0.08)',  border: 'rgba(64,112,184,0.22)',  tagColor: '#4070b8' },
+  { type: 'career',   name: 'Hướng Nghiệp', icon: '🎯', description: 'Bạn sinh ra để làm gì – không phải công việc nào cũng dành cho bạn\nĐiểm mạnh thật sự giúp bạn kiếm tiền (không phải thứ bạn "cố gắng")\nCách kiếm tiền phù hợp với bạn nhất (1 nghề hay đa nguồn thu)\nMôi trường nào giúp bạn bật lên nhanh nhất\nLộ trình rõ ràng để thoát mông lung – đi đúng hướng', color: 'rgba(200,148,63,0.08)',  border: 'rgba(200,148,63,0.22)',  tagColor: '#c8943f' },
+  { type: 'love',     name: 'Tình Duyên',   icon: '💝', description: 'Mô thức tình yêu vô thức khiến bạn tự làm tổn thương mình\nBạn thực sự cần gì trong tình yêu (không phải điều bạn nghĩ hay từ ý kiến của bất kì ai)\nĐiểm yếu trong tình cảm khiến bạn dễ bị tổn thương, lệ thuộc hoặc bị bỏ rơi\nKiểu người phù hợp với bạn – để đi đường dài, không phải xúc nhất thời',   color: 'rgba(185,77,112,0.08)',  border: 'rgba(185,77,112,0.22)',  tagColor: '#b84d70' },
+  { type: 'synastry', name: 'Cặp Đôi',      icon: '💑', description: 'Gốc rễ xung đột của mâu thuẫn: khác biệt cảm xúc, cách yêu hay nhu cầu sâu bên trong\nBạn và người ấy hợp ở đâu – lệch ở đâu (đi dài hay chỉ đi một đoạn)\nĐiểm kích hoạt cãi vã lặp lại và cách tháo gỡ đúng cách để kết nối lại, hiểu nhau thật sự\nĐiều mỗi người cần thay đổi cụ thể để không lặp lại vòng lặp cũ, hạnh phúc trọn vẹn hơn', color: 'rgba(120,77,186,0.08)',  border: 'rgba(120,77,186,0.22)',  tagColor: '#7c4dba', needsTwo: true },
+  { type: 'transit',  name: 'Vận Hạn',      icon: '🔮', description: 'Giai đoạn này bạn nên tiến lên hay chậm lại, hạn chế rủi ro khi đưa ra quyết định\nThời điểm vàng để hành động (công việc, tiền bạc, đầu tư, tình cảm)\nLĩnh vực nào trong cuộc sống đang được mở ra – hoặc bị thử thách\nCơ hội nào bạn nên nắm bắt ngay, thời điểm đẹp để bạn quyết định những dự định của chính mình.', color: 'rgba(64,112,184,0.08)',  border: 'rgba(64,112,184,0.22)',  tagColor: '#4070b8' },
 ]
 
 function buildServices(configs?: Record<string, string>): ServiceDef[] {
@@ -511,10 +511,10 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
                   letterSpacing: '0.03em',
                 }}
               >
-                Chọn dịch vụ
+                Cùng bạn tháo gỡ các vấn đề
               </h1>
               <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>
-                Mỗi báo cáo được các vì sao biên soạn chi tiết và gửi qua email dưới dạng PDF
+                Chọn lĩnh vực mà bạn quan tâm để nhận bản luận giải tổng quan <strong style={{ color: '#d9ab55' }}>MIỄN PHÍ</strong>
               </p>
             </div>
 
