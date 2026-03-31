@@ -258,6 +258,7 @@ src/
 - [x] **Claim form reset after submit** — `payment/page.tsx`: reset `claimAmount` + `claimContent` → `''` trước khi `setClaimDone(true)`; form trống khi user mở lại sau khi submit
 - [x] **7-day retention email** — `sendRetentionEmail()` trong `email.ts`; `/api/cron/retention` endpoint: tìm completed orders với `paidAt` 7-8 ngày trước + `retentionEmailSentAt: null` + `adminCancelledAt: null`; mark trước → gửi sau (idempotent); subject "✦ Một tuần sau báo cáo [svc] — bạn có câu hỏi gì không?"; nút "Xem lại báo cáo →"; `RETENTION_EMAIL_ENABLED = true` flag; `Order.retentionEmailSentAt DateTime?` DB column
 - [x] **/pricing page** — `src/app/pricing/page.tsx` (server component, force-dynamic); đọc giá từ DB qua `getAllPrices()`; 3 tiers: Miễn Phí (0đ), Báo Cáo Đơn Lẻ (giá theo service), Premium (coming soon); bảng giá per-service (career/love/synastry/transit)
+- [x] **TDK last-check v2.2 UX fixes** — RRI-T audit phát hiện 2 regressions vs v1.0: (W1) `CtvRegisterModal.tsx` duplicate register → "Đăng ký thành công!" nhưng không có path đến /setup → thêm guidance text khi `!setupToken`; (W2) `/pricing` copy "Mục 1+2" → sửa thành "Mục 1" (D1 revert làm preview chỉ hiện Mục 1)
 
 ## What's TODO
 
