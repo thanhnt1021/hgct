@@ -77,10 +77,25 @@ export async function POST(request: Request) {
       return OK()
     }
 
-    // 7. Verify amount (allow overpayment, alert on underpayment)
+    // 7. Verify amount (allow overpayment; block if < 90% of expected, alert if 90–99%)
     if (order.amount && transferAmount < order.amount) {
+      const minThreshold = Math.floor(order.amount * 0.9)
+      if (transferAmount < minThreshold) {
+        // Hard block: too far under — do not process; admin must handle manually
+        console.warn(
+          `[sepay-webhook] Underpayment blocked: got ${transferAmount}, expected ${order.amount} (threshold ${minThreshold}) for order=${order.id}`,
+        )
+        sendUnderpaymentAlert({
+          orderId: order.id,
+          transferCode: code,
+          expected: order.amount,
+          received: transferAmount,
+        }).catch(() => {})
+        return OK()
+      }
+      // Between 90–99%: alert admin but still process
       console.warn(
-        `[sepay-webhook] Underpayment: got ${transferAmount}, expected ${order.amount} for order=${order.id}`,
+        `[sepay-webhook] Minor underpayment: got ${transferAmount}, expected ${order.amount} for order=${order.id}`,
       )
       sendUnderpaymentAlert({
         orderId: order.id,
@@ -88,7 +103,6 @@ export async function POST(request: Request) {
         expected: order.amount,
         received: transferAmount,
       }).catch(() => {})
-      // Policy: still mark paid and process — admin can review via Telegram alert
     }
 
     // 8. Mark order as paid — Bug #17 fix: atomic lock via updateMany to prevent duplicate job creation

@@ -1,5 +1,10 @@
 // Admin Bot — business logic: menus, handlers, order actions, system control
 
+// Escape HTML special chars for Telegram parse_mode: 'HTML'
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import prisma from '@/lib/db'
@@ -275,7 +280,7 @@ export async function showPendingOrders(ctx: Ctx) {
 
     const fmtLine = (o: { id: number; service: string; email: string; amount: number | null; createdAt: Date }) => {
       const d = new Date(o.createdAt)
-      return `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${o.email} — ${fmt(o.amount ?? 0)} — ${fmtTimeVN(d)} (${timeAgoStr(d)} trước)`
+      return `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${escHtml(o.email)} — ${fmt(o.amount ?? 0)} — ${fmtTimeVN(d)} (${timeAgoStr(d)} trước)`
     }
 
     const sections: string[] = []
@@ -347,7 +352,7 @@ export async function showRecentOrders(ctx: Ctx) {
     }
     const lines = orders.map(
       o =>
-        `${statusEmoji(o.status)} #${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${o.email} — ${fmt(o.amount ?? 0)}`,
+        `${statusEmoji(o.status)} #${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${escHtml(o.email)} — ${fmt(o.amount ?? 0)}`,
     )
     await respond(
       ctx,

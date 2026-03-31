@@ -659,13 +659,15 @@ const FOOTER_TEMPLATE = `<div style="
 "><div style="border-top: 0.8pt solid #fca5a5; padding-top: 3mm;">Hạt Giống Chiêm Tinh</div></div>`
 
 export async function generatePdf(essayText: string, options: PdfOptions): Promise<Buffer | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let browser: any = null
   try {
     const imgPrefix = options.service ? SERVICE_IMG_PREFIX[options.service] : undefined
 
     const chromium = await import('@sparticuz/chromium')
     const puppeteer = await import('puppeteer-core')
     const execPath = await chromium.default.executablePath()
-    const browser = await puppeteer.default.launch({
+    browser = await puppeteer.default.launch({
       args: [...chromium.default.args, '--no-sandbox', '--disable-setuid-sandbox'],
       executablePath: execPath,
       headless: true,
@@ -677,7 +679,8 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
     await page.setViewport({ width: 642, height: 1123 })
 
     // Capture browser console logs for debugging JS evaluations
-    page.on('console', msg => console.log('[PDF-JS]', msg.text()))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    page.on('console', (msg: any) => console.log('[PDF-JS]', msg.text()))
 
     const html = buildHtml(essayText, options)
     await page.setContent(html, { waitUntil: 'networkidle0' })
@@ -995,6 +998,7 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
     }
 
     await browser.close()
+    browser = null // mark as closed so finally doesn't double-close
 
     const finalPdf = imgPrefix
       ? await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix, refPageBuffer)
@@ -1004,6 +1008,8 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
   } catch (e) {
     console.error('[PDF ERROR]', e)
     return null
+  } finally {
+    if (browser) await browser.close().catch(() => {})
   }
 }
 
@@ -1020,7 +1026,7 @@ async function compressPdf(buffer: Buffer): Promise<Buffer> {
       '-dCompatibilityLevel=1.7',
       `-sOutputFile=${outFile}`,
       inFile,
-    ])
+    ], { timeout: 60_000 })
     const result = fs.readFileSync(outFile)
     console.log(`[PDF] gs compress: ${buffer.length} → ${result.length} bytes (${Math.round(result.length / buffer.length * 100)}%)`)
     return result

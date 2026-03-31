@@ -5,10 +5,22 @@ import { getJobFromDb, cancelJob } from '@/lib/jobs'
 import prisma from '@/lib/db'
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const dbJobMeta = await prisma.job.findUnique({ where: { id }, select: { userUid: true } })
+  if (!dbJobMeta) return NextResponse.json({ error: 'Job not found' }, { status: 404 })
+
+  // Guest jobs (userUid=null) are public; owned jobs require matching session
+  if (dbJobMeta.userUid !== null) {
+    const session = await getServerSession(authOptions)
+    const uid = (session?.user as Record<string, unknown>)?.uid as string | undefined
+    if (!uid || uid !== dbJobMeta.userUid) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+  }
+
   const job = await getJobFromDb(id)
   if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 })
   return NextResponse.json(job)

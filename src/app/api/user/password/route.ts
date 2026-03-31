@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server'
 import { createHash } from 'crypto'
+import bcrypt from 'bcryptjs'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/db'
 
-function hashPassword(password: string): string {
+function sha256Hash(password: string): string {
   return createHash('sha256').update(password).digest('hex')
+}
+
+async function verifyCurrentPassword(password: string, hash: string): Promise<boolean> {
+  const bcryptMatch = await bcrypt.compare(password, hash)
+  if (bcryptMatch) return true
+  return sha256Hash(password) === hash
 }
 
 export async function POST(request: Request) {
@@ -31,14 +38,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Không tìm thấy tài khoản' }, { status: 404 })
     }
 
-    // Verify current password
-    if (!currentPassword || hashPassword(currentPassword) !== user.passwordHash) {
+    if (!currentPassword || !await verifyCurrentPassword(currentPassword, user.passwordHash)) {
       return NextResponse.json({ error: 'Mật khẩu hiện tại không đúng' }, { status: 400 })
     }
 
+    const newHash = await bcrypt.hash(newPassword, 12)
     await prisma.user.update({
       where: { userUid: uid },
-      data: { passwordHash: hashPassword(newPassword) },
+      data: { passwordHash: newHash },
     })
 
     return NextResponse.json({ message: 'Đã đổi mật khẩu thành công' })

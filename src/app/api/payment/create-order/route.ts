@@ -32,6 +32,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid service' }, { status: 400 })
     }
 
+    // Idempotency check — return existing order if key already used
+    const idemKey = request.headers.get('x-idempotency-key')?.trim() || null
+    if (idemKey) {
+      const existing = await prisma.order.findUnique({
+        where: { idempotencyKey: idemKey },
+        select: { id: true, transferCode: true, amount: true },
+      })
+      if (existing) {
+        return NextResponse.json({
+          orderId: existing.id,
+          transferCode: existing.transferCode,
+          amount: existing.amount ?? 0,
+          bankAccount: process.env.BANK_ACCOUNT_NUMBER || '',
+          bankName: process.env.BANK_NAME || '',
+          bankAccountName: process.env.BANK_ACCOUNT_NAME || '',
+        })
+      }
+    }
+
     const originalAmount = await getPrice(service)
     let amount = originalAmount
     let appliedCommissionRate = 0
@@ -70,6 +89,7 @@ export async function POST(request: Request) {
         paymentStatus: 'unpaid',
         amount,
         ctvCode: ctvCode || null,
+        idempotencyKey: idemKey || undefined,
       },
     })
 

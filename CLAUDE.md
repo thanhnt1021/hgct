@@ -255,6 +255,24 @@ src/
 ## What's TODO
 
 ## Known Fixes Applied
+- **RRI-T v2.0 security hardening** (17 items, full auto-verified):
+  - `auth.ts` — bcrypt dual-mode: `hashPassword` async bcrypt12; `verifyPassword` SHA256 fallback + silent rehash → migration transparent
+  - `email.ts` — SMTP TLS `rejectUnauthorized: false` → `true` (tested OK with Hostinger smtp.hostinger.com:465)
+  - `src/lib/ratelimit.ts` (new) — Upstash Redis rate limiting + in-memory fallback: login 10/15min, recover 5/10min, claim 3/1h
+  - `api/auth/[...nextauth]/route.ts` — custom POST wrapper: check `checkLoginRateLimit` trước khi pass qua NextAuth; URL parse thay context.params (Next.js 15 compat)
+  - `api/recover/route.ts` + `api/payment/claim-transfer/route.ts` — rate limit applied
+  - `notify.ts` — `escHtml()` applied to `name/email/error` trong `sendOrderFailedAlert`; `AbortSignal.timeout(10_000)` cho cả `getOpenRouterBalance` và `getGenerationCost` fetches
+  - `telegram/admin.ts` — `escHtml()` applied to `o.email` trong pending + recent orders display
+  - `report/route.ts` — IDOR guard: profileUidA + profileUidB verify ownership khi có session
+  - `api/job/[id]/route.ts` GET — owned jobs (userUid≠null) yêu cầu matching session uid
+  - `pdf/generator.ts` — `let browser = null` before try + `finally { if (browser) browser.close() }` prevent leak; ghostscript `timeout: 60_000`
+  - `openrouter.ts` — `AbortController` 180s per stream attempt; `AbortError` → continue retry loop
+  - `checkout/page.tsx` + `api/payment/create-order/route.ts` — idempotency key (UUID sessionStorage + DB `idempotency_key` UNIQUE column)
+  - `reportProcessor.ts` — recovery token preserved across retries (không xóa khi retry); CTV commission email fail → `sendOrderFailedAlert` admin alert
+  - `api/cron/cleanup/route.ts` — Phase 3: xóa `/tmp/hgct-previews/` files > 24h
+  - `api/payment/sepay-webhook/route.ts` — 90% underpayment hard block (< 90% → return OK, không process); 90–99% → alert + process
+  - Nginx — `X-Real-IP: $http_cf_connecting_ip` (thay `$remote_addr`) cho cả production + demo → rate limit dùng đúng IP user qua Cloudflare
+  - `package.json` — thêm `bcryptjs` + `@types/bcryptjs`
 - RRI-T v2.3 bug sweep (31 bugs total, 2 sessions):
   - Bugs #1–#12: `report/route.ts` Bug#1 + Bug#3; `reportProcessor.ts` Bug#2 + Bug#8; `pdf/[id]/route.ts` Bug#2; `job-watchdog.ts` Bug#4 + Bug#6; `smart-retry.ts` Bug#5; `deploy/route.ts` Bug#9; `middleware.ts` Bug#10; `sepay-webhook/route.ts` Bug#11 (timingSafeEqual); `admin/config/route.ts` Bug#12 (key allowlist + numeric validation)
   - Bug#13: `openrouter.ts` — HTTP 429/5xx retry (RegExp match trên Error message, không phải TypeError)

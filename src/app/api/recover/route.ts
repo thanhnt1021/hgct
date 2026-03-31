@@ -1,9 +1,24 @@
 import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import prisma from '@/lib/db'
 import { MAX_RETRIES } from '@/lib/jobs'
 import { smartRetryOrder } from '@/lib/smart-retry'
+import { checkRecoverRateLimit } from '@/lib/ratelimit'
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Rate limit: 5 attempts per IP per 10 minutes
+  const ip =
+    req.headers.get('x-real-ip') ||
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    'unknown'
+  const allowed = await checkRecoverRateLimit(ip)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau 10 phút.' },
+      { status: 429 }
+    )
+  }
+
   let token: string
   try {
     const body = await req.json()

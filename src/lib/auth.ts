@@ -2,10 +2,31 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import { createHash } from 'crypto'
+import bcrypt from 'bcryptjs'
 import prisma from './db'
 
-function hashPassword(password: string): string {
+// Legacy SHA256 (migration only — do NOT use for new passwords)
+function sha256Hash(password: string): string {
   return createHash('sha256').update(password).digest('hex')
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12)
+}
+
+// Dual-mode verify: try bcrypt first, fallback SHA256 → rehash silently
+async function verifyPassword(password: string, hash: string, userUid: string): Promise<boolean> {
+  const bcryptMatch = await bcrypt.compare(password, hash)
+  if (bcryptMatch) return true
+
+  // Legacy SHA256 check
+  if (sha256Hash(password) === hash) {
+    // Rehash with bcrypt on next login — transparent migration
+    const newHash = await bcrypt.hash(password, 12)
+    await prisma.user.update({ where: { userUid }, data: { passwordHash: newHash } }).catch(() => {})
+    return true
+  }
+  return false
 }
 
 export const authOptions: NextAuthOptions = {
@@ -24,7 +45,7 @@ export const authOptions: NextAuthOptions = {
           where: { OR: [{ username: cleanInput }, { email: cleanInput }] },
         })
 
-        if (user && user.passwordHash === hashPassword(credentials.password)) {
+        if (user && await verifyPassword(credentials.password, user.passwordHash, user.userUid)) {
           return { id: user.userUid, name: user.username, email: user.email }
         }
         return null
@@ -60,7 +81,6 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user, account, trigger }) {
-      // Force re-read from DB when session.update() is called
       if (trigger === 'update' && token.uid) {
         const dbUser = await prisma.user.findUnique({
           where: { userUid: token.uid as string },
@@ -102,7 +122,6 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === 'google' && user.email) {
         const existing = await prisma.user.findUnique({ where: { email: user.email } })
         if (!existing) {
-          // Registration closed — block new Google accounts
           return false
         }
       }

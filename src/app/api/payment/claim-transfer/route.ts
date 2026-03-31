@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import prisma from '@/lib/db'
 import { sendCustomerClaimAlert } from '@/lib/notify'
+import { checkClaimRateLimit } from '@/lib/ratelimit'
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { orderId, amount, transferContent } = body as {
@@ -13,6 +15,16 @@ export async function POST(req: Request) {
 
     if (!orderId || typeof orderId !== 'number') {
       return NextResponse.json({ error: 'Invalid orderId' }, { status: 400 })
+    }
+
+    // Rate limit: 3 claims per IP per orderId per hour
+    const ip =
+      req.headers.get('x-real-ip') ||
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      'unknown'
+    const allowed = await checkClaimRateLimit(ip, orderId)
+    if (!allowed) {
+      return NextResponse.json({ success: true }) // Silent 200 — don't reveal throttle
     }
 
     const order = await prisma.order.findUnique({

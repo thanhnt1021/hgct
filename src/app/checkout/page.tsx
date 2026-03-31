@@ -167,6 +167,12 @@ function CheckoutInner() {
   const handlePayment = async () => {
     if (!email.trim()) { alert('Vui lòng nhập email để nhận báo cáo'); return }
     setLoading(true)
+    // Idempotency key: generated once per checkout session — retries reuse same key
+    let idemKey = sessionStorage.getItem('checkout_idem_key')
+    if (!idemKey) {
+      idemKey = crypto.randomUUID()
+      sessionStorage.setItem('checkout_idem_key', idemKey)
+    }
     const payload = JSON.stringify({
       service, inputData, email: email.trim(),
       ...(inputDataB ? { inputDataB } : {}),
@@ -183,7 +189,9 @@ function CheckoutInner() {
       }
       try {
         const res = await fetch('/api/payment/create-order', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload,
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Idempotency-Key': idemKey },
+          body: payload,
         })
         const result = await res.json()
         if (res.ok && result.orderId) {
@@ -198,6 +206,7 @@ function CheckoutInner() {
           })
           if (result.originalAmount) params.set('originalAmount', String(result.originalAmount))
           if (result.discountPct) params.set('discountPct', String(result.discountPct))
+          sessionStorage.removeItem('checkout_idem_key')
           router.push(`/payment?${params.toString()}`)
           return
         }
