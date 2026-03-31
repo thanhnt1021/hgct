@@ -36,7 +36,7 @@ function isAbsenceLine(s: string): boolean {
 
 function isBracketNote(s: string): boolean {
   if (s.includes('[/]')) return false  // contains format tag closing — not a bracket note
-  return s.startsWith('[') && s.endsWith(']') && !s.startsWith('[KTLUẬN]') && !s.startsWith('[KTTIỂU]') && !s.startsWith('[SUBTITLE]') && s !== '[CLOSING]' && s.length > 2
+  return s.startsWith('[') && s.endsWith(']') && !s.startsWith('[KTLUẬN]') && !s.startsWith('[KTTIỂU]') && !s.startsWith('[SUBTITLE]') && s !== '[CLOSING]' && s !== '[CTA_PAGE]' && s.length > 2
 }
 
 /**
@@ -213,6 +213,9 @@ function classifyLine(line: string): string {
   if (/^\s{3,}\*\s/.test(line)) return 'bullet_indent'
   if (s.startsWith('* ')) return 'bullet'
   if (s.startsWith('- ') && s.length > 2) return 'dash_bullet'
+  if (s === '[CTA_PAGE]') return 'cta_page_start'
+  if (s.startsWith('[LOCKED]')) return 'locked_heading'
+  if (s.startsWith('[LSUB]')) return 'locked_subtitle'
   if (/^\d+\.\s+\S/.test(s) && s.length < 120) return 'section_heading'
   if (s.toLowerCase().startsWith('kính gửi')) return 'opener'
   if (SIGN_KEYS.some(k => s.startsWith(k))) return 'signature'
@@ -235,6 +238,7 @@ interface PdfOptions {
   profile: { name: string; dob: { day: string; month: string; year: string }; tob?: string }
   profileB?: { name: string; dob: { day: string; month: string; year: string }; tob?: string }
   service?: string
+  skipClosing?: boolean
 }
 
 function buildFontFaces(): string {
@@ -262,6 +266,9 @@ function lineToHtml(kind: string, s: string): string {
     case 'section_heading':  return `<h2 class="section">${safe}</h2>`
     case 'title_heading':    return `<h2 class="section">${safe}</h2><hr class="section-rule">`
     case 'section_subtitle': return `<p class="section-subtitle">${safe.replace(/^\[SUBTITLE\]\s*/, '')}</p>`
+    case 'locked_heading':  return `<h2 class="section">${safe.replace(/^\[LOCKED\]\s*/, '')}</h2>`
+    case 'locked_subtitle': return `<p class="section-subtitle">${safe.replace(/^\[LSUB\]\s*/, '')}</p>`
+    case 'cta_page_start':  return ''
     case 'subheading':          return `<h3 class="subheading">${parseFormatTags(safe)}</h3>`
     case 'format_subheading':   return `<p class="body">${parseFormatTags(safe)}</p>`
     case 'bold_summary': {
@@ -288,7 +295,7 @@ function buildHtml(essayText: string, options: PdfOptions): string {
   // Strip AI's closing (unreliable) and inject hardcoded version when available.
   // Primary cut point: [CLOSING] marker. Fallback: detect "Cảm ơn bạn đã" at line start.
   let processedText = essayText
-  const hardcodedClosing = options.service ? CLOSING_BLOCKS[options.service] : undefined
+  const hardcodedClosing = (!options.skipClosing && options.service) ? CLOSING_BLOCKS[options.service] : undefined
   if (hardcodedClosing) {
     let cutIdx = processedText.indexOf('[CLOSING]')
     if (cutIdx < 0) {
@@ -385,7 +392,9 @@ function buildHtml(essayText: string, options: PdfOptions): string {
       pendingRule = false
     }
 
+    if (kind === 'cta_page_start') { groupHtmlLines.push([]); seenSectionHeading = true; continue }
     if (kind === 'section_heading') groupHtmlLines.push([])
+    if (kind === 'locked_heading') seenSectionHeading = true
 
     const html = lineToHtml(kind, s)
     groupHtmlLines[groupHtmlLines.length - 1].push(html)

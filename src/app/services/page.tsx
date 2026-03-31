@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/db'
 import ServicesClient from './ServicesClient'
 import Navbar from '@/components/layout/Navbar'
+import { getAllPrices } from '@/lib/pricing'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,10 +15,11 @@ const SERVICE_CONFIG_KEYS = [
 ]
 
 export default async function ServicesPage() {
-  const [row, session, configRows] = await Promise.all([
+  const [row, session, configRows, prices] = await Promise.all([
     prisma.config.findUnique({ where: { key: 'site_mode' } }),
     getServerSession(authOptions),
     prisma.config.findMany({ where: { key: { in: SERVICE_CONFIG_KEYS } } }),
+    getAllPrices(),
   ])
   const serviceConfigs = Object.fromEntries(configRows.map((r) => [r.key, r.value]))
 
@@ -71,5 +73,5 @@ export default async function ServicesPage() {
     )
   }
 
-  return <ServicesClient serviceConfigs={serviceConfigs} />
+  return <ServicesClient serviceConfigs={serviceConfigs} prices={prices} />
 }

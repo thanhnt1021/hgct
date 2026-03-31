@@ -32,7 +32,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid service' }, { status: 400 })
     }
 
-    const amount = await getPrice(service)
+    const originalAmount = await getPrice(service)
+    let amount = originalAmount
+    let appliedCommissionRate = 0
+
+    // Apply CTV discount server-side
+    if (ctvCode) {
+      const ctv = await prisma.ctv.findUnique({
+        where: { ctvCode: ctvCode.trim().toUpperCase() },
+        select: { commissionRate: true, status: true },
+      })
+      if (ctv && ctv.status === 'active') {
+        appliedCommissionRate = ctv.commissionRate
+        amount = Math.round(originalAmount * (1 - appliedCommissionRate))
+      }
+    }
 
     const session = await getServerSession(authOptions)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,6 +86,10 @@ export async function POST(request: Request) {
       orderId: order.id,
       transferCode,
       amount,
+      ...(appliedCommissionRate > 0 ? {
+        originalAmount,
+        discountPct: Math.round(appliedCommissionRate * 100),
+      } : {}),
       bankAccount: process.env.BANK_ACCOUNT_NUMBER || '',
       bankName: process.env.BANK_NAME || '',
       bankAccountName: process.env.BANK_ACCOUNT_NAME || '',

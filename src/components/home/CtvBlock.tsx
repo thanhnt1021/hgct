@@ -35,8 +35,7 @@ export default function CtvBlock() {
               lineHeight: 1.3,
             }}
           >
-            Chia sẻ chiêm tinh học,<br />
-            nhận hoa hồng mỗi đơn
+            Nếu bản đồ sao đã giúp bạn hiểu rõ hơn về mình, hãy để nó chạm đến thêm nhiều người.
           </h2>
 
           <p
@@ -49,10 +48,10 @@ export default function CtvBlock() {
               margin: '0 auto 2.5rem',
             }}
           >
-            Trở thành Đại Sứ của Hạt Giống Chiêm Tinh — chia sẻ mã giới thiệu
-            riêng và nhận{' '}
-            <span style={{ color: '#c9a84c', fontWeight: 600 }}>hoa hồng 10%</span>{' '}
-            cho mỗi báo cáo được mua qua mã của bạn.
+            Chia sẻ mã Đại Sứ của bạn — mỗi người tìm được câu trả lời từ bản đồ
+            sao là một điều bạn góp phần tạo ra. Và với mỗi báo cáo hoàn thành qua
+            mã của bạn, bạn nhận{' '}
+            <span style={{ color: '#c9a84c', fontWeight: 600 }}>hoa hồng 10%</span>.
           </p>
 
           {/* 3 benefits */}
@@ -61,9 +60,9 @@ export default function CtvBlock() {
             style={{ maxWidth: '600px', margin: '0 auto 2.5rem' }}
           >
             {[
-              { icon: '🔗', title: 'Mã riêng của bạn', desc: 'Mỗi Đại Sứ có 1 mã duy nhất để chia sẻ' },
-              { icon: '💰', title: 'Hoa hồng 10%', desc: 'Nhận hoa hồng cho mỗi đơn hoàn thành' },
-              { icon: '📊', title: 'Theo dõi real-time', desc: 'Dashboard riêng xem đơn & hoa hồng' },
+              { icon: '✦', title: 'Mã chiêm tinh của riêng bạn', desc: 'Mỗi Đại Sứ có một mã duy nhất để chia sẻ với cộng đồng của mình' },
+              { icon: '💫', title: 'Hoa hồng 10% mỗi đơn', desc: 'Tự động ghi nhận vào tài khoản sau mỗi báo cáo hoàn thành' },
+              { icon: '🔭', title: 'Dashboard cá nhân', desc: 'Theo dõi lịch sử đơn hàng và hoa hồng theo thời gian thực' },
             ].map(b => (
               <div
                 key={b.title}
@@ -102,7 +101,7 @@ export default function CtvBlock() {
               boxShadow: '0 4px 24px rgba(200,148,63,0.25)',
             }}
           >
-            Đăng ký làm Đại Sứ →
+            Trở thành Đại Sứ →
           </button>
         </div>
       </section>

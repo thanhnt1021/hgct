@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
   const ctv = await prisma.ctv.findUnique({
     where: { ctvCode: code },
-    select: { id: true, name: true, status: true },
+    select: { id: true, name: true, status: true, commissionRate: true },
   })
 
   if (!ctv || ctv.status !== 'active') {
@@ -21,5 +21,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     valid: true,
     name: ctv.name,
+    discountPct: Math.round((ctv.commissionRate ?? 0.10) * 100),
   })
 }

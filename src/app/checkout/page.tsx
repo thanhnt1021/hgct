@@ -62,15 +62,17 @@ function CheckoutInner() {
   const [transitStartDate, setTransitStartDate] = useState('')
   const [transitEndDate, setTransitEndDate] = useState('')
   const [ctvCode, setCtvCode] = useState('')
-  const [ctvVerified, setCtvVerified] = useState<null | { valid: boolean; name?: string }>(null)
+  const [ctvVerified, setCtvVerified] = useState<null | { valid: boolean; name?: string; discountPct?: number }>(null)
   const [ctvVerifying, setCtvVerifying] = useState(false)
+  const [autoMode, setAutoMode] = useState(false)
+  const [basePrice, setBasePrice] = useState<number | null>(null)
 
   const verifyCtvCode = useCallback(async (code: string) => {
     if (!code.trim()) { setCtvVerified(null); return }
     setCtvVerifying(true)
     try {
       const res = await fetch(`/api/ctv/verify-code?code=${encodeURIComponent(code.trim())}`)
-      const data = await res.json()
+      const data = await res.json() as { valid: boolean; name?: string; discountPct?: number }
       setCtvVerified(data)
     } catch {
       setCtvVerified({ valid: false })
@@ -99,6 +101,12 @@ function CheckoutInner() {
     if (data) setInputData(JSON.parse(data))
     if (dataB) setInputDataB(JSON.parse(dataB))
 
+    // Fetch base price for discount display
+    fetch(`/api/pricing?service=${encodeURIComponent(svc)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((d: { price?: number } | null) => { if (d?.price != null) setBasePrice(d.price) })
+      .catch(() => {})
+
     // Auto-fill CTV code from URL param or sessionStorage
     const utmCtv = searchParams.get('ctv') || sessionStorage.getItem('ctvCode') || ''
     if (utmCtv) {
@@ -106,14 +114,37 @@ function CheckoutInner() {
       verifyCtvCode(utmCtv)
     }
 
-    // Pre-fill with reportEmail if set, else account email
-    fetch('/api/user/account', { cache: 'no-store' })
-      .then(r => r.ok ? r.json() : null)
-      .then((data: { reportEmail?: string; accountEmail?: string } | null) => {
-        const prefill = data?.reportEmail || data?.accountEmail || user?.email || ''
-        if (prefill) setEmail(prefill)
-      })
-      .catch(() => { if (user?.email) setEmail(user.email) })
+    // Auto-checkout mode: skip form UI and trigger payment automatically
+    const isAuto = sessionStorage.getItem('autoCheckout') === '1'
+    sessionStorage.removeItem('autoCheckout')
+    const storedEmail = sessionStorage.getItem('checkoutEmail') || ''
+    if (storedEmail) sessionStorage.removeItem('checkoutEmail')
+
+    if (isAuto) {
+      setLoading(true)
+      if (storedEmail) {
+        setEmail(storedEmail)
+        setAutoMode(true)
+      } else {
+        fetch('/api/user/account', { cache: 'no-store' })
+          .then(r => r.ok ? r.json() : null)
+          .then((d: { reportEmail?: string; accountEmail?: string } | null) => {
+            const e = d?.reportEmail || d?.accountEmail || user?.email || ''
+            setEmail(e)
+            setAutoMode(true)
+          })
+          .catch(() => { setEmail(user?.email || ''); setAutoMode(true) })
+      }
+    } else {
+      // Pre-fill with reportEmail if set, else account email
+      fetch('/api/user/account', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : null)
+        .then((data: { reportEmail?: string; accountEmail?: string } | null) => {
+          const prefill = data?.reportEmail || data?.accountEmail || user?.email || ''
+          if (prefill) setEmail(prefill)
+        })
+        .catch(() => { if (user?.email) setEmail(user.email) })
+    }
   }, [user, router, searchParams, verifyCtvCode])
 
   const fmtDate = (s: string) => { if (!s) return ''; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}` }
@@ -143,7 +174,7 @@ function CheckoutInner() {
       ...(profileUidB ? { profileUidB } : {}),
       ...(service === 'transit' && transitStartDate && transitEndDate
         ? { startDate: transitStartDate, endDate: transitEndDate } : {}),
-      ...(ctvCode.trim() && ctvVerified?.valid ? { ctvCode: ctvCode.trim() } : {}),
+      ...(ctvCode.trim() ? { ctvCode: ctvCode.trim().toUpperCase() } : {}),
     })
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) {
@@ -165,6 +196,8 @@ function CheckoutInner() {
             bankName: result.bankName, bankAccountName: result.bankAccountName,
             service, name: displayName,
           })
+          if (result.originalAmount) params.set('originalAmount', String(result.originalAmount))
+          if (result.discountPct) params.set('discountPct', String(result.discountPct))
           router.push(`/payment?${params.toString()}`)
           return
         }
@@ -225,6 +258,26 @@ function CheckoutInner() {
     alert('Hệ thống đang bận. Vui lòng thử lại sau.')
     setLoading(false)
   }
+
+  // Auto-verify CTV code after user stops typing (debounced)
+  useEffect(() => {
+    const code = ctvCode.trim()
+    if (!code) { setCtvVerified(null); return }
+    const timer = setTimeout(() => verifyCtvCode(code), 600)
+    return () => clearTimeout(timer)
+  }, [ctvCode, verifyCtvCode])
+
+  // Auto-trigger when autoMode + all data ready
+  useEffect(() => {
+    if (!autoMode || !service || !inputData || !email || authLoading) return
+    setAutoMode(false)
+    if (isPremiumOrLifetime) {
+      handleConfirm()
+    } else {
+      handlePayment()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoMode, service, inputData, email, authLoading, isPremiumOrLifetime])
 
   // Auth still resolving
   if (authLoading) {
@@ -383,10 +436,9 @@ function CheckoutInner() {
                   type="text"
                   value={ctvCode}
                   onChange={e => {
-                    setCtvCode(e.target.value)
+                    setCtvCode(e.target.value.toUpperCase())
                     setCtvVerified(null)
                   }}
-                  onBlur={() => verifyCtvCode(ctvCode)}
                   placeholder="Nhập mã CTV nếu có"
                   className="w-full"
                   style={{
@@ -400,11 +452,27 @@ function CheckoutInner() {
                   <div className="w-5 h-5 rounded-full animate-spin flex-shrink-0" style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
                 )}
               </div>
-              {ctvCode && ctvVerified?.valid && (
-                <p style={{ color: '#4ade80', fontSize: '0.75rem', marginTop: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
-                  ✓ Mã hợp lệ — giới thiệu bởi {ctvVerified.name}
-                </p>
-              )}
+              {ctvCode && ctvVerified?.valid && (() => {
+                const pct = ctvVerified.discountPct ?? 10
+                const discountedPrice = basePrice != null ? Math.round(basePrice * (1 - pct / 100)) : null
+                return (
+                  <div style={{ marginTop: '0.4rem' }}>
+                    <p style={{ color: '#4ade80', fontSize: '0.75rem', margin: 0, fontFamily: 'var(--font-vietnam)' }}>
+                      ✓ Mã hợp lệ — giảm {pct}%
+                    </p>
+                    {basePrice != null && discountedPrice != null && (
+                      <p style={{ margin: '0.2rem 0 0', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+                        <span style={{ color: '#6b7280', textDecoration: 'line-through', marginRight: '0.5rem' }}>
+                          {basePrice.toLocaleString('vi-VN')}đ
+                        </span>
+                        <span style={{ color: '#f0cc78', fontWeight: 700 }}>
+                          {discountedPrice.toLocaleString('vi-VN')}đ
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                )
+              })()}
               {ctvCode && ctvVerified?.valid === false && (
                 <p style={{ color: '#c8410a', fontSize: '0.75rem', marginTop: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
                   ✕ Mã không hợp lệ

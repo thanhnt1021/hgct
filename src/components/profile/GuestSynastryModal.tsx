@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import LocationPicker from './LocationPicker'
 import { ProfileFormData, EMPTY_PROFILE_FORM } from './ProfileFormModal'
@@ -197,48 +197,133 @@ function PersonSection({ label, state }: {
   )
 }
 
+const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+
 export default function GuestSynastryModal({
   open,
   onClose,
   onSubmit,
   initialDataA,
   initialDataB,
+  showCtvField,
+  draftKey,
 }: {
   open: boolean
   onClose: () => void
-  onSubmit: (dataA: ProfileFormData, dataB: ProfileFormData) => void
+  onSubmit: (dataA: ProfileFormData, dataB: ProfileFormData, action?: 'free' | 'paid', email?: string) => void
   initialDataA?: ProfileFormData | null
   initialDataB?: ProfileFormData | null
+  showCtvField?: boolean
+  draftKey?: string
 }) {
   const a = usePersonState()
   const b = usePersonState()
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [ctvCode, setCtvCode] = useState('')
+  const [ctvVerified, setCtvVerified] = useState<null | { valid: boolean; name?: string; discountPct?: number }>(null)
+  const [ctvVerifying, setCtvVerifying] = useState(false)
 
   useEffect(() => {
     if (!open) return
+    if (draftKey && !initialDataA && !initialDataB) {
+      try {
+        const saved = sessionStorage.getItem(draftKey)
+        if (saved) {
+          const draft = JSON.parse(saved) as { formA?: ProfileFormData; formB?: ProfileFormData; email?: string; ctvCode?: string }
+          if (draft.formA) a.resetWith(draft.formA); else a.reset()
+          if (draft.formB) b.resetWith(draft.formB); else b.reset()
+          setEmail(draft.email ?? '')
+          setEmailError('')
+          setCtvCode(draft.ctvCode ?? '')
+          setCtvVerified(null)
+          return
+        }
+      } catch { /* ignore */ }
+    }
     if (initialDataA) a.resetWith(initialDataA)
     else a.reset()
     if (initialDataB) b.resetWith(initialDataB)
     else b.reset()
+    setEmail('')
+    setEmailError('')
+    setCtvCode('')
+    setCtvVerified(null)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  // Auto-verify CTV code after user stops typing (debounced)
+  const ctvDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (ctvDebounceRef.current) clearTimeout(ctvDebounceRef.current)
+    const code = ctvCode.trim()
+    if (!code) { setCtvVerified(null); return }
+    ctvDebounceRef.current = setTimeout(async () => {
+      setCtvVerifying(true)
+      try {
+        const res = await fetch(`/api/ctv/verify-code?code=${encodeURIComponent(code)}`)
+        const data = await res.json() as { valid: boolean; name?: string; discountPct?: number }
+        setCtvVerified(data)
+        if (data.valid) sessionStorage.setItem('ctvCode', code)
+        else sessionStorage.removeItem('ctvCode')
+      } catch {
+        setCtvVerified({ valid: false })
+      } finally {
+        setCtvVerifying(false)
+      }
+    }, 600)
+    return () => { if (ctvDebounceRef.current) clearTimeout(ctvDebounceRef.current) }
+  }, [ctvCode])
+
+  const handleClose = () => {
+    if (draftKey && !initialDataA && !initialDataB) {
+      try {
+        sessionStorage.setItem(draftKey, JSON.stringify({ formA: a.form, formB: b.form, email, ctvCode }))
+      } catch { /* ignore */ }
+    }
+    onClose()
+  }
+
   if (!open) return null
 
-  const handleSubmit = () => {
+  const validateBoth = (): [ProfileFormData, ProfileFormData] | null => {
     const stateA: PersonState = { form: a.form, yearMode: a.yearMode, customYear: a.customYear, yearError: a.yearError, formError: a.formError }
     const stateB: PersonState = { form: b.form, yearMode: b.yearMode, customYear: b.customYear, yearError: b.yearError, formError: b.formError }
     const dataA = validate(stateA, a.setYearError, a.setFormError)
-    if (!dataA) return
+    if (!dataA) return null
     const dataB = validate(stateB, b.setYearError, b.setFormError)
-    if (!dataB) return
-    onSubmit(dataA, dataB)
+    if (!dataB) return null
+    return [dataA, dataB]
+  }
+
+  const validateEmail = (): string | null => {
+    setEmailError('')
+    if (!email.trim()) { setEmailError('Vui lòng nhập email để nhận báo cáo'); return null }
+    if (!isValidEmail(email)) { setEmailError('Email không đúng định dạng'); return null }
+    return email.trim()
+  }
+
+  const handleFree = () => {
+    const data = validateBoth()
+    if (!data) return
+    const em = validateEmail()
+    if (em === null) return
+    onSubmit(data[0], data[1], 'free', em)
+  }
+
+  const handlePaid = () => {
+    const data = validateBoth()
+    if (!data) return
+    const em = validateEmail()
+    if (em === null) return
+    onSubmit(data[0], data[1], 'paid', em)
   }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      onClick={e => { if (e.target === e.currentTarget) handleClose() }}
     >
       <div
         className="w-full max-h-[90vh] overflow-y-auto rounded-2xl"
@@ -249,7 +334,7 @@ export default function GuestSynastryModal({
           <h3 className="font-bold text-lg" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
             Thông tin của bạn và của đối phương
           </h3>
-          <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
+          <button onClick={handleClose} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
             <X size={18} />
           </button>
         </div>
@@ -259,16 +344,73 @@ export default function GuestSynastryModal({
           <PersonSection label="── THÔNG TIN CỦA BẠN ──" state={a} />
           <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.25), transparent)' }} />
           <PersonSection label="── THÔNG TIN CỦA ĐỐI PHƯƠNG ──" state={b} />
+
+          {/* Email field */}
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.25rem', color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500 }}>
+              Email nhận báo cáo PDF <span style={{ color: '#ef4444' }}>*</span>
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => { setEmail(e.target.value); setEmailError('') }}
+              placeholder="email@example.com"
+              style={{ width: '100%' }}
+            />
+            {emailError && (
+              <p style={{ color: '#ef4444', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>⚠ {emailError}</p>
+            )}
+          </div>
+
+          {/* CTV affiliate code (optional) */}
+          {showCtvField && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.25rem', color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500 }}>
+                Mã Đại Sứ{' '}
+                <span style={{ color: '#4a4560', fontWeight: 400, fontSize: '0.7rem' }}>(nếu có)</span>
+              </label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="text"
+                  value={ctvCode}
+                  onChange={e => setCtvCode(e.target.value.toUpperCase())}
+                  placeholder="VD: DAISU2025"
+                  style={{ flex: 1, textTransform: 'uppercase' }}
+                  maxLength={20}
+                />
+                {ctvVerifying && (
+                  <span style={{ color: '#6b7280', fontSize: '0.75rem', alignSelf: 'center', flexShrink: 0 }}>...</span>
+                )}
+              </div>
+              {ctvVerified?.valid && (
+                <p style={{ color: '#4ade80', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>
+                  ✓ Mã hợp lệ — bạn được giảm {ctvVerified.discountPct ?? 10}%
+                </p>
+              )}
+              {ctvVerified?.valid === false && (
+                <p style={{ color: '#ef4444', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>
+                  ✗ Mã không hợp lệ hoặc không tồn tại
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 space-y-2">
           <button
-            onClick={handleSubmit}
+            onClick={handlePaid}
             className="w-full h-10 rounded-lg font-semibold"
-            style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}
+            style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
           >
-            Tiếp tục →
+            Xuất PDF chi tiết →
+          </button>
+          <button
+            onClick={handleFree}
+            className="w-full h-10 rounded-lg font-semibold"
+            style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
+          >
+            Nhận báo cáo tổng quan miễn phí
           </button>
         </div>
       </div>

@@ -75,6 +75,7 @@ Việc nhìn trước những xu hướng năng lượng của một năm không
 [FILL: 2-3 câu kết phần tổng quan: lời khuyên ưu tiên tập trung cho cả năm, tone chữa lành và nâng đỡ]
 
 2. Công việc và sự nghiệp
+[SUBTITLE] Cơ hội và thách thức trong sự nghiệp của bạn giai đoạn này
 
 [FILL: 2-3 câu dẫn tổng quan vận sự nghiệp năm nay dựa vào dữ liệu Phần 2]
 
@@ -89,6 +90,7 @@ Việc nhìn trước những xu hướng năng lượng của một năm không
 [KTLUẬN] [FILL: 2-3 câu cô đọng vận sự nghiệp + "Bí kíp cho bạn" 1-2 câu thực tế]
 
 3. Tài chính đầu tư
+[SUBTITLE] Dòng chảy tài chính và hướng đầu tư phù hợp với vận hạn của bạn
 
 [FILL: 2-3 câu dẫn tổng quan tài chính năm nay]
 
@@ -107,6 +109,7 @@ Việc nhìn trước những xu hướng năng lượng của một năm không
 [KTLUẬN] [FILL: 2-3 câu thông điệp tài chính tổng kết giai đoạn]
 
 4. Tình yêu hôn nhân
+[SUBTITLE] Năng lượng tình cảm và những điều cần lưu ý trong các mối quan hệ thân thiết
 
 [FILL: 2-3 câu dẫn tổng quan tình yêu/hôn nhân năm nay]
 
@@ -121,6 +124,7 @@ Nếu bạn đang trong mối quan hệ: [FILL: 1 câu ngắn mô tả tổng qu
 [KTLUẬN] [FILL: 2-3 câu cô đọng vận tình yêu/hôn nhân]
 
 5. Gia đình, nhà cửa
+[SUBTITLE] Những chuyển dịch trong cuộc sống gia đình và không gian sống của bạn
 
 [FILL: 2-3 câu dẫn tổng quan gia đình năm nay]
 
@@ -133,6 +137,7 @@ Nếu bạn đang trong mối quan hệ: [FILL: 1 câu ngắn mô tả tổng qu
 [KTLUẬN] [FILL: 2-3 câu thông điệp gia đình]
 
 6. Sức Khỏe
+[SUBTITLE] Những lưu ý về thể chất và tinh thần để bạn duy trì năng lượng tích cực
 
 [FILL: 2-3 câu dẫn tổng quan sức khỏe năm nay]
 
@@ -151,6 +156,7 @@ Nếu bạn đang trong mối quan hệ: [FILL: 1 câu ngắn mô tả tổng qu
 [KTLUẬN] [FILL: 2-3 câu thông điệp sức khỏe tổng kết]
 
 7. Thông điệp dành cho bạn trong giai đoạn này
+[SUBTITLE] Lời nhắn từ các vì sao cho hành trình phía trước của bạn
 
 {name} thân mến, sau khi đã thấu hiểu những dòng chảy năng lượng trong bản đồ vận hạn, đây là lúc chúng ta cùng gói ghém lại những hành trang quan trọng nhất. Hãy coi đây là chiếc "La bàn bỏ túi" để bạn tự tin bước đi trong giai đoạn {start_str}–{end_str} này.
 

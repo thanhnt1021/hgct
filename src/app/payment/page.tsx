@@ -24,6 +24,8 @@ function PaymentInner() {
   const orderId = params.get('orderId') || ''
   const transferCode = params.get('transferCode') || ''
   const amount = Number(params.get('amount') || 0)
+  const originalAmount = Number(params.get('originalAmount') || 0)
+  const discountPct = Number(params.get('discountPct') || 0)
   const bankAccount = params.get('bankAccount') || ''
   const bankName = params.get('bankName') || ''
   const bankAccountName = params.get('bankAccountName') || ''
@@ -370,9 +372,25 @@ function PaymentInner() {
                 {displayName}
               </p>
             )}
-            <p style={{ color: '#c8410a', fontFamily: 'var(--font-vietnam)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.02em', margin: 0 }}>
-              {formatAmount(amount)}
-            </p>
+            {originalAmount > 0 && discountPct > 0 ? (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                  <span style={{ color: '#6b7280', textDecoration: 'line-through', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>
+                    {formatAmount(originalAmount)}
+                  </span>
+                  <span style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', fontWeight: 700, background: 'rgba(74,222,128,0.15)', padding: '1px 7px', borderRadius: '4px', letterSpacing: '0.04em' }}>
+                    -{discountPct}%
+                  </span>
+                </div>
+                <p style={{ color: '#c8410a', fontFamily: 'var(--font-vietnam)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.02em', margin: 0 }}>
+                  {formatAmount(amount)}
+                </p>
+              </div>
+            ) : (
+              <p style={{ color: '#c8410a', fontFamily: 'var(--font-vietnam)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.02em', margin: 0 }}>
+                {formatAmount(amount)}
+              </p>
+            )}
           </div>
 
           <div className="px-6 py-5">

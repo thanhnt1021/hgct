@@ -209,7 +209,7 @@ function ProfilePicker({
 
 // ── Main page ─────────────────────────────────────────────────────
 
-export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Record<string, string> }) {
+export default function ServicesClient({ serviceConfigs, prices }: { serviceConfigs?: Record<string, string>; prices?: Record<string, number> }) {
   const services = buildServices(serviceConfigs)
   const router = useRouter()
   const { user } = useAuth()
@@ -288,10 +288,36 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
     loc: { address: formData.loc.address, lat: formData.loc.lat, lon: formData.loc.lon, tz: formData.loc.tz },
   })
 
-  const handleGuestModalSubmit = (formData: ProfileFormData, save: boolean) => {
+  const buildPreviewData = (inputData: object, inputDataB?: object, serviceType?: string) => ({
+    service: serviceType || guestService?.type || '',
+    inputData,
+    ...(inputDataB ? { inputDataB } : {}),
+    ...(serviceType === 'transit' || guestService?.type === 'transit' ? (() => {
+      const today = new Date()
+      const oneYearLater = new Date(today); oneYearLater.setFullYear(today.getFullYear() + 1)
+      return { startDate: today.toISOString().split('T')[0], endDate: oneYearLater.toISOString().split('T')[0] }
+    })() : {}),
+  })
+
+  const handleGuestModalSubmit = (formData: ProfileFormData, save: boolean, action?: 'free' | 'paid', email?: string) => {
     if (!guestService) return
     const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
-    sessionStorage.setItem('inputData', JSON.stringify(guestProfileToInput(formData, name)))
+    const inputData = guestProfileToInput(formData, name)
+    const ctvCode = sessionStorage.getItem('ctvCode') || undefined
+
+    if (action === 'free') {
+      const previewData = {
+        ...buildPreviewData(inputData),
+        ...(email ? { email } : {}),
+        ...(ctvCode ? { ctvCode } : {}),
+      }
+      localStorage.setItem('previewInput', JSON.stringify(previewData))
+      window.open('/preview', '_blank')
+      return
+    }
+
+    // paid flow
+    sessionStorage.setItem('inputData', JSON.stringify(inputData))
     sessionStorage.setItem('selectedService', guestService.type)
     sessionStorage.setItem('profileUidA', '')
     sessionStorage.setItem('guestFormDataA', JSON.stringify(formData))
@@ -308,6 +334,8 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
       sessionStorage.removeItem('transitStartDate')
       sessionStorage.removeItem('transitEndDate')
     }
+    if (email) sessionStorage.setItem('checkoutEmail', email)
+    sessionStorage.setItem('autoCheckout', '1')
     router.push('/checkout')
     // Background save if user wants
     if (user && save) {
@@ -318,11 +346,26 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
     }
   }
 
-  const handleGuestSynastrySubmit = (formA: ProfileFormData, formB: ProfileFormData) => {
+  const handleGuestSynastrySubmit = (formA: ProfileFormData, formB: ProfileFormData, action?: 'free' | 'paid', email?: string) => {
     const nameA = [formA.ho, formA.dem, formA.ten].filter(Boolean).join(' ')
     const nameB = [formB.ho, formB.dem, formB.ten].filter(Boolean).join(' ')
-    sessionStorage.setItem('inputData', JSON.stringify(guestProfileToInput(formA, nameA)))
-    sessionStorage.setItem('inputDataB', JSON.stringify(guestProfileToInput(formB, nameB)))
+    const inputDataA = guestProfileToInput(formA, nameA)
+    const inputDataB = guestProfileToInput(formB, nameB)
+    const ctvCode = sessionStorage.getItem('ctvCode') || undefined
+
+    if (action === 'free') {
+      const previewData = {
+        ...buildPreviewData(inputDataA, inputDataB, 'synastry'),
+        ...(email ? { email } : {}),
+        ...(ctvCode ? { ctvCode } : {}),
+      }
+      localStorage.setItem('previewInput', JSON.stringify(previewData))
+      window.open('/preview', '_blank')
+      return
+    }
+
+    sessionStorage.setItem('inputData', JSON.stringify(inputDataA))
+    sessionStorage.setItem('inputDataB', JSON.stringify(inputDataB))
     sessionStorage.setItem('selectedService', 'synastry')
     sessionStorage.setItem('profileUidA', '')
     sessionStorage.setItem('profileUidB', '')
@@ -330,6 +373,8 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
     sessionStorage.setItem('guestFormDataB', JSON.stringify(formB))
     sessionStorage.removeItem('transitStartDate')
     sessionStorage.removeItem('transitEndDate')
+    if (email) sessionStorage.setItem('checkoutEmail', email)
+    sessionStorage.setItem('autoCheckout', '1')
     router.push('/checkout')
   }
 
@@ -454,20 +499,42 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
     setModalSaving(false)
   }
 
-  const handleConfirm = () => {
-    if (!selectedService) return
+  const getConfirmData = () => {
+    if (!selectedService) return null
     const pa = profiles.find(p => p.id === profileA)
-    if (!pa) return
+    if (!pa) return null
+    const pb = selectedService.needsTwo ? profiles.find(p => p.id === profileB) : null
+    if (selectedService.needsTwo && !pb) return null
+    return { pa, pb }
+  }
 
-    sessionStorage.setItem('inputData', JSON.stringify(profileToInputData(pa)))
+  const handleConfirmFree = () => {
+    const d = getConfirmData()
+    if (!d || !selectedService) return
+    const inputData = profileToInputData(d.pa)
+    const inputDataB = d.pb ? profileToInputData(d.pb) : undefined
+    const previewData: Record<string, unknown> = { service: selectedService.type, inputData }
+    if (inputDataB) previewData.inputDataB = inputDataB
+    if (selectedService.type === 'transit') {
+      previewData.startDate = transitStartDate
+      previewData.endDate = transitEndDate
+    }
+    if (user?.email) previewData.email = user.email
+    localStorage.setItem('previewInput', JSON.stringify(previewData))
+    window.open('/preview', '_blank')
+  }
+
+  const handleConfirmPaid = () => {
+    const d = getConfirmData()
+    if (!d || !selectedService) return
+
+    sessionStorage.setItem('inputData', JSON.stringify(profileToInputData(d.pa)))
     sessionStorage.setItem('selectedService', selectedService.type)
-    sessionStorage.setItem('profileUidA', pa.profileUid || '')
+    sessionStorage.setItem('profileUidA', d.pa.profileUid || '')
 
-    if (selectedService.needsTwo) {
-      const pb = profiles.find(p => p.id === profileB)
-      if (!pb) return
-      sessionStorage.setItem('inputDataB', JSON.stringify(profileToInputData(pb)))
-      sessionStorage.setItem('profileUidB', pb.profileUid || '')
+    if (selectedService.needsTwo && d.pb) {
+      sessionStorage.setItem('inputDataB', JSON.stringify(profileToInputData(d.pb)))
+      sessionStorage.setItem('profileUidB', d.pb.profileUid || '')
     }
 
     if (selectedService.type === 'transit') {
@@ -478,6 +545,7 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
       sessionStorage.removeItem('transitEndDate')
     }
 
+    sessionStorage.setItem('autoCheckout', '1')
     router.push('/checkout')
   }
 
@@ -489,6 +557,7 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
   )
   const canConfirm = profileA !== '' && (!selectedService?.needsTwo || profileB !== '') && transitDatesValid
   const hasAnyProfile = profiles.length > 0
+  const fmtPrice = (p: number) => p.toLocaleString('vi-VN') + ' ₫'
 
   return (
     <div className="min-h-screen" style={{ background: '#06060f' }}>
@@ -563,6 +632,11 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
                       <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
                         {s.description}
                       </p>
+                      {prices && prices[s.type] != null && (
+                        <p style={{ marginTop: '0.75rem', color: s.tagColor, fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', fontWeight: 600 }}>
+                          PDF đầy đủ: {fmtPrice(prices[s.type])}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -730,25 +804,43 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
                 )}
 
                 {(hasAnyProfile || profileA !== '') && (
-                  <button
-                    onClick={handleConfirm}
-                    disabled={!canConfirm}
-                    className="w-full py-3.5 mt-2 font-bold text-sm tracking-wider"
-                    style={{
-                      background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
-                      backgroundSize: '200% 200%',
-                      color: '#06060f',
-                      borderRadius: '4px',
-                      fontFamily: 'var(--font-vietnam)',
-                      letterSpacing: '0.08em',
-                      opacity: canConfirm ? 1 : 0.35,
-                      boxShadow: canConfirm ? '0 4px 20px rgba(200,148,63,0.25)' : 'none',
-                      transition: 'opacity 0.2s ease',
-                      cursor: canConfirm ? 'pointer' : 'not-allowed',
-                    }}
-                  >
-                    Tiếp tục →
-                  </button>
+                  <div className="space-y-2 mt-2">
+                    <button
+                      onClick={handleConfirmPaid}
+                      disabled={!canConfirm}
+                      className="w-full py-3.5 font-bold text-sm tracking-wider"
+                      style={{
+                        background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
+                        backgroundSize: '200% 200%',
+                        color: '#06060f',
+                        borderRadius: '4px',
+                        fontFamily: 'var(--font-vietnam)',
+                        letterSpacing: '0.08em',
+                        opacity: canConfirm ? 1 : 0.35,
+                        boxShadow: canConfirm ? '0 4px 20px rgba(200,148,63,0.25)' : 'none',
+                        transition: 'opacity 0.2s ease',
+                        cursor: canConfirm ? 'pointer' : 'not-allowed',
+                      }}
+                    >
+                      Xuất PDF chi tiết →
+                    </button>
+                    <button
+                      onClick={handleConfirmFree}
+                      disabled={!canConfirm}
+                      className="w-full py-3 font-semibold text-sm"
+                      style={{
+                        background: 'transparent',
+                        border: '1px solid rgba(200,148,63,0.35)',
+                        color: canConfirm ? '#d9ab55' : '#4a4560',
+                        borderRadius: '4px',
+                        fontFamily: 'var(--font-vietnam)',
+                        opacity: canConfirm ? 1 : 0.35,
+                        cursor: canConfirm ? 'pointer' : 'not-allowed',
+                      }}
+                    >
+                      Nhận báo cáo tổng quan miễn phí
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -779,7 +871,10 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
         initialData={guestInitialDataA}
         showSaveCheckbox={!!user}
         defaultSaveChecked={!!user}
-        submitLabel="Tiếp tục →"
+        showEmailField
+        twoActionMode
+        showCtvField={!user}
+        draftKey="guest_modal_single"
         onSave={handleGuestModalSubmit}
         onClose={() => { setGuestModalOpen(false); setGuestService(null); setGuestInitialDataA(null) }}
       />
@@ -791,6 +886,8 @@ export default function ServicesClient({ serviceConfigs }: { serviceConfigs?: Re
         onSubmit={handleGuestSynastrySubmit}
         initialDataA={guestInitialDataA}
         initialDataB={guestInitialDataB}
+        showCtvField={!user}
+        draftKey="guest_modal_synastry"
       />
     </div>
   )
