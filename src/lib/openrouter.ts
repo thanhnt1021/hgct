@@ -79,9 +79,13 @@ export async function generateEssayStreaming(
     }
 
     try {
+      const abortCtrl = new AbortController()
+      const streamTimeout = setTimeout(() => abortCtrl.abort(new Error('Stream timeout (180s)')), 180_000)
+
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: HEADERS(),
+        signal: abortCtrl.signal,
         body: JSON.stringify({
           model: MODEL,
           messages: [
@@ -93,8 +97,8 @@ export async function generateEssayStreaming(
           stream: true,
         }),
       })
-
       if (!response.ok) {
+        clearTimeout(streamTimeout)
         const err = await response.text()
         throw new Error(`OpenRouter streaming error: ${response.status} ${err}`)
       }
@@ -141,11 +145,19 @@ export async function generateEssayStreaming(
 
       // Stream ended without [DONE] — treat as interrupted, retry
       if (!finished) {
+        clearTimeout(streamTimeout)
         throw new StreamInterruptedError(fullText.length)
       }
 
+      clearTimeout(streamTimeout)
       return fullText
     } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((err as any)?.name === 'AbortError' || (err instanceof Error && err.message.includes('Stream timeout'))) {
+        lastError = new Error(`Stream timeout after 180s (attempt ${attempt + 1})`)
+        console.error(`[OpenRouter] Stream timeout on attempt ${attempt + 1}`)
+        continue
+      }
       lastError = err
       if (!isRetryableError(err)) throw err
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createHash } from 'crypto'
+import bcrypt from 'bcryptjs'
 import prisma from '@/lib/db'
-
-function hashPassword(password: string): string {
-  return createHash('sha256').update(password).digest('hex')
-}
 
 export async function POST(request: Request) {
   try {
@@ -27,10 +23,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Link đã hết hạn hoặc không hợp lệ' }, { status: 400 })
     }
 
+    const newHash = await bcrypt.hash(newPassword, 12)
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        passwordHash: hashPassword(newPassword),
+        passwordHash: newHash,
         resetToken: null,
         resetTokenExpiry: null,
       },

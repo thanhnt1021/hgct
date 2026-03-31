@@ -1,3 +1,8 @@
+// Escape HTML special chars for Telegram parse_mode: 'HTML'
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
 const TELEGRAM_CHAT_ID = '-1003849385640'
 const TELEGRAM_THREAD_ID = 161
@@ -16,6 +21,7 @@ export async function getOpenRouterBalance(): Promise<number | null> {
   try {
     const res = await fetch('https://openrouter.ai/api/v1/credits', {
       headers: { Authorization: `Bearer ${OPENROUTER_MANAGEMENT_KEY}` },
+      signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return null
     const data = await res.json()
@@ -71,6 +77,7 @@ async function getGenerationCost(generationIds: string[]): Promise<number | null
       for (const id of generationIds) {
         const res = await fetch(`https://openrouter.ai/api/v1/generation?id=${id}`, {
           headers: { Authorization: `Bearer ${OPENROUTER_MANAGEMENT_KEY}` },
+          signal: AbortSignal.timeout(10_000),
         })
         if (res.ok) {
           const data = await res.json()
@@ -161,9 +168,9 @@ export async function sendOrderFailedAlert(params: {
   const svcName = SERVICE_NAMES[service] || service
   const text = [
     `❌ <b>Đơn #${orderId} bị lỗi!</b>`,
-    `📦 ${svcName} — ${name}`,
-    `📧 ${email}`,
-    `💥 ${error.slice(0, 120)}`,
+    `📦 ${svcName} — ${escHtml(name)}`,
+    `📧 ${escHtml(email)}`,
+    `💥 ${escHtml(error.slice(0, 120))}`,
   ].join('\n')
   const keyboard = [
     [

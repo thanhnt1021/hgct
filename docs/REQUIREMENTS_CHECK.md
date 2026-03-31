@@ -119,6 +119,10 @@ TELEGRAM_ADMIN_WEBHOOK_SECRET=   # Random hex: node -e "console.log(require('cry
 
 # Admin Dashboard
 ADMIN_EMAILS=                    # Comma-separated emails được phép truy cập dashboard (ngoài lifetime users), vd: admin@gmail.com
+
+# Rate Limiting (optional — nếu không set thì dùng in-memory fallback, mất khi restart)
+UPSTASH_REDIS_REST_URL=          # Từ Upstash Console → Redis → REST API URL (https://...upstash.io)
+UPSTASH_REDIS_REST_TOKEN=        # Từ Upstash Console → Redis → REST API Token
 ```
 
 Sau khi tạo `.env.local`, copy vào standalone:

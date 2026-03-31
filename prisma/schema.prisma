@@ -108,6 +108,9 @@ model Order {
   // Admin intentional cancel (immune to status resets)
   adminCancelledAt    DateTime? @map("admin_cancelled_at")
 
+  // Idempotency key (checkout retry protection)
+  idempotencyKey      String?   @unique @map("idempotency_key")
+
   // CTV referral
   ctvCode             String?   @map("ctv_code")
 

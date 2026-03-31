@@ -102,6 +102,28 @@ export async function GET(request: Request) {
     }
   }
 
-  console.log('[CRON cleanup]', JSON.stringify(results))
-  return NextResponse.json({ ok: true, ...results })
+  // ── Phase 3: delete /tmp/hgct-previews/ files older than 24h ─────────
+  const PREVIEW_DIR = '/tmp/hgct-previews'
+  const phase3 = { deleted: 0 }
+  if (fs.existsSync(PREVIEW_DIR)) {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000
+    try {
+      const files = fs.readdirSync(PREVIEW_DIR)
+      for (const file of files) {
+        const filePath = path.join(PREVIEW_DIR, file)
+        try {
+          const stat = fs.statSync(filePath)
+          if (stat.mtimeMs < cutoff) {
+            fs.unlinkSync(filePath)
+            phase3.deleted++
+          }
+        } catch { /* skip */ }
+      }
+    } catch (err) {
+      results.errors.push(`phase3 preview cleanup: ${err}`)
+    }
+  }
+
+  console.log('[CRON cleanup]', JSON.stringify({ ...results, phase3 }))
+  return NextResponse.json({ ok: true, ...results, phase3 })
 }

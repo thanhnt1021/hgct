@@ -349,7 +349,16 @@ export async function processReport(
             orderAmount: updatedOrder.amount,
             commissionAmount,
             commissionRate: ctv.commissionRate,
-          }).catch((err) => console.error(`[JOB ${jobId}] CTV email failed:`, err))
+          }).catch((err) => {
+            console.error(`[JOB ${jobId}] CTV email failed:`, err)
+            sendOrderFailedAlert({
+              orderId,
+              service,
+              name,
+              email: ctv.email,
+              error: `CTV commission email failed: ${err instanceof Error ? err.message : String(err)}`,
+            }).catch(() => {})
+          })
           console.log(`[JOB ${jobId}] CTV commission ${commissionAmount} created for CTV ${ctv.id}`)
         }
       }
@@ -429,7 +438,11 @@ export function createReportJob(opts: CreateReportJobOptions): string {
     let recoveryToken: string | undefined
     if (orderId) {
       try {
-        recoveryToken = generateRecoveryToken()
+        // Preserve existing token if set (customer's email link must stay valid across retries)
+        const existingOrder = await prisma.order.findUnique({
+          where: { id: orderId }, select: { recoveryToken: true },
+        })
+        recoveryToken = existingOrder?.recoveryToken ?? generateRecoveryToken()
         const updated = await prisma.order.updateMany({
           where: { id: orderId, status: { not: 'failed' } },
           data: { status: 'failed', recoveryToken },
@@ -439,7 +452,7 @@ export function createReportJob(opts: CreateReportJobOptions): string {
           const name = (iData.name as string) || ''
           sendRecoveryEmail({ to: body.email as string, service, token: recoveryToken, name }).catch(console.error)
         } else {
-          recoveryToken = undefined // order already in failed state (concurrent request)
+          recoveryToken = existingOrder?.recoveryToken ?? undefined // concurrent failure already handled it
         }
       } catch (tokenErr) {
         console.error(`[JOB ${jobId}] Recovery token failed:`, tokenErr)

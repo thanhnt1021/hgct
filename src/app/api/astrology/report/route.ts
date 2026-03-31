@@ -41,6 +41,16 @@ export async function POST(request: Request) {
       endDate: eDate,
     } = body as Record<string, unknown>
 
+    // IDOR guard: verify profileUids belong to authenticated user
+    if (userUid && typeof pUidA === 'string') {
+      const owned = await prisma.profile.findFirst({ where: { profileUid: pUidA, userUid } })
+      if (!owned) return NextResponse.json({ error: 'Profile không hợp lệ' }, { status: 403 })
+    }
+    if (userUid && typeof pUidB === 'string') {
+      const owned = await prisma.profile.findFirst({ where: { profileUid: pUidB, userUid } })
+      if (!owned) return NextResponse.json({ error: 'Profile không hợp lệ' }, { status: 403 })
+    }
+
     // Bug #1 fix: save ALL order fields so retry/recovery can reconstruct full body
     let orderId: number | undefined
     try {
