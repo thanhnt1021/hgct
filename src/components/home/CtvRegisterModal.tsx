@@ -134,6 +134,9 @@ export default function CtvRegisterModal({ open, onClose }: Props) {
             <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>
               Chúng tôi đã nhận được thông tin của bạn.<br />
               Hãy truy cập trang Đại Sứ để thiết lập mật khẩu và mã giới thiệu của bạn.
+              {!setupToken && (
+                <><br /><span style={{ color: '#c9a84c', fontSize: '0.82rem' }}>Đã đăng ký trước đó? Vào trang Đại Sứ → đăng nhập bằng email để lấy lại link thiết lập.</span></>
+              )}
             </p>
             <a
               href={setupToken ? `https://daisu.hatgiongchiemtinh.com/setup?setupToken=${setupToken}` : 'https://daisu.hatgiongchiemtinh.com'}

@@ -83,9 +83,13 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
    → Xem `GIT_WORKFLOW.md` mục **"Push lên universal-workflow repo"** để biết cách thực hiện.
 
 8. Khi backup DB hoặc file quan trọng: **luôn lưu 2 nơi** — `/tmp/` (nhanh) + một thư mục persistent (`/var/[project]/backups/` hoặc tương đương) ngay trong cùng lệnh.
-
-9. **Package manager**: Dùng `pnpm` thay `npm` cho mọi project Node.js. pnpm dùng shared store (hardlink) nên nhiều project dùng chung packages mà không tốn thêm disk. Lệnh tương ứng: `pnpm install`, `pnpm run build`, `pnpm run dev`. Xem `NEW_PROJECT_SETUP.md` để biết chi tiết.
    _Lý do: `/tmp/` bị xóa khi server reboot. Backup trong `/tmp/` thôi là không có backup — mất dữ liệu khi cần nhất._
+
+9. **KHÔNG BAO GIỜ xin lỗi.** Không viết "xin lỗi", "sorry", "apologies" trong bất kỳ output nào. Khi gây ra lỗi: **lập tức phân tích nguyên nhân gốc (root cause) và đưa giải pháp thiết thực, thực tế để THỰC SỰ fix vấn đề**. KHÔNG đưa ra giải pháp bừa, random, chỉ để xoa dịu user. Giải pháp phải nhắm đúng root cause và ngăn lỗi tái diễn.
+   _Lý do: apology = thừa nhận vấn đề mà không giải quyết = vô ích. Random fix chỉ để "make peace" cũng vô ích — tốn thêm thời gian debug lần 2. Chỉ có root cause analysis + targeted fix mới có giá trị._
+
+10. **v98store proxy: XML wrap BẮT BUỘC.** Mọi function gọi AI qua v98store (hoặc bất kỳ proxy nào inject system prompt) PHẢI áp dụng ĐỦ 4 biện pháp: (a) embed instructions trong user message, KHÔNG dùng role system; (b) XML wrap mọi data block; (c) assistant prefill force role/format; (d) refusal detection + retry tối đa 3 lần. **KHÔNG BAO GIỜ** build function AI mới mà quên rule này.
+    _Lý do: proxy inject system prompt riêng (persona, security text) gây conflict với instructions của mình. Nếu không XML wrap + prefill, AI sẽ refuse hoặc break character. Đã xảy ra nhiều lần, tốn thời gian debug._
 
 ---
 

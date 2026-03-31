@@ -13,7 +13,7 @@ const TIERS = [
     features: [
       'Xem biểu đồ natal đầy đủ',
       'Bảng nguyên tố & tính chất',
-      'Xem trước báo cáo (Mục 1+2)',
+      'Xem trước báo cáo (Mục 1)',
       'Tìm kiếm vị trí sinh',
     ],
     cta: 'Bắt đầu miễn phí',
