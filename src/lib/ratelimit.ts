@@ -70,3 +70,13 @@ export async function checkRecoverRateLimit(ip: string): Promise<boolean> {
 export async function checkClaimRateLimit(ip: string, orderId: number): Promise<boolean> {
   return allow(`rl:claim:${ip}:${orderId}`, 3, 60 * 60)
 }
+
+/** CTV Login: 5 attempts per IP per 15 minutes */
+export async function checkCtvLoginRateLimit(ip: string): Promise<boolean> {
+  return allow(`rl:ctv:login:${ip}`, 5, 15 * 60)
+}
+
+/** CTV Register: 3 attempts per IP per hour */
+export async function checkCtvRegisterRateLimit(ip: string): Promise<boolean> {
+  return allow(`rl:ctv:register:${ip}`, 3, 60 * 60)
+}

@@ -123,6 +123,9 @@ ADMIN_EMAILS=                    # Comma-separated emails được phép truy c�
 # Rate Limiting (optional — nếu không set thì dùng in-memory fallback, mất khi restart)
 UPSTASH_REDIS_REST_URL=          # Từ Upstash Console → Redis → REST API URL (https://...upstash.io)
 UPSTASH_REDIS_REST_TOKEN=        # Từ Upstash Console → Redis → REST API Token
+
+# CTV (Đại Sứ / Affiliate)
+CTV_JWT_SECRET=                  # JWT secret cho CTV cookie — optional, fallback về NEXTAUTH_SECRET nếu không set
 ```
 
 Sau khi tạo `.env.local`, copy vào standalone:
@@ -175,13 +178,22 @@ sudo systemctl enable hgct hgct-demo
 
 ## 10. Crontab
 
-Setup cron check đơn định kỳ (chạy mỗi phút, endpoint tự check interval trong DB):
+**Tự động:** `deploy.sh` và `deploy-demo.sh` tự đăng ký 3 cron jobs sau mỗi deploy (không cần setup thủ công). Nếu cần setup thủ công trước deploy đầu tiên:
+
 ```bash
 CRON_SECRET=<giá trị CRON_SECRET trong .env.local>
-(crontab -l 2>/dev/null | grep -v 'order-check'; echo "* * * * * curl -s -H \"Authorization: Bearer ${CRON_SECRET}\" \"https://hatgiongchiemtinh.com/api/cron/order-check\" > /dev/null 2>&1") | crontab -
+(crontab -l 2>/dev/null | grep -v 'api/cron' ; \
+ echo "0 2 * * * curl -s -H 'Authorization: Bearer ${CRON_SECRET}' http://localhost:65498/api/cron/cleanup >> /var/log/hgct-cron.log 2>&1" ; \
+ echo "* * * * * curl -s -H 'Authorization: Bearer ${CRON_SECRET}' http://localhost:65498/api/cron/order-check >> /var/log/hgct-cron.log 2>&1" ; \
+ echo "0 9 * * * curl -s -H 'Authorization: Bearer ${CRON_SECRET}' http://localhost:65498/api/cron/retention >> /var/log/hgct-cron.log 2>&1") | crontab -
 # Verify:
-crontab -l | grep order-check
+crontab -l | grep api/cron
 ```
+
+3 jobs:
+- **cleanup** (2AM daily): xóa PDFs hết hạn + `/tmp/hgct-previews/` > 24h
+- **order-check** (every minute): check đơn paid nhưng chưa done, gửi Telegram alert
+- **retention** (9AM daily): gửi email follow-up 7 ngày sau mua
 
 ---
 

@@ -7,8 +7,7 @@ import { Suspense } from 'react'
 function SetupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const ctvId = searchParams.get('ctvId')
-  const setupEmail = searchParams.get('email') || ''
+  const setupToken = searchParams.get('setupToken')
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -31,17 +30,16 @@ function SetupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!ctvId) { setError('Thiếu ctvId'); return }
+    if (!setupToken) { setError('Link thiết lập không hợp lệ — vui lòng đăng ký lại'); return }
     if (password !== confirm) { setError('Mật khẩu xác nhận không khớp'); return }
     if (password.length < 8) { setError('Mật khẩu phải ít nhất 8 ký tự'); return }
     setLoading(true)
-    if (!setupEmail) { setError('Thiếu thông tin xác thực — vui lòng đăng nhập lại'); return }
     setError('')
     try {
       const res = await fetch('/api/ctv/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ctvId: Number(ctvId), email: setupEmail, password, ctvCode }),
+        body: JSON.stringify({ setupToken, password, ctvCode }),
       })
       const data = await res.json()
       if (res.ok) {

@@ -1,6 +1,8 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'crypto'
+import bcrypt from 'bcryptjs'
 
 const SECRET = new TextEncoder().encode(
   process.env.CTV_JWT_SECRET || process.env.NEXTAUTH_SECRET || 'ctv-fallback-secret'
@@ -58,6 +60,28 @@ export function setCtvCookie(res: NextResponse, token: string): void {
     maxAge: COOKIE_MAX_AGE,
     path: '/',
   })
+}
+
+/** Hash a new CTV password with bcrypt (cost 12). */
+export async function hashCtvPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12)
+}
+
+/**
+ * Dual-mode: verify SHA256 legacy or bcrypt.
+ * Returns { valid, needsRehash } — rehash = true means upgrade SHA256 → bcrypt.
+ */
+export async function verifyCtvPassword(
+  password: string,
+  stored: string,
+): Promise<{ valid: boolean; needsRehash: boolean }> {
+  if (/^[0-9a-f]{64}$/.test(stored)) {
+    const sha256 = createHash('sha256').update(password).digest('hex')
+    const valid = sha256 === stored
+    return { valid, needsRehash: valid }
+  }
+  const valid = await bcrypt.compare(password, stored)
+  return { valid, needsRehash: false }
 }
 
 export function clearCtvCookie(res: NextResponse): void {

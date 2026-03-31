@@ -71,40 +71,36 @@ export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userUid = (session?.user as any)?.uid as string | undefined
 
-    // Create order first to get the auto-increment ID
-    const order = await prisma.order.create({
-      data: {
-        userUid: userUid ?? null,
-        service,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        profileData: inputData as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        profileDataB: (inputDataB ?? null) as any,
-        profileUidA: profileUidA ?? null,
-        profileUidB: profileUidB ?? null,
-        startDate: startDate ?? null,
-        endDate: endDate ?? null,
-        email,
-        status: 'pending',
-        paymentStatus: 'unpaid',
-        amount,
-        ctvCode: ctvCode || null,
-        idempotencyKey: idemKey || undefined,
-      },
-    })
-
-    // Generate transferCode from orderId: HGCT + 6-digit padded ID
-    const transferCode = `HGCT${order.id.toString().padStart(6, '0')}`
-
-    // Update order with transferCode
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { transferCode },
+    // Atomic: create order + set transferCode in one transaction
+    const order = await prisma.$transaction(async (tx) => {
+      const created = await tx.order.create({
+        data: {
+          userUid: userUid ?? null,
+          service,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          profileData: inputData as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          profileDataB: (inputDataB ?? null) as any,
+          profileUidA: profileUidA ?? null,
+          profileUidB: profileUidB ?? null,
+          startDate: startDate ?? null,
+          endDate: endDate ?? null,
+          email,
+          status: 'pending',
+          paymentStatus: 'unpaid',
+          amount,
+          ctvCode: ctvCode || null,
+          idempotencyKey: idemKey || undefined,
+        },
+      })
+      // Generate transferCode from orderId: HGCT + 6-digit padded ID
+      const transferCode = `HGCT${created.id.toString().padStart(6, '0')}`
+      return tx.order.update({ where: { id: created.id }, data: { transferCode } })
     })
 
     return NextResponse.json({
       orderId: order.id,
-      transferCode,
+      transferCode: order.transferCode,
       amount,
       ...(appliedCommissionRate > 0 ? {
         originalAmount,
