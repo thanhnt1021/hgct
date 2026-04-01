@@ -38,7 +38,12 @@ export default function PreviewPage() {
   const [emailSent, setEmailSent] = useState(false)
   const [emailSending, setEmailSending] = useState(false)
   const [emailError, setEmailError] = useState('')
+  const [isMobile, setIsMobile] = useState(false)
   const hasStarted = useRef(false)
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768)
+  }, [])
 
   useEffect(() => {
     if (hasStarted.current) return
@@ -325,11 +330,54 @@ export default function PreviewPage() {
             </div>
           )}
 
-          <iframe
-            src={`/api/astrology/preview-pdf/${pdfId}`}
-            style={{ flex: 1, border: 'none', minHeight: 0 }}
-            title="Bản xem trước báo cáo chiêm tinh"
-          />
+          {isMobile ? (
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '1.5rem',
+                padding: '2rem 1.25rem',
+              }}
+            >
+              <div style={{ fontSize: '3rem' }}>✦</div>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: '#f4efe6', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem', fontFamily: 'var(--font-vietnam)' }}>
+                  Bản xem trước đã sẵn sàng
+                </p>
+                <p style={{ color: '#8a8399', fontSize: '0.85rem', lineHeight: 1.6, maxWidth: 280, fontFamily: 'var(--font-vietnam)' }}>
+                  Mở PDF để xem trên điện thoại
+                </p>
+              </div>
+              <a
+                href={`/api/astrology/preview-pdf/${pdfId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-block',
+                  padding: '0.75rem 2rem',
+                  background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
+                  color: '#06060f',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-vietnam)',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Mở PDF →
+              </a>
+            </div>
+          ) : (
+            <iframe
+              src={`/api/astrology/preview-pdf/${pdfId}`}
+              style={{ flex: 1, border: 'none', minHeight: 0 }}
+              title="Bản xem trước báo cáo chiêm tinh"
+            />
+          )}
 
           {/* Info bar at bottom */}
           <div
