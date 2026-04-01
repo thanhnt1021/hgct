@@ -62,6 +62,7 @@ export async function generateEssayStreaming(
   onProgress: (charsReceived: number) => void,
   onRetry?: (attempt: number, reason: string) => void,
   onGenerationId?: (id: string) => void,
+  timeoutMs = 300_000,
 ): Promise<string> {
   if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not configured')
 
@@ -80,7 +81,7 @@ export async function generateEssayStreaming(
 
     try {
       const abortCtrl = new AbortController()
-      const streamTimeout = setTimeout(() => abortCtrl.abort(new Error('Stream timeout (300s)')), 300_000)
+      const streamTimeout = setTimeout(() => abortCtrl.abort(new Error(`Stream timeout (${timeoutMs / 1000}s)`)), timeoutMs)
 
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -154,7 +155,7 @@ export async function generateEssayStreaming(
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((err as any)?.name === 'AbortError' || (err instanceof Error && err.message.includes('Stream timeout'))) {
-        lastError = new Error(`Stream timeout after 300s (attempt ${attempt + 1})`)
+        lastError = new Error(`Stream timeout after ${timeoutMs / 1000}s (attempt ${attempt + 1})`)
         console.error(`[OpenRouter] Stream timeout on attempt ${attempt + 1}`)
         continue
       }

@@ -210,6 +210,16 @@ export async function processReport(
   const expected = EXPECTED_CHARS[service] || 10000
   const minChars = MIN_CHARS[service] || 2000
 
+  // Service-specific stream timeout: transit/synastry need more time (longer output)
+  const STREAM_TIMEOUT_MS: Record<string, number> = {
+    career: 300_000,   // 5 min
+    love: 300_000,     // 5 min
+    synastry: 480_000, // 8 min
+    transit: 660_000,  // 11 min
+    relationship: 480_000,
+  }
+  const streamTimeoutMs = STREAM_TIMEOUT_MS[service] ?? 300_000
+
   const AI_MAX_RETRIES = 3
   let essayText = ''
   let totalAttempt = 0
@@ -245,6 +255,7 @@ export async function processReport(
         console.log(`[JOB ${jobId}] OpenRouter inner retry ${innerAttempt}`)
       },
       (genId) => generationIds.push(genId),
+      streamTimeoutMs,
     )
 
     if (essayText && essayText.length >= minChars) break
