@@ -28,7 +28,7 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 **Report flow:** Calculate chart → Get KB from DB → Run logic blocks → Build prompt → AI generates essay → Generate PDF → Send email
 
 **Environments:**
-- Production: hatgiongchiemtinh.com → port 65498, hgct.service, deploy with `sudo bash /root/hgct/deploy.sh`
+- Production: hatgiongchiemtinh.com → port 65498, hgct.service (`User=hgct`), deploy with `sudo bash /root/hgct/deploy.sh`
 - Demo: demo.hatgiongchiemtinh.com → port 65500, hgct-demo.service, deploy with `sudo bash /root/hgct/deploy-demo.sh [branch]`
 
 **Workflow:**
@@ -315,6 +315,7 @@ src/
 - PDF font deduplication — career PDF bị ~3× font embed (main render + reference page render mỗi cái embed full font set, pdf-lib không deduplicate) → 7.9MB thay vì 2.3MB; fix: `compressPdf()` dùng `ghostscript -dPDFSETTINGS=/printer` sau khi build xong PDF cuối (áp dụng tất cả service); 7.9MB → 2.9MB (63% giảm); fallback: nếu gs lỗi trả PDF gốc; `apt install ghostscript` thêm vào server
 - Recovery token bị xóa khi auto-retry — `smartRetryOrder()` set `recoveryToken: null` mỗi lần retry, khách nhận email với token cũ → vào trang recover → 404 "Không tìm thấy"; fix: bỏ `recoveryToken: null` khỏi update, token giữ nguyên đến khi order `completed`
 - **RRI-T v2.1 CTV security** — (A) bcrypt dual-mode: `verifyCtvPassword` SHA256 fallback + silent rehash, `hashCtvPassword` bcrypt12; (B) rate limit CTV login/register qua `ratelimit.ts`; (C) setupToken IDOR fix: thay ctvId+email bằng random 64-hex token, single-use (cleared sau setup); (D) email enumeration: register duplicate → 200 thay 409; Prisma `ctv.setup_token TEXT` thêm trực tiếp SQL (prisma db push lỗi config PK)
+- **Security incident + hardening (Apr 2026)** — XMRig miner bị cài qua `/root/FILE` file manager (unauthenticated `POST /run_command` shell execution); response: kill miners, clear malicious crontab, enable UFW firewall (block direct 65498/65500), add backend auth to FILE app, rotate tất cả 12 credentials, re-encrypt 629 profiles với PROFILE_ENCRYPTION_KEY mới; infrastructure: `hgct.service User=hgct` (không còn root), `admin.hatgiongchiemtinh.com` có Nginx Basic Auth (2-layer: Basic Auth popup + Flask login, cùng 1 password)
 
 ## Important Notes
 - Run dev server: `PORT=65498 npm run dev`
