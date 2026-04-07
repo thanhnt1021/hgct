@@ -64,35 +64,13 @@ export const authOptions: NextAuthOptions = {
   cookies: {
     sessionToken: {
       name: process.env.NODE_ENV === 'production'
-        ? '__Secure-next-auth.session-token'
+        ? '__Secure-next-auth.session-token-v2'
         : 'next-auth.session-token',
       options: {
         httpOnly: true,
         sameSite: 'lax' as const,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
-        domain: process.env.NODE_ENV === 'production' ? '.hatgiongchiemtinh.com' : undefined,
-      },
-    },
-    // Share OAuth state cookie across subdomains (demo ↔ production same Google OAuth callback)
-    state: {
-      name: '__Secure-next-auth.state',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax' as const,
-        path: '/',
-        secure: true,
-        maxAge: 60 * 15,
-        domain: process.env.NODE_ENV === 'production' ? '.hatgiongchiemtinh.com' : undefined,
-      },
-    },
-    callbackUrl: {
-      name: '__Secure-next-auth.callback-url',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax' as const,
-        path: '/',
-        secure: true,
         domain: process.env.NODE_ENV === 'production' ? '.hatgiongchiemtinh.com' : undefined,
       },
     },

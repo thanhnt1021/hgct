@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const OLD_SESSION_COOKIE = '__Secure-next-auth.session-token'
+
 export function middleware(req: NextRequest) {
   // Bug #10 fix: prefer 'host' (set by Nginx, trusted) over 'x-forwarded-host'
   // which can be spoofed by clients to bypass dashboard routing checks.
@@ -34,7 +36,17 @@ export function middleware(req: NextRequest) {
     return NextResponse.rewrite(url)
   }
 
-  return NextResponse.next()
+  const res = NextResponse.next()
+
+  // One-time migration: clear old session cookie (v1 name) that conflicts with v2.
+  // Runs on every non-static request until the old cookie is gone from the browser.
+  if (req.cookies.has(OLD_SESSION_COOKIE)) {
+    const clearOpts = 'Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax'
+    res.headers.append('Set-Cookie', `${OLD_SESSION_COOKIE}=; ${clearOpts}`)
+    res.headers.append('Set-Cookie', `${OLD_SESSION_COOKIE}=; Domain=.hatgiongchiemtinh.com; ${clearOpts}`)
+  }
+
+  return res
 }
 
 export const config = {
