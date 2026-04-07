@@ -449,6 +449,14 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
           {formError && (
             <p style={{ color: '#ef4444', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>⚠ {formError}</p>
           )}
+
+          {/* Scroll hint — tells user to scroll down to tap the button */}
+          <div style={{ textAlign: 'center', paddingTop: '0', animation: 'pfm-bounce 1.6s ease-in-out infinite' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ display: 'inline-block' }}>
+              <path d="M12 5v14M5 13l7 7 7-7" stroke="#c9a84c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.65"/>
+            </svg>
+          </div>
+          <style>{`@keyframes pfm-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}`}</style>
         </div>
 
         {/* Footer */}

@@ -2,6 +2,7 @@
 
 // VISUAL ONLY — services page restyled to Celestial Sanctum design
 // Backend logic (profileToInputData, handleConfirm, routing) untouched
+// v2 — dual pricing display
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -209,7 +210,7 @@ function ProfilePicker({
 
 // ── Main page ─────────────────────────────────────────────────────
 
-export default function ServicesClient({ serviceConfigs, prices }: { serviceConfigs?: Record<string, string>; prices?: Record<string, number> }) {
+export default function ServicesClient({ serviceConfigs, prices, displayPrices }: { serviceConfigs?: Record<string, string>; prices?: Record<string, number>; displayPrices?: Record<string, number> }) {
   const services = buildServices(serviceConfigs)
   const router = useRouter()
   const { user } = useAuth()
@@ -305,11 +306,15 @@ export default function ServicesClient({ serviceConfigs, prices }: { serviceConf
     const inputData = guestProfileToInput(formData, name)
     const ctvCode = sessionStorage.getItem('ctvCode') || undefined
 
+    // Persist form data as draft so modal re-opens with pre-filled data if user navigates back
+    try { sessionStorage.setItem('guest_modal_single', JSON.stringify({ form: formData })) } catch { /* ignore */ }
+
     if (action === 'free') {
       const previewData = {
         ...buildPreviewData(inputData),
         ...(email ? { email } : {}),
         ...(ctvCode ? { ctvCode } : {}),
+        _guestFormA: formData,  // for form restoration if user goes /preview → /checkout → back
       }
       localStorage.setItem('previewInput', JSON.stringify(previewData))
       window.open('/preview', '_blank')
@@ -353,11 +358,16 @@ export default function ServicesClient({ serviceConfigs, prices }: { serviceConf
     const inputDataB = guestProfileToInput(formB, nameB)
     const ctvCode = sessionStorage.getItem('ctvCode') || undefined
 
+    // Persist synastry form data as draft so modal re-opens pre-filled if user navigates back
+    try { sessionStorage.setItem('guest_modal_synastry', JSON.stringify({ formA, formB })) } catch { /* ignore */ }
+
     if (action === 'free') {
       const previewData = {
         ...buildPreviewData(inputDataA, inputDataB, 'synastry'),
         ...(email ? { email } : {}),
         ...(ctvCode ? { ctvCode } : {}),
+        _guestFormA: formA,
+        _guestFormB: formB,
       }
       localStorage.setItem('previewInput', JSON.stringify(previewData))
       window.open('/preview', '_blank')
@@ -588,26 +598,18 @@ export default function ServicesClient({ serviceConfigs, prices }: { serviceConf
             </div>
 
             {/* Service grid */}
+            <style>{`.svc-card{transition:transform .25s ease,box-shadow .25s ease}.svc-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.4)}`}</style>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {services.map(s => (
                 <button
                   key={s.type}
                   onClick={() => handleServiceClick(s)}
-                  className="text-left p-7 rounded-xl transition-all"
+                  className="svc-card text-left p-7 rounded-xl"
                   style={{
                     background: s.color,
                     border: `1px solid ${s.border}`,
                     backdropFilter: 'blur(12px)',
-                    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
                     height: '100%',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'
-                    ;(e.currentTarget as HTMLElement).style.boxShadow = '0 16px 48px rgba(0,0,0,0.4)'
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                    ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
                   }}
                 >
                   <div className="flex items-start gap-4">
@@ -632,10 +634,15 @@ export default function ServicesClient({ serviceConfigs, prices }: { serviceConf
                       <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
                         {s.description}
                       </p>
-                      {prices && prices[s.type] != null && (
-                        <p style={{ marginTop: '0.75rem', color: s.tagColor, fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', fontWeight: 600 }}>
-                          PDF đầy đủ: {fmtPrice(prices[s.type])}
-                        </p>
+                      {displayPrices?.[s.type] != null && (
+                        <div style={{ marginTop: '0.75rem' }}>
+                          <p style={{ color: s.tagColor, fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700 }}>
+                            {fmtPrice(displayPrices[s.type])}
+                          </p>
+                          <p style={{ color: '#9b8fb5', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', fontStyle: 'italic', marginTop: '0.2rem' }}>
+                            (Bấm xem chi tiết để nhận ưu đãi)
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>

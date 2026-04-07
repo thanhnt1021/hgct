@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
 const ALLOWED_CONFIG_KEYS = new Set([
   'site_mode',
   'price_career', 'price_love', 'price_synastry', 'price_transit',
+  'display_price_career', 'display_price_love', 'display_price_synastry', 'display_price_transit',
   'service_price',
   'hero_subtitle', 'hero_cta_text', 'cta_body', 'cta_button_text',
   'service_career_name', 'service_career_desc',
@@ -33,6 +34,7 @@ const ALLOWED_CONFIG_KEYS = new Set([
 
 const NUMERIC_KEYS = new Set([
   'price_career', 'price_love', 'price_synastry', 'price_transit',
+  'display_price_career', 'display_price_love', 'display_price_synastry', 'display_price_transit',
   'service_price', 'order_check_interval',
 ])
 

@@ -19,7 +19,11 @@ export default function GoogleSignInButton({ callbackUrl = '/profile' }: { callb
 
   const handleClick = () => {
     setLoading(true)
-    signIn('google', { callbackUrl, redirect: true })
+    // Use full origin so production NextAuth can redirect back to demo if needed
+    const fullCallbackUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}${callbackUrl.startsWith('/') ? callbackUrl : `/${callbackUrl}`}`
+      : callbackUrl
+    signIn('google', { callbackUrl: fullCallbackUrl, redirect: true })
     // Safety: reset loading if somehow the redirect didn't navigate away (e.g. popup blocked)
     setTimeout(() => setLoading(false), 10000)
   }

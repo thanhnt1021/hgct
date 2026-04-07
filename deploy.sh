@@ -67,6 +67,16 @@ systemctl restart hgct.service
 systemctl enable hgct.service
 sleep 3
 
+# Update chromium hash in security monitor (auto-detects new version after npm install)
+CHROMIUM_HASH=$(cd "$APP_DIR" && node scripts/chromium-hash.js 2>/dev/null)
+if [ -n "$CHROMIUM_HASH" ]; then
+  HASH_FILE="/etc/security-monitor/chromium_hash.txt"
+  chattr -i "$HASH_FILE" 2>/dev/null || true
+  echo "$CHROMIUM_HASH" > "$HASH_FILE"
+  chattr +i "$HASH_FILE"
+  echo "Chromium hash updated: $CHROMIUM_HASH"
+fi
+
 echo ""
 echo "=== Deploy complete ==="
 systemctl status hgct.service --no-pager | head -12

@@ -39,8 +39,13 @@ cp -r "$APP_DIR/public" "$APP_DIR/.next/standalone/public"
 echo "[3/4] Syncing build to demo dir..."
 rm -rf "$DEMO_DIR/.next"
 cp -r "$APP_DIR/.next" "$DEMO_DIR/.next"
-# Restore demo .env.local (different NEXTAUTH_URL + APP_PORT=65500)
-cp "$DEMO_DIR/.env.local" "$DEMO_DIR/.next/standalone/.env.local"
+# Build demo .env.local: start from production (always has current DB password + all keys),
+# then override only the two demo-specific vars. This prevents stale-credential breakage.
+cp "$APP_DIR/.env.local" "$DEMO_DIR/.next/standalone/.env.local"
+sed -i 's|^APP_PORT=.*|APP_PORT=65500|' "$DEMO_DIR/.next/standalone/.env.local"
+sed -i 's|^NEXTAUTH_URL=.*|NEXTAUTH_URL=https://demo.hatgiongchiemtinh.com|' "$DEMO_DIR/.next/standalone/.env.local"
+# Keep $DEMO_DIR/.env.local in sync too (used as reference in future deploys)
+cp "$DEMO_DIR/.next/standalone/.env.local" "$DEMO_DIR/.env.local"
 
 # 4. Restart demo service
 echo "[4/4] Restarting hgct-demo service..."
@@ -49,6 +54,16 @@ sleep 1
 systemctl daemon-reload
 systemctl restart hgct-demo.service
 sleep 3
+
+# Update chromium hash in security monitor
+CHROMIUM_HASH=$(cd "$APP_DIR" && node scripts/chromium-hash.js 2>/dev/null)
+if [ -n "$CHROMIUM_HASH" ]; then
+  HASH_FILE="/etc/security-monitor/chromium_hash.txt"
+  chattr -i "$HASH_FILE" 2>/dev/null || true
+  echo "$CHROMIUM_HASH" > "$HASH_FILE"
+  chattr +i "$HASH_FILE"
+  echo "Chromium hash updated: $CHROMIUM_HASH"
+fi
 
 echo ""
 echo "=== Quick Deploy done ==="

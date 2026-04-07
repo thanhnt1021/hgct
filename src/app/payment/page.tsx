@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
+// v2 — simplified QR-first layout
 
 const SERVICE_NAMES: Record<string, string> = {
   career: 'Luận Giải Hướng Nghiệp',
@@ -34,6 +35,7 @@ function PaymentInner() {
 
   const [paymentStatus, setPaymentStatus] = useState<'unpaid' | 'paid' | 'expired'>('unpaid')
   const [copied, setCopied] = useState(false)
+  const [bankExpanded, setBankExpanded] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(Math.floor(TIMEOUT_MS / 1000))
   const [failCount, setFailCount] = useState(0)
   const [countdownPaused, setCountdownPaused] = useState(false)
@@ -355,161 +357,147 @@ function PaymentInner() {
         </div>
       )}
 
-      <div className="max-w-md mx-auto px-4 pt-28 pb-16">
-        <div
-          className="rounded-2xl overflow-hidden"
-          style={{ background: 'rgba(245,240,232,0.97)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
-        >
-          {/* Header strip — includes amount */}
-          <div className="px-6 py-5 text-center"
-            style={{ background: 'linear-gradient(135deg, #1a0f2e 0%, #0d0720 100%)', borderBottom: '1px solid rgba(200,148,63,0.2)' }}>
-            <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.12em', fontWeight: 700, marginBottom: '0.3rem' }}>
-              THANH TOÁN
-            </p>
-            <h1 style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem', fontWeight: 700, letterSpacing: '0.03em', marginBottom: '0.2rem' }}>
-              {SERVICE_NAMES[service] || 'Báo cáo chiêm tinh'}
-            </h1>
-            {displayName && (
-              <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', marginBottom: '0.4rem' }}>
-                {displayName}
-              </p>
-            )}
+      <div className="max-w-sm mx-auto px-4 pt-24 pb-16">
+
+        {/* Service + name */}
+        <div className="text-center mb-5">
+          <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.12em', fontWeight: 700, marginBottom: '0.3rem' }}>
+            THANH TOÁN
+          </p>
+          <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem', fontWeight: 700, marginBottom: displayName ? '0.25rem' : 0 }}>
+            {SERVICE_NAMES[service] || 'Báo cáo chiêm tinh'}
+          </p>
+          {displayName && (
+            <p style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>{displayName}</p>
+          )}
+          {/* Amount */}
+          <div style={{ marginTop: '0.6rem' }}>
             {originalAmount > 0 && discountPct > 0 ? (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                  <span style={{ color: '#6b7280', textDecoration: 'line-through', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>
-                    {formatAmount(originalAmount)}
-                  </span>
-                  <span style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', fontWeight: 700, background: 'rgba(74,222,128,0.15)', padding: '1px 7px', borderRadius: '4px', letterSpacing: '0.04em' }}>
-                    -{discountPct}%
-                  </span>
-                </div>
-                <p style={{ color: '#c8410a', fontFamily: 'var(--font-vietnam)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.02em', margin: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
+                <span style={{ color: '#4a4560', textDecoration: 'line-through', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+                  {formatAmount(originalAmount)}
+                </span>
+                <span style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontWeight: 700, background: 'rgba(74,222,128,0.12)', padding: '1px 7px', borderRadius: '4px' }}>
+                  -{discountPct}%
+                </span>
+                <span style={{ color: '#f87171', fontFamily: 'var(--font-vietnam)', fontSize: '1.4rem', fontWeight: 800 }}>
                   {formatAmount(amount)}
-                </p>
+                </span>
               </div>
             ) : (
-              <p style={{ color: '#c8410a', fontFamily: 'var(--font-vietnam)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '0.02em', margin: 0 }}>
+              <span style={{ color: '#f87171', fontFamily: 'var(--font-vietnam)', fontSize: '1.5rem', fontWeight: 800 }}>
                 {formatAmount(amount)}
-              </p>
+              </span>
             )}
-          </div>
-
-          <div className="px-6 py-5">
-
-            {/* QR Code from SePay */}
-            <div className="flex justify-center mb-6">
-              {qrUrl ? (
-                <div className="rounded-xl p-3"
-                  style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', display: 'inline-block' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrUrl} alt="QR thanh toán SePay" width={200} height={200}
-                    style={{ display: 'block', borderRadius: '8px' }} />
-                </div>
-              ) : (
-                <div className="flex items-center justify-center rounded-xl"
-                  style={{ width: 200, height: 200, background: '#f0ebe2', border: '2px dashed rgba(200,148,63,0.4)' }}>
-                  <p style={{ color: '#b0a8a0', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', textAlign: 'center' }}>
-                    QR không khả dụng
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Bank info */}
-            <div className="rounded-xl p-4 mb-4"
-              style={{ background: 'rgba(26,15,46,0.06)', border: '1px solid rgba(0,0,0,0.07)' }}>
-              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.08em', fontWeight: 700, marginBottom: '0.6rem' }}>
-                THÔNG TIN CHUYỂN KHOẢN
-              </p>
-              <div className="space-y-2">
-                {[
-                  { label: 'Ngân hàng', value: bankName },
-                  { label: 'Số tài khoản', value: bankAccount },
-                  { label: 'Chủ tài khoản', value: bankAccountName },
-                ].map(row => (
-                  <div key={row.label} className="flex justify-between items-baseline gap-4"
-                    style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem' }}>
-                    <span style={{ color: '#9991a8', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', flexShrink: 0 }}>
-                      {row.label}:
-                    </span>
-                    <span style={{ color: '#1a0f2e', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, textAlign: 'right' }}>
-                      {row.value || '—'}
-                    </span>
-                  </div>
-                ))}
-                <div className="flex justify-between items-baseline gap-4"
-                  style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '0.5rem' }}>
-                  <span style={{ color: '#9991a8', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', flexShrink: 0 }}>Số tiền:</span>
-                  <span style={{ color: '#c8410a', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem', fontWeight: 800 }}>
-                    {formatAmount(amount)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center gap-4 pt-1">
-                  <span style={{ color: '#9991a8', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', flexShrink: 0 }}>
-                    Nội dung CK:
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span style={{ color: '#1a55e3', fontFamily: 'var(--font-vietnam)', fontSize: '1rem', fontWeight: 800, letterSpacing: '0.04em', background: 'rgba(26,85,227,0.08)', padding: '0.15rem 0.5rem', borderRadius: '6px' }}>
-                      {transferCode}
-                    </span>
-                    <button
-                      onClick={() => handleCopy(transferCode)}
-                      title="Sao chép nội dung"
-                      style={{
-                        background: copied ? 'rgba(61,184,138,0.15)' : 'rgba(0,0,0,0.06)',
-                        border: 'none', borderRadius: '6px', padding: '0.25rem 0.5rem',
-                        cursor: 'pointer', color: copied ? '#3db88a' : '#9991a8',
-                        fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontWeight: 600, transition: 'all 0.2s',
-                      }}
-                    >
-                      {copied ? '✓' : 'Copy'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Combined notice */}
-            <div className="rounded-lg px-4 py-3 mb-4 flex items-center gap-3"
-              style={{ background: 'rgba(61,184,138,0.05)', border: '1px solid rgba(61,184,138,0.15)' }}>
-              <span className="animate-pulse" style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#3db88a', flexShrink: 0 }} />
-              <p style={{ color: '#4a6660', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', lineHeight: 1.6, margin: 0 }}>
-                Tự động xác nhận và tạo báo cáo ngay khi nhận tiền.{' '}
-                <span style={{ color: '#8a7a55' }}>💡 Đã CK chưa thấy? Đợi 1–2 phút.</span>
-              </p>
-            </div>
-
-            {/* Countdown */}
-            <div className="text-center mb-4">
-              <p style={{ color: '#9991a8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
-                {countdownPaused ? 'Đang kết nối lại — đếm ngược tạm dừng' : 'Phiên thanh toán còn hiệu lực'}
-              </p>
-              <p style={{
-                color: countdownPaused ? '#8a8399' : (secondsLeft < 60 ? '#c8410a' : '#3d2b5e'),
-                fontFamily: 'var(--font-vietnam)', fontSize: '1.4rem', fontWeight: 800, letterSpacing: '0.05em',
-                opacity: countdownPaused ? 0.5 : 1,
-              }}>
-                {formatCountdown(secondsLeft)}
-              </p>
-            </div>
-
-            {/* Cancel link */}
-            <div className="text-center">
-              <button
-                onClick={() => router.push('/services')}
-                style={{ color: '#9991a8', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(153,145,168,0.4)' }}
-              >
-                Hủy giao dịch
-              </button>
-            </div>
           </div>
         </div>
 
-        <p style={{ color: '#38287a', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', textAlign: 'center', marginTop: '1.25rem', lineHeight: 1.7 }}>
-          Quét mã QR hoặc chuyển khoản thủ công với đúng nội dung <strong style={{ color: '#4a3870' }}>{transferCode}</strong>.<br />
-          Báo cáo sẽ được gửi tới email sau khi xác nhận.
-        </p>
+        {/* QR — big, centered, white bg */}
+        <div className="flex justify-center mb-5">
+          {qrUrl ? (
+            <div style={{ background: '#fff', borderRadius: '16px', padding: '12px', display: 'inline-block', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={qrUrl} alt="QR thanh toán SePay" width={240} height={240}
+                style={{ display: 'block', borderRadius: '8px' }} />
+            </div>
+          ) : (
+            <div className="flex items-center justify-center"
+              style={{ width: 240, height: 240, background: 'rgba(255,255,255,0.04)', borderRadius: '16px', border: '2px dashed rgba(200,148,63,0.3)' }}>
+              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem' }}>
+                QR không khả dụng
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Transfer code — primary action for manual transfer */}
+        <div className="rounded-xl px-4 py-4 mb-4 text-center"
+          style={{ background: 'rgba(26,15,60,0.7)', border: '1px solid rgba(200,148,63,0.2)' }}>
+          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+            NỘI DUNG CHUYỂN KHOẢN
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+            <span style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.06em' }}>
+              {transferCode}
+            </span>
+            <button
+              onClick={() => handleCopy(transferCode)}
+              style={{
+                background: copied ? 'rgba(61,184,138,0.2)' : 'rgba(200,148,63,0.15)',
+                border: `1px solid ${copied ? 'rgba(61,184,138,0.4)' : 'rgba(200,148,63,0.3)'}`,
+                borderRadius: '8px', padding: '0.3rem 0.75rem',
+                cursor: 'pointer', color: copied ? '#3db88a' : '#d9ab55',
+                fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 700, transition: 'all 0.2s',
+              }}
+            >
+              {copied ? '✓ Đã copy' : 'Copy'}
+            </button>
+          </div>
+        </div>
+
+        {/* Bank details — collapsible */}
+        <div className="rounded-xl mb-4 overflow-hidden"
+          style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+          <button
+            onClick={() => setBankExpanded(v => !v)}
+            className="w-full flex items-center justify-between px-4 py-3"
+            style={{ background: 'rgba(255,255,255,0.03)', border: 'none', cursor: 'pointer' }}
+          >
+            <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+              Thông tin tài khoản ngân hàng
+            </span>
+            <span style={{ color: '#6b6585', fontSize: '0.7rem' }}>{bankExpanded ? '▲' : '▼'}</span>
+          </button>
+          {bankExpanded && (
+            <div className="px-4 pb-4 space-y-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              {[
+                { label: 'Ngân hàng', value: bankName },
+                { label: 'Số tài khoản', value: bankAccount },
+                { label: 'Chủ tài khoản', value: bankAccountName },
+                { label: 'Số tiền', value: formatAmount(amount) },
+              ].map(row => (
+                <div key={row.label} className="flex justify-between items-baseline gap-4"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', flexShrink: 0 }}>
+                    {row.label}:
+                  </span>
+                  <span style={{ color: '#c8bfda', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'right' }}>
+                    {row.value || '—'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Notice + countdown row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+            <span className="animate-pulse" style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#3db88a', flexShrink: 0 }} />
+            <p style={{ color: '#4a6660', fontFamily: 'var(--font-vietnam)', fontSize: '0.74rem', lineHeight: 1.5, margin: 0 }}>
+              Tự động xác nhận khi nhận tiền.{' '}
+              <span style={{ color: '#6b6040' }}>Đã CK chưa thấy? Đợi 1–2 phút.</span>
+            </p>
+          </div>
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            <p style={{ color: countdownPaused ? '#6b6585' : (secondsLeft < 60 ? '#f87171' : '#f4efe6'), fontFamily: 'var(--font-vietnam)', fontSize: '1.3rem', fontWeight: 800, letterSpacing: '0.05em', margin: 0, opacity: countdownPaused ? 0.5 : 1 }}>
+              {formatCountdown(secondsLeft)}
+            </p>
+            {countdownPaused && (
+              <p style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', margin: 0 }}>tạm dừng</p>
+            )}
+          </div>
+        </div>
+
+        {/* Cancel link */}
+        <div className="text-center">
+          <button
+            onClick={() => router.push('/services')}
+            style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(74,69,96,0.4)' }}
+          >
+            Hủy giao dịch
+          </button>
+        </div>
       </div>
     </div>
   )

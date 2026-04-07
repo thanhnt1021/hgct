@@ -37,16 +37,13 @@ echo "    Branch: $BRANCH @ $(git -C $DEMO_DIR rev-parse --short HEAD)"
 echo "[2/6] Installing dependencies..."
 cd "$DEMO_DIR" && npm install --production=false
 
-# 3. Create demo .env.local if not exists
-if [ ! -f "$DEMO_DIR/.env.local" ]; then
-  echo "[3/6] Creating demo .env.local from production..."
-  cp "$APP_DIR/.env.local" "$DEMO_DIR/.env.local"
-  sed -i 's|NEXTAUTH_URL=.*|NEXTAUTH_URL=https://demo.hatgiongchiemtinh.com|' "$DEMO_DIR/.env.local"
-  sed -i 's|NEXT_PUBLIC_APP_URL=.*|NEXT_PUBLIC_APP_URL=https://demo.hatgiongchiemtinh.com|' "$DEMO_DIR/.env.local"
-  sed -i 's|APP_PORT=.*|APP_PORT=65500|' "$DEMO_DIR/.env.local"
-else
-  echo "[3/6] Demo .env.local exists"
-fi
+# 3. Always re-sync .env.local from production to pick up latest DB password + all keys,
+#    then patch the two demo-specific vars. Never trust old $DEMO_DIR/.env.local creds.
+echo "[3/6] Syncing .env.local from production (patching demo vars)..."
+cp "$APP_DIR/.env.local" "$DEMO_DIR/.env.local"
+# NEXTAUTH_URL keeps production value — shares same Google OAuth callback domain
+sed -i 's|^NEXT_PUBLIC_APP_URL=.*|NEXT_PUBLIC_APP_URL=https://demo.hatgiongchiemtinh.com|' "$DEMO_DIR/.env.local"
+sed -i 's|^APP_PORT=.*|APP_PORT=65500|' "$DEMO_DIR/.env.local"
 
 # 4. Build
 echo "[4/6] Building..."

@@ -24,6 +24,47 @@ const DEFAULTS: Record<string, number> = {
   transit: 3333,
 }
 
+const DISPLAY_DEFAULTS: Record<string, number> = {
+  career: 299000,
+  love: 299000,
+  synastry: 399000,
+  transit: 299000,
+}
+
+export function displayPriceKey(service: string): string {
+  return `display_price_${service}`
+}
+
+/** Get display price (giá niêm yết hiện ở /services) for a single service. */
+export async function getDisplayPrice(service: string): Promise<number> {
+  try {
+    const row = await prisma.config.findUnique({ where: { key: displayPriceKey(service) } })
+    if (row) {
+      const v = parseInt(row.value, 10)
+      if (!isNaN(v) && v >= 0) return v
+    }
+  } catch { /* ignore */ }
+  return DISPLAY_DEFAULTS[service] ?? 299000
+}
+
+/** Get all 4 display prices in one DB query. */
+export async function getAllDisplayPrices(): Promise<Record<string, number>> {
+  try {
+    const rows = await prisma.config.findMany({
+      where: { key: { in: SERVICES.map(displayPriceKey) } },
+    })
+    const map = Object.fromEntries(rows.map(r => [r.key, parseInt(r.value, 10)]))
+    return Object.fromEntries(
+      SERVICES.map(svc => {
+        const v = map[displayPriceKey(svc)]
+        return [svc, !isNaN(v) && v >= 0 ? v : DISPLAY_DEFAULTS[svc]]
+      }),
+    )
+  } catch {
+    return Object.fromEntries(SERVICES.map(s => [s, DISPLAY_DEFAULTS[s]]))
+  }
+}
+
 export function priceKey(service: string): string {
   return `price_${service}`
 }

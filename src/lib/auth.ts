@@ -74,6 +74,28 @@ export const authOptions: NextAuthOptions = {
         domain: process.env.NODE_ENV === 'production' ? '.hatgiongchiemtinh.com' : undefined,
       },
     },
+    // Share OAuth state cookie across subdomains (demo ↔ production same Google OAuth callback)
+    state: {
+      name: '__Secure-next-auth.state',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        path: '/',
+        secure: true,
+        maxAge: 60 * 15,
+        domain: process.env.NODE_ENV === 'production' ? '.hatgiongchiemtinh.com' : undefined,
+      },
+    },
+    callbackUrl: {
+      name: '__Secure-next-auth.callback-url',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        path: '/',
+        secure: true,
+        domain: process.env.NODE_ENV === 'production' ? '.hatgiongchiemtinh.com' : undefined,
+      },
+    },
   },
   pages: {
     signIn: '/auth/login',
@@ -126,6 +148,13 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return true
+    },
+    async redirect({ url, baseUrl }) {
+      // Allow redirects to any subdomain of hatgiongchiemtinh.com (e.g. demo.)
+      if (url.startsWith('https://') && url.includes('.hatgiongchiemtinh.com')) return url
+      if (url.startsWith(baseUrl)) return url
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      return baseUrl
     },
   },
 }

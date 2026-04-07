@@ -276,11 +276,11 @@ function ProcessingInner() {
 
   // ── Processing state ──
   const steps = [
-    { pct: 5,  label: 'Đang xác lập chính xác bản đồ sao của bạn' },
-    { pct: 15, label: 'Giải mã năng lượng các hành tinh và cung hoàng đạo' },
-    { pct: 18, label: 'Biên soạn nội dung luận giải cá nhân hoá' },
-    { pct: 90, label: 'Đóng gói thành file PDF' },
-    { pct: 95, label: 'Gửi đến email của bạn' },
+    { pct: 0,  label: 'Có lẽ bạn đã đi qua nhiều điều… và hôm nay, bạn chọn dừng lại để hiểu chính mình hơn một chút.' },
+    { pct: 20, label: 'Không phải ai cũng đủ can đảm để nhìn sâu vào bên trong như bạn đang làm lúc này.' },
+    { pct: 40, label: 'Từng mảnh ghép trong bạn đang dần được gọi tên — cả những điều bạn từng mơ hồ cảm nhận.' },
+    { pct: 60, label: 'Bạn không hề "ngẫu nhiên" như bạn nghĩ… mọi thứ trong bạn đều có lý do của nó.' },
+    { pct: 80, label: 'Và có lẽ, hôm nay sẽ là một ngày rất đẹp — vì bạn bắt đầu thật sự hiểu mình là ai.' },
   ]
 
   return (
@@ -401,8 +401,8 @@ function ProcessingInner() {
 
           {/* Step checklist */}
           <div className="space-y-2.5 text-left">
-            {steps.map(step => {
-              const done = progress >= step.pct + 5 || (step.pct === 95 && progress >= 100)
+            {steps.map((step, idx) => {
+              const done = idx < steps.length - 1 ? progress >= steps[idx + 1].pct : progress >= 100
               const active = progress >= step.pct && !done
               return (
                 <div
