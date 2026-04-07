@@ -57,6 +57,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `check goal` | Show tóm tắt GOAL.md + tiến độ + đề xuất bước tiếp theo (xem `OUTCOME.md` mục "Bất kỳ lúc nào") |
 | `update goal` | Claude đề xuất những gì nên update GOAL.md dựa trên việc vừa làm trong session (xem `OUTCOME.md`) |
 | `full update` | **One-shot cuối task**: update MD files → commit + push → merge main → restart service → report (xem **`full update` Workflow** bên dưới) |
+| `commit all` | **One-shot khi sửa `docs/universal_rules/`**: update MD files → commit + push project hiện tại → commit + push repo `universal-workflow` (nếu có thay đổi universal_rules/) → merge main → restart service → report (xem **`commit all` Workflow** bên dưới) |
 | **`tdk: [câu hỏi thô]`** | **Đọc `docs/tdk/MASTER_v1.md` → parse input → route pipeline TDK (PGA/INFRA/RRI-T)** |
 | **`check quality`** | **Đọc `docs/tdk/RRI-T_v1.md` → chạy QA multi-pass theo TDK protocol** |
 | **`check growth`** | **Đọc `docs/tdk/PGA_v1.md` → product growth analysis** |
@@ -219,6 +220,62 @@ One-shot command cuối task — gom toàn bộ `commit` + `merge main` + restar
 - Nếu có merge conflict → **DỪNG**, báo user, KHÔNG tự resolve
 - `full update` KHÔNG bao gồm deploy demo — chỉ restart service (production)
 - Nếu cần deploy demo trước khi commit → dùng `quick deploy` riêng trước
+
+---
+
+## commit all Workflow
+
+One-shot command khi cần commit + push ra **cả 2 repos** (project hiện tại + `universal-workflow`) trong cùng 1 lần. Dùng khi đã sửa `docs/universal_rules/` và muốn sync lên cả 2 nơi ngay lập tức.
+
+> **Lệnh `commit all` là lệnh rõ ràng của user** — không vi phạm Core Rule 1. Khi user nói `commit all`, Claude ĐƯỢC PHÉP commit, push, merge, restart.
+
+### Các bước (thực hiện tuần tự)
+
+**Bước 1 — Update MD files** (giống `full update` Bước 1)
+- Đọc `docs/MD_FILES_TO_UPDATE.md` → update tất cả MD files trong danh sách
+- Update `CLAUDE.md` nếu có thay đổi kiến trúc / commands / config
+- Clear `docs/MD_FILES_TO_UPDATE.md` sau khi update xong
+
+**Bước 2 — Push repo `universal-workflow`** (nếu `docs/universal_rules/` có thay đổi)
+- Kiểm tra: `git diff --name-only HEAD -- docs/universal_rules/` hoặc `git status`
+- Nếu có file thay đổi trong `docs/universal_rules/`:
+  1. Check `/tmp/universal-workflow/` còn tồn tại không (bị xóa khi reboot)
+  2. Nếu chưa có: `GIT_SSH_COMMAND="ssh -i /home/hgct/.ssh/github_hgct" git clone git@github.com:hentaiikidd/universal-workflow.git /tmp/universal-workflow`
+  3. Copy **chỉ những file đã thay đổi** từ `docs/universal_rules/` → `/tmp/universal-workflow/`
+  4. Trong `/tmp/universal-workflow/`: `git add [files]` → `git commit` → `GIT_SSH_COMMAND="..." git push`
+  5. Verify push thành công trước khi tiếp tục
+- Nếu không có thay đổi → **skip bước này hoàn toàn**, ghi chú "Universal-workflow: skipped (no changes)"
+
+**Bước 3 — Commit + push project hiện tại**
+- `git add [files cụ thể]` (KHÔNG `git add -A`)
+- `git commit` với message mô tả "why"
+- `git push -u origin HEAD` (feature branch) hoặc `git push` (main)
+- `git status` → verify "up to date"
+
+**Bước 4 — Merge main** (chỉ khi đang trên feature branch)
+- `git checkout main && git merge --no-ff feature/[tên]`
+- `git push`
+- Nếu đang trên `main` → skip bước này
+
+**Bước 5 — Restart service** (chỉ khi project có service)
+- `sudo systemctl restart [service-name]`
+- Verify: `sudo systemctl is-active [service-name]`
+
+**Bước 6 — Report**
+```
+-- commit all --
+Universal-workflow repo: pushed [N files] / skipped (no changes)
+Branch: [branch] -> main
+Commit: [hash] [message ngắn]
+Service: [tên] restarted / N/A
+MD files updated: [danh sách]
+```
+
+### Lưu ý
+- Nếu bất kỳ bước nào fail → **DỪNG ngay**, báo lỗi, KHÔNG tiếp tục
+- Nếu merge conflict → **DỪNG**, báo user
+- Universal-workflow repo dùng cùng SSH key: `/home/hgct/.ssh/github_hgct`
+- Repo URL: `git@github.com:hentaiikidd/universal-workflow.git`
 
 ---
 
