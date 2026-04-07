@@ -14,8 +14,9 @@ export async function GET() {
   try {
     // Read current interval from timer file
     const { stdout } = await execFileAsync('systemctl', ['cat', 'security-monitor.timer'])
-    const match = stdout.match(/OnUnitActiveSec=(\d+)min/)
-    const interval = match ? parseInt(match[1]) : 5
+    // systemctl cat shows base file first, then drop-in overrides — use last match
+    const matches = Array.from(stdout.matchAll(/OnUnitActiveSec=(\d+)min/g))
+    const interval = matches.length > 0 ? parseInt(matches[matches.length - 1][1]) : 5
     return NextResponse.json({ interval })
   } catch {
     return NextResponse.json({ interval: 5 })
