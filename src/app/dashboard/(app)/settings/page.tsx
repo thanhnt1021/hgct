@@ -1,4 +1,5 @@
 import SystemInfo from './SystemInfo'
+import SecurityMonitorSettings from './SecurityMonitorSettings'
 
 export default function SettingsPage() {
   return (
@@ -6,6 +7,7 @@ export default function SettingsPage() {
       <h1 style={{ fontSize: '1.4rem', fontWeight: 600, marginBottom: 4, color: '#f0e8d0' }}>Hệ Thống</h1>
       <p style={{ color: '#6b6585', fontSize: '0.8rem', marginBottom: 32 }}>Thông tin server và thống kê hệ thống</p>
       <SystemInfo />
+      <SecurityMonitorSettings />
     </div>
   )
 }

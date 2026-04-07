@@ -666,7 +666,19 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
 
     const chromium = await import('@sparticuz/chromium')
     const puppeteer = await import('puppeteer-core')
-    const execPath = await chromium.default.executablePath()
+
+    // Auto-fix EACCES: if chromium binary isn't executable by current user, delete it
+    // so @sparticuz/chromium re-extracts with correct ownership on next executablePath() call
+    let execPath = await chromium.default.executablePath()
+    try {
+      const { accessSync, unlinkSync, constants } = await import('fs')
+      try { accessSync(execPath, constants.X_OK) } catch {
+        console.warn('[PDF] Chromium not executable — removing and re-extracting:', execPath)
+        try { unlinkSync(execPath) } catch {}
+        execPath = await chromium.default.executablePath()
+      }
+    } catch {}
+
     browser = await puppeteer.default.launch({
       args: [...chromium.default.args, '--no-sandbox', '--disable-setuid-sandbox'],
       executablePath: execPath,

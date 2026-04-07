@@ -478,6 +478,10 @@ export async function handleCancelOrder(ctx: Ctx, orderId: number) {
       return
     }
     if (order.adminCancelledAt) {
+      // Ensure status is also set to 'cancelled' (may have been set before status update existed)
+      if (order.status !== 'cancelled') {
+        await prisma.order.update({ where: { id: orderId }, data: { status: 'cancelled' } })
+      }
       if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '✅ Đơn đã được admin hủy rồi')
       return
     }

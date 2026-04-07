@@ -2,6 +2,7 @@
 // can call processReport() without duplicating logic.
 
 import { randomUUID } from 'crypto'
+import { appendFileSync } from 'fs'
 import { calculateChart } from '@/lib/astrology/calculations'
 import { getKnowledgeFromDB } from '@/lib/astrology/knowledge'
 import { getCareerBlocks } from '@/lib/logic/career/manager'
@@ -432,7 +433,9 @@ export function createReportJob(opts: CreateReportJobOptions): string {
   createJob(jobId, meta)
 
   processReport(jobId, body, orderId, amount).catch(async (err) => {
-    console.error(`[JOB ${jobId}] Error:`, err)
+    const errLine = `[${new Date().toISOString()}] [JOB ${jobId}] [${service}] Error: ${err}\n${(err as Error)?.stack || ''}\n---\n`
+    console.error(errLine)
+    try { appendFileSync('/tmp/hgct-job-errors.log', errLine) } catch {}
 
     // Alert admin via Telegram
     if (orderId) {
