@@ -482,7 +482,10 @@ export async function handleCancelOrder(ctx: Ctx, orderId: number) {
       if (order.status !== 'cancelled') {
         await prisma.order.update({ where: { id: orderId }, data: { status: 'cancelled' } })
       }
-      if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '✅ Đơn đã được admin hủy rồi')
+      if (ctx.cbQueryId) await tgAnswer(ctx.cbQueryId, '✅ Đã hủy đơn #' + orderId)
+      // Refresh the list so the button disappears
+      const editCtx: Ctx = { chatId: ctx.chatId, threadId: ctx.threadId, messageId: ctx.messageId }
+      await showFailedOrders(editCtx)
       return
     }
     if (order.status === 'processing' || order.status === 'retrying') {
