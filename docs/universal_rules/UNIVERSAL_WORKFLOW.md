@@ -244,6 +244,7 @@ One-shot command khi cần commit + push ra **cả 2 repos** (project hiện t�
   3. Copy **chỉ những file đã thay đổi** từ `docs/universal_rules/` → `/tmp/universal-workflow/`
   4. Trong `/tmp/universal-workflow/`: `git add [files]` → `git commit` → `GIT_SSH_COMMAND="..." git push`
   5. Verify push thành công trước khi tiếp tục
+  6. **Xóa ngay**: `rm -rf /tmp/universal-workflow` — **KHÔNG để lại sau khi push xong** (tránh tạo safe-harbor cho attacker trong /tmp)
 - Nếu không có thay đổi → **skip bước này hoàn toàn**, ghi chú "Universal-workflow: skipped (no changes)"
 
 **Bước 3 — Commit + push project hiện tại**
