@@ -4,8 +4,8 @@ import { spawn } from 'child_process'
 import path from 'path'
 
 const ALLOWED_SCRIPTS = {
-  demo: '/root/hgct/deploy-demo-local.sh',
-  production: '/root/hgct/deploy.sh',
+  demo: '/home/hgct/hgct/deploy-demo-local.sh',
+  production: '/home/hgct/hgct/deploy.sh',
 } as const
 
 export async function POST(req: NextRequest) {

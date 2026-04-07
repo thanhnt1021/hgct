@@ -134,7 +134,7 @@ Profile page → nhập upgrade code
 ## 4. Cấu Trúc Thư Mục
 
 ```
-/root/hgct/
+/home/hgct/hgct/
 ├── src/
 │   ├── app/                        — Next.js App Router pages + API routes
 │   │   ├── layout.tsx              — Root layout, font loading, Providers
@@ -260,10 +260,10 @@ Job store **persist ra DB** (`jobs` table) — survive server restart. In-memory
 
 ```bash
 # Production
-sudo bash /root/hgct/deploy.sh
+sudo bash /home/hgct/hgct/deploy.sh
 
 # Demo (chỉ định branch)
-sudo bash /root/hgct/deploy-demo.sh [branch]
+sudo bash /home/hgct/hgct/deploy-demo.sh [branch]
 
 # Script làm gì:
 # 1. rm -rf .next && npx next build

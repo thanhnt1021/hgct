@@ -3,7 +3,7 @@ set -e
 
 echo "=== Deploying hgct (hatgiongchiemtinh.com) ==="
 
-cd /root/hgct
+cd /home/hgct/hgct
 
 # Install dependencies
 echo "[1/5] Installing dependencies..."

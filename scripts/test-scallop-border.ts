@@ -1,7 +1,7 @@
 /**
  * Test script: generate a PDF with scalloped border on [KTLUẬN] box.
  * Uses mock essay content (no AI call) for fast testing.
- * Saves to /root/hgct/docs/patchMD/testBorder.pdf
+ * Saves to /home/hgct/hgct/docs/patchMD/testBorder.pdf
  */
 import { generatePdf } from '../src/lib/pdf/generator'
 import fs from 'fs'

@@ -10,7 +10,7 @@
 
 ## Project Overview
 Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc lập, hoàn chỉnh.
-**KHÔNG liên quan** đến bất kỳ source code cũ nào nữa. Chỉ làm việc trong `/root/hgct`.
+**KHÔNG liên quan** đến bất kỳ source code cũ nào nữa. Chỉ làm việc trong `/home/hgct/hgct`.
 
 **Quy tắc file MD:** Mọi file `.md` mới (trừ `CLAUDE.md`) đều mặc định tạo trong `/docs/`. `CLAUDE.md` bắt buộc ở root (Claude Code CLI yêu cầu).
 
@@ -28,8 +28,8 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 **Report flow:** Calculate chart → Get KB from DB → Run logic blocks → Build prompt → AI generates essay → Generate PDF → Send email
 
 **Environments:**
-- Production: hatgiongchiemtinh.com → port 65498, hgct.service (`User=hgct`), deploy with `sudo bash /root/hgct/deploy.sh`
-- Demo: demo.hatgiongchiemtinh.com → port 65500, hgct-demo.service, deploy with `sudo bash /root/hgct/deploy-demo.sh [branch]`
+- Production: hatgiongchiemtinh.com → port 65498, hgct.service (`User=hgct`), deploy with `sudo bash /home/hgct/hgct/deploy.sh`
+- Demo: demo.hatgiongchiemtinh.com → port 65500, hgct-demo.service, deploy with `sudo bash /home/hgct/hgct/deploy-demo.sh [branch]`
 
 **Workflow:**
 - Làm việc trên nhánh `feature/...` → iterate nhanh với **quick deploy** (không cần commit) → **DỪNG, chờ user confirm**
@@ -44,10 +44,10 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 - Sau khi quick deploy xong → **báo cáo kết quả rồi DỪNG**, không tự commit/merge/deploy thêm
 
 **2 cách deploy demo:**
-1. **Quick deploy** (iterate nhanh, chưa commit): `sudo bash /root/hgct/deploy-demo-local.sh`
-   - Build từ code hiện tại tại `/root/hgct` (kể cả uncommitted changes)
-   - Sync build sang `/root/hgct-demo`, restart service — không cần git push
-2. **Full deploy** (sau khi commit + push): `sudo bash /root/hgct/deploy-demo.sh [branch]`
+1. **Quick deploy** (iterate nhanh, chưa commit): `sudo bash /home/hgct/hgct/deploy-demo-local.sh`
+   - Build từ code hiện tại tại `/home/hgct/hgct` (kể cả uncommitted changes)
+   - Sync build sang `/home/hgct/hgct-demo`, restart service — không cần git push
+2. **Full deploy** (sau khi commit + push): `sudo bash /home/hgct/hgct/deploy-demo.sh [branch]`
    - Pull từ GitHub, build từ đầu — dùng khi muốn share link demo hoặc sau khi commit
 
 **Shorthand commands (dùng trong chat):**

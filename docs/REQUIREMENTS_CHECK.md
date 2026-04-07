@@ -33,14 +33,14 @@ Sau khi `git clone`, mở Claude CLI và yêu cầu: **"check requirements"** �
 
 - [ ] `/var/hgct/pdfs/` tồn tại và writable: `sudo mkdir -p /var/hgct/pdfs && sudo chmod 755 /var/hgct/pdfs`
 - [ ] `/var/hgct/backups/` tồn tại: `sudo mkdir -p /var/hgct/backups && sudo chown hgct:hgct /var/hgct/backups`
-- [ ] `/root/hgct/` — thư mục project (git clone về đây)
-- [ ] `/root/hgct-demo/` — sẽ được tạo tự động bởi `deploy-demo.sh` lần đầu
+- [ ] `/home/hgct/hgct/` — thư mục project (git clone về đây)
+- [ ] `/home/hgct/hgct-demo/` — sẽ được tạo tự động bởi `deploy-demo.sh` lần đầu
 
 ---
 
 ## 4. Node Dependencies
 
-- [ ] `npm install` trong `/root/hgct/`
+- [ ] `npm install` trong `/home/hgct/hgct/`
 - [ ] `npx prisma generate` (sau khi có DATABASE_URL trong .env.local)
 
 ---
@@ -60,14 +60,14 @@ sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE zodiacdb TO nguydev;"
 
 Sau đó chạy migrate:
 ```bash
-cd /root/hgct && npx prisma migrate deploy
+cd /home/hgct/hgct && npx prisma migrate deploy
 ```
 
 ---
 
 ## 6. File `.env.local`
 
-Tạo `/root/hgct/.env.local` với các biến sau. **Hỏi user từng giá trị:**
+Tạo `/home/hgct/hgct/.env.local` với các biến sau. **Hỏi user từng giá trị:**
 
 ```env
 # App
@@ -130,7 +130,7 @@ CTV_JWT_SECRET=                  # JWT secret cho CTV cookie — optional, fallb
 
 Sau khi tạo `.env.local`, copy vào standalone:
 ```bash
-cp /root/hgct/.env.local /root/hgct/.next/standalone/.env.local
+cp /home/hgct/hgct/.env.local /home/hgct/hgct/.next/standalone/.env.local
 ```
 
 ---
@@ -145,8 +145,8 @@ Cần hỏi user:
 
 Template configs có sẵn tại `server_conf/`:
 ```bash
-sudo cp /root/hgct/server_conf/hgct.conf /etc/nginx/sites-available/hgct.conf
-sudo cp /root/hgct/server_conf/demo.hatgiongchiemtinh.com.conf /etc/nginx/sites-available/hgct-demo.conf
+sudo cp /home/hgct/hgct/server_conf/hgct.conf /etc/nginx/sites-available/hgct.conf
+sudo cp /home/hgct/hgct/server_conf/demo.hatgiongchiemtinh.com.conf /etc/nginx/sites-available/hgct-demo.conf
 # Sửa domain + port trong 2 file trên cho khớp với server mới
 sudo ln -sf /etc/nginx/sites-available/hgct.conf /etc/nginx/sites-enabled/
 sudo ln -sf /etc/nginx/sites-available/hgct-demo.conf /etc/nginx/sites-enabled/
@@ -167,8 +167,8 @@ sudo certbot --nginx -d yourdomain.com -d demo.yourdomain.com -d dashboard.yourd
 
 Template có sẵn tại `server_conf/`:
 ```bash
-sudo cp /root/hgct/server_conf/hgct.service /etc/systemd/system/
-sudo cp /root/hgct/server_conf/hgct-demo.service /etc/systemd/system/
+sudo cp /home/hgct/hgct/server_conf/hgct.service /etc/systemd/system/
+sudo cp /home/hgct/hgct/server_conf/hgct-demo.service /etc/systemd/system/
 # Kiểm tra port trong 2 file service khớp với .env.local
 sudo systemctl daemon-reload
 sudo systemctl enable hgct hgct-demo
@@ -200,8 +200,8 @@ crontab -l | grep api/cron
 ## 11. First Deploy
 
 ```bash
-sudo bash /root/hgct/deploy.sh                          # production (tự re-register Telegram webhook)
-sudo bash /root/hgct/deploy-demo.sh main                # demo
+sudo bash /home/hgct/hgct/deploy.sh                          # production (tự re-register Telegram webhook)
+sudo bash /home/hgct/hgct/deploy-demo.sh main                # demo
 ```
 
 ---

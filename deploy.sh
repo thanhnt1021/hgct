@@ -1,10 +1,10 @@
 #!/bin/bash
 # Deploy script for HGCT Next.js app
-# Run as root: bash /root/hgct/deploy.sh
+# Run as root: bash /home/hgct/hgct/deploy.sh
 
 set -e
 
-APP_DIR="/root/hgct"
+APP_DIR="/home/hgct/hgct"
 
 echo "=== HGCT Deploy ==="
 
@@ -39,15 +39,15 @@ After=network.target postgresql.service
 
 [Service]
 Type=simple
-User=root
-Group=root
-WorkingDirectory=/root/hgct/.next/standalone
+User=hgct
+Group=hgct
+WorkingDirectory=/home/hgct/hgct/.next/standalone
 Environment="PORT=65498"
 Environment="NODE_ENV=production"
-EnvironmentFile=/root/hgct/.env.local
+EnvironmentFile=/home/hgct/hgct/.env.local
 ExecStartPre=/bin/sh -c 'fuser -k 65498/tcp 2>/dev/null || true'
 ExecStartPre=/bin/sleep 1
-ExecStart=/usr/bin/node /root/hgct/.next/standalone/server.js
+ExecStart=/usr/bin/node /home/hgct/hgct/.next/standalone/server.js
 Restart=always
 RestartSec=5
 

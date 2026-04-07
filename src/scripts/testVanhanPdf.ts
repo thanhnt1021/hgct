@@ -1,13 +1,13 @@
 /**
  * Test script: generates a Vận Hạn PDF with section 1 only.
  * Run: DATABASE_URL="..." npx tsx src/scripts/testVanhanPdf.ts
- * Output: /root/hgct/imgs/testCanvaVanhan.pdf
+ * Output: /home/hgct/hgct/imgs/testCanvaVanhan.pdf
  */
 import fs from 'fs'
 import path from 'path'
 import { generatePdf, cleanForPdf } from '../lib/pdf/generator'
 
-const OUTPUT_PATH = '/root/hgct/imgs/testCanvaVanhan.pdf'
+const OUTPUT_PATH = '/home/hgct/hgct/imgs/testCanvaVanhan.pdf'
 
 // Sample section 1 essay (Tổng Quan Vận Hạn) with [KTLUẬN] box
 const SAMPLE_ESSAY = `Kính gửi Diệu Hương,

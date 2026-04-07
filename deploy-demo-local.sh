@@ -1,12 +1,12 @@
 #!/bin/bash
 # Quick local build + deploy to demo — NO git commit/push needed
 # Dùng khi đang iterate nhanh, chưa muốn commit
-# Usage: sudo bash /root/hgct/deploy-demo-local.sh
+# Usage: sudo bash /home/hgct/hgct/deploy-demo-local.sh
 
 set -e
 
-APP_DIR="/root/hgct"
-DEMO_DIR="/root/hgct-demo"
+APP_DIR="/home/hgct/hgct"
+DEMO_DIR="/home/hgct/hgct-demo"
 
 echo "=== HGCT Quick Local Deploy (no git push) ==="
 

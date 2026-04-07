@@ -477,7 +477,7 @@ P2 — Tối ưu:
 - **KHÔNG break flow hiện tại** — backward-compatible
 - DB schema changes → liệt kê migration TRƯỚC khi implement
   - Check: `Order` có field `claimedAt`/`claimInfo` không? Nếu chưa → thêm
-- Deploy production: `sudo bash /root/hgct/deploy.sh` (tự re-register webhook)
+- Deploy production: `sudo bash /home/hgct/hgct/deploy.sh` (tự re-register webhook)
 - SePay webhook path: `/api/payment/confirm/` (KHÔNG PHẢI `/api/payment/sepay-webhook/`)
 - PDF path: `/var/hgct/pdfs/{orderId}.pdf`
 - Env vars: xem `docs/REQUIREMENTS_CHECK.md` — nếu thêm env mới → update file đó

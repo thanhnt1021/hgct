@@ -267,4 +267,4 @@ npx prisma generate
 npx prisma studio
 ```
 
-**Lưu ý:** Chạy trong `/root/hgct/` với `.env.local` có `DATABASE_URL`.
+**Lưu ý:** Chạy trong `/home/hgct/hgct/` với `.env.local` có `DATABASE_URL`.

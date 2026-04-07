@@ -1,12 +1,12 @@
 #!/bin/bash
 # Deploy script for HGCT Demo (demo.hatgiongchiemtinh.com)
-# Usage: bash /root/hgct/deploy-demo.sh [branch-name]
+# Usage: bash /home/hgct/hgct/deploy-demo.sh [branch-name]
 # Run as root
 
 set -e
 
-APP_DIR="/root/hgct"
-DEMO_DIR="/root/hgct-demo"
+APP_DIR="/home/hgct/hgct"
+DEMO_DIR="/home/hgct/hgct-demo"
 GITHUB_REPO="git@github.com:hentaiikidd/hgct.git"
 BRANCH="${1:-$(git -C $APP_DIR branch --show-current)}"
 

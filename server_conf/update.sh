@@ -2,7 +2,7 @@
 set -e
 
 echo "=== Updating hgct ==="
-cd /root/hgct
+cd /home/hgct/hgct
 
 npm install --production
 npm run build

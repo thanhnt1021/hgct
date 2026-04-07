@@ -228,7 +228,7 @@ function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-const PDF_IMGS_DIR = '/root/hgct/imgs'
+const PDF_IMGS_DIR = '/home/hgct/hgct/imgs'
 
 interface PdfOptions {
   coverTitle: string

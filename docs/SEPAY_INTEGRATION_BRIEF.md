@@ -190,7 +190,7 @@ model Order {
 
 ## 4. Env vars cần thiết
 
-Thêm vào `.env.local` **và** `/root/hgct-demo/.env.local` (nếu có demo):
+Thêm vào `.env.local` **và** `/home/hgct/hgct-demo/.env.local` (nếu có demo):
 
 ```env
 # SePay Payment Integration
@@ -202,12 +202,12 @@ BANK_NAME=              # Format SePay: TPBank / MBBank / Vietcombank / ACB / Te
 
 **⚠️ Pitfall hay gặp — Demo environment:**
 
-Script `deploy-demo-local.sh` **restore** `/root/hgct-demo/.env.local` sau khi build, nên nếu chỉ thêm vars vào `/root/hgct/.env.local` mà không thêm vào `/root/hgct-demo/.env.local` → demo sẽ không có vars → API trả về rỗng → QR không hiển thị, bank info hiện "—".
+Script `deploy-demo-local.sh` **restore** `/home/hgct/hgct-demo/.env.local` sau khi build, nên nếu chỉ thêm vars vào `/home/hgct/hgct/.env.local` mà không thêm vào `/home/hgct/hgct-demo/.env.local` → demo sẽ không có vars → API trả về rỗng → QR không hiển thị, bank info hiện "—".
 
 **Fix:** Luôn thêm SePay vars vào CẢ HAI file:
 ```bash
-# /root/hgct/.env.local       ← production
-# /root/hgct-demo/.env.local  ← demo
+# /home/hgct/hgct/.env.local       ← production
+# /home/hgct/hgct-demo/.env.local  ← demo
 ```
 
 **⚠️ Pitfall — Production chưa restart:**
@@ -331,7 +331,7 @@ price_<service>  →  service_price (key cũ, backward compat)  →  3333 (hardc
 
 **Nguyên nhân:** Env vars rỗng trong demo. Deploy script restore demo `.env.local` (cũ) sau khi build.
 
-**Fix:** Thêm SePay vars vào `/root/hgct-demo/.env.local` (xem mục 4).
+**Fix:** Thêm SePay vars vào `/home/hgct/hgct-demo/.env.local` (xem mục 4).
 
 ### 7b. Khách CK xong, web không tự chuyển trang (mobile)
 

@@ -73,9 +73,9 @@ export default function TestEmailPage() {
               {noPass && (
                 <div className="mt-3 rounded-lg p-3" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
                   <p className="text-sm font-semibold mb-2" style={{ color: '#fbbf24' }}>⚠️ Thiếu mật khẩu SMTP</p>
-                  <p className="text-xs mb-2" style={{ color: '#94a3b8' }}>Thêm mật khẩu email Hostinger vào file <code style={{ color: '#c9a84c' }}>/root/hgct/.env.local</code>:</p>
+                  <p className="text-xs mb-2" style={{ color: '#94a3b8' }}>Thêm mật khẩu email Hostinger vào file <code style={{ color: '#c9a84c' }}>/home/hgct/hgct/.env.local</code>:</p>
                   <pre className="text-xs font-mono rounded p-2" style={{ background: 'rgba(0,0,0,0.3)', color: '#e8c96e' }}>SMTP_PASS=mật_khẩu_email_của_bạn</pre>
-                  <p className="text-xs mt-2" style={{ color: '#6b7280' }}>Sau đó chạy lại: <code style={{ color: '#94a3b8' }}>bash /root/hgct/deploy.sh</code></p>
+                  <p className="text-xs mt-2" style={{ color: '#6b7280' }}>Sau đó chạy lại: <code style={{ color: '#94a3b8' }}>bash /home/hgct/hgct/deploy.sh</code></p>
                 </div>
               )}
 
@@ -98,7 +98,7 @@ export default function TestEmailPage() {
         {/* Config guide */}
         <div className="mt-5 rounded-xl p-5" style={{ background: 'rgba(26,21,53,0.6)', border: '1px solid rgba(201,168,76,0.1)' }}>
           <p className="text-sm font-semibold mb-1" style={{ color: '#c9a84c', fontFamily: 'var(--font-vietnam)' }}>Cấu hình trong .env.local</p>
-          <p className="text-xs mb-3" style={{ color: '#6b7280' }}>File: <code style={{ color: '#94a3b8' }}>/root/hgct/.env.local</code></p>
+          <p className="text-xs mb-3" style={{ color: '#6b7280' }}>File: <code style={{ color: '#94a3b8' }}>/home/hgct/hgct/.env.local</code></p>
           <pre className="text-xs font-mono whitespace-pre-wrap rounded p-3" style={{ background: 'rgba(0,0,0,0.3)', color: '#94a3b8' }}>{`SMTP_HOST=smtp.hostinger.com
 SMTP_PORT=465
 SMTP_USER=support@hatgiongchiemtinh.com
