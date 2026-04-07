@@ -38,6 +38,7 @@ Bộ workflow rules dùng chung cho mọi project làm việc với **Claude Cod
 2. **Nếu không chạy được script**, thực hiện THỦ CÔNG theo đúng thứ tự:
    - `mkdir -p docs/universal_rules` trong dự án đích
    - Copy tất cả `*.md` vào `docs/universal_rules/` — **KHÔNG PHẢI root**
+   - Copy subdirectories: `hooks/`, `tdk/`, `github_templates/`
    - Tạo/cập nhật `CLAUDE.md` ở root với reference line
 
 3. **KHÔNG BAO GIỜ:**
@@ -56,7 +57,9 @@ curl -fsSL https://raw.githubusercontent.com/hentaiikidd/universal-workflow/main
 ```
 
 Script tự động:
-- Tạo `docs/universal_rules/` và copy toàn bộ rules vào đó (bao gồm `hooks/` và `tdk/`)
+- Tạo `docs/universal_rules/` và copy toàn bộ rules vào đó (bao gồm `hooks/`, `tdk/`, `github_templates/`)
+- Copy templates mới: `ENV_RULES.md`, `SECURITY_CHECKLIST.md`, `CI_CD_TEMPLATE.md`, `CONTRIBUTING_TEMPLATE.md`, `ADR_TEMPLATE.md`
+- Copy `github_templates/` (PR template + Issue templates)
 - Tạo hoặc cập nhật `CLAUDE.md` ở root
 - Tạo `README.md` ở root từ `README_TEMPLATE.md` (nếu chưa có)
 - Tạo `docs/GOAL.md` từ `GOAL_TEMPLATE.md` (nếu chưa có)
@@ -82,6 +85,9 @@ mkdir -p docs/universal_rules
 GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa" \
   git clone git@github.com:hentaiikidd/universal-workflow.git /tmp/_uw
 cp /tmp/_uw/*.md docs/universal_rules/
+cp -r /tmp/_uw/github_templates docs/universal_rules/ 2>/dev/null || true
+cp -r /tmp/_uw/hooks docs/universal_rules/ 2>/dev/null || true
+cp -r /tmp/_uw/tdk docs/universal_rules/ 2>/dev/null || true
 rm -rf /tmp/_uw
 ```
 
@@ -169,7 +175,10 @@ mkdir -p docs/universal_rules
 GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa" \
   git clone git@github.com:hentaiikidd/universal-workflow.git /tmp/_uw \
   && cp /tmp/_uw/*.md docs/universal_rules/ \
-  && rm -rf /tmp/_uw
+  && cp -r /tmp/_uw/github_templates docs/universal_rules/ 2>/dev/null; \
+  cp -r /tmp/_uw/hooks docs/universal_rules/ 2>/dev/null; \
+  cp -r /tmp/_uw/tdk docs/universal_rules/ 2>/dev/null; \
+  rm -rf /tmp/_uw
 ```
 
 Sau đó chạy bước 2 ở Cách 2 để setup CLAUDE.md.
@@ -200,7 +209,9 @@ Danh sách đầy đủ: xem [`README.md`](./README.md). Dưới đây là các 
 | `ASK-BACK.md` | Cơ chế hỏi ngược trước khi thực thi |
 | `OUTCOME.md` | Goal tracking protocol |
 
-Các file chuyên biệt (dùng khi project cần): `UI_MOBILE_RULES.md`, `BOT_COMMAND_RULES.md`, `VIETNAMESE_DIACRITICS.md`, `GOOGLE_OAUTH_SETUP.md`, `SEPAY_PAYMENT.md`
+Các file chuyên biệt (dùng khi project cần): `UI_MOBILE_RULES.md`, `BOT_COMMAND_RULES.md`, `VIETNAMESE_DIACRITICS.md`, `GOOGLE_OAUTH_SETUP.md`, `SEPAY_PAYMENT.md`, `ENV_RULES.md`, `SECURITY_CHECKLIST.md`
+
+Templates: `CONTRIBUTING_TEMPLATE.md`, `ADR_TEMPLATE.md`, `CI_CD_TEMPLATE.md`, `github_templates/`
 
 ---
 

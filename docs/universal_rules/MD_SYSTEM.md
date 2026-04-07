@@ -25,12 +25,22 @@ project-root/
       GOOGLE_OAUTH_SETUP.md          ← chuyên biệt: Google Login
       SEPAY_PAYMENT.md               ← chuyên biệt: thanh toán SePay
       VIETNAMESE_DIACRITICS.md       ← chuyên biệt: tiếng Việt
+      ENV_RULES.md                   ← quản lý .env, secrets
+      SECURITY_CHECKLIST.md          ← app-level security (OWASP)
+      CI_CD_TEMPLATE.md              ← GitHub Actions workflow templates
+      CONTRIBUTING_TEMPLATE.md       ← template cho CONTRIBUTING.md
+      ADR_TEMPLATE.md                ← Architecture Decision Records
+      github_templates/              ← PR + Issue templates cho GitHub
+        PULL_REQUEST_TEMPLATE.md
+        ISSUE_TEMPLATE/
+          bug_report.md
+          feature_request.md
     tdk/                             ← TDK Pipeline — product strategy + QA + infra
       MASTER_v1.md                   ← Orchestrator (input parser + router)
       PGA_v1.md                      ← Product Growth Analysis
       INFRA_v1.md                    ← Infrastructure + CI/CD
       RRI-T_v1.md                    ← Quality Assurance Testing
-      HDSD.md                        ← Hướng dẫn sử dụng TDK
+      HDSD_v1.md                     ← Hướng dẫn sử dụng TDK
     REQUIREMENTS_CHECK.md            ← tạo tự động khi `check requirements`
     MD_FILES_TO_UPDATE.md            ← tạo tự động khi `check requirements`
     [các file MD khác của project]   ← tất cả vào /docs
@@ -88,6 +98,6 @@ Chứa thông tin project-specific để Claude có context ngay khi mở sessio
 - What's DONE / TODO
 - Known fixes (những lỗi đã gặp + cách fix — tránh tìm lại)
 - Reference line: `> Chi tiết đầy đủ: docs/universal_rules/UNIVERSAL_WORKFLOW.md`
-- Reference line: `> TDK Pipeline: docs/tdk/HDSD.md`
+- Reference line: `> TDK Pipeline: docs/tdk/HDSD_v1.md`
 
 _Lý do CLAUDE.md quan trọng: Claude không có memory giữa các session. Không có file này, mỗi session mới Claude phải hỏi lại từ đầu về project, mất thời gian và dễ làm sai._

@@ -26,10 +26,16 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | Tích hợp thanh toán QR (SePay) | `SEPAY_PAYMENT.md` |
 | Bootstrap universal rules vào project mới | `BOOTSTRAP.md` |
 | Tạo/update tài liệu dự án | `PROJECT_DOCS.md` |
+| Quản lý .env, secrets, biến môi trường | `ENV_RULES.md` |
+| App-level security (OWASP, auth, upload) | `SECURITY_CHECKLIST.md` |
+| CI/CD workflow templates (GitHub Actions) | `CI_CD_TEMPLATE.md` |
+| Template cho CONTRIBUTING.md | `CONTRIBUTING_TEMPLATE.md` |
+| Ghi lại quyết định kiến trúc (ADR) | `ADR_TEMPLATE.md` |
+| PR template, issue templates (GitHub) | `github_templates/` |
 | **Phân tích sản phẩm / growth / positioning** | **`docs/tdk/MASTER_v1.md` → auto-route tới PGA** |
 | **Test chất lượng toàn diện (QA multi-pass)** | **`docs/tdk/RRI-T_v1.md`** |
 | **Setup server / deploy / infra / CI/CD** | **`docs/tdk/INFRA_v1.md`** |
-| **Đọc hướng dẫn bộ TDK Pipeline** | **`docs/tdk/HDSD.md`** |
+| **Đọc hướng dẫn bộ TDK Pipeline** | **`docs/tdk/HDSD_v1.md`** |
 
 ---
 
@@ -83,13 +89,25 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
    → Xem `GIT_WORKFLOW.md` mục **"Push lên universal-workflow repo"** để biết cách thực hiện.
 
 8. Khi backup DB hoặc file quan trọng: **luôn lưu 2 nơi** — `/tmp/` (nhanh) + một thư mục persistent (`/var/[project]/backups/` hoặc tương đương) ngay trong cùng lệnh.
+
+9. **Package manager**: Dùng `pnpm` thay `npm` cho mọi project Node.js. pnpm dùng shared store (hardlink) nên nhiều project dùng chung packages mà không tốn thêm disk. Lệnh tương ứng: `pnpm install`, `pnpm run build`, `pnpm run dev`. Xem `NEW_PROJECT_SETUP.md` để biết chi tiết.
    _Lý do: `/tmp/` bị xóa khi server reboot. Backup trong `/tmp/` thôi là không có backup — mất dữ liệu khi cần nhất._
 
-9. **KHÔNG BAO GIỜ xin lỗi.** Không viết "xin lỗi", "sorry", "apologies" trong bất kỳ output nào. Khi gây ra lỗi: **lập tức phân tích nguyên nhân gốc (root cause) và đưa giải pháp thiết thực, thực tế để THỰC SỰ fix vấn đề**. KHÔNG đưa ra giải pháp bừa, random, chỉ để xoa dịu user. Giải pháp phải nhắm đúng root cause và ngăn lỗi tái diễn.
-   _Lý do: apology = thừa nhận vấn đề mà không giải quyết = vô ích. Random fix chỉ để "make peace" cũng vô ích — tốn thêm thời gian debug lần 2. Chỉ có root cause analysis + targeted fix mới có giá trị._
+10. **KHÔNG CHẮC → HỎI NGAY.** Khi không chắc cách implement đúng (API vs subprocess, endpoint nào, flow ra sao, destructive action...) → dùng **AskUserQuestion TRƯỚC KHI code**. KHÔNG tự đoán rồi làm sai, không tự assume rồi implement, không loop fix nhiều lần.
+    _Lý do: đoán sai 1 lần tốn thời gian hơn hỏi 1 câu. User muốn kết quả đúng ngay lần đầu._
 
-10. **v98store proxy: XML wrap BẮT BUỘC.** Mọi function gọi AI qua v98store (hoặc bất kỳ proxy nào inject system prompt) PHẢI áp dụng ĐỦ 4 biện pháp: (a) embed instructions trong user message, KHÔNG dùng role system; (b) XML wrap mọi data block; (c) assistant prefill force role/format; (d) refusal detection + retry tối đa 3 lần. **KHÔNG BAO GIỜ** build function AI mới mà quên rule này.
-    _Lý do: proxy inject system prompt riêng (persona, security text) gây conflict với instructions của mình. Nếu không XML wrap + prefill, AI sẽ refuse hoặc break character. Đã xảy ra nhiều lần, tốn thời gian debug._
+11. **KHÔNG BAO GIỜ dùng subprocess Python** để tạo job/chạy operation khi web server đang live. Luôn dùng API endpoint (curl/httpx POST) — giống cách frontend làm.
+    _Lý do: subprocess có event loop riêng → khi subprocess kết thúc, event loop chết → job không bao giờ chạy. Phải restart web server mới pick up được — gây downtime và confuse._
+
+12. **Cài hooks ngay khi setup project mới.** Chạy `python3 docs/universal_rules/hooks/install_hooks.py` để cài tất cả Claude Code hooks vào `~/.claude/settings.json`. Hooks bắt buộc:
+    - `claude_notify.sh` — gửi Telegram khi task xong / cần trả lời / cần permission (cần `telegram_config.env`)
+    - `askback_enforce.py` — enforce ask-back trước khi execute
+    - `viet_diacritics_check.py` — chặn file tiếng Việt thiếu dấu
+    Setup Telegram: copy `telegram_config.env.example` → `telegram_config.env`, điền `BOT_TOKEN` + `CHAT_ID`.
+    _Lý do: hooks chạy tự động mỗi session — không cần nhớ, không bị bỏ sót. Telegram notify đặc biệt quan trọng khi task chạy lâu: biết ngay khi xong mà không cần ngồi canh._
+
+13. **KHÔNG BAO GIỜ xin lỗi.** Không viết "xin lỗi", "sorry", "apologies" trong bất kỳ output nào. Khi có lỗi: **đưa giải pháp ngay lập tức**. User cần solution, không cần apology. Apology = thừa nhận vấn đề mà không giải quyết = vô ích.
+   _Lý do: thời gian viết lời xin lỗi là thời gian lãng phí. Mỗi giây dùng để xin lỗi là một giây không dùng để fix. Nếu nguyên nhân gốc được xử lý triệt để thì lỗi không tái diễn — và không cần xin lỗi._
 
 ---
 

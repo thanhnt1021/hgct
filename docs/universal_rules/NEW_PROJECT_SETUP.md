@@ -48,15 +48,56 @@ Khi `check requirements`, Claude tự detect project type và thêm reference li
 | Có viewport meta, bottom-nav pattern, hoặc user nói "webapp" | `MOBILE_APP_STRICT_RULES.md` | `> Webapp strict rules: docs/universal_rules/MOBILE_APP_STRICT_RULES.md` |
 | Có `python-telegram-bot` hoặc bot framework trong dependencies | `BOT_COMMAND_RULES.md` | `> Bot rules: docs/universal_rules/BOT_COMMAND_RULES.md` |
 | Có strings tiếng Việt trong code hoặc user nói project tiếng Việt | `VIETNAMESE_DIACRITICS.md` | `> Vietnamese: docs/universal_rules/VIETNAMESE_DIACRITICS.md` |
-| Có `docs/tdk/` folder | TDK Pipeline | `> TDK Pipeline: docs/tdk/HDSD.md` |
+| Có `docs/tdk/` folder | TDK Pipeline | `> TDK Pipeline: docs/tdk/HDSD_v1.md` |
 | Có Google OAuth / NextAuth config | `GOOGLE_OAUTH_SETUP.md` | `> Google OAuth: docs/universal_rules/GOOGLE_OAUTH_SETUP.md` |
 | Có SePay / payment integration | `SEPAY_PAYMENT.md` | `> SePay: docs/universal_rules/SEPAY_PAYMENT.md` |
+| Có auth / payment / file-upload / sensitive data | `SECURITY_CHECKLIST.md` | `> Security: docs/universal_rules/SECURITY_CHECKLIST.md` |
+| Có ≥ 3 quyết định kỹ thuật quan trọng | `ADR_TEMPLATE.md` | Tạo `docs/adr/` theo template |
+| Dùng GitHub PRs / open-source | `github_templates/` | Copy vào `.github/` |
+| Cần CI/CD pipeline | `CI_CD_TEMPLATE.md` | `> CI/CD: docs/universal_rules/CI_CD_TEMPLATE.md` |
+| Có frontend (Next.js/React/Vue) | Tạo `docs/FRONTEND.md` | Detect `package.json` với framework |
+| Có Tailwind/CSS framework | Tạo `docs/DESIGN_SYSTEM.md` | Detect `tailwind.config` hoặc CSS framework |
+| Có systemd/PM2/Docker/nginx config | Tạo `docs/DEPLOYMENT.md` | Detect service files hoặc ecosystem.config |
 
 **Quy trình:**
 1. Claude scan codebase (package.json, templates, config files)
 2. Detect signals → list rule files cần apply
 3. Output: "Phát hiện project type: [X]. Đề xuất apply: [list rule files]. OK?"
 4. User confirm → Claude thêm reference lines vào CLAUDE.md
+
+---
+
+## Hooks Setup — Bắt buộc khi setup project mới
+
+Chạy ngay sau khi copy `docs/universal_rules/` vào project:
+
+```bash
+# 1. Cài hooks vào ~/.claude/settings.json
+python3 docs/universal_rules/hooks/install_hooks.py
+
+# 2. Setup Telegram notify (nếu chưa có)
+cp docs/universal_rules/hooks/telegram_config.env.example ~/.claude/hooks/telegram_config.env
+# Điền BOT_TOKEN và CHAT_ID vào file vừa copy
+```
+
+Hooks được cài:
+| Hook file | Trigger | Tác dụng |
+|---|---|---|
+| `claude_notify.sh` | Stop / AskUserQuestion / Permission | Gửi Telegram khi task xong / cần trả lời / cần confirm |
+| `askback_enforce.py` | UserPromptSubmit / Stop | Enforce ask-back trước khi execute |
+| `viet_diacritics_check.py` | Write / Edit | Chặn file tiếng Việt thiếu dấu |
+
+> `install_hooks.py` idempotent — chạy nhiều lần không bị duplicate.
+
+---
+
+## Execution Rules — Áp dụng mọi lúc
+
+> Những rules này phải được nhắc lại khi setup project mới và luôn active trong mọi session.
+
+- **KHÔNG CHẮC → HỎI NGAY.** Không tự đoán implementation, không assume. Dùng **AskUserQuestion** trước khi code.
+- **KHÔNG dùng subprocess Python** để tạo job/chạy operation khi web server đang live. Luôn dùng API endpoint (curl/httpx POST).
+- **Sau khi tạo job/trigger operation**: verify ngay bằng cách kiểm tra log hoặc gọi API check status — đừng assume "chắc chạy rồi".
 
 ### Template `docs/MD_FILES_TO_UPDATE.md` (khi tạo mới)
 
@@ -96,6 +137,8 @@ _(trống)_
   - `[WEB/Next.js]`: NEXTAUTH_URL, NEXTAUTH_SECRET, DATABASE_URL, API keys...
   - `[BOT]`: BOT_TOKEN, WEBHOOK_URL...
   - `[API]`: DATABASE_URL, SECRET_KEY, PORT...
+- [ ] `.env.example` — nếu chưa có: tạo từ `.env` (keys only, placeholder values). Xem `ENV_RULES.md`.
+- [ ] `CONTRIBUTING.md` ở root — nếu project có > 1 contributor: tạo từ `CONTRIBUTING_TEMPLATE.md`. **KHÔNG overwrite nếu đã có.**
 - [ ] `.gitignore` có chứa `.env*` — kiểm tra và thêm nếu thiếu.
   _Lý do: nếu `.env` bị commit vào repo (kể cả private), secrets (API keys, DB password, JWT secret) sẽ nằm trong git history mãi mãi — xóa file đi cũng không xóa được khỏi history. Một khi lộ là coi như đã lộ._
 

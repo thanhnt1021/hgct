@@ -45,7 +45,26 @@ _Lý do: build pass không đảm bảo app chạy đúng. Runtime errors (API s
 
 _Lý do: đây là quality gate vì code và docs phải đi cùng nhau trong một commit. Nếu merge code mà docs cũ, người deploy server mới sau này sẽ thiếu thông tin và app sẽ crash._
 
-## 5. Vietnamese Diacritics Check (Dự án tiếng Việt)
+## 5. Environment Sync Check
+
+- [ ] `.env.example` tồn tại và đồng bộ với `.env` (cùng keys, khác values)
+- [ ] `.gitignore` chứa `.env*` (không commit secrets)
+- [ ] Không có file `.env` trong staged changes
+
+> Chi tiết: `ENV_RULES.md`
+
+_Lý do: `.env.example` là tài liệu duy nhất cho team biết cần setup biến nào. Thiếu sync = deploy server mới thiếu biến → app crash._
+
+## 6. Dependency Security Audit (Security-sensitive projects)
+
+- [ ] `npm audit --audit-level=high` — zero high/critical (Node.js)
+- [ ] `pip audit` — zero known vulnerabilities (Python)
+
+> Chi tiết: `SECURITY_CHECKLIST.md` §4
+
+_Lý do: dependencies có thể chứa CVE công khai. Không audit = deploy code có lỗ hổng đã biết._
+
+## 7. Vietnamese Diacritics Check (Dự án tiếng Việt)
 
 - [ ] Grep tất cả strings tiếng Việt trong files vừa sửa
 - [ ] Mọi user-facing string đều có dấu đầy đủ (messages, buttons, captions, image labels, AI prompts)
@@ -55,7 +74,7 @@ _Lý do: đây là quality gate vì code và docs phải đi cùng nhau trong m�
 
 _Lý do: Tiếng Việt không dấu là lỗi phổ biến nhất khi AI viết code. Mỗi commit phải verify -- không tin vào "đã viết đúng từ đầu"._
 
-## 6. Commit Message
+## 8. Commit Message
 
 Format:
 ```
@@ -101,7 +120,7 @@ Types và ý nghĩa:
 - [ ] Service restart thành công: `sudo systemctl restart <service> && sudo systemctl status <service>`
 - [ ] **Command Registration Check:** Tương tự Node — xem `BOT_COMMAND_RULES.md` mục 1 + 4.
 
-## 7. RRI-T Quality Audit (Khi user yêu cầu)
+## 9. RRI-T Quality Audit (Khi user yêu cầu)
 
 Khi user gọi `check quality` hoặc `check RRI-T` → chạy kiểm thử toàn diện theo **TDK Pipeline**:
 

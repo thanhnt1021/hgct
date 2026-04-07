@@ -53,7 +53,12 @@ Kiểm tra `docs/` xem đã có file nào chưa:
 | `docs/API_REFERENCE.md` | Project có REST API | Endpoints, methods, request/response, auth, error codes |
 | `docs/DATABASE.md` | Project có database | Schema, relations, migrations, queries quan trọng |
 | `docs/AUTH_SYSTEM.md` | Auth phức tạp (multi-method, roles) | Auth flow, token format, middleware, permissions |
-| `docs/DEPLOY.md` | Deploy flow phức tạp | Cách deploy, scripts, CI/CD, environment setup |
+| `docs/DEPLOYMENT.md` | Project có deploy config (systemd/PM2/Docker/nginx) | Services, ports, nginx config, SSL, deploy commands, rollback, monitoring |
+| `docs/FRONTEND.md` | Project có frontend (Next.js/React/Vue) | Routes/pages, components, hooks, providers, state management, build & deploy |
+| `docs/DESIGN_SYSTEM.md` | Project có UI framework (Tailwind/CSS) | Colors, typography, spacing, layout patterns, responsive, dark mode |
+| `docs/SECURITY.md` | Có auth/payment/sensitive data | Security posture, risks, audit log (template: `SECURITY_CHECKLIST.md` §5) |
+| `docs/adr/` | Có ≥ 3 quyết định kiến trúc | Architecture Decision Records (template: `ADR_TEMPLATE.md`) |
+| `CONTRIBUTING.md` (root) | Có > 1 contributor | Quick start, branch naming, PR process (template: `CONTRIBUTING_TEMPLATE.md`) |
 
 ---
 
@@ -64,6 +69,7 @@ Kiểm tra `docs/` xem đã có file nào chưa:
 - `_Last reviewed: YYYY-MM-DD_` ngay dưới heading
 - Dùng bảng (table) cho danh sách có nhiều cột
 - Dùng code block cho schema, flow diagram, command
+- Dùng Mermaid cho architecture diagrams khi cần (GitHub renders natively)
 - Viết tiếng Việt có dấu (theo `VIETNAMESE_DIACRITICS.md`)
 
 ### Nguyên tắc nội dung

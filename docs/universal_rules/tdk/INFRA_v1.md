@@ -702,6 +702,11 @@ Prevention:
 
 ## 10. CI/CD PIPELINE
 
+> **Workflow templates đầy đủ** (Node.js, Python, Docker — lint + test + security audit + deploy):
+> Xem `docs/universal_rules/CI_CD_TEMPLATE.md`
+>
+> Section này chỉ cover SSH deploy pattern cơ bản. Dùng `CI_CD_TEMPLATE.md` khi cần full CI/CD pipeline.
+
 ### 10.1 GitHub Actions — SSH Deploy
 
 ```yaml
@@ -797,6 +802,14 @@ cat deploy_key.pub >> /home/deploy/.ssh/authorized_keys
 ---
 
 ## 11. SECURITY & HEALTH AUDIT
+
+> **App-level security** (OWASP Top 10, auth, file upload, dependency audit):
+> Xem `docs/universal_rules/SECURITY_CHECKLIST.md`
+>
+> **Secrets management** (.env, rotation, classification):
+> Xem `docs/universal_rules/ENV_RULES.md`
+>
+> Section này focus server-level security. Kết hợp với 2 file trên cho coverage đầy đủ.
 
 ### 11.1 Security Checklist
 

@@ -70,8 +70,25 @@ def main() -> None:
     settings = load_settings()
     added = []
 
+    notify  = os.path.join(hooks_dir, "claude_notify.sh")
     askback = os.path.join(hooks_dir, "askback_enforce.py")
     viet    = os.path.join(hooks_dir, "viet_diacritics_check.py")
+
+    # claude_notify: UserPromptSubmit + PreToolUse(AskUserQuestion) + Notification + Stop
+    if os.path.exists(notify):
+        config = os.path.join(hooks_dir, "telegram_config.env")
+        if not os.path.exists(config):
+            print(f"  WARNING: telegram_config.env not found — copy from telegram_config.env.example and fill in BOT_TOKEN + CHAT_ID")
+        if ensure_hook(settings, "UserPromptSubmit", "", notify, timeout=5):
+            added.append("UserPromptSubmit -> claude_notify.sh")
+        if ensure_hook(settings, "PreToolUse", "AskUserQuestion", notify, timeout=5):
+            added.append("PreToolUse(AskUserQuestion) -> claude_notify.sh")
+        if ensure_hook(settings, "Notification", "", notify, timeout=5):
+            added.append("Notification -> claude_notify.sh")
+        if ensure_hook(settings, "Stop", "", notify, timeout=10):
+            added.append("Stop -> claude_notify.sh")
+    else:
+        print(f"  WARNING: {notify} not found — skipping notify hooks")
 
     # askback_enforce: UserPromptSubmit + Stop
     if os.path.exists(askback):
