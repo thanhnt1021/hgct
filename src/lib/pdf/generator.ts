@@ -685,6 +685,8 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       headless: true,
     })
     const page = await browser.newPage()
+    // Global timeout for all navigations — inline HTML can take >30s on loaded server
+    page.setDefaultNavigationTimeout(60000)
 
     // Fix 1: viewport width = 642px = A4 print content width (170mm @ 96dpi).
     // This makes screen layout match print layout so heading overflow detection is accurate.
@@ -695,7 +697,11 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
     page.on('console', (msg: any) => console.log('[PDF-JS]', msg.text()))
 
     const html = buildHtml(essayText, options)
-    await page.setContent(html, { waitUntil: 'networkidle0' })
+    // 'load' fires when HTML is parsed — correct for self-contained inline HTML.
+    // Font correctness is guaranteed by `document.fonts.ready` in the evaluate below.
+    // 'networkidle0' was unreliable: Chromium internal activity could reset the 500ms
+    // idle timer, causing intermittent 30s timeouts even with no external resources.
+    await page.setContent(html, { waitUntil: 'load', timeout: 60000 })
 
     // Polyfill esbuild's __name helper for TSX runtime (not available in browser context)
     await page.evaluate(() => { (globalThis as any).__name = (fn: any, _n: string) => fn })
