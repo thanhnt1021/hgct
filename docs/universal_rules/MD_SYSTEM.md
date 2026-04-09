@@ -95,9 +95,34 @@ Chứa thông tin project-specific để Claude có context ngay khi mở sessio
   _Lý do: CLAUDE.md là file DUY NHẤT Claude Code CLI tự động đọc mỗi session. Rules trong file được reference (`docs/universal_rules/*.md`) phụ thuộc vào việc Claude có chịu mở ra đọc không — không đảm bảo. Critical rules phải nằm trong file được auto-load._
 - Tech stack, cấu trúc thư mục
 - Env vars, ports, domain
-- What's DONE / TODO
-- Known fixes (những lỗi đã gặp + cách fix — tránh tìm lại)
+- What's DONE (tóm tắt) / TODO
+- Known fixes (tóm tắt — xem file history để tránh tìm lại)
 - Reference line: `> Chi tiết đầy đủ: docs/universal_rules/UNIVERSAL_WORKFLOW.md`
 - Reference line: `> TDK Pipeline: docs/tdk/HDSD_v1.md`
 
 _Lý do CLAUDE.md quan trọng: Claude không có memory giữa các session. Không có file này, mỗi session mới Claude phải hỏi lại từ đầu về project, mất thời gian và dễ làm sai._
+
+### Giới hạn kích thước CLAUDE.md — ≤40k chars
+
+Claude Code CLI cảnh báo khi CLAUDE.md vượt 40k chars, ảnh hưởng performance. Khi project lớn dần, 2 section hay phình to nhất là **What's DONE** và **Known Fixes Applied** — đây là nội dung lịch sử, không phải context cần thiết cho task mới.
+
+**Quy tắc:** Khi CLAUDE.md vượt 35k chars, tách 2 section đó ra file riêng:
+
+| File | Nội dung |
+|------|----------|
+| `docs/DONE_HISTORY.md` | Toàn bộ danh sách tính năng đã hoàn thành |
+| `docs/FIXES_HISTORY.md` | Toàn bộ danh sách bug đã gặp + cách fix |
+
+**Trong CLAUDE.md giữ lại:**
+- `## What's DONE ✓` → dòng tóm tắt ngắn (1-2 câu, liệt kê tên tính năng chính) + `> Lịch sử đầy đủ: docs/DONE_HISTORY.md`
+- `## Known Fixes Applied` → 1 dòng hướng dẫn + `> Lịch sử đầy đủ: docs/FIXES_HISTORY.md`
+
+**Khi thêm feature mới:**
+- Append vào `docs/DONE_HISTORY.md` (không thêm vào CLAUDE.md body)
+- Update dòng tóm tắt trong CLAUDE.md nếu cần
+
+**Khi gặp bug + fix:**
+- Append vào `docs/FIXES_HISTORY.md`
+- KHÔNG thêm vào CLAUDE.md
+
+**`read context` shorthand** nên bổ sung đọc 2 file này khi task liên quan đến lịch sử feature hoặc debug.
