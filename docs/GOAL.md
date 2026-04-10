@@ -32,6 +32,8 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 
 - [ ] Rate limiting — chưa có; cân nhắc lại khi traffic tăng đột biến
 - [ ] Xóa `src/lib/pdf/planetPaths.ts` và `src/lib/pdf/signPaths.ts` (placeholder path data cũ) sau khi SVG icons (svgIcons.ts) đã vận hành ổn định trên production
+- [ ] Dashboard toggle: bật/tắt hiển thị ký hiệu nghịch hành ℞ trong PDF chart — admin chọn on/off từ dashboard, lưu vào config DB
+- [ ] Fix font ℞ trong PDF: tìm font embed sẵn có glyph U+211E (℞) để Puppeteer render đúng chữ thay vì fallback "Px"
 
 ## Hiện tại đang ở đâu
 
