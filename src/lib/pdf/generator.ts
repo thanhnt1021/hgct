@@ -611,7 +611,7 @@ function buildChartPageHtml(svgString: string): string {
   return `<!DOCTYPE html><html><head><meta charset="utf-8">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #ffffff; display: flex; justify-content: center; align-items: center;
+  body { background: transparent; display: flex; justify-content: center; align-items: center;
          width: 100%; height: 100%; }
   .chart-wrap { width: 100%; max-width: 695px; margin: 0 auto; }
   .chart-wrap svg { width: 100%; height: auto; display: block; }
@@ -636,7 +636,19 @@ async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string, ref
   // ── Page 1: cover ─────────────────────────────────────────────────────────
   finalDoc.addPage([W, H]).drawImage(coverImg, { x: 0, y: 0, width: W, height: H })
 
-  // ── Page 2: chart page (if present) — bgImg + SVG chart ────────────────────
+  // ── Content + chart: profile (p0) → chart → essay (p1+) ───────────────────
+  const contentDoc = await PDFDocument.load(contentPdfBuffer)
+  const allPageIndices = contentDoc.getPageIndices()
+
+  // Page 2: profile info (first content page)
+  if (allPageIndices.length > 0) {
+    const [emb] = await finalDoc.embedPages([contentDoc.getPage(0)])
+    const p = finalDoc.addPage([W, H])
+    p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })
+    p.drawPage(emb, { x: 0, y: 0, width: W, height: H })
+  }
+
+  // Page 3: chart (if present) — bgImg + SVG chart
   if (chartPageBuffer) {
     const chartDoc = await PDFDocument.load(chartPageBuffer)
     for (const idx of chartDoc.getPageIndices()) {
@@ -647,13 +659,12 @@ async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string, ref
     }
   }
 
-  // ── Content pages: bgImg (bottom) + embedded content page (top) ───────────
-  const contentDoc = await PDFDocument.load(contentPdfBuffer)
-  for (const pageIndex of contentDoc.getPageIndices()) {
+  // Pages 4+: essay sections (remaining content pages)
+  for (const pageIndex of allPageIndices.slice(1)) {
     const [embeddedPage] = await finalDoc.embedPages([contentDoc.getPage(pageIndex)])
     const p = finalDoc.addPage([W, H])
-    p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })       // layer 1: background
-    p.drawPage(embeddedPage, { x: 0, y: 0, width: W, height: H }) // layer 2: text content
+    p.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })
+    p.drawPage(embeddedPage, { x: 0, y: 0, width: W, height: H })
   }
 
   // ── Reference page (career only) — second-to-last ──────────────────────────
@@ -687,7 +698,7 @@ const FOOTER_TEMPLATE = `<div style="
   text-align: center;
 "><div style="border-top: 0.8pt solid #fca5a5; padding-top: 3mm;">Hạt Giống Chiêm Tinh</div></div>`
 
-export async function generatePdf(essayText: string, options: PdfOptions): Promise<Buffer | null> {
+export async function generatePdf(essayText: string, options: PdfOptions, onProgress?: (pct: number) => void): Promise<Buffer | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let browser: any = null
   try {
@@ -696,15 +707,23 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
     const chromium = await import('@sparticuz/chromium')
     const puppeteer = await import('puppeteer-core')
 
-    // Auto-fix EACCES: if chromium binary isn't executable by current user, delete it
-    // so @sparticuz/chromium re-extracts with correct ownership on next executablePath() call
+    // Auto-fix EACCES: deploy scripts run chromium-hash.js as root → /tmp/chromium owned root
+    // (rwx------), service user (hgct) cannot execute. Fix hierarchy:
+    // 1. Try chmod 755 (works only if we own the file — fails silently if root-owned)
+    // 2. Try delete + re-extract (fails silently if root-owned, but deploy.sh now does chmod)
     let execPath = await chromium.default.executablePath()
     try {
-      const { accessSync, unlinkSync, constants } = await import('fs')
+      const { accessSync, unlinkSync, chmodSync, constants } = await import('fs')
       try { accessSync(execPath, constants.X_OK) } catch {
-        console.warn('[PDF] Chromium not executable — removing and re-extracting:', execPath)
-        try { unlinkSync(execPath) } catch {}
-        execPath = await chromium.default.executablePath()
+        console.warn('[PDF] Chromium not executable — attempting chmod fix:', execPath)
+        // Step 1: try chmod (succeeds if we own it, fails silently if root-owned)
+        try { chmodSync(execPath, 0o755) } catch {}
+        // Step 2: if still not executable, try delete + re-extract
+        try { accessSync(execPath, constants.X_OK) } catch {
+          console.warn('[PDF] chmod failed — trying delete + re-extract:', execPath)
+          try { unlinkSync(execPath) } catch (e) { console.warn('[PDF] unlink failed (root-owned?):', e) }
+          execPath = await chromium.default.executablePath()
+        }
       }
     } catch {}
 
@@ -713,6 +732,7 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       executablePath: execPath,
       headless: true,
     })
+    onProgress?.(91) // browser ready
     const page = await browser.newPage()
     // Global timeout for all navigations — inline HTML can take >30s on loaded server
     page.setDefaultNavigationTimeout(60000)
@@ -1027,6 +1047,7 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       footerTemplate: FOOTER_TEMPLATE,
       margin: { top: '25mm', right: '20mm', bottom: '28mm', left: '20mm' },
     })
+    onProgress?.(92) // essay rendered
 
     // Career: render static reference page (second-to-last) with same margins/footer
     let refPageBuffer: Buffer | undefined
@@ -1069,11 +1090,15 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
         const chartPdf = await page.pdf({
           format: 'A4',
           printBackground: true,
-          margin: { top: '12mm', right: '12mm', bottom: '12mm', left: '12mm' },
+          displayHeaderFooter: true,
+          headerTemplate: '<div></div>',
+          footerTemplate: FOOTER_TEMPLATE,
+          margin: { top: '12mm', right: '12mm', bottom: '28mm', left: '12mm' },
         })
         chartPageBuffer = Buffer.from(chartPdf)
       }
     }
+    onProgress?.(93) // all optional renders done (ref + chart)
 
     await browser.close()
     browser = null // mark as closed so finally doesn't double-close
@@ -1082,7 +1107,9 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       ? await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix, refPageBuffer, chartPageBuffer)
       : Buffer.from(contentPdf)
 
-    return await compressPdf(finalPdf)
+    const result = await compressPdf(finalPdf)
+    onProgress?.(94) // merge + compress done
+    return result
   } catch (e) {
     console.error('[PDF ERROR]', e)
     return null

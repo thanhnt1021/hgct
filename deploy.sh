@@ -67,8 +67,14 @@ systemctl restart hgct.service
 systemctl enable hgct.service
 sleep 3
 
+# Fix chromium permissions: chromium-hash.js extracts /tmp/chromium as root (rwx------).
+# Service runs as hgct (not root) → EACCES on first PDF job. Must chmod before service uses it.
+chmod 755 /tmp/chromium 2>/dev/null || true
+
 # Update chromium hash in security monitor (auto-detects new version after npm install)
 CHROMIUM_HASH=$(cd "$APP_DIR" && node scripts/chromium-hash.js 2>/dev/null)
+# chmod again in case hash.js re-extracted
+chmod 755 /tmp/chromium 2>/dev/null || true
 if [ -n "$CHROMIUM_HASH" ]; then
   HASH_FILE="/etc/security-monitor/chromium_hash.txt"
   chattr -i "$HASH_FILE" 2>/dev/null || true

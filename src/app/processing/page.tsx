@@ -21,6 +21,14 @@ const SERVICE_ETA: Record<string, string> = {
   career: '3–4', love: '4–5', synastry: '6–8', transit: '6–8',
 }
 
+const MOTIV_STEPS = [
+  { pct: 0,  label: 'Có lẽ bạn đã đi qua nhiều điều… và hôm nay, bạn chọn dừng lại để hiểu chính mình hơn một chút.' },
+  { pct: 20, label: 'Không phải ai cũng đủ can đảm để nhìn sâu vào bên trong như bạn đang làm lúc này.' },
+  { pct: 40, label: 'Từng mảnh ghép trong bạn đang dần được gọi tên — cả những điều bạn từng mơ hồ cảm nhận.' },
+  { pct: 60, label: 'Bạn không hề "ngẫu nhiên" như bạn nghĩ… mọi thứ trong bạn đều có lý do của nó.' },
+  { pct: 80, label: 'Và có lẽ, hôm nay sẽ là một ngày rất đẹp — vì bạn bắt đầu thật sự hiểu mình là ai.' },
+]
+
 function ProcessingInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -37,6 +45,9 @@ function ProcessingInner() {
   const [recoveryToken, setRecoveryToken] = useState('')
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [motivText, setMotivText] = useState(MOTIV_STEPS[0].label)
+  const [motivVisible, setMotivVisible] = useState(true)
+  const [visualProgress, setVisualProgress] = useState(0)
   const [frozenWarning, setFrozenWarning] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const frozenIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -167,6 +178,28 @@ function ProcessingInner() {
     }
   }, [jobId, router])
 
+  // Visual progress lags real progress — slows the bar start so first sentence is readable.
+  // Exception: snap immediately at 100% so completion UI is instant.
+  useEffect(() => {
+    if (progress >= 100) { setVisualProgress(100); return }
+    if (visualProgress >= progress) { if (visualProgress !== progress) setVisualProgress(progress); return }
+    // Move at most 4% per 500ms — 0→20% takes ~2.5s, but catches up faster at high values
+    const step = Math.max(4, Math.floor((progress - visualProgress) / 3))
+    const t = setTimeout(() => setVisualProgress(v => Math.min(progress, v + step)), 500)
+    return () => clearTimeout(t)
+  }, [progress, visualProgress])
+
+  // Fade-transition motivational text when visual progress crosses thresholds
+  const prevStepLabelRef = useRef(MOTIV_STEPS[0].label)
+  useEffect(() => {
+    const current = [...MOTIV_STEPS].reverse().find(s => visualProgress >= s.pct) ?? MOTIV_STEPS[0]
+    if (current.label === prevStepLabelRef.current) return
+    prevStepLabelRef.current = current.label
+    setMotivVisible(false)
+    const t = setTimeout(() => { setMotivText(current.label); setMotivVisible(true) }, 300)
+    return () => clearTimeout(t)
+  }, [visualProgress])
+
   const handleCancel = async () => {
     setCancelling(true)
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -274,15 +307,6 @@ function ProcessingInner() {
     )
   }
 
-  // ── Processing state ──
-  const steps = [
-    { pct: 0,  label: 'Có lẽ bạn đã đi qua nhiều điều… và hôm nay, bạn chọn dừng lại để hiểu chính mình hơn một chút.' },
-    { pct: 20, label: 'Không phải ai cũng đủ can đảm để nhìn sâu vào bên trong như bạn đang làm lúc này.' },
-    { pct: 40, label: 'Từng mảnh ghép trong bạn đang dần được gọi tên — cả những điều bạn từng mơ hồ cảm nhận.' },
-    { pct: 60, label: 'Bạn không hề "ngẫu nhiên" như bạn nghĩ… mọi thứ trong bạn đều có lý do của nó.' },
-    { pct: 80, label: 'Và có lẽ, hôm nay sẽ là một ngày rất đẹp — vì bạn bắt đầu thật sự hiểu mình là ai.' },
-  ]
-
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4"
@@ -358,18 +382,21 @@ function ProcessingInner() {
             backdropFilter: 'blur(20px)',
           }}
         >
-          {/* Label + percent */}
-          <div className="flex justify-between items-center mb-3">
+          {/* Motivational text + percent */}
+          <div className="flex justify-between items-end gap-3 mb-3">
             <span
               style={{
-                color: '#d9ab55',
+                color: '#c9a84c',
                 fontFamily: 'var(--font-vietnam)',
-                fontSize: '0.65rem',
-                letterSpacing: '0.04em',
-                
+                fontSize: '0.82rem',
+                fontStyle: 'italic',
+                lineHeight: 1.65,
+                flex: 1,
+                opacity: motivVisible ? 1 : 0,
+                transition: 'opacity 300ms ease',
               }}
             >
-              {label}
+              {motivText}
             </span>
             <span
               style={{
@@ -377,60 +404,27 @@ function ProcessingInner() {
                 fontFamily: 'var(--font-vietnam)',
                 fontWeight: 700,
                 fontSize: '0.85rem',
+                flexShrink: 0,
               }}
             >
-              {progress}%
+              {visualProgress}%
             </span>
           </div>
 
           {/* Progress bar */}
           <div
-            className="h-1.5 rounded-full overflow-hidden mb-8"
+            className="h-1.5 rounded-full overflow-hidden"
             style={{ background: 'rgba(200,148,63,0.08)' }}
           >
             <div
               className="h-full rounded-full"
               style={{
-                width: `${progress}%`,
+                width: `${visualProgress}%`,
                 background: 'linear-gradient(90deg, #c8943f, #f0cc78)',
                 boxShadow: '0 0 12px rgba(200,148,63,0.5)',
                 transition: 'width 700ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             />
-          </div>
-
-          {/* Step checklist */}
-          <div className="space-y-2.5 text-left">
-            {steps.map((step, idx) => {
-              const done = idx < steps.length - 1 ? progress >= steps[idx + 1].pct : progress >= 100
-              const active = progress >= step.pct && !done
-              return (
-                <div
-                  key={step.pct}
-                  className="flex items-center gap-3 text-xs"
-                  style={{ color: progress >= step.pct ? '#c9c3d6' : '#4a4560' }}
-                >
-                  {/* Status indicator */}
-                  <div style={{ width: '14px', height: '14px', flexShrink: 0, position: 'relative' }}>
-                    {done ? (
-                      <span style={{ color: '#3db88a', fontSize: '0.75rem', lineHeight: 1 }}>✓</span>
-                    ) : active ? (
-                      <span
-                        className="animate-pulse"
-                        style={{ color: '#d9ab55', fontSize: '0.5rem', position: 'absolute', top: '2px', left: '2px' }}
-                      >
-                        ◆
-                      </span>
-                    ) : (
-                      <span style={{ color: '#38287a', fontSize: '0.5rem', position: 'absolute', top: '2px', left: '2px' }}>◆</span>
-                    )}
-                  </div>
-                  <span style={{ fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', opacity: progress >= step.pct ? 1 : 0.35 }}>
-                    {step.label}
-                  </span>
-                </div>
-              )
-            })}
           </div>
         </div>
 

@@ -3,6 +3,9 @@
 > File này chứa toàn bộ lịch sử tính năng đã hoàn thành. Xem tóm tắt nhanh trong `CLAUDE.md` mục "What's DONE ✓".
 
 ## What's DONE ✓
+
+- [x] **Chart trong PDF + loading page overhaul + PDF progress real-time** — (1) `generator.ts`: chart SVG (natal/synastry/transit) render thành trang 3 trong mọi loại PDF (sau cover + profile, trước essay); background chart page transparent (bỏ `background: #ffffff` trong `buildChartPageHtml` — fix hình chữ nhật trắng đè lên bgImg); `buildTemplatePdf` thêm `chartPageBuffer` param, đặt chart giữa content[0] (profile) và content[1+] (essay); chart PDF có footer + margin 28mm bottom. (2) `generator.ts` `generatePdf` thêm `onProgress` callback với 4 milestones thực: 91% browser launched, 92% essay rendered, 93% ref+chart done, 94% merge+compress done — không còn time-based estimate. (3) `reportProcessor.ts` truyền `onProgress` callback cập nhật DB job progress tại từng milestone thực, thay ticker cũ. (4) `processing/page.tsx` loading page rewrite: bỏ checklist 5 câu, câu motivational hiện ngay trên thanh progress bar với fade transition (fade-out 300ms → update → fade-in); `MOTIV_STEPS` 5 câu tại 0/20/40/60/80%; `visualProgress` damping (step = max(4, (real-visual)/3) mỗi 500ms) + snap 100% ngay lập tức. (5) Chromium EACCES permanent fix: `deploy.sh` + `deploy-demo-local.sh` thêm `chmod 755 /tmp/chromium` trước+sau `chromium-hash.js`; `generator.ts` fix hierarchy: chmod → delete+re-extract.
+
 - [x] Project scaffolding (Next.js, Prisma, Tailwind)
 - [x] Auth system — NextAuth.js, credentials + Google OAuth, register, forgot-password
 - [x] Session: uid, username, isPremium, planType
