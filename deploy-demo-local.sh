@@ -55,8 +55,13 @@ systemctl daemon-reload
 systemctl restart hgct-demo.service
 sleep 3
 
+# Fix chromium permissions before hash extraction
+chmod 755 /tmp/chromium 2>/dev/null || true
+
 # Update chromium hash in security monitor
 CHROMIUM_HASH=$(cd "$APP_DIR" && node scripts/chromium-hash.js 2>/dev/null)
+# chmod again in case hash.js re-extracted
+chmod 755 /tmp/chromium 2>/dev/null || true
 if [ -n "$CHROMIUM_HASH" ]; then
   HASH_FILE="/etc/security-monitor/chromium_hash.txt"
   chattr -i "$HASH_FILE" 2>/dev/null || true

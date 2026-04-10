@@ -301,7 +301,7 @@ export async function processReport(
       chartData: chart,
       chartDataB: chartB,
       cycleData,
-    })
+    }, (pct) => updateJob(jobId, { progress: pct, label: 'Đóng gói thành file PDF' }))
   } finally {
     chromiumSemaphore.release()
   }
