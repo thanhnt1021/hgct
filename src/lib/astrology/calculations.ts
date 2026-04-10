@@ -371,6 +371,72 @@ export function getDominantHousesSorted(chartData: ChartData): { house: number; 
     .sort((a, b) => b.score - a.score)
 }
 
+// ─── Outer Planet Cycle Data (for Van Han / Cap Doi chart) ──────────
+
+const OUTER_PLANET_SWE_IDS: Record<string, number> = {
+  Jupiter: swe.SE_JUPITER,
+  Saturn:  swe.SE_SATURN,
+  Uranus:  swe.SE_URANUS,
+  Neptune: swe.SE_NEPTUNE,
+  Pluto:   swe.SE_PLUTO,
+}
+
+export interface OuterPlanetCycle {
+  A: number; B: number; start: number; end: number; len: number
+}
+
+export function getOuterPlanetCycleData(
+  startDateStr: string,   // "DD/MM/YYYY"
+  endDateStr:   string,   // "DD/MM/YYYY"
+  lat: number,
+  lon: number,
+): Record<string, OuterPlanetCycle> | null {
+  try {
+    const chartA = calculateChart(startDateStr, '00:00', lat, lon, 'UTC', 0)
+    const chartB = calculateChart(endDateStr,   '00:00', lat, lon, 'UTC', 0)
+    if (!chartA || !chartB) return null
+
+    const jdStart   = chartA.jd
+    const jdEnd     = chartB.jd
+    const totalDays = Math.floor(jdEnd - jdStart)
+    const stepDays  = 5
+    const steps     = Math.max(1, Math.floor(totalDays / stepDays))
+
+    const result: Record<string, OuterPlanetCycle> = {}
+
+    for (const [pName, pId] of Object.entries(OUTER_PLANET_SWE_IDS)) {
+      const lonA = chartA.planets[pName]?.lon
+      const lonB = chartB.planets[pName]?.lon
+      if (lonA == null || lonB == null) continue
+
+      const longitudes: number[] = [lonA]
+      for (let i = 1; i <= steps; i++) {
+        const res = swe.swe_calc_ut(jdStart + i * stepDays, pId, swe.SEFLG_SWIEPH | swe.SEFLG_SPEED)
+        longitudes.push(res.longitude)
+      }
+      longitudes.push(lonB)
+
+      // Relative diff in [-180, +180] handles wrap-around and retrograde
+      const diffs  = longitudes.map(l => ((l - lonA + 180) % 360) - 180)
+      const minD   = Math.min(...diffs)
+      const maxD   = Math.max(...diffs)
+
+      result[pName] = {
+        A:     lonA,
+        B:     lonB,
+        start: ((lonA + minD) % 360 + 360) % 360,
+        end:   ((lonA + maxD) % 360 + 360) % 360,
+        len:   maxD - minD,
+      }
+    }
+
+    return Object.keys(result).length > 0 ? result : null
+  } catch (e) {
+    console.error('[getOuterPlanetCycleData]', e)
+    return null
+  }
+}
+
 // ─── Element/Modality Matrix ─────────────────────────────────────
 
 export function calculateElementMatrix(chartData: ChartData): {
