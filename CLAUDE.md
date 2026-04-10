@@ -120,6 +120,8 @@ src/
     jobHistory.ts         # Lịch sử job
     openrouter.ts         # OpenRouter AI client
     pdf/generator.ts      # PDF generation
+    pdf/chartSvg.ts       # SVG chart generation (natal/synastry/transit) — dùng bởi generator.ts
+    pdf/svgIcons.ts       # SVG icon cache — đọc public/chart-symbols/ lúc module load
   prompts/                # AI prompt templates (4 loại dịch vụ)
   types/                  # TypeScript types
 ```

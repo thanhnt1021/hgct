@@ -237,6 +237,9 @@ interface PdfOptions {
   profileB?: { name: string; dob: { day: string; month: string; year: string }; tob?: string }
   service?: string
   skipClosing?: boolean
+  chartData?: import('@/lib/astrology/calculations').ChartData
+  chartDataB?: import('@/lib/astrology/calculations').ChartData
+  cycleData?: Record<string, import('@/lib/astrology/calculations').OuterPlanetCycle> | null
 }
 
 function buildFontFaces(): string {
@@ -604,7 +607,22 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
 </body></html>`
 }
 
-async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string, refPageBuffer?: Buffer): Promise<Buffer> {
+function buildChartPageHtml(svgString: string): string {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #ffffff; display: flex; justify-content: center; align-items: center;
+         width: 100%; height: 100%; }
+  .chart-wrap { width: 100%; max-width: 695px; margin: 0 auto; }
+  .chart-wrap svg { width: 100%; height: auto; display: block; }
+  @page { size: A4; margin: 12mm; }
+  @media print { body { height: 100vh; } }
+</style></head><body>
+<div class="chart-wrap">${svgString}</div>
+</body></html>`
+}
+
+async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string, refPageBuffer?: Buffer, chartPageBuffer?: Buffer): Promise<Buffer> {
   const { PDFDocument } = await import('pdf-lib')
   const W = 595.28, H = 841.89  // A4 in points
 
@@ -617,6 +635,17 @@ async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string, ref
 
   // ── Page 1: cover ─────────────────────────────────────────────────────────
   finalDoc.addPage([W, H]).drawImage(coverImg, { x: 0, y: 0, width: W, height: H })
+
+  // ── Page 2: chart page (if present) — bgImg + SVG chart ────────────────────
+  if (chartPageBuffer) {
+    const chartDoc = await PDFDocument.load(chartPageBuffer)
+    for (const idx of chartDoc.getPageIndices()) {
+      const [embChart] = await finalDoc.embedPages([chartDoc.getPage(idx)])
+      const cp = finalDoc.addPage([W, H])
+      cp.drawImage(bgImg, { x: 0, y: 0, width: W, height: H })
+      cp.drawPage(embChart, { x: 0, y: 0, width: W, height: H })
+    }
+  }
 
   // ── Content pages: bgImg (bottom) + embedded content page (top) ───────────
   const contentDoc = await PDFDocument.load(contentPdfBuffer)
@@ -1015,11 +1044,42 @@ export async function generatePdf(essayText: string, options: PdfOptions): Promi
       refPageBuffer = Buffer.from(refPdf)
     }
 
+    // Chart page: render SVG chart to PDF page
+    let chartPageBuffer: Buffer | undefined
+    if (options.chartData) {
+      const {
+        generateNatalChartSvg,
+        generateSynastryTransitChartSvg,
+        generateTransitChartSvg,
+      } = await import('@/lib/pdf/chartSvg')
+      let svgString = ''
+      const svc = options.service ?? ''
+      if (svc === 'synastry' || svc === 'relationship') {
+        svgString = options.chartDataB
+          ? generateSynastryTransitChartSvg(options.chartData, options.chartDataB, options.cycleData ?? null)
+          : generateNatalChartSvg(options.chartData)
+      } else if (svc === 'transit' || svc === 'vanhan') {
+        svgString = generateTransitChartSvg(options.chartData, {}, options.cycleData ?? null)
+      } else {
+        svgString = generateNatalChartSvg(options.chartData)
+      }
+      if (svgString) {
+        page.setDefaultNavigationTimeout(60000)
+        await page.setContent(buildChartPageHtml(svgString), { waitUntil: 'load', timeout: 60000 })
+        const chartPdf = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+          margin: { top: '12mm', right: '12mm', bottom: '12mm', left: '12mm' },
+        })
+        chartPageBuffer = Buffer.from(chartPdf)
+      }
+    }
+
     await browser.close()
     browser = null // mark as closed so finally doesn't double-close
 
     const finalPdf = imgPrefix
-      ? await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix, refPageBuffer)
+      ? await buildTemplatePdf(Buffer.from(contentPdf), imgPrefix, refPageBuffer, chartPageBuffer)
       : Buffer.from(contentPdf)
 
     return await compressPdf(finalPdf)

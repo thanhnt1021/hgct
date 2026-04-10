@@ -133,6 +133,8 @@ export async function processReport(
     | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let synBrief: any = undefined
+  let chartB: import('@/lib/astrology/calculations').ChartData | undefined
+  let cycleData: Record<string, import('@/lib/astrology/calculations').OuterPlanetCycle> | null = null
 
   if (service === 'career') {
     const blocks = getCareerBlocks(chart, kb)
@@ -155,13 +157,13 @@ export async function processReport(
     const fullNameB = (inputDataB.name as string) || ''
     const onlyNameB = ((inputDataB.ten as string) || '').trim() || fullNameB
     nameB = fullNameB
-    const chartB = calculateChart(
+    chartB = calculateChart(
       `${dobB.day}/${dobB.month}/${dobB.year}`,
       `${tobB.hour}:${String(tobB.minute).padStart(2, '0')}`,
       locB.lat,
       locB.lon,
       locB.tz,
-    )
+    ) ?? undefined
     if (!chartB) throw new Error('Partner chart failed')
     const { getRelationshipBlocks } = await import('@/lib/logic/relationship/manager')
     const { buildRelationshipEssayPrompt } = await import('@/lib/logic/relationship/prompt')
@@ -201,6 +203,10 @@ export async function processReport(
     prompt = buildVanhanEssayPrompt(chart, startDate, endDate, profile, kb)
     coverTitle = 'LUẬN GIẢI VẬN HẠN'
     sectionTitle = 'TỔNG HỢP LUẬN GIẢI VẬN HẠN'
+    // Tính cycle data cho chart overlay
+    const { getOuterPlanetCycleData } = await import('@/lib/astrology/calculations')
+    const fmt = (s: string) => { const [y,m,d] = s.split('-'); return `${d}/${m}/${y}` }
+    cycleData = getOuterPlanetCycleData(fmt(startDate), fmt(endDate), loc.lat, loc.lon)
   } else {
     throw new Error(`Invalid service: ${service}`)
   }
@@ -292,6 +298,9 @@ export async function processReport(
       profile,
       profileB: coverProfileB,
       service,
+      chartData: chart,
+      chartDataB: chartB,
+      cycleData,
     })
   } finally {
     chromiumSemaphore.release()

@@ -31,7 +31,7 @@ export const PLANET_SYMBOLS: Record<string, string> = {
   Sun: '☉', Moon: '☽', Mercury: '☿', Venus: '♀', Mars: '♂',
   Jupiter: '♃', Saturn: '♄', Uranus: '♅', Neptune: '♆',
   Pluto: '♇', 'True Node': '☊', Chiron: '⚷', Vertex: 'Vx',
-  Asc: 'AC', MC: 'MC', Lilith: '⚸', 'South Node': '☋',
+  Asc: 'AC', MC: 'MC', 'South Node': '☋',
 }
 
 export const PLANET_POINTS: Record<string, number> = {

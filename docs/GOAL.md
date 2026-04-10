@@ -31,6 +31,7 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 ## Pending / Cần Quyết Định
 
 - [ ] Rate limiting — chưa có; cân nhắc lại khi traffic tăng đột biến
+- [ ] Xóa `src/lib/pdf/planetPaths.ts` và `src/lib/pdf/signPaths.ts` (placeholder path data cũ) sau khi SVG icons (svgIcons.ts) đã vận hành ổn định trên production
 
 ## Hiện tại đang ở đâu
 
