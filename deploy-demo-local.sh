@@ -21,31 +21,32 @@ if [ ! -f "$DEMO_DIR/.env.local" ]; then
 fi
 
 # 1. Build from current working directory (uncommitted code OK)
-echo "[1/4] Building from local source..."
-cd "$APP_DIR"
-rm -rf .next
-DATABASE_URL=$(grep DATABASE_URL "$APP_DIR/.env.local" | cut -d= -f2- | tr -d '"') npx prisma generate
-npx next build
+# SECURITY: build chạy với quyền hgct, không phải root — ngăn supply chain attack
+echo "[1/4] Building from local source (as hgct)..."
+chown -R hgct:hgct "$APP_DIR/.next" 2>/dev/null || true
+su -s /bin/bash hgct -c "cd $APP_DIR && rm -rf .next && DATABASE_URL=\$(grep DATABASE_URL $APP_DIR/.env.local | cut -d= -f2- | tr -d '\"') npx prisma generate && npx next build"
 
 # 2. Prepare standalone bundle
-echo "[2/4] Preparing standalone..."
-cp "$APP_DIR/.env.local" "$APP_DIR/.next/standalone/.env.local"
-rm -rf "$APP_DIR/.next/standalone/.next/static"
-cp -r "$APP_DIR/.next/static" "$APP_DIR/.next/standalone/.next/static"
-rm -rf "$APP_DIR/.next/standalone/public"
-cp -r "$APP_DIR/public" "$APP_DIR/.next/standalone/public"
+echo "[2/4] Preparing standalone (as hgct)..."
+su -s /bin/bash hgct -c "
+  cp $APP_DIR/.env.local $APP_DIR/.next/standalone/.env.local
+  rm -rf $APP_DIR/.next/standalone/.next/static
+  cp -r $APP_DIR/.next/static $APP_DIR/.next/standalone/.next/static
+  rm -rf $APP_DIR/.next/standalone/public
+  cp -r $APP_DIR/public $APP_DIR/.next/standalone/public
+"
 
 # 3. Sync build to demo dir (overwrite .next only)
-echo "[3/4] Syncing build to demo dir..."
-rm -rf "$DEMO_DIR/.next"
-cp -r "$APP_DIR/.next" "$DEMO_DIR/.next"
-# Build demo .env.local: start from production (always has current DB password + all keys),
-# then override only the two demo-specific vars. This prevents stale-credential breakage.
-cp "$APP_DIR/.env.local" "$DEMO_DIR/.next/standalone/.env.local"
-sed -i 's|^APP_PORT=.*|APP_PORT=65500|' "$DEMO_DIR/.next/standalone/.env.local"
-sed -i 's|^NEXTAUTH_URL=.*|NEXTAUTH_URL=https://demo.hatgiongchiemtinh.com|' "$DEMO_DIR/.next/standalone/.env.local"
-# Keep $DEMO_DIR/.env.local in sync too (used as reference in future deploys)
-cp "$DEMO_DIR/.next/standalone/.env.local" "$DEMO_DIR/.env.local"
+echo "[3/4] Syncing build to demo dir (as hgct)..."
+chown -R hgct:hgct "$DEMO_DIR/.next" 2>/dev/null || true
+su -s /bin/bash hgct -c "
+  rm -rf $DEMO_DIR/.next
+  cp -r $APP_DIR/.next $DEMO_DIR/.next
+  cp $APP_DIR/.env.local $DEMO_DIR/.next/standalone/.env.local
+  sed -i 's|^APP_PORT=.*|APP_PORT=65500|' $DEMO_DIR/.next/standalone/.env.local
+  sed -i 's|^NEXTAUTH_URL=.*|NEXTAUTH_URL=https://demo.hatgiongchiemtinh.com|' $DEMO_DIR/.next/standalone/.env.local
+  cp $DEMO_DIR/.next/standalone/.env.local $DEMO_DIR/.env.local
+"
 
 # 4. Restart demo service
 echo "[4/4] Restarting hgct-demo service..."

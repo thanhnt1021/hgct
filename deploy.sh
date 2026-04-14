@@ -1,6 +1,8 @@
 #!/bin/bash
 # Deploy script for HGCT Next.js app
-# Run as root: bash /home/hgct/hgct/deploy.sh
+# Run as root: sudo bash /home/hgct/hgct/deploy.sh
+# SECURITY: build chạy với quyền hgct (không phải root) để ngăn supply chain attack.
+# Root chỉ dùng cho: systemd, chromium chmod, cron.
 
 set -e
 
@@ -8,26 +10,27 @@ APP_DIR="/home/hgct/hgct"
 
 echo "=== HGCT Deploy ==="
 
-# 0. Allow root to access hgct-owned repo
-git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
-
-# 0b. Ensure required directories exist
+# 0. Ensure required directories exist (cần root)
 mkdir -p /var/hgct/pdfs
 chmod 755 /var/hgct/pdfs
+chown -R hgct:hgct "$APP_DIR/.next" 2>/dev/null || true
 
-# 1. Clean previous build then build fresh
+# 1. Clean previous build then build fresh — CHẠY LÀ hgct, không phải root
+# Lý do: build chạy với root → compiled files owned by root → attacker có thể inject
+# vào source trước khi deploy rồi code độc được compile với quyền root (Apr 2026 attack)
 cd "$APP_DIR"
-echo "[1/5] Cleaning old build & building..."
-rm -rf "$APP_DIR/.next"
-npx next build
+echo "[1/5] Cleaning old build & building as hgct..."
+su -s /bin/bash hgct -c "cd $APP_DIR && rm -rf .next && npx next build"
 
 # 2. Copy static assets to standalone (REQUIRED — Next.js does not do this automatically)
 echo "[2/5] Copying static assets to standalone..."
-cp "$APP_DIR/.env.local" "$APP_DIR/.next/standalone/.env.local"
-rm -rf "$APP_DIR/.next/standalone/.next/static"
-cp -r "$APP_DIR/.next/static" "$APP_DIR/.next/standalone/.next/static"
-rm -rf "$APP_DIR/.next/standalone/public"
-cp -r "$APP_DIR/public" "$APP_DIR/.next/standalone/public"
+su -s /bin/bash hgct -c "
+  cp $APP_DIR/.env.local $APP_DIR/.next/standalone/.env.local
+  rm -rf $APP_DIR/.next/standalone/.next/static
+  cp -r $APP_DIR/.next/static $APP_DIR/.next/standalone/.next/static
+  rm -rf $APP_DIR/.next/standalone/public
+  cp -r $APP_DIR/public $APP_DIR/.next/standalone/public
+"
 echo "    CSS: $(ls $APP_DIR/.next/standalone/.next/static/css/ 2>/dev/null | head -1)"
 
 # 3. Update systemd service

@@ -9,9 +9,10 @@ cd /home/hgct/hgct
 echo "[1/5] Installing dependencies..."
 npm install --production
 
-# Build Next.js
-echo "[2/5] Building Next.js..."
-npm run build
+# Build Next.js — CHẠY LÀ hgct, không phải root
+echo "[2/5] Building Next.js (as hgct)..."
+chown -R hgct:hgct /home/hgct/hgct/.next 2>/dev/null || true
+su -s /bin/bash hgct -c "cd /home/hgct/hgct && npm run build"
 
 # Copy nginx config
 echo "[3/5] Setting up nginx..."

@@ -1,14 +1,19 @@
 [Unit]
-Description=Next.js instance for hgct (hatgiongchiemtinh.com)
-After=network.target
+Description=HGCT Next.js App
+After=network.target postgresql.service
 
 [Service]
-User=root
-Group=www-data
-WorkingDirectory=/root/hgct
-Environment="NODE_ENV=production"
+Type=simple
+User=hgct
+Group=hgct
+WorkingDirectory=/home/hgct/hgct/.next/standalone
 Environment="PORT=65498"
-ExecStart=/usr/bin/node /root/hgct/node_modules/.bin/next start -p 65498
+Environment="NODE_ENV=production"
+Environment="HOSTNAME=127.0.0.1"
+EnvironmentFile=/home/hgct/hgct/.env.local
+ExecStartPre=/bin/sh -c 'fuser -k 65498/tcp 2>/dev/null || true'
+ExecStartPre=/bin/sleep 1
+ExecStart=/usr/bin/node /home/hgct/hgct/.next/standalone/server.js
 Restart=always
 RestartSec=5
 

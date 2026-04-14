@@ -4,15 +4,16 @@ After=network.target postgresql.service
 
 [Service]
 Type=simple
-User=root
-Group=root
-WorkingDirectory=/root/hgct-demo/.next/standalone
+User=hgct
+Group=hgct
+WorkingDirectory=/home/hgct/hgct-demo/.next/standalone
 Environment="PORT=65500"
 Environment="NODE_ENV=production"
-EnvironmentFile=/root/hgct-demo/.env.local
+Environment="HOSTNAME=127.0.0.1"
+EnvironmentFile=/home/hgct/hgct-demo/.env.local
 ExecStartPre=/bin/sh -c 'fuser -k 65500/tcp 2>/dev/null || true'
 ExecStartPre=/bin/sleep 1
-ExecStart=/usr/bin/node /root/hgct-demo/.next/standalone/server.js
+ExecStart=/usr/bin/node /home/hgct/hgct-demo/.next/standalone/server.js
 Restart=always
 RestartSec=5
 

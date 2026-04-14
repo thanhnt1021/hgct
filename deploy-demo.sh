@@ -35,7 +35,7 @@ echo "    Branch: $BRANCH @ $(git -C $DEMO_DIR rev-parse --short HEAD)"
 
 # 2. Install dependencies (always run to pick up new packages)
 echo "[2/6] Installing dependencies..."
-cd "$DEMO_DIR" && npm install --production=false
+cd "$DEMO_DIR" && npm ci --ignore-scripts
 
 # 3. Always re-sync .env.local from production to pick up latest DB password + all keys,
 #    then patch the two demo-specific vars. Never trust old $DEMO_DIR/.env.local creds.
@@ -45,21 +45,20 @@ cp "$APP_DIR/.env.local" "$DEMO_DIR/.env.local"
 sed -i 's|^NEXT_PUBLIC_APP_URL=.*|NEXT_PUBLIC_APP_URL=https://demo.hatgiongchiemtinh.com|' "$DEMO_DIR/.env.local"
 sed -i 's|^APP_PORT=.*|APP_PORT=65500|' "$DEMO_DIR/.env.local"
 
-# 4. Build
-echo "[4/6] Building..."
-cd "$DEMO_DIR"
-rm -rf .next
-# Regenerate Prisma client in case schema changed
-DATABASE_URL=$(grep DATABASE_URL "$DEMO_DIR/.env.local" | cut -d= -f2- | tr -d '"') npx prisma generate
-npx next build
+# 4. Build — CHẠY LÀ hgct, không phải root
+echo "[4/6] Building (as hgct)..."
+chown -R hgct:hgct "$DEMO_DIR/.next" 2>/dev/null || true
+su -s /bin/bash hgct -c "cd $DEMO_DIR && rm -rf .next && DATABASE_URL=\$(grep DATABASE_URL $DEMO_DIR/.env.local | cut -d= -f2- | tr -d '\"') npx prisma generate && npx next build"
 
 # 5. Copy static assets to standalone
-echo "[5/6] Copying static assets..."
-cp "$DEMO_DIR/.env.local" "$DEMO_DIR/.next/standalone/.env.local"
-rm -rf "$DEMO_DIR/.next/standalone/.next/static"
-cp -r "$DEMO_DIR/.next/static" "$DEMO_DIR/.next/standalone/.next/static"
-rm -rf "$DEMO_DIR/.next/standalone/public"
-cp -r "$DEMO_DIR/public" "$DEMO_DIR/.next/standalone/public"
+echo "[5/6] Copying static assets (as hgct)..."
+su -s /bin/bash hgct -c "
+  cp $DEMO_DIR/.env.local $DEMO_DIR/.next/standalone/.env.local
+  rm -rf $DEMO_DIR/.next/standalone/.next/static
+  cp -r $DEMO_DIR/.next/static $DEMO_DIR/.next/standalone/.next/static
+  rm -rf $DEMO_DIR/.next/standalone/public
+  cp -r $DEMO_DIR/public $DEMO_DIR/.next/standalone/public
+"
 
 # 6. Systemd service
 echo "[6/6] Starting hgct-demo service..."
