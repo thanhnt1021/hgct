@@ -5,6 +5,48 @@ _Dùng khi project có auth, payment, file upload, hoặc xử lý dữ liệu n
 
 ---
 
+## 0. MUST DO — Bắt buộc trước mỗi `quick deploy` (gọi bằng `check code`)
+
+> **Tại sao section này tồn tại:** Server bị compromise tháng 8/2024 qua lỗ hổng app code.
+> Mỗi feature mới là thêm attack surface. Attacker exploit → chạy lệnh dưới quyền app user → cài miner/backdoor.
+> Check này phải chạy **mọi lần**, không phải chỉ khi "nghi có lỗ hổng".
+
+### A. Grep RCE risk trong files vừa sửa
+
+```bash
+# Chạy trên files vừa thay đổi trong feature này
+grep -rn "exec\|spawn\|child_process\|os\.system\|subprocess\.run\|subprocess\.call\|eval\|shell=True" \
+  [files vừa sửa] | grep -v "test_\|node_modules\|venv\|\.pyc"
+```
+
+→ Nếu có kết quả: verify input đến từ **trusted source** (constant, env var, DB value do hệ thống tạo ra) — **KHÔNG** từ request body/params/headers của user.
+
+### B. Checklist input validation cho endpoint mới
+
+```
+□ User input → shell command?   KHÔNG BAO GIỜ (kể cả sau khi "sanitize")
+□ User input → file path?       Phải dùng path.basename() + whitelist thư mục
+□ User input → DB query?        Parameterized query / ORM — không string concat
+□ User input → HTML render?     Escape hoặc dùng framework auto-escape (React JSX, Jinja2)
+□ Endpoint cần auth?            Có auth middleware — không public khi không cần
+□ Endpoint tốn resource?        Có rate limiting
+```
+
+### C. Dependency audit — BẮT BUỘC sau mỗi `npm install` hoặc `pip install`
+
+```bash
+# Node.js — chạy NGAY sau npm install, trước khi làm gì khác
+npm audit --audit-level=high
+
+# Python — chạy NGAY sau pip install
+pip audit
+```
+
+→ **Nếu có high/critical: fix trước khi tiếp tục**. Không deploy code có known vulnerability.
+→ Commit lock file (`package-lock.json` / `requirements.txt`) cùng lúc với code thay đổi.
+
+---
+
 ## 1. OWASP Top 10 — Checklist thực dụng
 
 ### A01: Broken Access Control

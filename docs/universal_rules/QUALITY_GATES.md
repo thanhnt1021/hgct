@@ -55,14 +55,15 @@ _Lý do: đây là quality gate vì code và docs phải đi cùng nhau trong m�
 
 _Lý do: `.env.example` là tài liệu duy nhất cho team biết cần setup biến nào. Thiếu sync = deploy server mới thiếu biến → app crash._
 
-## 6. Dependency Security Audit (Security-sensitive projects)
+## 6. Dependency Security Audit — BẮT BUỘC MỌI PROJECT
 
 - [ ] `npm audit --audit-level=high` — zero high/critical (Node.js)
 - [ ] `pip audit` — zero known vulnerabilities (Python)
+- [ ] Lock file đã được commit cùng với code thay đổi
 
-> Chi tiết: `SECURITY_CHECKLIST.md` §4
+> Chi tiết: `SECURITY_CHECKLIST.md` §0.C
 
-_Lý do: dependencies có thể chứa CVE công khai. Không audit = deploy code có lỗ hổng đã biết._
+_Lý do: supply chain attack — package inject mã độc sau khi publish lên npm/PyPI. Server production đã bị compromise qua attack chain có liên quan. Không audit = deploy code có known vulnerability = rủi ro không cần thiết._
 
 ## 7. Vietnamese Diacritics Check (Dự án tiếng Việt)
 

@@ -49,6 +49,7 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 | `merge main` / `lên production` | Merge vào main + deploy production |
 | `deploy demo` | Full deploy từ GitHub (sau khi đã commit) |
 | `check requirements` | Kiểm tra và setup mọi thứ còn thiếu theo `NEW_PROJECT_SETUP.md` |
+| **`check code`** | **Chạy App Code Security check theo `SECURITY_CHECKLIST.md` §0: grep exec/spawn/shell trong files vừa sửa + verify input validation + npm/pip audit. BẮT BUỘC trước mỗi `quick deploy`.** |
 | `sync uni` | Pull latest từ `hentaiikidd/universal-workflow` GitHub repo → cập nhật `docs/universal_rules/` → dọn file thừa. **KHÔNG overwrite** `CLAUDE.md`, `README.md`, `docs/GOAL.md` (xem **`sync uni` Workflow** bên dưới) |
 | `docs project` | Đọc code → tạo mới hoặc update tài liệu dự án (flow, UI/UX, events, summary...) theo `PROJECT_DOCS.md`. Chờ user review trước khi commit. |
 | `update workflow` | Review + đề xuất cải tiến các file trong `universal_rules/` |
@@ -166,7 +167,11 @@ Khi nhận lệnh `feature: [tên]`, tuân theo 2 phase sau — **không nhảy 
    - Quick deploy → verify trên browser/app
    - Hoặc test endpoint trực tiếp (curl, server log, DB state...)
 3. **Confirm works** → mới chuyển sang bước tiếp theo.
-4. Khi tất cả xong → quick deploy lần cuối → **báo cáo tổng kết** → **DỪNG chờ feedback**.
+4. **Trước `quick deploy` lần cuối → `check code` BẮT BUỘC** (xem `SECURITY_CHECKLIST.md` §0):
+   - Grep exec/spawn/shell/eval trong files vừa sửa
+   - Verify mọi user input đều được validate ở server-side
+   - Nếu vừa chạy `npm install`/`pip install` → chạy audit ngay
+5. Khi tất cả xong → quick deploy lần cuối → **báo cáo tổng kết** → **DỪNG chờ feedback**.
 
 > **Exception:** Nếu gặp vấn đề không giải quyết được hoặc loop >2 lần → **dừng, tham vấn user ngay** — không tự thử mãi.
 

@@ -34,7 +34,12 @@ my-project/
 │   └── universal_rules/       ← TẤT CẢ rules files
 │       ├── UNIVERSAL_WORKFLOW.md
 │       ├── GIT_WORKFLOW.md
-│       ├── ...
+│       ├── ENV_RULES.md
+│       ├── SECURITY_CHECKLIST.md
+│       ├── CI_CD_TEMPLATE.md
+│       ├── CONTRIBUTING_TEMPLATE.md
+│       ├── ADR_TEMPLATE.md
+│       ├── github_templates/
 │       ├── GOAL_TEMPLATE.md
 │       ├── README_TEMPLATE.md
 │       ├── hooks/
@@ -57,13 +62,19 @@ my-project/
 | `NEW_PROJECT_SETUP.md` | Logic của lệnh `check requirements` |
 | `ASK-BACK.md` | Cơ chế hỏi ngược trước khi thực thi |
 | `OUTCOME.md` | Goal tracking protocol |
+| `ENV_RULES.md` | Quản lý .env, secrets |
+| `SECURITY_CHECKLIST.md` | App-level security (OWASP) |
 
-### Templates (tạo file project-specific khi bootstrap)
+### Templates (tạo file project-specific)
 
-| Template | Tạo ra | Vị trí |
-|----------|--------|--------|
+| Template | Tạo ra | Mô tả |
+|----------|--------|-------|
 | `GOAL_TEMPLATE.md` | `docs/GOAL.md` | Mục tiêu + milestones project |
 | `README_TEMPLATE.md` | `README.md` (root) | GitHub README project |
+| `CONTRIBUTING_TEMPLATE.md` | `CONTRIBUTING.md` (root) | Hướng dẫn contribute |
+| `ADR_TEMPLATE.md` | `docs/adr/*.md` | Architecture Decision Records |
+| `CI_CD_TEMPLATE.md` | `.github/workflows/` | GitHub Actions CI/CD |
+| `github_templates/` | `.github/` | PR template + Issue templates |
 
 ### Chuyên biệt (dùng khi project cần)
 
