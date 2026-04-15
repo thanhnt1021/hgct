@@ -137,7 +137,7 @@ src/
 
 > Lịch sử đầy đủ: `docs/DONE_HISTORY.md`
 
-**Tính năng đã hoàn thiện:** Auth (Google OAuth + credentials), 4 report services (career adult/young/love/synastry/transit), payment SePay QR, PDF generation (Puppeteer + Ghostscript), job system + watchdog, order recovery v4, admin dashboard (dashboard subdomain), CTV affiliate system (daisu subdomain), free preview (typewriter stream), admin Telegram bot + notify bot, dual pricing, maintenance mode, OG image, 7-day retention email, OpenRouter retry/timeout, resilient order system.
+**Tính năng đã hoàn thiện:** Auth (Google OAuth + credentials), 4 report services (career adult/young/love/synastry/transit), payment SePay QR, PDF generation (Puppeteer + Ghostscript), job system + watchdog, order recovery v4, admin dashboard (dashboard subdomain), CTV affiliate system (daisu subdomain), free preview (typewriter stream), admin Telegram bot + notify bot, dual pricing, maintenance mode, OG image, 7-day retention email, OpenRouter retry/timeout, resilient order system, DiscountModal + LuckyWheel flow (referral code 99k flat + vòng xoay giảm giá 5–30%), display price update (199k/269k).
 
 <!-- Khi hoàn thành feature mới → append vào docs/DONE_HISTORY.md, update dòng tóm tắt trên -->
 

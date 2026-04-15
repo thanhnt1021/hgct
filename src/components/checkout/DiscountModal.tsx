@@ -1,0 +1,151 @@
+'use client'
+
+import { useState } from 'react'
+import { X } from 'lucide-react'
+import LuckyWheelModal from './LuckyWheelModal'
+
+interface Props {
+  open: boolean
+  service: string
+  onClose: () => void
+  /** Called when user is ready to proceed to checkout. */
+  onProceed: (discount: { referralCode?: string; wheelDiscountPct?: number }) => void
+}
+
+export default function DiscountModal({ open, service, onClose, onProceed }: Props) {
+  const [code, setCode] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [codeError, setCodeError] = useState('')
+  const [showWheel, setShowWheel] = useState(false)
+
+  if (!open) return null
+
+  const handleVerifyCode = async () => {
+    const trimmed = code.trim().toUpperCase()
+    if (!trimmed) { setCodeError('Vui lòng nhập mã giới thiệu'); return }
+    setVerifying(true)
+    setCodeError('')
+    try {
+      const res = await fetch('/api/referral/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: trimmed }),
+      })
+      const data = await res.json() as { valid: boolean; flatPrice?: number }
+      if (data.valid) {
+        onProceed({ referralCode: trimmed })
+      } else {
+        setCodeError('Mã không hợp lệ hoặc đã hết hạn')
+      }
+    } catch {
+      setCodeError('Lỗi kết nối, thử lại sau')
+    } finally {
+      setVerifying(false)
+    }
+  }
+
+  const handleWheelResult = (pct: number) => {
+    setShowWheel(false)
+    onProceed({ wheelDiscountPct: pct })
+  }
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}
+        onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      >
+        <div
+          className="w-full rounded-2xl"
+          style={{ maxWidth: 420, background: 'rgba(16,12,38,0.98)', border: '1px solid rgba(201,168,76,0.25)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
+            <h3 className="font-bold text-base" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+              Ưu đãi đặc biệt
+            </h3>
+            <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="px-6 py-5 space-y-5">
+            {/* Option A: Referral code */}
+            <div className="rounded-xl p-4" style={{ border: '1px solid rgba(201,168,76,0.2)', background: 'rgba(201,168,76,0.04)' }}>
+              <p className="font-semibold text-sm mb-1" style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)' }}>
+                Có mã giới thiệu?
+              </p>
+              <p className="text-xs mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+                Nhập mã để được giảm xuống còn <strong style={{ color: '#f0cc78' }}>99.000đ</strong> (flat)
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={code}
+                  onChange={e => { setCode(e.target.value.toUpperCase()); setCodeError('') }}
+                  placeholder="VD: HGCT2026"
+                  maxLength={20}
+                  style={{ flex: 1, textTransform: 'uppercase', fontSize: '0.85rem' }}
+                  onKeyDown={e => { if (e.key === 'Enter') handleVerifyCode() }}
+                />
+                <button
+                  onClick={handleVerifyCode}
+                  disabled={verifying}
+                  className="px-4 h-9 rounded-lg font-semibold text-sm"
+                  style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78)', color: '#06060f', fontFamily: 'var(--font-vietnam)', opacity: verifying ? 0.7 : 1, flexShrink: 0 }}
+                >
+                  {verifying ? '...' : 'Áp dụng'}
+                </button>
+              </div>
+              {codeError && (
+                <p className="text-xs mt-1.5" style={{ color: '#ef4444', fontFamily: 'var(--font-vietnam)' }}>⚠ {codeError}</p>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+              <span className="text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>HOẶC</span>
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+            </div>
+
+            {/* Option B: Lucky wheel */}
+            <div className="rounded-xl p-4 text-center" style={{ border: '1px solid rgba(201,168,76,0.2)', background: 'rgba(201,168,76,0.04)' }}>
+              <p className="font-semibold text-sm mb-1" style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)' }}>
+                Vòng Xoay May Mắn 🎡
+              </p>
+              <p className="text-xs mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+                Quay thử để nhận ưu đãi ngẫu nhiên từ 5% đến 30%
+              </p>
+              <button
+                onClick={() => setShowWheel(true)}
+                className="w-full h-10 rounded-lg font-semibold text-sm"
+                style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', color: '#fff', fontFamily: 'var(--font-vietnam)' }}
+              >
+                Quay ngay →
+              </button>
+            </div>
+
+            {/* Skip */}
+            <button
+              onClick={() => onProceed({})}
+              className="w-full text-center text-xs py-1"
+              style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}
+            >
+              Bỏ qua, tiếp tục với giá gốc
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <LuckyWheelModal
+        open={showWheel}
+        service={service}
+        onClose={() => setShowWheel(false)}
+        onResult={handleWheelResult}
+      />
+    </>
+  )
+}

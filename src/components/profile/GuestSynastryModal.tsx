@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import LocationPicker from './LocationPicker'
 import { ProfileFormData, EMPTY_PROFILE_FORM } from './ProfileFormModal'
@@ -205,7 +205,6 @@ export default function GuestSynastryModal({
   onSubmit,
   initialDataA,
   initialDataB,
-  showCtvField,
   draftKey,
 }: {
   open: boolean
@@ -213,16 +212,12 @@ export default function GuestSynastryModal({
   onSubmit: (dataA: ProfileFormData, dataB: ProfileFormData, action?: 'free' | 'paid', email?: string) => void
   initialDataA?: ProfileFormData | null
   initialDataB?: ProfileFormData | null
-  showCtvField?: boolean
   draftKey?: string
 }) {
   const a = usePersonState()
   const b = usePersonState()
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
-  const [ctvCode, setCtvCode] = useState('')
-  const [ctvVerified, setCtvVerified] = useState<null | { valid: boolean; name?: string; discountPct?: number }>(null)
-  const [ctvVerifying, setCtvVerifying] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -230,13 +225,11 @@ export default function GuestSynastryModal({
       try {
         const saved = sessionStorage.getItem(draftKey)
         if (saved) {
-          const draft = JSON.parse(saved) as { formA?: ProfileFormData; formB?: ProfileFormData; email?: string; ctvCode?: string }
+          const draft = JSON.parse(saved) as { formA?: ProfileFormData; formB?: ProfileFormData; email?: string }
           if (draft.formA) a.resetWith(draft.formA); else a.reset()
           if (draft.formB) b.resetWith(draft.formB); else b.reset()
           setEmail(draft.email ?? '')
           setEmailError('')
-          setCtvCode(draft.ctvCode ?? '')
-          setCtvVerified(null)
           return
         }
       } catch { /* ignore */ }
@@ -247,38 +240,13 @@ export default function GuestSynastryModal({
     else b.reset()
     setEmail('')
     setEmailError('')
-    setCtvCode('')
-    setCtvVerified(null)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
-
-  // Auto-verify CTV code after user stops typing (debounced)
-  const ctvDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => {
-    if (ctvDebounceRef.current) clearTimeout(ctvDebounceRef.current)
-    const code = ctvCode.trim()
-    if (!code) { setCtvVerified(null); return }
-    ctvDebounceRef.current = setTimeout(async () => {
-      setCtvVerifying(true)
-      try {
-        const res = await fetch(`/api/ctv/verify-code?code=${encodeURIComponent(code)}`)
-        const data = await res.json() as { valid: boolean; name?: string; discountPct?: number }
-        setCtvVerified(data)
-        if (data.valid) sessionStorage.setItem('ctvCode', code)
-        else sessionStorage.removeItem('ctvCode')
-      } catch {
-        setCtvVerified({ valid: false })
-      } finally {
-        setCtvVerifying(false)
-      }
-    }, 600)
-    return () => { if (ctvDebounceRef.current) clearTimeout(ctvDebounceRef.current) }
-  }, [ctvCode])
 
   const handleClose = () => {
     if (draftKey && !initialDataA && !initialDataB) {
       try {
-        sessionStorage.setItem(draftKey, JSON.stringify({ formA: a.form, formB: b.form, email, ctvCode }))
+        sessionStorage.setItem(draftKey, JSON.stringify({ formA: a.form, formB: b.form, email }))
       } catch { /* ignore */ }
     }
     onClose()
@@ -361,56 +329,23 @@ export default function GuestSynastryModal({
               <p style={{ color: '#ef4444', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>⚠ {emailError}</p>
             )}
           </div>
-
-          {/* CTV affiliate code (optional) */}
-          {showCtvField && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.25rem', color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500 }}>
-                Mã Đại Sứ{' '}
-                <span style={{ color: '#4a4560', fontWeight: 400, fontSize: '0.7rem' }}>(nếu có)</span>
-              </label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input
-                  type="text"
-                  value={ctvCode}
-                  onChange={e => setCtvCode(e.target.value.toUpperCase())}
-                  placeholder="VD: DAISU2025"
-                  style={{ flex: 1, textTransform: 'uppercase' }}
-                  maxLength={20}
-                />
-                {ctvVerifying && (
-                  <span style={{ color: '#6b7280', fontSize: '0.75rem', alignSelf: 'center', flexShrink: 0 }}>...</span>
-                )}
-              </div>
-              {ctvVerified?.valid && (
-                <p style={{ color: '#4ade80', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>
-                  ✓ Mã hợp lệ — bạn được giảm {ctvVerified.discountPct ?? 10}%
-                </p>
-              )}
-              {ctvVerified?.valid === false && (
-                <p style={{ color: '#ef4444', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>
-                  ✗ Mã không hợp lệ hoặc không tồn tại
-                </p>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Footer */}
-        <div className="px-6 pb-6 space-y-2">
-          <button
-            onClick={handlePaid}
-            className="w-full h-10 rounded-lg font-semibold"
-            style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
-          >
-            Xuất PDF chi tiết →
-          </button>
+        {/* Footer — horizontal CTAs */}
+        <div className="px-6 pb-6 flex gap-3">
           <button
             onClick={handleFree}
-            className="w-full h-10 rounded-lg font-semibold"
-            style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
+            className="flex-1 h-10 rounded-lg font-semibold"
+            style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
           >
-            Nhận báo cáo tổng quan miễn phí
+            Xem miễn phí
+          </button>
+          <button
+            onClick={handlePaid}
+            className="flex-1 h-10 rounded-lg font-semibold"
+            style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
+          >
+            Xuất PDF chi tiết →
           </button>
         </div>
       </div>

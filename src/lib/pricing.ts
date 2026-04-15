@@ -25,10 +25,10 @@ const DEFAULTS: Record<string, number> = {
 }
 
 const DISPLAY_DEFAULTS: Record<string, number> = {
-  career: 299000,
-  love: 299000,
-  synastry: 399000,
-  transit: 299000,
+  career: 199000,
+  love: 199000,
+  synastry: 269000,
+  transit: 199000,
 }
 
 export function displayPriceKey(service: string): string {

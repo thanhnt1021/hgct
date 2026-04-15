@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import LocationPicker from './LocationPicker'
 import { X } from 'lucide-react'
 
@@ -60,13 +60,12 @@ interface Props {
   hideNote?: boolean
   showEmailField?: boolean
   twoActionMode?: boolean
-  showCtvField?: boolean
   draftKey?: string
   onSave: (data: ProfileFormData, saveProfile: boolean, action?: 'free' | 'paid', email?: string) => void
   onClose: () => void
 }
 
-export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, hideNote, showEmailField, twoActionMode, showCtvField, draftKey, onSave, onClose }: Props) {
+export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, hideNote, showEmailField, twoActionMode, draftKey, onSave, onClose }: Props) {
   const [form, setForm] = useState<ProfileFormData>(initialData ?? EMPTY_PROFILE_FORM)
   const [yearMode, setYearMode] = useState<'select' | 'custom'>('select')
   const [customYearText, setCustomYearText] = useState('')
@@ -75,9 +74,6 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
   const [saveProfile, setSaveProfile] = useState(defaultSaveChecked ?? false)
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
-  const [ctvCode, setCtvCode] = useState('')
-  const [ctvVerified, setCtvVerified] = useState<null | { valid: boolean; name?: string; discountPct?: number }>(null)
-  const [ctvVerifying, setCtvVerifying] = useState(false)
 
   // Sync form when open changes — restore draft if available
   useEffect(() => {
@@ -86,7 +82,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
       try {
         const saved = sessionStorage.getItem(draftKey)
         if (saved) {
-          const draft = JSON.parse(saved) as { form?: ProfileFormData; email?: string; ctvCode?: string }
+          const draft = JSON.parse(saved) as { form?: ProfileFormData; email?: string }
           const data = draft.form ?? EMPTY_PROFILE_FORM
           setForm(data)
           const inRange = data.dob.year >= CUR_YEAR - 100 && data.dob.year <= CUR_YEAR
@@ -94,8 +90,6 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
           setCustomYearText(inRange || data.dob.year === 0 ? '' : String(data.dob.year))
           setYearError(''); setFormError(''); setEmailError('')
           setEmail(draft.email ?? '')
-          setCtvCode(draft.ctvCode ?? '')
-          setCtvVerified(null)
           setSaveProfile(defaultSaveChecked ?? false)
           return
         }
@@ -110,49 +104,8 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
     setFormError('')
     setEmailError('')
     setEmail('')
-    setCtvCode('')
-    setCtvVerified(null)
     setSaveProfile(defaultSaveChecked ?? false)
   }, [open, initialData, defaultSaveChecked, draftKey])
-
-  // Auto-verify CTV code after user stops typing (debounced)
-  const ctvDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => {
-    if (ctvDebounceRef.current) clearTimeout(ctvDebounceRef.current)
-    const code = ctvCode.trim()
-    if (!code) { setCtvVerified(null); return }
-    ctvDebounceRef.current = setTimeout(async () => {
-      setCtvVerifying(true)
-      try {
-        const res = await fetch(`/api/ctv/verify-code?code=${encodeURIComponent(code)}`)
-        const data = await res.json() as { valid: boolean; name?: string; discountPct?: number }
-        setCtvVerified(data)
-        if (data.valid) sessionStorage.setItem('ctvCode', code)
-        else sessionStorage.removeItem('ctvCode')
-      } catch {
-        setCtvVerified({ valid: false })
-      } finally {
-        setCtvVerifying(false)
-      }
-    }, 600)
-    return () => { if (ctvDebounceRef.current) clearTimeout(ctvDebounceRef.current) }
-  }, [ctvCode])
-
-  const verifyCtvCode = async (code: string) => {
-    if (!code.trim()) { setCtvVerified(null); return }
-    setCtvVerifying(true)
-    try {
-      const res = await fetch(`/api/ctv/verify-code?code=${encodeURIComponent(code.trim())}`)
-      const data = await res.json() as { valid: boolean; name?: string; discountPct?: number }
-      setCtvVerified(data)
-      if (data.valid) sessionStorage.setItem('ctvCode', code.trim())
-      else sessionStorage.removeItem('ctvCode')
-    } catch {
-      setCtvVerified({ valid: false })
-    } finally {
-      setCtvVerifying(false)
-    }
-  }
 
   // Lock body scroll
   useEffect(() => {
@@ -164,7 +117,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
   const handleClose = () => {
     if (draftKey && !initialData) {
       try {
-        sessionStorage.setItem(draftKey, JSON.stringify({ form, email, ctvCode }))
+        sessionStorage.setItem(draftKey, JSON.stringify({ form, email }))
       } catch { /* ignore */ }
     }
     onClose()
@@ -413,70 +366,30 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
             </div>
           )}
 
-          {/* CTV affiliate code (optional) */}
-          {showCtvField && (
-            <div>
-              <label style={labelStyle}>
-                Mã Đại Sứ{' '}
-                <span style={{ color: '#4a4560', fontWeight: 400, fontSize: '0.7rem' }}>(nếu có)</span>
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={ctvCode}
-                  onChange={e => setCtvCode(e.target.value.toUpperCase())}
-                  placeholder="VD: DAISU2025"
-                  style={{ flex: 1, textTransform: 'uppercase' }}
-                  maxLength={20}
-                />
-                {ctvVerifying && (
-                  <span style={{ color: '#6b7280', fontSize: '0.75rem', alignSelf: 'center', flexShrink: 0 }}>...</span>
-                )}
-              </div>
-              {ctvVerified?.valid && (
-                <p style={{ color: '#4ade80', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>
-                  ✓ Mã hợp lệ — bạn được giảm {ctvVerified.discountPct ?? 10}%
-                </p>
-              )}
-              {ctvVerified?.valid === false && (
-                <p style={{ color: '#ef4444', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>
-                  ✗ Mã không hợp lệ hoặc không tồn tại
-                </p>
-              )}
-            </div>
-          )}
-
           {formError && (
             <p style={{ color: '#ef4444', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>⚠ {formError}</p>
           )}
 
-          {/* Scroll hint — tells user to scroll down to tap the button */}
-          <div style={{ textAlign: 'center', paddingTop: '0', animation: 'pfm-bounce 1.6s ease-in-out infinite' }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ display: 'inline-block' }}>
-              <path d="M12 5v14M5 13l7 7 7-7" stroke="#c9a84c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.65"/>
-            </svg>
-          </div>
-          <style>{`@keyframes pfm-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}`}</style>
         </div>
 
         {/* Footer */}
         {twoActionMode ? (
-          <div className="px-6 pb-6 space-y-2">
-            <button
-              onClick={handlePaid}
-              disabled={saving}
-              className="w-full h-10 rounded-lg font-semibold"
-              style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', opacity: saving ? 0.7 : 1 }}
-            >
-              Xuất PDF chi tiết →
-            </button>
+          <div className="px-6 pb-6 flex gap-3">
             <button
               onClick={handleFree}
               disabled={saving}
-              className="w-full h-10 rounded-lg font-semibold"
-              style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
+              className="flex-1 h-10 rounded-lg font-semibold"
+              style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
             >
-              Nhận báo cáo tổng quan miễn phí
+              Xem miễn phí
+            </button>
+            <button
+              onClick={handlePaid}
+              disabled={saving}
+              className="flex-1 h-10 rounded-lg font-semibold"
+              style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', opacity: saving ? 0.7 : 1 }}
+            >
+              Xuất PDF chi tiết →
             </button>
           </div>
         ) : (
