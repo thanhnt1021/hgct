@@ -3,7 +3,7 @@
 // VISUAL ONLY — checkout page restyled to Celestial Sanctum design
 // All logic (handleConfirm, sessionStorage reads, API call, routing) untouched
 
-import { useEffect, useState, useCallback, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
@@ -61,25 +61,10 @@ function CheckoutInner() {
   const [profileUidB, setProfileUidB] = useState('')
   const [transitStartDate, setTransitStartDate] = useState('')
   const [transitEndDate, setTransitEndDate] = useState('')
-  const [ctvCode, setCtvCode] = useState('')
-  const [ctvVerified, setCtvVerified] = useState<null | { valid: boolean; name?: string; discountPct?: number }>(null)
-  const [ctvVerifying, setCtvVerifying] = useState(false)
+  const [referralCode, setReferralCode] = useState('')
+  const [wheelDiscountPct, setWheelDiscountPct] = useState<number | undefined>(undefined)
   const [autoMode, setAutoMode] = useState(false)
   const [basePrice, setBasePrice] = useState<number | null>(null)
-
-  const verifyCtvCode = useCallback(async (code: string) => {
-    if (!code.trim()) { setCtvVerified(null); return }
-    setCtvVerifying(true)
-    try {
-      const res = await fetch(`/api/ctv/verify-code?code=${encodeURIComponent(code.trim())}`)
-      const data = await res.json() as { valid: boolean; name?: string; discountPct?: number }
-      setCtvVerified(data)
-    } catch {
-      setCtvVerified({ valid: false })
-    } finally {
-      setCtvVerifying(false)
-    }
-  }, [])
 
   useEffect(() => {
     const svc = sessionStorage.getItem('selectedService') || ''
@@ -107,12 +92,11 @@ function CheckoutInner() {
       .then((d: { price?: number } | null) => { if (d?.price != null) setBasePrice(d.price) })
       .catch(() => {})
 
-    // Auto-fill CTV code from URL param or sessionStorage
-    const utmCtv = searchParams.get('ctv') || sessionStorage.getItem('ctvCode') || ''
-    if (utmCtv) {
-      setCtvCode(utmCtv)
-      verifyCtvCode(utmCtv)
-    }
+    // Read discount params from sessionStorage (set by DiscountModal)
+    const storedReferral = sessionStorage.getItem('referralCode') || ''
+    if (storedReferral) { setReferralCode(storedReferral); sessionStorage.removeItem('referralCode') }
+    const storedWheelPct = sessionStorage.getItem('wheelDiscountPct')
+    if (storedWheelPct) { setWheelDiscountPct(Number(storedWheelPct)); sessionStorage.removeItem('wheelDiscountPct') }
 
     // Auto-checkout mode: skip form UI and trigger payment automatically
     const isAuto = sessionStorage.getItem('autoCheckout') === '1'
@@ -145,7 +129,7 @@ function CheckoutInner() {
         })
         .catch(() => { if (user?.email) setEmail(user.email) })
     }
-  }, [user, router, searchParams, verifyCtvCode])
+  }, [user, router, searchParams])
 
   const fmtDate = (s: string) => { if (!s) return ''; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}` }
   const fmtDob = (dob: Record<string, number> | undefined) => {
@@ -180,7 +164,8 @@ function CheckoutInner() {
       ...(profileUidB ? { profileUidB } : {}),
       ...(service === 'transit' && transitStartDate && transitEndDate
         ? { startDate: transitStartDate, endDate: transitEndDate } : {}),
-      ...(ctvCode.trim() ? { ctvCode: ctvCode.trim().toUpperCase() } : {}),
+      ...(referralCode ? { referralCode: referralCode.trim().toUpperCase() } : {}),
+      ...(wheelDiscountPct !== undefined ? { wheelDiscountPct } : {}),
     })
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) {
@@ -267,14 +252,6 @@ function CheckoutInner() {
     alert('Hệ thống đang bận. Vui lòng thử lại sau.')
     setLoading(false)
   }
-
-  // Auto-verify CTV code after user stops typing (debounced)
-  useEffect(() => {
-    const code = ctvCode.trim()
-    if (!code) { setCtvVerified(null); return }
-    const timer = setTimeout(() => verifyCtvCode(code), 600)
-    return () => clearTimeout(timer)
-  }, [ctvCode, verifyCtvCode])
 
   // Auto-trigger when autoMode + all data ready
   useEffect(() => {
@@ -435,60 +412,6 @@ function CheckoutInner() {
               </p>
             )}
           </div>
-
-          {/* CTV code field — only for free/guest users (not premium) */}
-          {!isPremiumOrLifetime && (
-            <div className="mb-6">
-              <label style={{ ...labelStyle, color: '#8a8399' }}>Mã giới thiệu (tuỳ chọn)</label>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  value={ctvCode}
-                  onChange={e => {
-                    setCtvCode(e.target.value.toUpperCase())
-                    setCtvVerified(null)
-                  }}
-                  placeholder="Nhập mã CTV nếu có"
-                  className="w-full"
-                  style={{
-                    borderColor: ctvCode
-                      ? ctvVerified?.valid ? 'rgba(74,222,128,0.5)' : ctvVerified?.valid === false ? 'rgba(196,82,82,0.5)' : 'rgba(200,148,63,0.2)'
-                      : 'rgba(200,148,63,0.1)',
-                    fontSize: '0.9rem',
-                  }}
-                />
-                {ctvVerifying && (
-                  <div className="w-5 h-5 rounded-full animate-spin flex-shrink-0" style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
-                )}
-              </div>
-              {ctvCode && ctvVerified?.valid && (() => {
-                const pct = ctvVerified.discountPct ?? 10
-                const discountedPrice = basePrice != null ? Math.round(basePrice * (1 - pct / 100)) : null
-                return (
-                  <div style={{ marginTop: '0.4rem' }}>
-                    <p style={{ color: '#4ade80', fontSize: '0.75rem', margin: 0, fontFamily: 'var(--font-vietnam)' }}>
-                      ✓ Mã hợp lệ — giảm {pct}%
-                    </p>
-                    {basePrice != null && discountedPrice != null && (
-                      <p style={{ margin: '0.2rem 0 0', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
-                        <span style={{ color: '#6b7280', textDecoration: 'line-through', marginRight: '0.5rem' }}>
-                          {basePrice.toLocaleString('vi-VN')}đ
-                        </span>
-                        <span style={{ color: '#f0cc78', fontWeight: 700 }}>
-                          {discountedPrice.toLocaleString('vi-VN')}đ
-                        </span>
-                      </p>
-                    )}
-                  </div>
-                )
-              })()}
-              {ctvCode && ctvVerified?.valid === false && (
-                <p style={{ color: '#c8410a', fontSize: '0.75rem', marginTop: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
-                  ✕ Mã không hợp lệ
-                </p>
-              )}
-            </div>
-          )}
 
           {/* CTA: Premium/Lifetime → create report directly; Free/Guest → create order + go to payment */}
           {isPremiumOrLifetime ? (

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import DiscountModal from '@/components/checkout/DiscountModal'
 
 const SERVICE_NAMES: Record<string, string> = {
   career: 'Hướng Nghiệp',
@@ -64,7 +65,6 @@ interface PreviewInput {
   startDate?: string
   endDate?: string
   email?: string
-  ctvCode?: string
 }
 
 const INTRO_TEXT: Record<string, string> = {
@@ -114,6 +114,7 @@ export default function PreviewPage() {
   const [streamText, setStreamText] = useState('')
   const [streamDone, setStreamDone] = useState(false)
   const [isYoungCareer, setIsYoungCareer] = useState(false)
+  const [discountModalOpen, setDiscountModalOpen] = useState(false)
   const [displayedLength, setDisplayedLength] = useState(0)
   const hasStarted = useRef(false)
   const streamTextRef = useRef('')  // mirror for sessionStorage writes
@@ -277,7 +278,7 @@ export default function PreviewPage() {
   const handleGetFullReport = () => {
     if (!previewInput) return
     sessionStorage.removeItem(CACHE_KEY)
-    const { service: svc, inputData, inputDataB, startDate, endDate, email: em, ctvCode,
+    const { service: svc, inputData, inputDataB, startDate, endDate, email: em,
       _guestFormA, _guestFormB } = previewInput as PreviewInput & { _guestFormA?: unknown; _guestFormB?: unknown }
     sessionStorage.setItem('selectedService', svc)
     sessionStorage.setItem('inputData', JSON.stringify(inputData))
@@ -286,11 +287,18 @@ export default function PreviewPage() {
     if (svc === 'transit' && startDate) sessionStorage.setItem('transitStartDate', startDate)
     if (svc === 'transit' && endDate) sessionStorage.setItem('transitEndDate', endDate)
     if (em) sessionStorage.setItem('checkoutEmail', em)
-    if (ctvCode) sessionStorage.setItem('ctvCode', ctvCode)
     // Restore guest form data so "← Sửa thông tin" in checkout can repopulate the modal
     if (_guestFormA) sessionStorage.setItem('guestFormDataA', JSON.stringify(_guestFormA))
     if (_guestFormB) sessionStorage.setItem('guestFormDataB', JSON.stringify(_guestFormB))
     else sessionStorage.removeItem('guestFormDataB')
+    setDiscountModalOpen(true)
+  }
+
+  const proceedToCheckout = (discount: { referralCode?: string; wheelDiscountPct?: number }) => {
+    if (discount.referralCode) sessionStorage.setItem('referralCode', discount.referralCode)
+    else sessionStorage.removeItem('referralCode')
+    if (discount.wheelDiscountPct !== undefined) sessionStorage.setItem('wheelDiscountPct', String(discount.wheelDiscountPct))
+    else sessionStorage.removeItem('wheelDiscountPct')
     sessionStorage.setItem('autoCheckout', '1')
     router.push('/checkout')
   }
@@ -488,6 +496,13 @@ export default function PreviewPage() {
           <div ref={textEndRef} style={{ height: '2rem' }} />
         </div>
       )}
+
+      <DiscountModal
+        open={discountModalOpen}
+        service={previewInput?.service || ''}
+        onClose={() => setDiscountModalOpen(false)}
+        onProceed={proceedToCheckout}
+      />
     </div>
   )
 }

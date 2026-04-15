@@ -11,6 +11,7 @@ import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
 import ProfileFormModal, { ProfileFormData } from '@/components/profile/ProfileFormModal'
 import GuestSynastryModal from '@/components/profile/GuestSynastryModal'
+import DiscountModal from '@/components/checkout/DiscountModal'
 
 interface Profile {
   id: string
@@ -235,6 +236,10 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
   const [guestInitialDataA, setGuestInitialDataA] = useState<ProfileFormData | null>(null)
   const [guestInitialDataB, setGuestInitialDataB] = useState<ProfileFormData | null>(null)
 
+  // Discount modal state
+  const [discountModalOpen, setDiscountModalOpen] = useState(false)
+  const [discountService, setDiscountService] = useState('')
+
   useEffect(() => {
     fetch('/api/profiles')
       .then(r => r.json())
@@ -304,7 +309,6 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
     if (!guestService) return
     const name = [formData.ho, formData.dem, formData.ten].filter(Boolean).join(' ')
     const inputData = guestProfileToInput(formData, name)
-    const ctvCode = sessionStorage.getItem('ctvCode') || undefined
 
     // Persist form data as draft so modal re-opens with pre-filled data if user navigates back
     try { sessionStorage.setItem('guest_modal_single', JSON.stringify({ form: formData })) } catch { /* ignore */ }
@@ -313,7 +317,6 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       const previewData = {
         ...buildPreviewData(inputData),
         ...(email ? { email } : {}),
-        ...(ctvCode ? { ctvCode } : {}),
         _guestFormA: formData,  // for form restoration if user goes /preview → /checkout → back
       }
       localStorage.setItem('previewInput', JSON.stringify(previewData))
@@ -321,7 +324,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       return
     }
 
-    // paid flow
+    // paid flow → stage data, then open DiscountModal
     sessionStorage.setItem('inputData', JSON.stringify(inputData))
     sessionStorage.setItem('selectedService', guestService.type)
     sessionStorage.setItem('profileUidA', '')
@@ -340,8 +343,6 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       sessionStorage.removeItem('transitEndDate')
     }
     if (email) sessionStorage.setItem('checkoutEmail', email)
-    sessionStorage.setItem('autoCheckout', '1')
-    router.push('/checkout')
     // Background save if user wants
     if (user && save) {
       fetch('/api/profiles', {
@@ -349,6 +350,9 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
         body: JSON.stringify({ name, gender: formData.gender, isTemp: false, data: formData }),
       }).catch(() => {})
     }
+    setGuestModalOpen(false)
+    setDiscountService(guestService.type)
+    setDiscountModalOpen(true)
   }
 
   const handleGuestSynastrySubmit = (formA: ProfileFormData, formB: ProfileFormData, action?: 'free' | 'paid', email?: string) => {
@@ -356,7 +360,6 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
     const nameB = [formB.ho, formB.dem, formB.ten].filter(Boolean).join(' ')
     const inputDataA = guestProfileToInput(formA, nameA)
     const inputDataB = guestProfileToInput(formB, nameB)
-    const ctvCode = sessionStorage.getItem('ctvCode') || undefined
 
     // Persist synastry form data as draft so modal re-opens pre-filled if user navigates back
     try { sessionStorage.setItem('guest_modal_synastry', JSON.stringify({ formA, formB })) } catch { /* ignore */ }
@@ -365,7 +368,6 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       const previewData = {
         ...buildPreviewData(inputDataA, inputDataB, 'synastry'),
         ...(email ? { email } : {}),
-        ...(ctvCode ? { ctvCode } : {}),
         _guestFormA: formA,
         _guestFormB: formB,
       }
@@ -374,6 +376,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       return
     }
 
+    // paid flow → stage data, then open DiscountModal
     sessionStorage.setItem('inputData', JSON.stringify(inputDataA))
     sessionStorage.setItem('inputDataB', JSON.stringify(inputDataB))
     sessionStorage.setItem('selectedService', 'synastry')
@@ -384,8 +387,9 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
     sessionStorage.removeItem('transitStartDate')
     sessionStorage.removeItem('transitEndDate')
     if (email) sessionStorage.setItem('checkoutEmail', email)
-    sessionStorage.setItem('autoCheckout', '1')
-    router.push('/checkout')
+    setGuestSynastryOpen(false)
+    setDiscountService('synastry')
+    setDiscountModalOpen(true)
   }
 
   // Xử lý ?edit=1 khi quay lại từ checkout
@@ -541,10 +545,15 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
     sessionStorage.setItem('inputData', JSON.stringify(profileToInputData(d.pa)))
     sessionStorage.setItem('selectedService', selectedService.type)
     sessionStorage.setItem('profileUidA', d.pa.profileUid || '')
+    sessionStorage.removeItem('guestFormDataA')
+    sessionStorage.removeItem('guestFormDataB')
 
     if (selectedService.needsTwo && d.pb) {
       sessionStorage.setItem('inputDataB', JSON.stringify(profileToInputData(d.pb)))
       sessionStorage.setItem('profileUidB', d.pb.profileUid || '')
+    } else {
+      sessionStorage.removeItem('inputDataB')
+      sessionStorage.removeItem('profileUidB')
     }
 
     if (selectedService.type === 'transit') {
@@ -555,6 +564,15 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       sessionStorage.removeItem('transitEndDate')
     }
 
+    setDiscountService(selectedService.type)
+    setDiscountModalOpen(true)
+  }
+
+  const proceedToCheckout = (discount: { referralCode?: string; wheelDiscountPct?: number }) => {
+    if (discount.referralCode) sessionStorage.setItem('referralCode', discount.referralCode)
+    else sessionStorage.removeItem('referralCode')
+    if (discount.wheelDiscountPct !== undefined) sessionStorage.setItem('wheelDiscountPct', String(discount.wheelDiscountPct))
+    else sessionStorage.removeItem('wheelDiscountPct')
     sessionStorage.setItem('autoCheckout', '1')
     router.push('/checkout')
   }
@@ -880,7 +898,6 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
         defaultSaveChecked={!!user}
         showEmailField
         twoActionMode
-        showCtvField={!user}
         draftKey="guest_modal_single"
         onSave={handleGuestModalSubmit}
         onClose={() => { setGuestModalOpen(false); setGuestService(null); setGuestInitialDataA(null) }}
@@ -893,8 +910,14 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
         onSubmit={handleGuestSynastrySubmit}
         initialDataA={guestInitialDataA}
         initialDataB={guestInitialDataB}
-        showCtvField={!user}
         draftKey="guest_modal_synastry"
+      />
+
+      <DiscountModal
+        open={discountModalOpen}
+        service={discountService}
+        onClose={() => setDiscountModalOpen(false)}
+        onProceed={proceedToCheckout}
       />
     </div>
   )
