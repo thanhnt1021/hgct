@@ -1,22 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import LuckyWheelModal from './LuckyWheelModal'
 
 interface Props {
   open: boolean
   service: string
+  email?: string // used to gate Lucky Wheel (hidden for returning buyers)
   onClose: () => void
   /** Called when user is ready to proceed to checkout. */
   onProceed: (discount: { referralCode?: string; wheelDiscountPct?: number }) => void
 }
 
-export default function DiscountModal({ open, service, onClose, onProceed }: Props) {
+export default function DiscountModal({ open, service, email, onClose, onProceed }: Props) {
   const [code, setCode] = useState('')
   const [verifying, setVerifying] = useState(false)
   const [codeError, setCodeError] = useState('')
   const [showWheel, setShowWheel] = useState(false)
+  // firstTime: true = never bought before → show wheel; false = returning → hide wheel
+  // null = still loading check → render as first-time skeleton to avoid flash
+  const [firstTime, setFirstTime] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    // Reset on every open so navigating back re-checks the email
+    setFirstTime(null)
+    const e = (email || '').trim().toLowerCase()
+    if (!e) { setFirstTime(true); return }
+    fetch(`/api/referral/check-first-time?email=${encodeURIComponent(e)}`, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() as Promise<{ firstTime: boolean }> : { firstTime: true })
+      .then(d => setFirstTime(d.firstTime))
+      .catch(() => setFirstTime(true))
+  }, [open, email])
 
   if (!open) return null
 
@@ -49,6 +65,9 @@ export default function DiscountModal({ open, service, onClose, onProceed }: Pro
     onProceed({ wheelDiscountPct: pct })
   }
 
+  // While checking, render modal shell but hide options to avoid showing wheel for a returning buyer
+  const showWheelSection = firstTime === true
+
   return (
     <>
       <div
@@ -63,7 +82,7 @@ export default function DiscountModal({ open, service, onClose, onProceed }: Pro
           {/* Header */}
           <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
             <h3 className="font-bold text-base" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
-              Ưu đãi đặc biệt
+              {firstTime === false ? 'Tiếp tục thanh toán' : 'Ưu đãi đặc biệt'}
             </h3>
             <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
               <X size={18} />
@@ -72,10 +91,10 @@ export default function DiscountModal({ open, service, onClose, onProceed }: Pro
 
           {/* Body */}
           <div className="px-6 py-5 space-y-5">
-            {/* Option A: Referral code */}
+            {/* Option A: Referral code — always shown */}
             <div className="rounded-xl p-4" style={{ border: '1px solid rgba(201,168,76,0.2)', background: 'rgba(201,168,76,0.04)' }}>
               <p className="font-semibold text-sm mb-1" style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)' }}>
-                Có mã giới thiệu?
+                Có mã đại sứ?
               </p>
               <p className="text-xs mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
                 Nhập mã để được giảm xuống còn <strong style={{ color: '#f0cc78' }}>99.000đ</strong> (flat)
@@ -104,37 +123,44 @@ export default function DiscountModal({ open, service, onClose, onProceed }: Pro
               )}
             </div>
 
-            {/* Divider */}
-            <div className="flex items-center gap-3">
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
-              <span className="text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>HOẶC</span>
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
-            </div>
+            {/* Wheel — only shown for first-time buyers */}
+            {showWheelSection && (
+              <>
+                <div className="flex items-center gap-3">
+                  <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                  <span className="text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>HOẶC</span>
+                  <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                </div>
 
-            {/* Option B: Lucky wheel */}
-            <div className="rounded-xl p-4 text-center" style={{ border: '1px solid rgba(201,168,76,0.2)', background: 'rgba(201,168,76,0.04)' }}>
-              <p className="font-semibold text-sm mb-1" style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)' }}>
-                Vòng Xoay May Mắn 🎡
-              </p>
-              <p className="text-xs mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
-                Quay thử để nhận ưu đãi ngẫu nhiên từ 5% đến 30%
-              </p>
-              <button
-                onClick={() => setShowWheel(true)}
-                className="w-full h-10 rounded-lg font-semibold text-sm"
-                style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', color: '#fff', fontFamily: 'var(--font-vietnam)' }}
-              >
-                Quay ngay →
-              </button>
-            </div>
+                <div className="rounded-xl p-4 text-center" style={{ border: '1px solid rgba(201,168,76,0.2)', background: 'rgba(201,168,76,0.04)' }}>
+                  <p className="font-semibold text-sm mb-1" style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)' }}>
+                    Vòng Xoay May Mắn 🎡
+                  </p>
+                  <p className="text-xs mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+                    Quay thử để nhận ưu đãi ngẫu nhiên từ 5% đến 30%
+                  </p>
+                  <button
+                    onClick={() => setShowWheel(true)}
+                    className="w-full h-10 rounded-lg font-semibold text-sm"
+                    style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', color: '#fff', fontFamily: 'var(--font-vietnam)' }}
+                  >
+                    Quay ngay →
+                  </button>
+                </div>
+              </>
+            )}
 
-            {/* Skip */}
+            {/* Continue button — label varies */}
             <button
               onClick={() => onProceed({})}
-              className="w-full text-center text-xs py-1"
-              style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}
+              className="w-full text-center text-sm py-2.5 rounded-lg font-semibold"
+              style={
+                firstTime === false
+                  ? { background: 'linear-gradient(135deg, #c8943f, #f0cc78)', color: '#06060f', fontFamily: 'var(--font-vietnam)' }
+                  : { color: '#4a4560', fontFamily: 'var(--font-vietnam)' }
+              }
             >
-              Bỏ qua, tiếp tục với giá gốc
+              {firstTime === false ? 'Tiếp tục thanh toán →' : 'Bỏ qua, tiếp tục với giá gốc'}
             </button>
           </div>
         </div>

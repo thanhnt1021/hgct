@@ -239,6 +239,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
   // Discount modal state
   const [discountModalOpen, setDiscountModalOpen] = useState(false)
   const [discountService, setDiscountService] = useState('')
+  const [discountEmail, setDiscountEmail] = useState('')
 
   useEffect(() => {
     fetch('/api/profiles')
@@ -352,6 +353,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
     }
     setGuestModalOpen(false)
     setDiscountService(guestService.type)
+    setDiscountEmail(email || '')
     setDiscountModalOpen(true)
   }
 
@@ -389,6 +391,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
     if (email) sessionStorage.setItem('checkoutEmail', email)
     setGuestSynastryOpen(false)
     setDiscountService('synastry')
+    setDiscountEmail(email || '')
     setDiscountModalOpen(true)
   }
 
@@ -564,7 +567,15 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       sessionStorage.removeItem('transitEndDate')
     }
 
+    // Lifetime users skip discount modal (wheel + referral) → go straight to checkout,
+    // which auto-creates a free report via isPremiumOrLifetime path.
+    if (user?.planType === 'lifetime') {
+      proceedToCheckout({})
+      return
+    }
+
     setDiscountService(selectedService.type)
+    setDiscountEmail(user?.email || '')
     setDiscountModalOpen(true)
   }
 
@@ -916,6 +927,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       <DiscountModal
         open={discountModalOpen}
         service={discountService}
+        email={discountEmail}
         onClose={() => setDiscountModalOpen(false)}
         onProceed={proceedToCheckout}
       />
