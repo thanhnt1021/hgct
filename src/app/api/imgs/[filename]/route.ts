@@ -10,7 +10,8 @@ const ALLOWED = new Set([
   'pdf-VanHan-02.jpg',
 ])
 
-const IMGS_DIR = '/home/hgct/hgct/imgs'
+// Resolve imgs/ via process.cwd() — works both in Docker (/app/imgs) and dev host.
+const IMGS_DIR = path.join(process.cwd(), 'imgs')
 
 export async function GET(
   _req: NextRequest,

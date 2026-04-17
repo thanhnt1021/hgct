@@ -5,8 +5,6 @@ function escHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-import { exec } from 'child_process'
-import { promisify } from 'util'
 import prisma from '@/lib/db'
 import { tgSend, tgEdit, tgAnswer, tgSendForceReply, TgKeyboard } from './bot'
 import {
@@ -24,8 +22,7 @@ import { sendRecoveryEmail } from '@/lib/email'
 import { smartRetryOrder } from '@/lib/smart-retry'
 import { getOpenRouterBalance } from '@/lib/notify'
 import { runOrderCheck, getCheckInterval, setCheckInterval } from '@/lib/orderCheck'
-
-const execAsync = promisify(exec)
+import { restartContainer, getContainerStatus } from '@/lib/docker'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -586,9 +583,13 @@ export async function handleRestartProd(ctx: Ctx, force = false) {
 
     await respond(
       ctx,
-      `🔄 <b>Đang restart Production...</b>\nService sẽ khởi động lại trong ~3 giây.`,
+      `🔄 <b>Đang restart Production...</b>\nContainer hgct-prod sẽ restart trong ~3 giây.`,
     )
-    exec('(sleep 3 && systemctl restart hgct.service) &', { shell: '/bin/bash' })
+    setTimeout(() => {
+      restartContainer('hgct-prod').catch((err) => {
+        console.error('[AdminBot] restartProd docker API error:', err)
+      })
+    }, 3000)
   } catch (err) {
     console.error('[AdminBot] restartProd error:', err)
     await respond(ctx, '❌ Lỗi khi restart. Kiểm tra logs.')
@@ -598,7 +599,9 @@ export async function handleRestartProd(ctx: Ctx, force = false) {
 export async function handleRestartDemo(ctx: Ctx) {
   try {
     await respond(ctx, '🔄 <b>Đang restart Demo...</b>')
-    exec('systemctl restart hgct-demo.service &', { shell: '/bin/bash' })
+    restartContainer('hgct-demo').catch((err) => {
+      console.error('[AdminBot] restartDemo docker API error:', err)
+    })
   } catch (err) {
     console.error('[AdminBot] restartDemo error:', err)
     await respond(ctx, '❌ Lỗi khi restart demo.')
@@ -685,20 +688,18 @@ export async function handleHealthCheck(ctx: Ctx) {
     results.push(`❌ Database: ${String(err).slice(0, 50)}`)
   }
 
-  // Production service
+  // Production container
   try {
-    const { stdout } = await execAsync('systemctl is-active hgct.service')
-    const st = stdout.trim()
-    results.push(`${st === 'active' ? '✅' : '⚠️'} Production: ${st}`)
+    const st = await getContainerStatus('hgct-prod')
+    results.push(`${st === 'running' ? '✅' : '⚠️'} Production: ${st}`)
   } catch {
     results.push('❌ Production: không lấy được')
   }
 
-  // Demo service
+  // Demo container
   try {
-    const { stdout } = await execAsync('systemctl is-active hgct-demo.service')
-    const st = stdout.trim()
-    results.push(`${st === 'active' ? '✅' : '⚠️'} Demo: ${st}`)
+    const st = await getContainerStatus('hgct-demo')
+    results.push(`${st === 'running' ? '✅' : '⚠️'} Demo: ${st}`)
   } catch {
     results.push('❌ Demo: không lấy được')
   }
