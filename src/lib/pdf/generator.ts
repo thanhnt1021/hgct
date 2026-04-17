@@ -228,7 +228,9 @@ function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-const PDF_IMGS_DIR = '/home/hgct/hgct/imgs'
+// Resolve imgs/ via process.cwd() — works both in Docker container (/app/imgs)
+// and dev host (wherever npm run dev runs from).
+const PDF_IMGS_DIR = path.join(process.cwd(), 'imgs')
 
 interface PdfOptions {
   coverTitle: string
