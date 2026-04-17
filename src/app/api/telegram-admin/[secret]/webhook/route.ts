@@ -3,7 +3,8 @@ import { handleCallback, handleCommand } from '@/lib/telegram/admin'
 import { tgAnswer } from '@/lib/telegram/bot'
 
 const WEBHOOK_SECRET = process.env.TELEGRAM_ADMIN_WEBHOOK_SECRET || ''
-const ADMIN_USER_ID = 1247334831
+const WEBHOOK_SECRET_TOKEN = process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN || ''
+const ADMIN_USER_ID = parseInt(process.env.ADMIN_TELEGRAM_USER_ID || '0', 10)
 
 export async function POST(
   request: Request,
@@ -11,8 +12,23 @@ export async function POST(
 ) {
   const { secret } = await params
 
+  // Layer 1: secret in URL path (identifies webhook)
   if (!WEBHOOK_SECRET || secret !== WEBHOOK_SECRET) {
     return NextResponse.json({ ok: false }, { status: 403 })
+  }
+
+  // Layer 2: secret_token header (Telegram standard — only Telegram server knows this)
+  if (WEBHOOK_SECRET_TOKEN) {
+    const receivedToken = request.headers.get('x-telegram-bot-api-secret-token')
+    if (receivedToken !== WEBHOOK_SECRET_TOKEN) {
+      return NextResponse.json({ ok: false }, { status: 403 })
+    }
+  }
+
+  // Layer 3: admin user ID must be configured
+  if (!ADMIN_USER_ID) {
+    console.error('[TelegramAdmin] ADMIN_TELEGRAM_USER_ID not set — all requests rejected')
+    return NextResponse.json({ ok: false }, { status: 500 })
   }
 
   let update: Record<string, unknown>

@@ -3,6 +3,7 @@ import { timingSafeEqual } from 'crypto'
 import prisma from '@/lib/db'
 import { createReportJob } from '@/lib/astrology/reportProcessor'
 import { sendUnderpaymentAlert, sendPaymentReceivedNotification, sendUnmatchedPaymentAlert } from '@/lib/notify'
+import { recordDemosepay } from '@/lib/demosepay-state'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
       code,
       transferType,
       transferAmount,
+      content,
     } = payload as {
       id: number
       code: string | null
@@ -47,10 +49,22 @@ export async function POST(request: Request) {
       accountNumber: string
     }
 
-    console.log(`[sepay-webhook] txnId=${txnId} code=${code} type=${transferType} amount=${transferAmount}`)
+    console.log(`[sepay-webhook] txnId=${txnId} code=${code} type=${transferType} amount=${transferAmount} content=${content}`)
 
     // 3. Only process incoming transfers
     if (transferType !== 'in') {
+      return OK()
+    }
+
+    // 3b. /demosepay test flow — short-circuit before order lookup.
+    // Format: HGCT999XXX (HGCT + 999 + 3 digits). 999xxx far above real orderID range.
+    // Also accept legacy DEMOSEPAY prefix for backward compat.
+    const demoMatch = (code && (/^HGCT999\d+$/i.test(code) || /^DEMOSEPAY/i.test(code))) ? code
+      : (content && (content.match(/HGCT999\d+/i)?.[0] || content.match(/DEMOSEPAY\d*/i)?.[0])) || null
+    if (demoMatch) {
+      recordDemosepay(demoMatch, transferAmount, txnId)
+      sendUnmatchedPaymentAlert({ txnId, code: demoMatch, amount: transferAmount }).catch(() => {})
+      console.log(`[sepay-webhook] demosepay test — memo=${demoMatch} amount=${transferAmount}`)
       return OK()
     }
 
