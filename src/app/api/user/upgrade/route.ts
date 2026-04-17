@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createHash } from 'crypto'
+import bcrypt from 'bcryptjs'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/db'
 
-function premiumToken(upgradeCode: string): string {
-  return createHash('sha256').update(upgradeCode + ':hgct-premium').digest('hex')
+// Derive the stable premiumToken stored alongside the user row — used to resume
+// premium sessions without re-entering the code. Derived from the env hash so
+// the token remains stable as long as the hash doesn't rotate.
+function premiumToken(secret: string): string {
+  return createHash('sha256').update(secret + ':hgct-premium').digest('hex')
 }
 
 export async function POST(request: Request) {
@@ -20,22 +24,25 @@ export async function POST(request: Request) {
     }
 
     const { code } = await request.json()
-    const expected = process.env.UPGRADE_CODE
+    const trimmed = (code || '').toString().trim()
+    const hash = process.env.UPGRADE_CODE_HASH
 
-    if (!expected) {
+    if (!hash) {
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
     }
-
-    const adminCode = process.env.ADMIN_UPGRADE_CODE || 'TaiKhoanAdmin'
-    const trimmed = code?.trim() || ''
-    const isLifetime = trimmed === adminCode
-    if (!trimmed || (trimmed !== expected && !isLifetime)) {
+    if (!trimmed) {
       return NextResponse.json({ error: 'Mã nâng cấp không hợp lệ' }, { status: 401 })
     }
 
-    const token = premiumToken(expected)
-    const uid = (session.user as any).uid as string
-    const planType = isLifetime ? 'lifetime' : 'premium'
+    const ok = await bcrypt.compare(trimmed, hash)
+    if (!ok) {
+      return NextResponse.json({ error: 'Mã nâng cấp không hợp lệ' }, { status: 401 })
+    }
+
+    // Unified code grants lifetime.
+    const token = premiumToken(hash)
+    const uid = (session.user as { uid?: string }).uid
+    const planType = 'lifetime'
 
     if (uid) {
       await prisma.user.update({
