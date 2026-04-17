@@ -92,8 +92,9 @@ File index cho toàn bộ universal rules. Claude đọc file này trước, sau
 
 8. Khi backup DB hoặc file quan trọng: **luôn lưu 2 nơi** — `/tmp/` (nhanh) + một thư mục persistent (`/var/[project]/backups/` hoặc tương đương) ngay trong cùng lệnh.
 
-9. **Package manager**: Dùng `pnpm` thay `npm` cho mọi project Node.js. pnpm dùng shared store (hardlink) nên nhiều project dùng chung packages mà không tốn thêm disk. Lệnh tương ứng: `pnpm install`, `pnpm run build`, `pnpm run dev`. Xem `NEW_PROJECT_SETUP.md` để biết chi tiết.
+9. **Package manager**: Dùng `pnpm` thay `npm` cho mọi project Node.js **MỚI**. pnpm dùng shared store (hardlink) nên nhiều project dùng chung packages mà không tốn thêm disk. Lệnh tương ứng: `pnpm install`, `pnpm run build`, `pnpm run dev`. Xem `NEW_PROJECT_SETUP.md` để biết chi tiết.
    _Lý do: `/tmp/` bị xóa khi server reboot. Backup trong `/tmp/` thôi là không có backup — mất dữ liệu khi cần nhất._
+   **Legacy exception:** Project đã có `package-lock.json` (npm) từ trước → giữ npm cho đến khi có task migration riêng. Không mix 2 package managers trong cùng 1 repo (pick `pnpm-lock.yaml` HOẶC `package-lock.json`, không cả hai).
 
 10. **KHÔNG CHẮC → HỎI NGAY.** Khi không chắc cách implement đúng (API vs subprocess, endpoint nào, flow ra sao, destructive action...) → dùng **AskUserQuestion TRƯỚC KHI code**. KHÔNG tự đoán rồi làm sai, không tự assume rồi implement, không loop fix nhiều lần.
     _Lý do: đoán sai 1 lần tốn thời gian hơn hỏi 1 câu. User muốn kết quả đúng ngay lần đầu._
@@ -204,10 +205,12 @@ One-shot command cuối task — gom toàn bộ `commit` + `merge main` + restar
 - `git status` → verify "up to date"
 - Nếu đang trên `main` → skip bước này
 
-**Bước 4 — Restart service** (chỉ khi project có service)
-- `sudo systemctl restart [service-name]`
-- Verify service running: `sudo systemctl is-active [service-name]`
-- Nếu project không có service / không có systemd config → skip bước này
+**Bước 4 — Deploy production** (chọn đúng path theo project)
+- Xem `CLAUDE.md` của project mục "Deploy workflow" để biết project dùng cách nào. Ba variant thường gặp:
+  - **systemd service**: `sudo systemctl restart [service-name]` → verify `sudo systemctl is-active [service-name]`
+  - **Docker Compose**: `cd [compose-dir] && docker compose build [service] && docker compose up -d --force-recreate [service]` → verify `docker ps` + `curl https://domain/` HTTP 200
+  - **Quick deploy only (no service)**: skip bước này, ghi note "No production service"
+- Nếu vừa deploy demo trong session (đã `docker compose build hgct-prod` rồi recreate) → có thể skip bước này, chỉ cần verify containers + HTTP health
 
 **Bước 5 — Report**
 - Output tóm tắt ngắn gọn:
@@ -215,7 +218,7 @@ One-shot command cuối task — gom toàn bộ `commit` + `merge main` + restar
   -- full update --
   Branch: [branch] -> main
   Commit: [hash] [message ngắn]
-  Service: [tên] restarted / N/A
+  Deploy: [systemctl name restarted / docker compose restarted / skipped]
   MD files updated: [danh sách]
   ```
 
@@ -263,9 +266,10 @@ One-shot command khi cần commit + push ra **cả 2 repos** (project hiện t�
 - `git push`
 - Nếu đang trên `main` → skip bước này
 
-**Bước 5 — Restart service** (chỉ khi project có service)
-- `sudo systemctl restart [service-name]`
-- Verify: `sudo systemctl is-active [service-name]`
+**Bước 5 — Deploy production** (chọn đúng path theo project — xem Bước 4 của `full update` Workflow)
+- systemd: `sudo systemctl restart [name]` → `sudo systemctl is-active [name]`
+- Docker Compose: `docker compose build [svc] && docker compose up -d --force-recreate [svc]` → verify HTTP 200
+- Không có production service → skip
 
 **Bước 6 — Report**
 ```

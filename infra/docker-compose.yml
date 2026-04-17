@@ -1,0 +1,106 @@
+name: hgct
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: hgct-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nguydev
+      POSTGRES_PASSWORD: ***DA-GO***
+      POSTGRES_DB: zodiacdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - hgct-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nguydev -d zodiacdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  hgct-prod:
+    build:
+      context: ./hgct
+      dockerfile: Dockerfile
+    container_name: hgct-prod
+    restart: unless-stopped
+    env_file:
+      - ./hgct/.env.local
+    environment:
+      PORT: "65498"
+      HOSTNAME: "0.0.0.0"
+      DATABASE_URL: "postgresql://nguydev:***DA-GO***@postgres:5432/zodiacdb"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./volumes/pdfs-prod:/var/hgct/pdfs
+      - ./volumes/avatars:/var/hgct/avatars
+      # Docker API access for admin bot restart/health commands.
+      # Security: mounting sock = root on host. Mitigated by 4-layer auth
+      # (URL secret + webhook secret_token + admin user_id + nginx IP allowlist).
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "988"  # host docker group GID — grants node user access to /var/run/docker.sock
+    networks:
+      - hgct-net
+
+  hgct-demo:
+    build:
+      context: ./hgct-demo
+      dockerfile: Dockerfile
+    container_name: hgct-demo
+    restart: unless-stopped
+    env_file:
+      - ./hgct-demo/.env.local
+    environment:
+      PORT: "65500"
+      HOSTNAME: "0.0.0.0"
+      DATABASE_URL: "postgresql://nguydev:***DA-GO***@postgres:5432/zodiacdb"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./volumes/pdfs-demo:/var/hgct/pdfs
+      - ./volumes/avatars:/var/hgct/avatars
+    networks:
+      - hgct-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: hgct-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./volumes/nginx-logs:/var/log/nginx
+    depends_on:
+      - hgct-prod
+      - hgct-demo
+    networks:
+      - hgct-net
+
+  hgct-cron:
+    image: alpine:latest
+    container_name: hgct-cron
+    restart: unless-stopped
+    env_file:
+      - ./hgct/.env.local
+    volumes:
+      - ./cron/start.sh:/cron/start.sh:ro
+    command: sh /cron/start.sh
+    depends_on:
+      - hgct-prod
+    networks:
+      - hgct-net
+
+networks:
+  hgct-net:
+    driver: bridge
+
+volumes:
+  postgres-data:

@@ -32,7 +32,7 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 - Demo: `demo.hatgiongchiemtinh.com` → container `hgct-demo` (internal :65500), clone riêng tại `/home/hgct/hgct-demo/`
 - Subdomains: `dashboard.` `daisu.` `admin.` (placeholder) `mo.` (placeholder) — Next.js middleware rewrite theo Host
 - Cron: Docker sidecar `hgct-cron` (alpine + crond) chạy `/api/cron/{order-check,cleanup,retention,kb-sync}` qua `CRON_SECRET`
-- Compose + nginx config **ngoài repo**: `/home/hgct/docker-compose.yml`, `/home/hgct/nginx/conf.d/`
+- Compose + nginx config: **live** tại `/home/hgct/docker-compose.yml`, `/home/hgct/nginx/conf.d/`, `/home/hgct/cron/start.sh`. **Snapshot tracked** trong `infra/` — xem `infra/README.md` cho setup fresh server + sync workflow.
 - Deploy: `cd /home/hgct && docker compose build hgct-prod && docker compose up -d --force-recreate hgct-prod && docker compose restart nginx`
 
 **Workflow:**
