@@ -1,9 +1,16 @@
 // Test: generate Career + Love essay, extract [bold] keywords
-// Run: npx tsx --tsconfig tsconfig.json test-ref-page.mjs (from /root/hgct)
+// Run: npx tsx --tsconfig tsconfig.json test-ref-page.mjs
 
-process.env.DATABASE_URL = "postgresql://nguydev:***DA-GO***@localhost:5432/zodiacdb"
-process.env.OPENROUTER_API_KEY = "***DA-GO***"
-process.env.PROFILE_ENCRYPTION_KEY = "***DA-GO***"
+import { readFileSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const envContent = readFileSync(resolve(__dirname, '.env.local'), 'utf-8')
+for (const line of envContent.split('\n')) {
+  const m = line.match(/^([^#=]+)=(.*)$/)
+  if (m) process.env[m[1].trim()] = m[2].trim().replace(/^["']|["']$/g, '')
+}
 
 const { calculateChart } = await import('./src/lib/astrology/calculations.ts')
 const { getKnowledgeFromDB } = await import('./src/lib/astrology/knowledge.ts')

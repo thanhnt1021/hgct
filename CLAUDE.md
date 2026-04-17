@@ -27,9 +27,13 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 ## Key Architecture
 **Report flow:** Calculate chart → Get KB from DB → Run logic blocks → Build prompt → AI generates essay → Generate PDF → Send email
 
-**Environments:**
-- Production: hatgiongchiemtinh.com → port 65498, hgct.service (`User=hgct`), deploy with `sudo bash /home/hgct/hgct/deploy.sh`
-- Demo: demo.hatgiongchiemtinh.com → port 65500, hgct-demo.service, deploy with `sudo bash /home/hgct/hgct/deploy-demo.sh [branch]`
+**Environments (server 185.197.30.234 — Docker stack):**
+- Production: `hatgiongchiemtinh.com` → container `hgct-prod` (internal :65498), nginx proxy 80/443 + Cloudflare Full Strict SSL
+- Demo: `demo.hatgiongchiemtinh.com` → container `hgct-demo` (internal :65500), clone riêng tại `/home/hgct/hgct-demo/`
+- Subdomains: `dashboard.` `daisu.` `admin.` (placeholder) `mo.` (placeholder) — Next.js middleware rewrite theo Host
+- Cron: Docker sidecar `hgct-cron` (alpine + crond) chạy `/api/cron/{order-check,cleanup,retention,kb-sync}` qua `CRON_SECRET`
+- Compose + nginx config **ngoài repo**: `/home/hgct/docker-compose.yml`, `/home/hgct/nginx/conf.d/`
+- Deploy: `cd /home/hgct && docker compose build hgct-prod && docker compose up -d --force-recreate hgct-prod && docker compose restart nginx`
 
 **Workflow:**
 - Làm việc trên nhánh `feature/...` → iterate nhanh với **quick deploy** (không cần commit) → **DỪNG, chờ user confirm**
@@ -43,12 +47,11 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 - `git merge main` / deploy production — chỉ khi user nói **"merge main"** hoặc **"lên production"**
 - Sau khi quick deploy xong → **báo cáo kết quả rồi DỪNG**, không tự commit/merge/deploy thêm
 
-**2 cách deploy demo:**
-1. **Quick deploy** (iterate nhanh, chưa commit): `sudo bash /home/hgct/hgct/deploy-demo-local.sh`
-   - Build từ code hiện tại tại `/home/hgct/hgct` (kể cả uncommitted changes)
-   - Sync build sang `/home/hgct/hgct-demo`, restart service — không cần git push
-2. **Full deploy** (sau khi commit + push): `sudo bash /home/hgct/hgct/deploy-demo.sh [branch]`
-   - Pull từ GitHub, build từ đầu — dùng khi muốn share link demo hoặc sau khi commit
+**Deploy workflow (Docker):**
+1. **Quick deploy demo** (iterate nhanh, chưa commit): build từ `/home/hgct/hgct` working tree, sync tới hgct-demo
+   - `cd /home/hgct && docker compose build hgct-demo && docker compose up -d --force-recreate hgct-demo && docker compose restart nginx`
+2. **Full deploy production** (sau khi merge main): checkout main + rebuild + recreate
+   - `cd /home/hgct/hgct && git checkout main && git pull && cd /home/hgct && docker compose build hgct-prod && docker compose up -d --force-recreate hgct-prod && docker compose restart nginx`
 
 **Shorthand commands (dùng trong chat):**
 - **"feature: [tên]"** → **[BƯỚC 0] tạo branch `feature/tên` NGAY, dù user có đính kèm code/plan** → re-read context → **hỏi bằng AskUserQuestion tool (BẮT BUỘC — KHÔNG output Q1/Q2/Q3 text)** → chờ user confirm rõ ràng → implement + test từng bước → quick deploy → **DỪNG chờ feedback** (xem chi tiết: `docs/universal_rules/UNIVERSAL_WORKFLOW.md` mục **`feature:` Workflow**)
