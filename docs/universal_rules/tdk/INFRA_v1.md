@@ -987,6 +987,8 @@ Attacker phải vượt đồng thời cả 5 lớp → practically impossible n
 
 **Script kèm theo:** `scripts/security-check.sh` trong repo universal-workflow — generic, set biến env rồi chạy trên server bất kỳ.
 
+**Nice-to-have mỗi server — Claude Code hooks + TMUX:** `scripts/claude-hooks/` — Telegram notification khi Claude xong task / hỏi câu hỏi + TMUX auto-menu khi SSH. Reusable, setup 1 lần 5 phút. Xem `scripts/claude-hooks/README.md`.
+
 #### Daily — AUTOMATED (setup 1 lần, xong quên)
 
 | Job | Tool | Command/path |
