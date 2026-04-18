@@ -979,7 +979,107 @@ Attacker phải vượt đồng thời cả 5 lớp → practically impossible n
 
 ---
 
-### 11.3 Quick Health Check
+### 11.3 Ongoing Maintenance Schedule
+
+> Nguồn: pattern post-compromise rebuild — giữ server secure qua thời gian, không phải one-time setup.
+
+**Tư duy:** Security không phải trạng thái, là process. Setup đúng ngày 0 → 6 tháng sau drift nếu không audit định kỳ. Lịch bên dưới thiết kế để tối thiểu hóa công thủ công (auto hết) + 5 phút/tháng check kết quả.
+
+**Script kèm theo:** `scripts/security-check.sh` trong repo universal-workflow — generic, set biến env rồi chạy trên server bất kỳ.
+
+#### Daily — AUTOMATED (setup 1 lần, xong quên)
+
+| Job | Tool | Command/path |
+|---|---|---|
+| Security patches | unattended-upgrades | `/etc/apt/apt.conf.d/20auto-upgrades` |
+| SSH brute-force block | fail2ban | jail sshd, `bantime=24h` |
+| DB backup | cron + pg_dump | `0 3 * * * backup-db.sh` |
+
+#### Weekly — AUTOMATED
+
+| Job | Cron |
+|---|---|
+| Rootkit scan | `0 4 * * 0 rkhunter --check --skip-keypress --report-warnings-only --quiet` |
+| (Optional) UFW sync Cloudflare IPs | `0 5 * * 0 sync-cf-ufw.sh` (CF đôi khi thêm range mới) |
+
+#### Monthly — MANUAL, ~5 phút
+
+```bash
+# 1. Chạy health check — xem tất cả 7 lớp + extras
+sudo bash scripts/security-check.sh
+
+# 2. Action theo warning/error trong output
+
+# 3. Check DMARC reports inbox (nếu đang enforce quarantine/reject)
+# 4. Test restore DB backup — verify file không corrupt:
+gunzip -c /path/to/backups/latest.sql.gz | head -20
+
+# 5. Review fail2ban banned IPs — có pattern attack đặc biệt không?
+sudo fail2ban-client status sshd
+```
+
+#### Quarterly — MANUAL, ~30 phút
+
+```bash
+# 1. npm/pip audit — CVE mới tuần nào cũng có
+npm audit --audit-level=high                # hoặc pip-audit
+
+# 2. Docker base images — patch security
+docker compose pull
+docker compose up -d
+
+# 3. Review authorized SSH keys — thiết bị mất/bán?
+cat ~/.ssh/authorized_keys                  # xem comment field
+
+# 4. SSL cert (nếu dùng Let's Encrypt — 90 ngày). Cloudflare Origin 15 năm skip.
+echo | openssl s_client -servername $DOMAIN -connect $DOMAIN:443 2>/dev/null | \
+  openssl x509 -noout -enddate
+
+# 5. DMARC enforcement bump (nếu đang p=quarantine pct=25 + reports clean 2-3 tuần):
+# → quarantine pct=100 → reject pct=100
+```
+
+#### Per-feature deploy — code-level
+
+Trước mỗi `quick deploy`: `SECURITY_CHECKLIST.md §0` — grep RCE risk + input validation + `npm audit` sau `npm install`.
+
+#### Per-OS-upgrade — CRITICAL
+
+Ubuntu major version upgrade thường reset `/etc/ssh/sshd_config` về default.
+
+```bash
+# 1. Backup config trước
+sudo tar czf /tmp/pre-upgrade-$(date +%F).tar.gz \
+  /etc/ssh /etc/pam.d/sshd /etc/fail2ban /etc/ufw /etc/cron.d
+
+# 2. do-release-upgrade
+sudo do-release-upgrade
+
+# 3. NGAY SAU khi reboot — chạy health check để detect drift
+sudo bash scripts/security-check.sh
+
+# 4. Verify SSH hardening còn đúng:
+grep -E '^(Port|PermitRootLogin|PasswordAuthentication|AuthenticationMethods)' /etc/ssh/sshd_config
+```
+
+#### Drift signals — khi nào cần audit đột xuất
+
+- CPU/memory/disk tăng đột biến (→ có thể miner)
+- Outbound connections lạ (`ss -tn state established` → IP unknown)
+- `last -n 20` thấy user hoặc IP lạ login
+- fail2ban banned count tăng đột ngột (có thể là reconnaissance phase)
+- Website chậm/lỗi không do deploy mới (có thể đang bị probe)
+
+```bash
+top                                    # CPU/memory
+ss -tn state established               # outbound connections
+last -n 20                             # recent logins
+sudo fail2ban-client status sshd
+```
+
+---
+
+### 11.4 Quick Health Check
 
 ```bash
 # Run this periodically or after incidents
