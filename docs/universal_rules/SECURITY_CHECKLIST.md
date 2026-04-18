@@ -214,5 +214,6 @@ _Last reviewed: YYYY-MM-DD_
 ## References
 
 - Server-level security: `INFRA_v1.md` §1 (SSH, firewall, fail2ban) + §11 (Security Audit)
+- **Hardening patterns for Docker + Cloudflare stack:** `INFRA_v1.md` §11.2 (SSH 2FA, UFW restrict to CF IPs, nginx DNS resolver for docker upstream, rkhunter cron, DMARC progressive, docker.sock defense in depth)
 - Secrets management: `ENV_RULES.md`
 - Quality gate: `QUALITY_GATES.md` — dependency audit gate

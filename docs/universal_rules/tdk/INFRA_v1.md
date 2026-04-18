@@ -847,7 +847,139 @@ MONITORING:
   □ Uptime monitoring external? (UptimeRobot etc.)
 ```
 
-### 11.2 Quick Health Check
+### 11.2 Hardening Patterns — Docker + Cloudflare Stack
+
+> **Nguồn:** session hardening server hgct 2026-04-17 → 18 (post-compromise rebuild).
+> Các pattern bên dưới đã verify chạy production, áp dụng được cho mọi stack
+> Docker + Next.js/Python + nginx behind Cloudflare.
+
+#### 11.2.1 SSH — Key + Google Authenticator 2FA
+
+```bash
+apt install libpam-google-authenticator -y
+# User chạy (KHÔNG sudo): google-authenticator
+# Chọn: time-based, DISALLOW reuse, rate-limit 3/30s, scratch codes
+
+# /etc/pam.d/sshd — thêm cuối file:
+auth required pam_google_authenticator.so
+# ⚠️ KHÔNG dùng `nullok` trong production — user chưa setup 2FA vẫn login được (fail-open)
+
+# /etc/ssh/sshd_config
+Port 52847                              # custom, tránh bot scan 22
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication yes
+UsePAM yes
+AuthenticationMethods publickey,keyboard-interactive   # BẮT BUỘC cả key + OTP
+AllowUsers deploy
+MaxAuthTries 3
+LoginGraceTime 20
+
+# Test trong session SSH THỨ HAI trước khi đóng session hiện tại.
+systemctl reload ssh
+```
+
+#### 11.2.2 UFW — Restrict 80/443 to Cloudflare IPs (anti IP leak)
+
+Sau khi bật Cloudflare Proxied, origin IP vẫn có thể leak qua Shodan/DNS history.
+Attacker hit thẳng IP → bypass WAF/rate-limit Cloudflare.
+
+```bash
+# Fetch official CF ranges
+for ip in $(curl -s https://www.cloudflare.com/ips-v4); do
+  ufw allow proto tcp from $ip to any port 80,443 comment 'CF'
+done
+for ip in $(curl -s https://www.cloudflare.com/ips-v6); do
+  ufw allow proto tcp from $ip to any port 80,443 comment 'CF6'
+done
+ufw delete allow 80/tcp
+ufw delete allow 443/tcp
+ufw reload
+
+# Weekly sync (CF đôi khi thêm range):
+# 0 5 * * 0 root /home/deploy/scripts/sync-cf-ufw.sh
+```
+
+#### 11.2.3 Nginx — DNS Resolver cho Docker Upstream (CRITICAL)
+
+**Gotcha:** `upstream { server name; }` resolve DNS **1 lần lúc startup** rồi cache mãi mãi.
+Khi container restart → đổi IP trên docker bridge → nginx vẫn gọi IP cũ → **502 Bad Gateway**.
+
+❌ **Sai (cache stale):**
+```nginx
+upstream myapp {
+    server myapp-container:3000;
+}
+server {
+    location / { proxy_pass http://myapp; }
+}
+```
+
+✅ **Đúng (re-resolve mỗi request qua resolver):**
+```nginx
+resolver 127.0.0.11 valid=10s ipv6=off;    # Docker's embedded DNS
+
+server {
+    set $upstream_myapp "myapp-container:3000";
+
+    location / {
+        proxy_pass http://$upstream_myapp$request_uri;
+    }
+}
+```
+
+Key points:
+- `resolver` với `valid=10s` → DNS refresh mỗi 10s
+- `set $variable` trong `proxy_pass` → ép nginx dùng resolver (upstream block KHÔNG dùng resolver)
+- `$request_uri` phải append vì với variable, nginx không tự pass URI
+- Nginx open-source native hỗ trợ pattern này — không cần nginx-plus
+
+#### 11.2.4 Cron — Weekly rkhunter + chkrootkit
+
+```bash
+apt install rkhunter chkrootkit -y
+
+# Fix WEB_CMD config (Ubuntu 24.04 ships broken default)
+sed -i 's|^WEB_CMD=.*|WEB_CMD=""|' /etc/rkhunter.conf
+
+# Baseline trên server fresh
+rkhunter --propupd
+
+# Weekly scan
+cat > /etc/cron.d/rkhunter-weekly <<'EOF'
+0 4 * * 0 root /usr/bin/rkhunter --check --skip-keypress --report-warnings-only --quiet >> /var/log/rkhunter-cron.log 2>&1
+EOF
+```
+
+#### 11.2.5 DMARC — Progressive Enforcement
+
+Không nhảy thẳng `p=reject` — sẽ reject cả email hợp lệ nếu SPF/DKIM config sai.
+
+```
+Tuần 1-2: v=DMARC1; p=quarantine; pct=25; rua=mailto:dmarc@yourdomain.com
+  → Monitor rua reports. Fix SPF/DKIM cho mọi source hợp lệ.
+Tuần 3-4: v=DMARC1; p=quarantine; pct=100; rua=...
+Tuần 5+:  v=DMARC1; p=reject; pct=100; rua=...
+```
+
+#### 11.2.6 Docker Socket Mount — Defense in Depth
+
+Nếu app container cần `/var/run/docker.sock` (restart, health check từ bot) — đó là **đường nâng quyền = root on host**. Mitigate bằng multi-layer auth TRƯỚC endpoint điều khiển:
+
+```
+Client → [Layer 1: URL path secret random]
+       → [Layer 2: HMAC/secret_token header verification]
+       → [Layer 3: Allowlist user_id / API key]
+       → [Layer 4: Nginx IP allowlist (chỉ IP source hợp lệ: Telegram/CF/office)]
+       → [Layer 5: Rate limit]
+       → App code với docker.sock access
+```
+
+Attacker phải vượt đồng thời cả 5 lớp → practically impossible nếu không leak full secret set.
+
+---
+
+### 11.3 Quick Health Check
 
 ```bash
 # Run this periodically or after incidents
