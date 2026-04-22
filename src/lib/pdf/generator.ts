@@ -690,15 +690,27 @@ async function buildTemplatePdf(contentPdfBuffer: Buffer, imgPrefix: string, ref
 // Renders INSIDE the bottom margin area — never overlaps with page content.
 // padding-bottom: 12mm lifts the footer text above any border/decoration at the
 // page bottom edge (measured from vanhan bg image: galaxy border = 10.4mm).
-const FOOTER_TEMPLATE = `<div style="
+//
+// The footer is rendered in a separate Puppeteer frame which does NOT inherit
+// the main document's @font-face, so it falls back to the container's system
+// fonts (Liberation Sans). Those fonts drop rare Vietnamese diacritics like `ạ`
+// and `ố`, producing "Ht Ging Chiêm Tinh". Embed Nunito inline so the footer
+// uses the same font as the body content regardless of system fonts.
+const FOOTER_TEMPLATE = (() => {
+  const nunitoB64 = fontB64('Nunito-Regular.ttf')
+  const fontFace = nunitoB64
+    ? `@font-face { font-family: 'Nunito'; src: url('data:font/truetype;base64,${nunitoB64}') format('truetype'); }`
+    : ''
+  return `<style>${fontFace}</style><div style="
   box-sizing: border-box;
   width: 100%;
   padding: 0 25mm 12mm;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Nunito', Arial, Helvetica, sans-serif;
   font-size: 10pt;
   color: #9ca3af;
   text-align: center;
 "><div style="border-top: 0.8pt solid #fca5a5; padding-top: 3mm;">Hạt Giống Chiêm Tinh</div></div>`
+})()
 
 export async function generatePdf(essayText: string, options: PdfOptions, onProgress?: (pct: number) => void): Promise<Buffer | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
