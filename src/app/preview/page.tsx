@@ -1,8 +1,25 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Script from 'next/script'
 import { useRouter } from 'next/navigation'
 import DiscountModal from '@/components/checkout/DiscountModal'
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_CF_TURNSTILE_SITE_KEY || ''
+
+interface TurnstileApi {
+  render: (el: HTMLElement, opts: Record<string, unknown>) => string
+  execute: (widgetId: string) => void
+  reset: (widgetId: string) => void
+  remove: (widgetId: string) => void
+}
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileApi
+    onloadTurnstileCallback?: () => void
+  }
+}
 
 const SERVICE_NAMES: Record<string, string> = {
   career: 'Hướng Nghiệp',
@@ -120,6 +137,49 @@ export default function PreviewPage() {
   const streamTextRef = useRef('')  // mirror for sessionStorage writes
   const textEndRef = useRef<HTMLDivElement>(null)
 
+  // ── Cloudflare Turnstile (invisible widget) ────────────────────────
+  const turnstileContainerRef = useRef<HTMLDivElement>(null)
+  const turnstileWidgetIdRef = useRef<string>('')
+  const cfTokenRef = useRef<string>('')
+
+  // Mount widget once Turnstile API is ready
+  const mountTurnstile = () => {
+    if (turnstileWidgetIdRef.current) return
+    const tw = typeof window !== 'undefined' ? window.turnstile : undefined
+    if (!tw || !turnstileContainerRef.current || !TURNSTILE_SITE_KEY) return
+    turnstileWidgetIdRef.current = tw.render(turnstileContainerRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      size: 'invisible',
+      callback: (token: string) => {
+        cfTokenRef.current = token
+      },
+      'error-callback': () => {
+        cfTokenRef.current = ''
+      },
+      'expired-callback': () => {
+        cfTokenRef.current = ''
+        if (turnstileWidgetIdRef.current && window.turnstile) {
+          window.turnstile.execute(turnstileWidgetIdRef.current)
+        }
+      },
+    })
+  }
+
+  // Wait up to 8s for a fresh Turnstile token
+  const getFreshTurnstileToken = async (): Promise<string> => {
+    if (cfTokenRef.current) return cfTokenRef.current
+    // Re-execute to ask Cloudflare for a token
+    const tw = typeof window !== 'undefined' ? window.turnstile : undefined
+    if (tw && turnstileWidgetIdRef.current) {
+      tw.execute(turnstileWidgetIdRef.current)
+    }
+    for (let i = 0; i < 32; i++) {
+      await new Promise(r => setTimeout(r, 250))
+      if (cfTokenRef.current) return cfTokenRef.current
+    }
+    throw new Error('Không lấy được mã xác thực bảo mật — vui lòng tải lại trang')
+  }
+
   // Read service from localStorage immediately (for intro text before previewInput state is set)
   const [earlyService] = useState<string>(() => {
     if (typeof window === 'undefined') return ''
@@ -202,11 +262,12 @@ export default function PreviewPage() {
       }
     } catch { /* ignore */ }
 
-    fetch('/api/astrology/preview-stream', {
+    // Wait for Turnstile token, then fetch
+    getFreshTurnstileToken().then((cfTurnstileToken) => fetch('/api/astrology/preview-stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(parsed),
-    }).then(async (res) => {
+      body: JSON.stringify({ ...parsed, cfTurnstileToken }),
+    })).then(async (res) => {
       if (!res.ok || !res.body) {
         const j = await res.json().catch(() => ({}))
         throw new Error((j as Record<string, string>).error || 'Preview thất bại')
@@ -313,6 +374,25 @@ export default function PreviewPage() {
         fontFamily: 'var(--font-vietnam, sans-serif)',
       }}
     >
+      {/* Cloudflare Turnstile (invisible) — must load before fetch */}
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onloadTurnstileCallback"
+        strategy="afterInteractive"
+        onLoad={() => {
+          // The onloadTurnstileCallback hook gives us a chance to mount when API ready.
+          if (typeof window !== 'undefined') {
+            window.onloadTurnstileCallback = mountTurnstile
+            // Edge case: script may already have called onload before we set the handler
+            if (window.turnstile) mountTurnstile()
+          }
+        }}
+      />
+      <div
+        ref={turnstileContainerRef}
+        style={{ position: 'fixed', left: '-9999px', top: '-9999px' }}
+        aria-hidden="true"
+      />
+
       {/* Top bar */}
       <div
         style={{

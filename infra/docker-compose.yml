@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: nguydev
-      POSTGRES_PASSWORD: ***DA-GO***
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: zodiacdb
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -18,6 +18,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  # Docker API gateway — restricts what hgct-prod can do via Docker socket.
+  # Only Container endpoints + POST methods enabled (restart/start/stop).
+  # NO Exec/Images/Networks/Volumes/SystemInfo/Build/Auth/Secrets exposure.
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    container_name: hgct-docker-proxy
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      POST: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - hgct-net
+    security_opt:
+      - no-new-privileges:true
 
   hgct-prod:
     build:
@@ -30,21 +47,21 @@ services:
     environment:
       PORT: "65498"
       HOSTNAME: "0.0.0.0"
-      DATABASE_URL: "postgresql://nguydev:***DA-GO***@postgres:5432/zodiacdb"
+      DATABASE_URL: "postgresql://nguydev:${POSTGRES_PASSWORD}@postgres:5432/zodiacdb"
+      DOCKER_PROXY_HOST: hgct-docker-proxy
+      DOCKER_PROXY_PORT: "2375"
     depends_on:
       postgres:
         condition: service_healthy
+      docker-socket-proxy:
+        condition: service_started
     volumes:
       - ./volumes/pdfs-prod:/var/hgct/pdfs
       - ./volumes/avatars:/var/hgct/avatars
-      # Docker API access for admin bot restart/health commands.
-      # Security: mounting sock = root on host. Mitigated by 4-layer auth
-      # (URL secret + webhook secret_token + admin user_id + nginx IP allowlist).
-      - /var/run/docker.sock:/var/run/docker.sock
-    group_add:
-      - "988"  # host docker group GID — grants node user access to /var/run/docker.sock
     networks:
       - hgct-net
+    security_opt:
+      - no-new-privileges:true
 
   hgct-demo:
     build:
@@ -57,15 +74,21 @@ services:
     environment:
       PORT: "65500"
       HOSTNAME: "0.0.0.0"
-      DATABASE_URL: "postgresql://nguydev:***DA-GO***@postgres:5432/zodiacdb"
+      DATABASE_URL: "postgresql://nguydev:${POSTGRES_PASSWORD}@postgres:5432/zodiacdb"
+      DOCKER_PROXY_HOST: hgct-docker-proxy
+      DOCKER_PROXY_PORT: "2375"
     depends_on:
       postgres:
         condition: service_healthy
+      docker-socket-proxy:
+        condition: service_started
     volumes:
       - ./volumes/pdfs-demo:/var/hgct/pdfs
       - ./volumes/avatars:/var/hgct/avatars
     networks:
       - hgct-net
+    security_opt:
+      - no-new-privileges:true
 
   nginx:
     image: nginx:alpine

@@ -1,9 +1,16 @@
-// Docker API client via /var/run/docker.sock (mounted into hgct-prod container).
-// Replaces legacy systemctl calls after Docker migration.
+// Docker API client via tecnativa/docker-socket-proxy (NOT raw /var/run/docker.sock).
+//
+// Security: hgct-prod container NO LONGER mounts docker.sock. Instead, the proxy
+// container has the sock (read-only), and exposes only safe endpoints on
+// internal port 2375 (CONTAINERS=1, POST=1 — restart/start/stop, no exec, no
+// images, no networks, no volumes, no system info).
+//
+// Connection: HTTP to hgct-docker-proxy:2375 inside the hgct_hgct-net network.
 
 import http from 'node:http'
 
-const DOCKER_SOCKET = '/var/run/docker.sock'
+const PROXY_HOST = process.env.DOCKER_PROXY_HOST || 'hgct-docker-proxy'
+const PROXY_PORT = Number(process.env.DOCKER_PROXY_PORT || 2375)
 
 function dockerRequest<T = unknown>(
   method: 'GET' | 'POST',
@@ -12,7 +19,8 @@ function dockerRequest<T = unknown>(
   return new Promise((resolve, reject) => {
     const req = http.request(
       {
-        socketPath: DOCKER_SOCKET,
+        host: PROXY_HOST,
+        port: PROXY_PORT,
         method,
         path,
         timeout: 15_000,
@@ -31,7 +39,7 @@ function dockerRequest<T = unknown>(
       },
     )
     req.on('error', reject)
-    req.on('timeout', () => { req.destroy(new Error('docker socket timeout')) })
+    req.on('timeout', () => { req.destroy(new Error('docker proxy timeout')) })
     req.end()
   })
 }
