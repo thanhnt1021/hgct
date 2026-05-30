@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { calculateChart } from '@/lib/astrology/calculations'
 import { getKnowledgeFromDB } from '@/lib/astrology/knowledge'
 import { getCareerBlocks } from '@/lib/logic/career/manager'
@@ -9,6 +9,13 @@ import { chromiumSemaphore } from '@/lib/job-queue'
 import { randomUUID } from 'crypto'
 import fs from 'fs'
 import path from 'path'
+import { verifyTurnstileToken, getClientIp } from '@/lib/turnstile'
+import {
+  MAX_BODY_BYTES,
+  validateInputData,
+  isValidService,
+  isValidDateString,
+} from '@/lib/preview-validation'
 
 export const runtime = 'nodejs'
 
@@ -130,14 +137,61 @@ function buildLockedSectionsText(sections: LockedSection[]): string {
 }
 
 export async function POST(req: NextRequest) {
+  // ── Pre-stream validation (returns JSON 4xx on failure) ────────────
+  let raw: string
+  try {
+    raw = await req.text()
+  } catch {
+    return NextResponse.json({ error: 'Không đọc được dữ liệu' }, { status: 400 })
+  }
+  if (raw.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: 'Dữ liệu quá lớn' }, { status: 413 })
+  }
   let body: Record<string, unknown>
   try {
-    body = await req.json()
+    body = JSON.parse(raw)
   } catch {
-    return new Response('event: error\ndata: {"message":"Dữ liệu không hợp lệ"}\n\n', {
-      headers: { 'Content-Type': 'text/event-stream' },
-    })
+    return NextResponse.json({ error: 'Dữ liệu không hợp lệ' }, { status: 400 })
   }
+
+  const ip = getClientIp(req)
+  const cfToken = typeof body.cfTurnstileToken === 'string' ? body.cfTurnstileToken : ''
+  const turnstile = await verifyTurnstileToken(cfToken, ip)
+  if (!turnstile.success) {
+    return NextResponse.json(
+      { error: 'Xác thực bảo mật thất bại. Vui lòng tải lại trang và thử lại.', reason: turnstile.reason },
+      { status: 403 },
+    )
+  }
+
+  const service = body.service
+  if (!isValidService(service)) {
+    return NextResponse.json({ error: 'Dịch vụ không hợp lệ' }, { status: 400 })
+  }
+  const validErr = validateInputData(body.inputData)
+  if (validErr) {
+    return NextResponse.json({ error: 'Dữ liệu không hợp lệ: ' + validErr }, { status: 400 })
+  }
+  if (body.inputDataB !== undefined && body.inputDataB !== null) {
+    const validErrB = validateInputData(body.inputDataB)
+    if (validErrB) {
+      return NextResponse.json(
+        { error: 'Dữ liệu người B không hợp lệ: ' + validErrB },
+        { status: 400 },
+      )
+    }
+  }
+  if (body.startDate !== undefined && body.startDate !== null && !isValidDateString(body.startDate)) {
+    return NextResponse.json({ error: 'startDate không hợp lệ' }, { status: 400 })
+  }
+  if (body.endDate !== undefined && body.endDate !== null && !isValidDateString(body.endDate)) {
+    return NextResponse.json({ error: 'endDate không hợp lệ' }, { status: 400 })
+  }
+
+  const inputData = body.inputData as InputData
+  const inputDataB = body.inputDataB as InputData | undefined
+  const startDate = body.startDate as string | undefined
+  const endDate = body.endDate as string | undefined
 
   const encoder = new TextEncoder()
   const { readable, writable } = new TransformStream()
@@ -151,23 +205,6 @@ export async function POST(req: NextRequest) {
 
   ;(async () => {
     try {
-      const { service, inputData, inputDataB, startDate, endDate } = body as {
-        service: string
-        inputData: InputData
-        inputDataB?: InputData
-        startDate?: string
-        endDate?: string
-      }
-
-      if (!service || !inputData) {
-        send('error', { message: 'Thiếu thông tin đầu vào' })
-        return
-      }
-      if (!['career', 'love', 'synastry', 'transit'].includes(service)) {
-        send('error', { message: 'Dịch vụ không hợp lệ' })
-        return
-      }
-
       send('progress', { pct: 5, label: 'Đang xác lập bản đồ sao...' })
 
       // Build chart for person A

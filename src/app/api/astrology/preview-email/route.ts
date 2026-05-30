@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sendEmail } from '@/lib/email'
 import fs from 'fs'
 import path from 'path'
+import { verifyTurnstileToken, getClientIp } from '@/lib/turnstile'
+import { MAX_BODY_BYTES } from '@/lib/preview-validation'
 
 export const runtime = 'nodejs'
 
@@ -19,26 +21,52 @@ const SERVICE_LABELS: Record<string, string> = {
 }
 
 export async function POST(req: NextRequest) {
+  // Body size cap
+  let raw: string
+  try {
+    raw = await req.text()
+  } catch {
+    return NextResponse.json({ error: 'Không đọc được dữ liệu' }, { status: 400 })
+  }
+  if (raw.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: 'Dữ liệu quá lớn' }, { status: 413 })
+  }
   let body: Record<string, unknown>
   try {
-    body = await req.json()
+    body = JSON.parse(raw)
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  // Turnstile bot verification
+  const ip = getClientIp(req)
+  const cfToken = typeof body.cfTurnstileToken === 'string' ? body.cfTurnstileToken : ''
+  const turnstile = await verifyTurnstileToken(cfToken, ip)
+  if (!turnstile.success) {
+    return NextResponse.json(
+      { error: 'Xác thực bảo mật thất bại. Vui lòng tải lại trang.', reason: turnstile.reason },
+      { status: 403 },
+    )
   }
 
   const id = String(body.id || '')
   const email = String(body.email || '').trim()
   const service = String(body.service || '')
-  const name = String(body.name || '')
+  const name = String(body.name || '').slice(0, 60)
 
-  // Validate id
+  // Validate id (UUID v4 format — prevents path traversal)
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id)) {
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
   }
 
   // Validate email
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Email không hợp lệ' }, { status: 400 })
+  }
+
+  // Validate service (whitelist)
+  if (service && !['career', 'love', 'synastry', 'transit'].includes(service)) {
+    return NextResponse.json({ error: 'Dịch vụ không hợp lệ' }, { status: 400 })
   }
 
   const filePath = path.join(PREVIEW_DIR, `${id}.pdf`)
