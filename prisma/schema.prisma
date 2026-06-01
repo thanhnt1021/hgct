@@ -21,9 +21,45 @@ model User {
   resetTokenExpiry DateTime? @map("reset_token_expiry")
   mainChartData    Json?     @map("main_chart_data")
   reportEmail      String?   @map("report_email")
+  coin             Int      @default(0)
+  coinUpdatedAt    DateTime? @map("coin_updated_at")
   profiles         Profile[]
+  coinTransactions CoinTransaction[]
 
   @@map("users")
+}
+
+model CoinTransaction {
+  id           Int      @id @default(autoincrement())
+  userUid      String   @map("user_uid")
+  delta        Int
+  balanceAfter Int      @map("balance_after")
+  reason       String
+  refType      String   @map("ref_type")
+  refId        String?  @map("ref_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user         User     @relation(fields: [userUid], references: [userUid])
+
+  @@index([userUid, createdAt])
+  @@map("coin_transactions")
+}
+
+// Persists unlocked section content per (user, profile, service, section).
+// profileUid is the 16-char hash of the input data — keeps "same profile = same
+// reading" stable even before Profile DB row exists (guest input).
+model Reading {
+  id         Int      @id @default(autoincrement())
+  userUid    String   @map("user_uid")
+  profileUid String   @map("profile_uid")
+  service    String
+  sectionId  String   @map("section_id")
+  content    String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([userUid, profileUid, service, sectionId])
+  @@index([userUid, profileUid, service])
+  @@map("readings")
 }
 
 model Profile {

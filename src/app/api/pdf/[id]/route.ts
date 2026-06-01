@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
+import { PDF_EMAIL_ENABLED } from '@/lib/feature-flags'
 
 const PDF_DIR = '/var/hgct/pdfs'
 
@@ -8,6 +9,9 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!PDF_EMAIL_ENABLED) {
+    return NextResponse.json({ error: 'Tính năng đã ngừng cung cấp' }, { status: 410 })
+  }
   const { id } = await params
   // Validate: UUID | UUID_service | UUID_UUID_service | UUID_service_orderId — prevent path traversal
   // Bug #2 fix: also accept numeric orderId suffix (_\d+) after service name

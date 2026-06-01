@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { useRouter } from 'next/navigation'
 import DiscountModal from '@/components/checkout/DiscountModal'
+import { PDF_EMAIL_ENABLED } from '@/lib/feature-flags'
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_CF_TURNSTILE_SITE_KEY || ''
 
@@ -430,24 +431,26 @@ export default function PreviewPage() {
             MIỄN PHÍ
           </span>
         </div>
-        <button
-          onClick={handleGetFullReport}
-          style={{
-            background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-            color: '#06060f',
-            borderRadius: '4px',
-            padding: '0.45rem 1rem',
-            fontWeight: 700,
-            fontSize: '0.82rem',
-            letterSpacing: '0.04em',
-            whiteSpace: 'nowrap',
-            border: 'none',
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-        >
-          Nhận báo cáo đầy đủ →
-        </button>
+        {PDF_EMAIL_ENABLED && (
+          <button
+            onClick={handleGetFullReport}
+            style={{
+              background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
+              color: '#06060f',
+              borderRadius: '4px',
+              padding: '0.45rem 1rem',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+              letterSpacing: '0.04em',
+              whiteSpace: 'nowrap',
+              border: 'none',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            Nhận báo cáo đầy đủ →
+          </button>
+        )}
       </div>
 
       {/* Error state */}
@@ -534,42 +537,44 @@ export default function PreviewPage() {
                 ))}
               </div>
 
-              {/* CTA block */}
-              <div
-                style={{
-                  marginTop: '1.5rem',
-                  background: 'rgba(200,148,63,0.06)',
-                  border: '1px solid rgba(200,148,63,0.2)',
-                  borderRadius: 12,
-                  padding: 'clamp(1.25rem, 4vw, 2rem)',
-                  textAlign: 'center',
-                }}
-              >
-                <p style={{ color: '#f4efe6', fontWeight: 700, fontSize: 'clamp(0.95rem, 2.5vw, 1.05rem)', marginBottom: '0.6rem' }}>
-                  Nhận báo cáo đầy đủ {lockedSections.length + 1} phần
-                </p>
-                <p style={{ color: '#8a8399', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                  Bản luận giải chi tiết, cá nhân hoá gửi thẳng vào email của bạn.
-                </p>
-                <button
-                  onClick={handleGetFullReport}
+              {/* CTA block — chỉ hiện khi luồng PDF/email được bật (legacy) */}
+              {PDF_EMAIL_ENABLED && (
+                <div
                   style={{
-                    background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                    color: '#06060f',
-                    borderRadius: '6px',
-                    padding: '0.75rem 2rem',
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    letterSpacing: '0.04em',
-                    width: '100%',
-                    maxWidth: 320,
+                    marginTop: '1.5rem',
+                    background: 'rgba(200,148,63,0.06)',
+                    border: '1px solid rgba(200,148,63,0.2)',
+                    borderRadius: 12,
+                    padding: 'clamp(1.25rem, 4vw, 2rem)',
+                    textAlign: 'center',
                   }}
                 >
-                  Nhận báo cáo đầy đủ →
-                </button>
-              </div>
+                  <p style={{ color: '#f4efe6', fontWeight: 700, fontSize: 'clamp(0.95rem, 2.5vw, 1.05rem)', marginBottom: '0.6rem' }}>
+                    Nhận báo cáo đầy đủ {lockedSections.length + 1} phần
+                  </p>
+                  <p style={{ color: '#8a8399', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                    Bản luận giải chi tiết, cá nhân hoá gửi thẳng vào email của bạn.
+                  </p>
+                  <button
+                    onClick={handleGetFullReport}
+                    style={{
+                      background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
+                      color: '#06060f',
+                      borderRadius: '6px',
+                      padding: '0.75rem 2rem',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      border: 'none',
+                      cursor: 'pointer',
+                      letterSpacing: '0.04em',
+                      width: '100%',
+                      maxWidth: 320,
+                    }}
+                  >
+                    Nhận báo cáo đầy đủ →
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

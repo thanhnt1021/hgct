@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import LocationPicker from './LocationPicker'
 import { X } from 'lucide-react'
+import { PDF_EMAIL_ENABLED } from '@/lib/feature-flags'
 
 export interface ProfileFormData {
   ho: string; dem: string; ten: string; gender: string
@@ -61,7 +62,7 @@ interface Props {
   showEmailField?: boolean
   twoActionMode?: boolean
   draftKey?: string
-  onSave: (data: ProfileFormData, saveProfile: boolean, action?: 'free' | 'paid', email?: string) => void
+  onSave: (data: ProfileFormData, saveProfile: boolean, action?: 'free' | 'paid' | 'reading', email?: string) => void
   onClose: () => void
 }
 
@@ -178,6 +179,15 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
     const em = validateEmail()
     if (em === null) return
     onSave(data, saveProfile, 'paid', em || undefined)
+  }
+
+  const handleReading = () => {
+    const data = validateForm()
+    if (!data) return
+    // twoActionMode = guest reading flow (services → /reading)
+    // non-twoActionMode = profile add/edit from picker → just save profile
+    if (twoActionMode) onSave(data, saveProfile, 'reading')
+    else onSave(data, saveProfile)
   }
 
   return (
@@ -347,8 +357,8 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
             </label>
           )}
 
-          {/* Email field (guest flow) */}
-          {showEmailField && (
+          {/* Email field — only rendered when legacy PDF/email flow is enabled */}
+          {showEmailField && PDF_EMAIL_ENABLED && (
             <div>
               <label style={labelStyle}>
                 Email nhận báo cáo PDF <span style={{ color: '#ef4444' }}>*</span>
@@ -372,38 +382,29 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
 
         </div>
 
-        {/* Footer */}
-        {twoActionMode ? (
-          <div className="px-6 pb-6 flex gap-3">
-            <button
-              onClick={handleFree}
-              disabled={saving}
-              className="flex-1 h-10 rounded-lg font-semibold"
-              style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
-            >
-              Xem miễn phí
-            </button>
-            <button
-              onClick={handlePaid}
-              disabled={saving}
-              className="flex-1 h-10 rounded-lg font-semibold"
-              style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', opacity: saving ? 0.7 : 1 }}
-            >
-              Xuất PDF chi tiết →
-            </button>
-          </div>
-        ) : (
-          <div className="flex gap-3 px-6 pb-6">
-            <button onClick={handleSubmit} disabled={saving} className="flex-1 h-9 rounded-lg font-semibold"
-              style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)', opacity: saving ? 0.7 : 1 }}>
-              {saving ? 'Đang lưu...' : (submitLabel ?? 'Lưu')}
-            </button>
-            <button onClick={handleClose} className="px-6 h-9 rounded-lg font-semibold"
-              style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
-              Hủy
-            </button>
-          </div>
-        )}
+        {/* Footer — single Hoàn Thành button (cancel via X icon top-right) */}
+        <div className="px-6 pb-6">
+          <button
+            onClick={handleReading}
+            disabled={saving}
+            className="w-full h-11 rounded-lg font-bold tracking-wider"
+            style={{
+              background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
+              backgroundSize: '200% 200%',
+              color: '#06060f',
+              fontFamily: 'var(--font-vietnam)',
+              fontSize: '0.9rem',
+              letterSpacing: '0.06em',
+              opacity: saving ? 0.7 : 1,
+              boxShadow: '0 4px 20px rgba(200,148,63,0.25)',
+              cursor: saving ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {saving ? 'Đang lưu...' : 'Hoàn Thành →'}
+          </button>
+        </div>
+        {/* Note: PDF_EMAIL_ENABLED + twoActionMode + handleFree/handlePaid + submitLabel
+            vẫn được giữ trong code để bật lại flow cũ nếu cần (xem feature-flags.ts) */}
       </div>
     </div>
   )

@@ -75,6 +75,7 @@ APP_PORT=                        # port production (mặc định: 65498)
 NEXTAUTH_URL=                    # https://yourdomain.com
 NEXT_PUBLIC_APP_URL=             # https://yourdomain.com
 NEXTAUTH_SECRET=                 # random string dài, dùng: openssl rand -base64 32
+NEXT_PUBLIC_ENABLE_PDF_FLOW=     # optional — 'true' = hiện lại luồng PDF/email cũ; bỏ trống/khác = coin mode (mặc định)
 
 # Database
 DATABASE_URL=postgresql://nguydev:PASSWORD@localhost:5432/zodiacdb

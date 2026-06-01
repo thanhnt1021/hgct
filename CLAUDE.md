@@ -49,6 +49,8 @@ Web app chiêm tinh học — Next.js 15 + TypeScript. Đây là dự án độc
 
 **Deploy workflow (Docker):**
 1. **Quick deploy demo** (iterate nhanh, chưa commit): build từ `/home/hgct/hgct` working tree, sync tới hgct-demo
+   - **⚠️ BẮT BUỘC sync trước khi build** — demo build từ clone riêng `/home/hgct/hgct-demo` (context `./hgct-demo` trong compose), KHÔNG phải `/home/hgct/hgct`. Bỏ bước sync = build ra code cũ:
+   - `rsync -a /home/hgct/hgct/src/ /home/hgct/hgct-demo/src/ && rsync -a /home/hgct/hgct/prisma/ /home/hgct/hgct-demo/prisma/`
    - `cd /home/hgct && docker compose build hgct-demo && docker compose up -d --force-recreate hgct-demo && docker compose restart nginx`
 2. **Full deploy production** (sau khi merge main): checkout main + rebuild + recreate
    - `cd /home/hgct/hgct && git checkout main && git pull && cd /home/hgct && docker compose build hgct-prod && docker compose up -d --force-recreate hgct-prod && docker compose restart nginx`
@@ -142,6 +144,8 @@ src/
 > Lịch sử đầy đủ: `docs/DONE_HISTORY.md`
 
 **Tính năng đã hoàn thiện:** Auth (Google OAuth + credentials), 4 report services (career adult/young/love/synastry/transit), payment SePay QR, PDF generation (Puppeteer + Ghostscript), job system + watchdog, order recovery v4, admin dashboard (dashboard subdomain), CTV affiliate system (daisu subdomain), free preview (typewriter stream), admin Telegram bot + notify bot, dual pricing, maintenance mode, OG image, 7-day retention email, OpenRouter retry/timeout, resilient order system, DiscountModal + LuckyWheel flow (referral code 99k flat + vòng xoay giảm giá 5–30%), display price update (199k/269k).
+
+**Coin rework (coin top-up + unlock-per-section):** Mô hình mới — nạp xu (SePay QR, gói 99k/300xu · 219k/900xu · 599k/2000xu) → mở từng mục luận giải online (stream) thay vì trả 1 lần lấy PDF. Models mới: `User.coin`, `CoinTransaction` (audit log atomic), `Reading` (lưu nội dung đã mở). Lib: `src/lib/coin/` (service atomic add/deduct), `src/lib/catalog/sections.ts` (8 dịch vụ + giá lẻ/bundle), `src/lib/essay/` (gen + cache essay), `src/lib/logic/relations/` (4 loại quan hệ mới). API: `src/app/api/coin/{balance,topup-order,unlock-section,unlock-bundle,reading-list}`. Webhook SePay dual-mode (`order.service==='coin-topup'` → cộng xu; ngược lại → report cũ). transferCode coin dùng chung prefix `HGCT######`. Luồng PDF/email cũ giữ nguyên sau feature flag `NEXT_PUBLIC_ENABLE_PDF_FLOW` (mặc định OFF = coin mode). **⚠️ Chưa xong:** phần gen nội dung khi unlock (đang fix). Migration DB đã apply (`prisma/migrations/manual/2026053*`).
 
 <!-- Khi hoàn thành feature mới → append vào docs/DONE_HISTORY.md, update dòng tóm tắt trên -->
 

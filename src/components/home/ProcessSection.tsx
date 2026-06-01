@@ -3,7 +3,7 @@
 const steps = [
   { num: '01', title: 'Nhập thông tin ngày giờ sinh' },
   { num: '02', title: 'Chọn điều bạn muốn khám phá' },
-  { num: '03', title: 'Nhận luận giải PDF qua email' },
+  { num: '03', title: 'Đọc luận giải ngay trên web' },
 ]
 
 export default function ProcessSection() {

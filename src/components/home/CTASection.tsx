@@ -49,7 +49,7 @@ export default function CTASection({ body, buttonText }: { body?: string; button
               </Link>
 
               <p style={{ color: '#9090a8', fontSize: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
-                Nhận báo cáo trong vài phút · Giao qua email · PDF lưu được
+                Đọc ngay trên web · Stream từng đoạn · Mở từng mục theo nhu cầu
               </p>
             </div>
           </div>
