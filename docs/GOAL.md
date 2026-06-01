@@ -30,6 +30,7 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 
 ## Pending / Cần Quyết Định
 
+- [ ] 🔴 **[TOP PRIORITY] Coin rework — production hardening** — thực thi `docs/COIN_PRODUCTION_HARDENING_PLAN.md` (A: essay→DB nhất quán · B: check xu trước gen · C: relations 4 thân bài + bỏ context dư · D: test double-spend · E: /security-review). **Điều kiện để mở lại production cho new user.** Giữ prod đóng đến khi xong A–E.
 - [ ] **Off-site DB backup (Cloudflare R2)** — hiện chỉ backup local trên server → SPOF. Đã chốt: R2 + rclone crypt + retention 30 ngày + monthly snapshot 12 tháng. Plan chi tiết: `/home/hgct/TODO_OFFSITE_BACKUP.md` trên server. Cần ~20 phút: user tạo bucket + API token trong CF dashboard → Claude config rclone + sửa `backup-db.sh` + test restore.
 - [ ] **Lucky wheel first-time buyer check** — hiện code KHÔNG verify user đã mua trước đó, ai vào checkout cũng quay được giảm giá. Cần query `prisma.order.count({ where: { userUid, paymentStatus: 'paid' } }) > 0` → ẩn wheel, chỉ cho referral code. Files ảnh hưởng: `src/components/checkout/DiscountModal.tsx`, `src/components/checkout/LuckyWheelModal.tsx`, cần tạo `src/app/api/user/has-previous-order/route.ts`.
 - [ ] Rate limiting — chưa có; cân nhắc lại khi traffic tăng đột biến
