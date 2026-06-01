@@ -1,6 +1,7 @@
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import StarField from '@/components/layout/StarField'
+import ZodiacBackground from '@/components/layout/ZodiacBackground'
 import HeroSection from '@/components/home/HeroSection'
 import FeaturesSection from '@/components/home/FeaturesSection'
 import ProcessSection from '@/components/home/ProcessSection'
@@ -20,6 +21,7 @@ export default async function HomePage() {
   return (
     <main className="relative min-h-screen">
       <StarField />
+      <ZodiacBackground />
       <Navbar />
       <HeroSection subtitle={cfg.hero_subtitle} ctaText={cfg.hero_cta_text} />
       <FeaturesSection />

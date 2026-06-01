@@ -3,8 +3,8 @@
 import Link from 'next/link'
 
 const HERO_DEFAULTS = {
-  subtitle: 'Bầu trời lúc bạn chào đời không hề ngẫu nhiên. Mỗi hành tinh là một dấu ấn – mỗi góc chiếu là một câu chuyện về bạn. Bản đồ sao chính là hạt giống tiềm năng đang chờ bạn khám phá và đánh thức. Hiểu bản đồ sao là bắt đầu hành trình hiểu mình – để chọn đúng đường, đi đúng hướng và tìm đúng người đồng hành.',
-  ctaText: 'Khám phá ngay tại đây',
+  subtitle: 'Bầu trời lúc bạn chào đời không hề ngẫu nhiên. Nếu bạn đang đọc đến những dòng này, có lẽ trong lòng bạn cũng đang có vài câu hỏi, vài nỗi băn khoăn về bản thân, tình yêu, sự nghiệp hay con đường phía trước. Mỗi bản đồ sao chính là một hạt giống, mỗi hành tinh là một dấu ấn, mỗi góc chiếu là một câu chuyện rất riêng về tính cách, cảm xúc, tình yêu và hành trình cuộc đời của bạn. Bản đồ sao cá nhân giống như một chiếc gương để bạn nhìn lại chính mình rõ hơn. Không phải để biết trước tương lai, mà để hiểu vì sao bạn lại trở thành con người của hiện tại, và mình có thể sống nhẹ hơn như thế nào từ đây.',
+  ctaText: 'Thông điệp ngày hôm nay',
 }
 
 export default function HeroSection({ subtitle, ctaText }: { subtitle?: string; ctaText?: string }) {
@@ -98,36 +98,6 @@ export default function HeroSection({ subtitle, ctaText }: { subtitle?: string; 
           <Link href="/services" className="btn-hero-primary">
             {cta}
           </Link>
-        </div>
-
-        {/* Tags */}
-        <div className="flex flex-wrap justify-center gap-3 animate-fade-up-delay-3">
-          {[
-            'Bản đồ cuộc đời',
-            'Tình duyên & Hôn nhân',
-            'Sự nghiệp & Tiền bạc',
-            'Vận hạn sắp tới',
-          ].map(label => (
-            <span
-              key={label}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.45rem 1.1rem',
-                borderRadius: '2px',
-                background: 'rgba(28,21,64,0.55)',
-                border: '1px solid rgba(200,148,63,0.14)',
-                color: '#8a8399',
-                fontFamily: 'var(--font-vietnam)',
-                fontSize: '0.88rem',
-                fontWeight: 400,
-              }}
-            >
-              <span style={{ color: 'rgba(200,148,63,0.6)', fontSize: '0.5rem' }}>✧</span>
-              {label}
-            </span>
-          ))}
         </div>
 
       </div>

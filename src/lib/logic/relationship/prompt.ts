@@ -776,6 +776,7 @@ export function buildRelationshipEssayPrompt(
   chartA: ChartData, chartB: ChartData,
   relBlocks: RelBlocks,
   profileA: Profile, profileB: Profile,
+  options?: { templateName?: string },
 ): { prompt: string; brief: RelBrief } {
   const brief = buildRelationshipBrief(chartA, chartB, relBlocks, profileA, profileB)
   const briefText = formatBriefForPrompt(brief)
@@ -784,7 +785,7 @@ export function buildRelationshipEssayPrompt(
   const aliasA = m._alias_A || m.name_A
   const aliasB = m._alias_B || m.name_B
 
-  let instructions = loadPromptTemplate('relationship')
+  let instructions = loadPromptTemplate(options?.templateName || 'relationship')
   // Replace template variables, full_name first (before name_A/B alias replacement)
   const replacements: Record<string, string> = {
     '{full_name_A}': m.full_name_A,

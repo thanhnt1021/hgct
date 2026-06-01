@@ -1,16 +1,17 @@
 'use client'
 
-// Navbar — logo + micro bar (privacy/terms links)
+// Navbar — logo + coin balance widget
 
 import Link from 'next/link'
 import { useState } from 'react'
+import CoinBalance from './CoinBalance'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-[#06060f]/95 to-[#06060f]/60 backdrop-blur-md border-b border-[#c8943f]/20 h-16 shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-3">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
@@ -29,6 +30,9 @@ export default function Navbar() {
             Hạt Giống Chiêm Tinh
           </span>
         </Link>
+
+        {/* Coin balance / login */}
+        <CoinBalance />
 
         {/* Mobile hamburger */}
         <button

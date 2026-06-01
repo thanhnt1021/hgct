@@ -4,6 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { verifyTurnstileToken, getClientIp } from '@/lib/turnstile'
 import { MAX_BODY_BYTES } from '@/lib/preview-validation'
+import { PDF_EMAIL_ENABLED } from '@/lib/feature-flags'
 
 export const runtime = 'nodejs'
 
@@ -21,6 +22,10 @@ const SERVICE_LABELS: Record<string, string> = {
 }
 
 export async function POST(req: NextRequest) {
+  // Legacy PDF/email flow is OFF by default in the coin-rework rollout.
+  if (!PDF_EMAIL_ENABLED) {
+    return NextResponse.json({ error: 'Tính năng đã ngừng cung cấp' }, { status: 410 })
+  }
   // Body size cap
   let raw: string
   try {

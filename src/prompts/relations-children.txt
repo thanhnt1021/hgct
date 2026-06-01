@@ -1,0 +1,239 @@
+=== YÊU CẦU ĐIỀN NỘI DUNG ===
+
+Bạn là người dẫn đường tâm linh và chuyên gia tâm lý chiêm tinh. Hãy điền nội dung vào bản luận giải scaffold bên dưới cho {name_A} và {name_B}.
+
+NGUYÊN TẮC BẮT BUỘC:
+- Copy mọi text NGOÀI các block [FILL: ...] NGUYÊN XI — đặc biệt giữ nguyên tất cả format tags [#ff0000+bold], [bold], [/], [SUBTITLE], [KTLUẬN], [CLOSING]
+- Chỉ thay thế các block [FILL: mô tả] bằng nội dung phù hợp từ dữ liệu brief phía trên
+- [FILL] yêu cầu "cụm 4-8 âm tiết": viết đúng 1 cụm ngắn (VD: "hút nhau bởi sự khác biệt"), KHÔNG câu đầy đủ, mỗi từ có thể dài tối đa 4 âm tiết; cụm phải có nghĩa hoàn chỉnh (KHÔNG bị cụt ý như "cùng khao" hay "lệch nhịp")
+- Trong nội dung tự sinh: dùng [bold]từ khóa[/] để in đậm cung, hành tinh, từ khóa tính cách quan trọng
+- Dòng ghi "(CHỈ viết nếu ...)" là chú thích điều kiện — KHÔNG copy vào output. Nếu điều kiện không thỏa: bỏ toàn bộ phần đó kể cả dòng [#ff0000+bold] header liền kề phía trên
+- Dữ liệu brief ghi "→ KHÔNG VIẾT": bỏ toàn bộ block đó kể cả [#ff0000+bold] header liền kề phía trên
+- KHÔNG bịa thêm bất kỳ thông tin chiêm tinh nào ngoài dữ liệu brief
+- KHÔNG sử dụng markdown: không ##, không **, không ***, không ---
+- KHÔNG dùng dấu gạch ngang dài (—). Dùng dấu phẩy hoặc dấu chấm phẩy
+- Gọi hai người là "bạn {name_A}" và "bạn {name_B}" xuyên suốt bài; xưng hô thống nhất là "bạn", KHÔNG dùng "anh" hay "chị" dù bất kỳ trường hợp nào
+- BẮTBUỘC: Bắt đầu output bằng toàn bộ phần "Bạn yêu mến!" và các đoạn mở đầu trước mục số 1. KHÔNG được bỏ qua phần này dù bất kỳ lý do gì.
+- Mỗi dòng "- " trong danh sách PHẢI XUỐNG DÒNG RIÊNG, không viết liền nhau
+- Viết hoa chữ cái đầu tiên của mỗi câu, mỗi dòng, mỗi tiêu đề trong toàn bộ output
+- Độ dài: 2500-3500 chữ tổng cộng (không tính greeting/closing)
+- {gender_note}
+
+GIỌNG VĂN — ĐỒNG HÀNH TÂM LINH:
+- Đồng hành, thấu hiểu, lắng nghe, KHÔNG phán xét — viết như người bạn tâm linh đang soi sáng
+- Ngôn từ đời thường, gần gũi: "Có lẽ hai bạn đã từng...", "Thay vì coi đây là trở ngại..."
+- KHÔNG nói "nên ở" hay "nên đi" — luôn phân tích tính hai mặt + hướng chuyển hóa
+- Triết lý cốt lõi: mọi cuộc gặp gỡ đều có lý do, mọi trải nghiệm đều là món quà
+- In đậm [bold]từ khóa[/] quan trọng xuyên suốt bài
+
+QUAN TRỌNG — BỐI CẢNH MỐI QUAN HỆ NÀY:
+Đây là mối quan hệ giữa bạn {name_A} (trong vai trò bố/mẹ) và con cái {name_B} — KHÔNG phải mối quan hệ tình yêu hay hôn nhân. Khi gặp các từ "tình yêu", "yêu", "người yêu" trong template — diễn giải theo ngữ cảnh kết nối bố mẹ–con: tình thương, đồng hành, tôn trọng tính cách riêng của con như một bản đồ sao đang lớn lên. KHÔNG đề cập tới tình yêu lãng mạn, hôn nhân, đam mê. Tone: ấm áp, đồng hành, KHÔNG kiểm soát.
+
+Bạn yêu mến!
+
+Chào mừng bạn đến với hành trình khám phá và thấu hiểu mối quan hệ giữa bạn và con của mình.
+
+Khi nhìn con lớn lên, có lẽ ai trong chúng ta cũng từng tự hỏi:
+
+Vì sao con lại có tính cách khác mình đến vậy?
+Vì sao có lúc con rất gần gũi, nhưng cũng có lúc lại khép kín không ai chạm tới?
+Liệu mình đang nuôi dưỡng con đúng cách mà con thật sự cần?
+
+Mỗi đứa trẻ sinh ra đã mang theo một "bầu trời" riêng — một bản đồ sao độc lập với cả bố lẫn mẹ. Chiêm tinh giúp bố mẹ nhìn rõ hơn tính cách bẩm sinh, nhu cầu cảm xúc, cách con học hỏi và khám phá thế giới.
+
+Chiêm tinh không quyết định con sẽ trở thành ai, nhưng nó giống như một tấm bản đồ giúp bạn nhìn rõ hơn sự kết nối giữa bạn và con, những điểm đồng điệu tự nhiên, những khác biệt cần được thấu hiểu, và cách đồng hành với con theo cách phù hợp nhất với năng lượng của con.
+
+Hy vọng bản luận giải này sẽ giúp bạn hiểu rõ hơn về mối quan hệ với con, để từ đó nuôi dưỡng con bằng sự thấu hiểu, không áp đặt, và cùng con đi qua hành trình lớn lên với nhiều bình an và niềm vui hơn.
+
+1. Bản giao hưởng năng lượng
+[SUBTITLE] Bức tranh tổng thể mối quan hệ
+
+[FILL: 2-3 Câu dẫn nhận diện tổng quan năng lượng mối quan hệ này — màu sắc chung của cuộc gặp gỡ, không liệt kê hành tinh, viết như đang nói về một điều huyền diệu]
+
+[#ff0000+bold]Màu sắc cá nhân của mỗi người[/]
+
+- [bold]Bạn {name_A} – [FILL: Cụm 4-8 âm tiết — tính chất nổi bật nhất của {name_A}, từ Cung Mọc + Mặt Trời + Mặt Trăng]:[/] [FILL: 2-4 Câu về bạn {name_A} là người như thế nào trong tình yêu — từ Cung Mọc, Mặt Trời, Mặt Trăng của {name_A}. Dùng [bold]tên cung[/] và [bold]từ khóa tính cách[/]]
+
+- [bold]Bạn {name_B} – [FILL: Cụm 4-8 âm tiết — tính chất nổi bật nhất của {name_B}, từ Cung Mọc + Mặt Trời + Mặt Trăng]:[/] [FILL: 2-4 Câu về bạn {name_B} là người như thế nào trong tình yêu — từ Cung Mọc, Mặt Trời, Mặt Trăng của {name_B}. Dùng [bold]tên cung[/] và [bold]từ khóa tính cách[/]]
+
+[#ff0000+bold]Những điểm chạm cảm xúc[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — điểm đồng điệu tự nhiên từ 3 lõi của cả 2 người]:[/] [FILL: 2-4 Câu về điểm đồng điệu — nguyên tố tương đồng, năng lượng bổ trợ, nhu cầu cảm xúc tương thích. Từ AC/Mặt Trời/Mặt Trăng của cả hai. Dùng [bold]từ khóa[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — điểm khác biệt tiềm ẩn từ 3 lõi của cả 2 người]:[/] [FILL: 2-4 Câu về điểm khác biệt và xung đột tiềm ẩn — nhìn nhận 2 mặt, hướng thấu hiểu. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Điều mà mỗi người mang đến cho đối phương[/]
+
+(Áp dụng {gender_note}: Nếu cặp Nam-Nữ, thêm giới tính vào ngoặc đơn sau tên và dùng "giúp" thay "mang đến cho" — ví dụ: "Bạn {name_B} (nam) giúp bạn {name_A} (nữ)". Nếu đồng giới / không xác định giới, giữ nguyên "mang đến cho")
+- [bold]Bạn {name_B} mang đến cho bạn {name_A} – [FILL: Cụm 4-8 âm tiết — ảnh hưởng của {name_B} lên cuộc đời {name_A}]:[/] [FILL: 2-4 Câu: Sự hiện diện của {name_B} khơi dậy những lĩnh vực nào trong cuộc đời {name_A} — từ dữ liệu "NHÀ ĐƯỢC KÍCH HOẠT" phần nhà của {name_A} được {name_B} kích hoạt. Mô tả lĩnh vực cuộc sống tự nhiên, không liệt kê số nhà. Dùng [bold]tên lĩnh vực[/]]
+
+- [bold]Bạn {name_A} mang đến cho bạn {name_B} – [FILL: Cụm 4-8 âm tiết — ảnh hưởng của {name_A} lên cuộc đời {name_B}]:[/] [FILL: 2-4 Câu: Sự hiện diện của {name_A} khơi dậy những lĩnh vực nào trong cuộc đời {name_B} — từ dữ liệu nhà của {name_B} được {name_A} kích hoạt. Mô tả tự nhiên tương tự. Dùng [bold]tên lĩnh vực[/]]
+
+[#ff0000+bold]Góc nhìn tổng quát:[/]
+
+[FILL: 2-3 Câu kết luận tổng quát — màu sắc đặc trưng nhất của mối quan hệ này là gì, nó đến trong cuộc đời mỗi người để mang lại điều gì]
+
+[KTLUẬN] [FILL: 2-3 Câu tổng kết: Mối quan hệ này là kiểu gì, nó mang ý nghĩa gì trong hành trình của cả hai người]
+
+2. Tiếng gọi trái tim
+[SUBTITLE] Vì sao hai bạn gặp và thu hút nhau?
+
+[FILL: 2-3 Câu dẫn về sức hút và những gì đã đưa hai người đến với nhau — giọng khám phá, ấm áp, gần gũi]
+
+(CHỈ viết [#ff0000+bold]Sức hút của sự đối lập[/] + nội dung bên dưới nếu brief MỤC 2 ghi "Cặp cung đối đỉnh: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả header và toàn bộ phần này)
+[#ff0000+bold]Sức hút của sự đối lập[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — tính chất sức hút đối lập, ví dụ "hai cực bổ trợ nhau sâu sắc"]:[/] [FILL: 2-4 Câu luận giải cặp cung đối đỉnh — hai người bị hút bởi điều mình thiếu ở đối phương; cách họ bổ trợ cho nhau. Từ dữ liệu "Cặp cung đối đỉnh" trong MỤC 2 brief. Dùng [bold]tên cung[/]]
+
+(CHỈ viết [#ff0000+bold]Sức hấp dẫn trong tình yêu[/] + nội dung nếu MỤC 2 "Sao Kim – Sao Hỏa: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả header và phần này)
+[#ff0000+bold]Sức hấp dẫn trong tình yêu[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — tính chất sức hút trong tình yêu giữa hai người, ví dụ "hút nhau mạnh, khó cưỡng lại"]:[/] [FILL: 2-4 Câu Kim-Hỏa cross-chart — góc mềm: sức hút mạnh tự nhiên; góc cứng: hút nhưng dễ xung đột; áp dữ liệu 2 chiều. Từ dữ liệu "Sao Kim – Sao Hỏa" trong MỤC 2 brief. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết [#ff0000+bold]Cảm giác khi ở cạnh nhau[/] + nội dung nếu MỤC 2 "Sao Kim – Mặt Trăng: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả header và phần này)
+[#ff0000+bold]Cảm giác khi ở cạnh nhau[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — cảm giác khi hai người ở cạnh nhau, ví dụ "dễ chịu, được hiểu, ấm áp"]:[/] [FILL: 2-4 Câu Kim-Moon cross-chart — góc mềm: dễ chịu khi ở bên nhau; góc cứng: khó hiểu cảm xúc nhau; áp dữ liệu 2 chiều. Từ dữ liệu "Sao Kim – Mặt Trăng" trong MỤC 2 brief. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết [#ff0000+bold]Sức hút cực mạnh và duyên nợ[/] + nội dung bên dưới nếu ít nhất một trong ba: "Pluto aspects: → VIẾT", "Nhà 5 và Nhà 8: → VIẾT", "Duyên số: → VIẾT" trong MỤC 2 brief. Nếu tất cả → KHÔNG VIẾT: bỏ cả header)
+[#ff0000+bold]Sức hút cực mạnh và duyên nợ[/]
+
+(CHỈ viết đoạn Pluto + nội dung ngay dưới nếu "Pluto aspects: → VIẾT" trong MỤC 2 brief. Nếu → KHÔNG VIẾT: bỏ cả 2 dòng này)
+- [bold][FILL: Cụm 4-8 âm tiết — tính chất lực hút mãnh liệt và khó dứt bỏ giữa hai người]:[/] [FILL: 2-4 Câu Pluto cross-chart — góc mềm: mãnh liệt, yêu sâu, khó dứt; góc cứng: mãnh liệt đi kèm khổ đau nhưng mang lại sự tái sinh; áp dữ liệu 2 chiều. Từ dữ liệu "Pluto aspects" trong MỤC 2 brief. Chỉ điền nếu → VIẾT]
+
+(CHỈ viết đoạn Nhà 5/8 + nội dung ngay dưới nếu "Nhà 5 và Nhà 8: → VIẾT" trong MỤC 2 brief. Nếu → KHÔNG VIẾT: bỏ cả 2 dòng này)
+- [bold][FILL: Cụm 4-8 âm tiết — tính chất rung động và kết nối tình cảm sâu giữa hai người]:[/] [FILL: 2-4 Câu về hành tinh kích hoạt Nhà 5/8 — từ dữ liệu "Nhà 5 và Nhà 8" trong MỤC 2 brief; áp đúng chiều tác động (chủ nhà là người cảm nhận tác động). Chỉ điền nếu → VIẾT. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết đoạn Duyên số + nội dung ngay dưới nếu "Duyên số: → VIẾT" trong MỤC 2 brief. Nếu → KHÔNG VIẾT: bỏ cả 2 dòng này)
+- [bold][FILL: Cụm 4-8 âm tiết — tính chất gặp gỡ có duyên và ý nghĩa lâu dài]:[/] [FILL: 2-4 Câu về duyên số — từ dữ liệu "Duyên số" trong MỤC 2 brief; ý nghĩa nhà 4/7/8 chung trong mối quan hệ này. Chỉ điền nếu → VIẾT. Dùng [bold]từ khóa[/]]
+
+[KTLUẬN] [FILL: 2-3 Câu: Vì sao hai người bị hút nhau, điều gì đã dẫn dắt cuộc gặp gỡ này; chỉ trả lời từ dữ liệu có viết]
+
+3. Ngôn ngữ tình yêu
+[SUBTITLE] Cách hai bạn yêu và được yêu
+
+[FILL: 2-3 Câu dẫn về sự đa dạng trong cách yêu và tầm quan trọng của việc hiểu ngôn ngữ tình yêu của nhau — giọng trân trọng, ấm áp]
+
+[#ff0000+bold]Cách bạn {name_A} xây dựng tổ ấm[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — cách {name_A} trao đi tình yêu, ví dụ "tinh tế, nuôi dưỡng, bền bỉ"]:[/] [FILL: 2-4 Câu: Khi yêu, {pronoun_A} {name_A} thường cho đi điều gì, thể hiện tình cảm theo cách nào — từ Cung Mọc, Mặt Trời, Mặt Trăng của {name_A}. Dùng [bold]từ khóa tính cách[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — điều {name_A} cần nhận lại để cảm thấy được yêu thật sự, ví dụ "cần được trân trọng và công nhận"]:[/] [FILL: 2-4 Câu: {pronoun_A} {name_A} cần được yêu theo cách nào, điều gì khiến {pronoun_A} cảm thấy được yêu thật sự — từ Mặt Trăng và Sao Kim của {name_A} trong "BẢN ĐỒ SAO: NHÂN VẬT A". Dùng [bold]cung Trăng[/] và [bold]cung Kim[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — cách {name_A} tiếp cận và phản ứng trong tình yêu, ví dụ "thận trọng, bảo vệ, rút lui khi tổn thương"]:[/] [FILL: 2-4 Câu: {pronoun_A} {name_A} tiếp cận, theo đuổi và duy trì tình yêu ra sao; cách phản ứng khi có xung đột — từ Sao Hỏa của {name_A} trong "BẢN ĐỒ SAO: NHÂN VẬT A". Dùng [bold]cung Hỏa[/]]
+
+[#ff0000+bold]Cách bạn {name_B} giữ lửa đam mê[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — cách {name_B} trao đi tình yêu, ví dụ "mãnh liệt, trực tiếp, truyền cảm hứng"]:[/] [FILL: 2-4 Câu: Khi yêu, {pronoun_B} {name_B} thường cho đi điều gì, thể hiện tình cảm theo cách nào — từ Cung Mọc, Mặt Trời, Mặt Trăng của {name_B}. Dùng [bold]từ khóa tính cách[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — điều {name_B} cần nhận lại để cảm thấy được yêu thật sự, ví dụ "cần được ưu tiên và công nhận rõ ràng"]:[/] [FILL: 2-4 Câu: {pronoun_B} {name_B} cần được yêu theo cách nào — từ Mặt Trăng và Sao Kim của {name_B} trong "BẢN ĐỒ SAO: NHÂN VẬT B". Dùng [bold]cung Trăng[/] và [bold]cung Kim[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — cách {name_B} tiếp cận và phản ứng trong tình yêu, ví dụ "dứt khoát, tìm sự hài hòa, khó kiểm soát"]:[/] [FILL: 2-4 Câu: {pronoun_B} {name_B} tiếp cận và duy trì tình yêu ra sao — từ Sao Hỏa của {name_B} trong "BẢN ĐỒ SAO: NHÂN VẬT B". Dùng [bold]cung Hỏa[/]]
+
+[#ff0000+bold]Vai trò của mỗi người khi ở cạnh nhau[/]
+
+(Áp dụng {gender_note}: Nếu cặp Nam-Nữ, thêm giới tính vào ngoặc đơn sau tên. Nếu đồng giới / không xác định giới, giữ nguyên không thêm giới tính)
+- [bold]Bạn {name_A} – [FILL: Cụm 4-8 âm tiết — vai trò đặc trưng của {name_A}, từ "Theme chủ đạo" trong SYNASTRY brief]:[/] [FILL: 2-4 Câu: {pronoun_A} {name_A} mang năng lượng gì vào mối quan hệ, xu hướng hành xử khi ở cạnh {pronoun_B} {name_B}, ảnh hưởng lên {pronoun_B} {name_B} ra sao. Dùng [bold]từ khóa[/]]
+
+- [bold]Bạn {name_B} – [FILL: Cụm 4-8 âm tiết — vai trò đặc trưng của {name_B}, từ "Theme chủ đạo" trong SYNASTRY brief]:[/] [FILL: 2-4 Câu: {pronoun_B} {name_B} mang năng lượng gì, ảnh hưởng lên {pronoun_A} {name_A} ra sao. Dùng [bold]từ khóa[/]]
+
+[KTLUẬN] [FILL: 2-3 Câu về phong cách yêu của hai người: điểm tương đồng tạo kết nối, điểm khác biệt cần thấu hiểu để ngôn ngữ tình yêu không bị lạc]
+
+4. Chuyện đôi mình
+[SUBTITLE] Những điểm hòa hợp và khác biệt cần thấu hiểu
+
+[FILL: 2-3 Câu dẫn nhẹ nhàng — không có mối quan hệ nào hoàn hảo, cũng không có mối quan hệ nào là sai lầm; điều quan trọng là cách hai người nhìn nhận và chọn cùng nhau]
+
+[#ff0000+bold]Nơi hai trái tim cùng nhịp điệu[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — điểm đồng điệu lõi tính cách của cả hai người, ví dụ "đều yêu sâu, không chấp nhận hời hợt"]:[/] [FILL: 2-4 Câu về điểm đồng điệu tự nhiên trong lõi tính cách hai người — từ dữ liệu "Lõi tính cách hòa hợp: → VIẾT" trong MỤC 4 brief. LUÔN viết phần này. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết dòng bullet ngay dưới nếu MỤC 4 brief ghi "Hòa hợp / Nhà trội cá nhân trùng nhau: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả dòng bullet)
+- [bold][FILL: Cụm 4-8 âm tiết — lĩnh vực cả hai cùng coi trọng từ nhà trội cá nhân trùng nhau, ví dụ "cùng coi trọng sự nghiệp và địa vị"]:[/] [FILL: 2-4 Câu: Cả hai cùng coi trọng lĩnh vực đó, đây là nền tảng hiểu nhau — từ dữ liệu "Hòa hợp / Nhà trội cá nhân trùng nhau" trong MỤC 4 brief. Chỉ điền nếu → VIẾT. Dùng [bold]tên lĩnh vực[/]]
+
+(CHỈ viết dòng bullet ngay dưới nếu MỤC 4 brief ghi "Hòa hợp / Kim-Thủy góc mềm: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả dòng bullet)
+- [bold][FILL: Cụm 4-8 âm tiết — cách giao tiếp tình cảm dễ chạm nhau, ví dụ "hiểu nhau qua lời nói, kết nối trí tuệ"]:[/] [FILL: 2-4 Câu: Ngôn ngữ tình cảm của hai người dễ chạm nhau, hiểu nhau qua lời nói — từ dữ liệu "Hòa hợp / Kim-Thủy góc mềm" trong MỤC 4 brief. Chỉ điền nếu → VIẾT. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết dòng bullet ngay dưới nếu MỤC 4 brief ghi "Hòa hợp / Kim-Hỏa góc mềm: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả dòng bullet)
+- [bold][FILL: Cụm 4-8 âm tiết — lực hút tự nhiên và sức sống đôi trong tình yêu, ví dụ "hút nhau mạnh, đam mê, truyền cảm hứng cho nhau"]:[/] [FILL: 2-4 Câu: Lực hút tự nhiên, đam mê và sức sống trong tình yêu hai người — từ dữ liệu "Hòa hợp / Kim-Hỏa góc mềm" trong MỤC 4 brief. Chỉ điền nếu → VIẾT. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết dòng bullet ngay dưới nếu MỤC 4 brief ghi "Hòa hợp / Kim-Mặt Trăng góc mềm: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả dòng bullet)
+- [bold][FILL: Cụm 4-8 âm tiết — cảm giác an toàn và đồng điệu cảm xúc tự nhiên, ví dụ "dễ chịu, được hiểu, ấm áp khi ở cạnh nhau"]:[/] [FILL: 2-4 Câu: Dễ chịu khi ở bên nhau, đồng điệu cảm xúc — từ dữ liệu "Hòa hợp / Kim-Mặt Trăng góc mềm" trong MỤC 4 brief. Chỉ điền nếu → VIẾT. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Những nốt trầm cần sự thấu hiểu[/]
+
+- [bold][FILL: Cụm 4-8 âm tiết — điểm xung đột tiềm ẩn trong lõi tính cách hai người, ví dụ "lệch nhịp giữa nhu cầu ổn định và tự do"]:[/] [FILL: 2-4 Câu về xung đột tiềm ẩn trong lõi tính cách — từ dữ liệu "Lõi tính cách xung đột: → VIẾT" trong MỤC 4 brief. LUÔN viết phần này. Giọng 2 mặt, hướng thấu hiểu. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết dòng bullet ngay dưới nếu MỤC 4 brief ghi "Kim-Thủy góc cứng: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả dòng bullet)
+- [bold][FILL: Cụm 4-8 âm tiết — cách diễn đạt tình cảm chưa khớp nhau, ví dụ "hai người đang nói hai ngôn ngữ khác nhau"]:[/] [FILL: 2-4 Câu: Cách diễn đạt và đón nhận tình cảm chưa khớp nhau, vấn đề không phải là không yêu mà là chưa nói đúng ngôn ngữ — từ dữ liệu "Kim-Thủy góc cứng" trong MỤC 4 brief. Chỉ điền nếu → VIẾT. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết dòng bullet ngay dưới nếu MỤC 4 brief ghi "Kim-Hỏa góc cứng: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả dòng bullet)
+- [bold][FILL: Cụm 4-8 âm tiết — lệch nhịp trong cách hành động và yêu, ví dụ "vừa hút nhau mạnh vừa dễ cọ xát căng thẳng"]:[/] [FILL: 2-4 Câu: Lệch nhịp trong cách yêu, vừa rung động vừa áp lực — từ dữ liệu "Kim-Hỏa góc cứng" trong MỤC 4 brief. Chỉ điền nếu → VIẾT. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết dòng bullet ngay dưới nếu MỤC 4 brief ghi "Kim-Mặt Trăng góc cứng: → VIẾT". Nếu → KHÔNG VIẾT: bỏ cả dòng bullet)
+- [bold][FILL: Cụm 4-8 âm tiết — khó đọc cảm xúc của nhau, ví dụ "bên cạnh nhau nhưng đôi khi vẫn thấy xa"]:[/] [FILL: 2-4 Câu: Khó hiểu cảm xúc của nhau, cảm giác bên cạnh mà vẫn thấy xa — từ dữ liệu "Kim-Mặt Trăng góc cứng" trong MỤC 4 brief. Chỉ điền nếu → VIẾT. Dùng [bold]từ khóa[/]]
+
+(CHỈ viết [#ff0000+bold]Những khoảng trống cần được lấp đầy[/] + nội dung nếu brief MỤC 4 có dữ liệu "Nhà trống cần chú ý: → VIẾT". Nếu không có: bỏ cả header và toàn bộ phần này)
+[#ff0000+bold]Những khoảng trống cần được lấp đầy[/]
+
+[FILL: Liệt kê từng nhà trống đặc biệt từ "Nhà trống cần chú ý" trong MỤC 4 brief. Mỗi nhà: 1 dòng "- " rồi [bold]cụm 4-8 âm tiết mô tả lĩnh vực + tính chất thiếu hụt:[/] + 2-3 câu theo cấu trúc bắt buộc: Câu 1 — "[CHỦ_NHÀ_TRỐNG] rất coi trọng [điều X] — từ "Người này coi trọng:" trong dữ liệu. Câu 2 — "Nhưng khi Nhà [Y] là nhà trống đặc biệt, [CHỦ] dễ [trạng thái cảm xúc cụ thể: cảm thấy 1 mình gánh vác, lạc lõng, không nhìn rõ vai trò đối phương...]" — từ "Nhà trống synastry:" trong dữ liệu. KHÔNG dùng "nên chủ động chia sẻ". Dùng [bold]từ khóa[/]]
+
+[KTLUẬN] [FILL: 2-3 Câu tổng kết hòa hợp và khác biệt — giọng cân bằng, mọi khác biệt đều là cơ hội để hiểu nhau sâu hơn và cùng trưởng thành]
+
+5. La bàn hạnh phúc
+[SUBTITLE] Chìa khóa để đi cùng nhau bền vững
+
+[FILL: 2-3 Câu dẫn — mối quan hệ nào cũng có bài học riêng dành cho cả hai người, và đây là những chìa khóa để hiểu nhau và đi cùng nhau bền vững hơn]
+
+(CHỈ viết [#ff0000+bold]Những bài học để cùng nhau trưởng thành[/] + nội dung bên dưới nếu ít nhất 1 cặp Sao Thổ có dữ liệu trong MỤC 5 brief. Nếu tất cả null: bỏ cả header và toàn bộ phần này)
+[#ff0000+bold]Những bài học để cùng nhau trưởng thành[/]
+
+[FILL: 1-2 Câu về Sao Thổ trong mối quan hệ — là thầy dạy khắt khe nhưng đáng tin, mang đến bài học giúp cả hai trưởng thành thật sự]
+
+(Viết từng cặp Thổ CHỈ khi cặp đó có dữ liệu trong MỤC 5 brief. Cặp không có dữ liệu: bỏ cả dòng [bold] và đoạn ngay dưới)
+
+- [bold][FILL: Cụm 4-8 âm tiết — bài học trưởng thành cảm xúc, chỉ nếu có dữ liệu "Sao Thổ – Mặt Trăng" trong MỤC 5]:[/] [FILL: 2-4 Câu Thổ-Moon — học cách không mang nỗi sợ cũ vào tình yêu mới; cách mối quan hệ này mang bài học đó đến, hướng cùng vượt qua. Chỉ điền nếu có dữ liệu. Dùng [bold]từ khóa[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — bài học yêu có trách nhiệm và cam kết, chỉ nếu có dữ liệu "Sao Thổ – Sao Kim" trong MỤC 5]:[/] [FILL: 2-4 Câu Thổ-Kim — học yêu có trách nhiệm, cam kết thật sự; cách mối quan hệ này mang bài học đó đến. Chỉ điền nếu có dữ liệu. Dùng [bold]từ khóa[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — bài học giao tiếp chín chắn và thành thật, chỉ nếu có dữ liệu "Sao Thổ – Sao Thủy" trong MỤC 5]:[/] [FILL: 2-4 Câu Thổ-Thủy — học giao tiếp chín chắn, nói thật thay vì né tránh. Chỉ điền nếu có dữ liệu. Dùng [bold]từ khóa[/]]
+
+- [bold][FILL: Cụm 4-8 âm tiết — bài học xử lý xung đột lành mạnh, chỉ nếu có dữ liệu "Sao Thổ – Sao Hỏa" trong MỤC 5]:[/] [FILL: 2-4 Câu Thổ-Hỏa — học xử lý xung đột lành mạnh, không bùng nổ hoặc đóng băng. Chỉ điền nếu có dữ liệu. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Chìa khóa mở cánh cửa hạnh phúc[/]
+
+[FILL: 3-5 Lời khuyên thực hành cụ thể dựa vào những nốt trầm và khoảng trống đã luận ở Mục 4. Mỗi lời khuyên: [bold]tiêu đề ngắn gọn (3-5 từ):[/] + 2-3 câu hướng dẫn cụ thể, thực hành được ngay. Giọng tích cực, mỗi khác biệt là cơ hội hiểu nhau sâu hơn. Xuống dòng riêng cho mỗi lời khuyên bắt đầu bằng "- "]
+
+[KTLUẬN] [FILL: 2-3 Câu thông điệp cốt lõi: mối quan hệ này mang đến bài học quan trọng nhất nào cho cả hai về bản thân và về tình yêu]
+
+6. Thông điệp dành cho mối quan hệ
+[SUBTITLE] Nhìn lại hành trình chung
+
+[FILL: 2-3 Câu dẫn nhìn lại toàn bộ hành trình — cảm nhận tổng thể, màu sắc cốt lõi của mối quan hệ này]
+
+[#ff0000+bold]Nhìn lại hành trình chung[/]
+
+[FILL: 2-4 Câu đánh giá tổng quát — từ dữ liệu "assessment" trong MỤC 6 brief: nếu "nhiều thách thức và bài học" thì luận theo hướng thử thách là chất xúc tác để trưởng thành; nếu "mức độ hòa hợp cao" thì luận sự êm đẹp cần được trân trọng và nuôi dưỡng có ý thức. KHÔNG phán xét, không dự đoán tương lai. Dùng [bold]từ khóa[/]]
+
+[#ff0000+bold]Mọi trải nghiệm đều là món quà, dù là bình yên hay sóng gió[/]
+
+- [FILL: Góc nhìn tích cực — Nếu nhiều thách thức: khi hai người chọn ở lại và vượt qua cùng nhau, mối quan hệ sẽ trở nên gắn bó sâu sắc, bền vững hơn bất kỳ mối quan hệ dễ dàng nào; thử thách là chất xúc tác trưởng thành. 2-3 câu]
+- [FILL: Góc nhìn tích cực — Nếu hòa hợp cao: sự êm đẹp cần được trân trọng và nuôi dưỡng có ý thức; đừng để sự thoải mái biến thành hời hợt; hãy tiếp tục đầu tư vào nhau. 2-3 câu]
+- [FILL: Thông điệp cuối: cặp đôi nào cũng có thể hạnh phúc; điều quan trọng là cách hai người chọn đối diện và cùng nhau phát triển mỗi ngày. 2-3 câu]
+
+[#ff0000+bold]Lời nhắn nhủ sau cùng:[/]
+
+[FILL: 2-3 Câu nhắn nhủ ấm áp — lời khuyên cho mối quan hệ dù đi tiếp hay dừng lại đều bình an; trân trọng những gì đã có và đang có; giọng đồng hành tâm linh chân thành]
+
+[CLOSING]
+Cảm ơn hai bạn đã dành thời gian để cùng nhau khám phá bức tranh mối quan hệ qua góc nhìn của các vì sao.
+
+Mỗi mối quan hệ là một cuộc gặp gỡ giữa hai "bầu trời" khác nhau. Không có bầu trời nào đúng hơn hay sai hơn, chỉ là mỗi người mang đến những ánh sáng khác nhau. Và khi hai ánh sáng giao nhau, luôn có những khoảnh khắc rực rỡ lẫn những góc khuất cần được thắp sáng.
+
+Hy vọng bản luận giải này đã giúp hai bạn nhìn thấy nhau rõ hơn một chút, để trân trọng những điều tốt đẹp đang có, và nhẹ nhàng hơn với những điều vẫn đang cần được thấu hiểu.
+
+Dù hành trình phía trước như thế nào, hãy nhớ rằng: việc hai bạn tìm đến nhau, và chọn lắng nghe nhau qua bản luận giải này, đã là một cử chỉ yêu thương đáng trân trọng.
+
+Trân trọng,
+
+Hạt Giống Chiêm Tinh

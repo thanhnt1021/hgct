@@ -4,6 +4,8 @@ import prisma from '@/lib/db'
 import { createReportJob } from '@/lib/astrology/reportProcessor'
 import { sendUnderpaymentAlert, sendPaymentReceivedNotification, sendUnmatchedPaymentAlert } from '@/lib/notify'
 import { recordDemosepay } from '@/lib/demosepay-state'
+import { addCoin } from '@/lib/coin/service'
+import { getPackage } from '@/lib/coin/packages'
 
 export const dynamic = 'force-dynamic'
 
@@ -117,6 +119,60 @@ export async function POST(request: Request) {
         expected: order.amount,
         received: transferAmount,
       }).catch(() => {})
+    }
+
+    // 8a. Dual-mode router — COIN top-up vs legacy HGCT (PDF/email) order
+    if (order.service === 'coin-topup') {
+      const pd = order.profileData as { packageCode?: string; coins?: number }
+      const pkg = pd?.packageCode ? getPackage(pd.packageCode) : null
+      if (!pkg || !order.userUid) {
+        console.warn(`[sepay-webhook] coin-topup misconfigured: order=${order.id} pkg=${pd?.packageCode} user=${order.userUid}`)
+        sendUnmatchedPaymentAlert({ txnId, code, amount: transferAmount }).catch(() => {})
+        return OK()
+      }
+
+      try {
+        await prisma.$transaction(async (tx) => {
+          const locked = await tx.order.updateMany({
+            where: { id: order.id, paymentStatus: 'unpaid' },
+            data: {
+              paymentStatus: 'paid',
+              paidAt: new Date(),
+              sepayTxnId: txnId,
+              status: 'completed',
+            },
+          })
+          if (locked.count === 0) {
+            // Already processed by a concurrent webhook — abort
+            throw new Error('already-paid')
+          }
+          await addCoin({
+            userUid: order.userUid!,
+            amount: pkg.coins,
+            reason: `topup-${pkg.code}`,
+            refType: 'topup',
+            refId: String(order.id),
+            tx,
+          })
+        })
+      } catch (e) {
+        if ((e as Error).message === 'already-paid') {
+          console.log(`[sepay-webhook] coin-topup ${order.id} already processed — skip`)
+          return OK()
+        }
+        throw e
+      }
+
+      console.log(`[sepay-webhook] coin-topup ${order.id} → +${pkg.coins} xu for user ${order.userUid}`)
+      sendPaymentReceivedNotification({
+        orderId: order.id,
+        service: 'coin-topup',
+        name: pkg.label,
+        email: order.email,
+        amount: order.amount ?? transferAmount,
+        transferCode: code,
+      }).catch(() => {})
+      return OK()
     }
 
     // 8. Mark order as paid — Bug #17 fix: atomic lock via updateMany to prevent duplicate job creation

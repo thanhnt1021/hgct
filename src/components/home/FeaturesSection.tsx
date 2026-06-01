@@ -1,22 +1,21 @@
 // VISUAL ONLY — features/services section, Celestial Sanctum design (Server Component)
 
-import Link from 'next/link'
-import { Fingerprint, Mail, Lock, Briefcase, Heart, Users, TrendingUp, type LucideIcon } from 'lucide-react'
+import { Facebook, Youtube, type LucideIcon } from 'lucide-react'
+import ServicesGrid from './ServicesGrid'
 
-type Feature = { Icon: LucideIcon; title: string; description: string }
-type Service = { type: string; Icon: LucideIcon; title: string; desc: string; tag: string; accentColor: string; borderColor: string; tagColor: string }
+type Social = { Icon?: LucideIcon; IconSvg?: React.ReactNode; title: string; href: string; description: string; color: string }
 
-const features: Feature[] = [
-  { Icon: Fingerprint, title: 'Luận giải cá nhân hóa', description: 'Phân tích bản đồ sao được viết riêng cho bạn, dựa trên ngày – giờ – nơi sinh, giúp bạn hiểu rõ tính cách, tiềm năng và hướng đi của mình.' },
-  { Icon: Mail, title: 'Nhận qua email, đọc mọi lúc', description: 'Bản luận giải PDF được gửi thẳng vào email trong vài phút. Chi tiết, gần gũi – lưu lại để đọc đi đọc lại bất cứ lúc nào.' },
-  { Icon: Lock, title: 'Kết nối với chuyên gia', description: 'Có thể đặt lịch coaching 1:1 để được giải đáp sâu hơn và hiểu rõ bản đồ sao của mình.' },
-]
+// TikTok inline SVG (lucide doesn't ship a tiktok icon)
+const TikTokIcon = (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 8.5a8.5 8.5 0 0 1-5-1.6V16a6 6 0 1 1-6-6c.34 0 .67.03 1 .08v3.18a3 3 0 1 0 2 2.82V2h3a5.5 5.5 0 0 0 5 5.5v1z" />
+  </svg>
+)
 
-const services: Service[] = [
-  { type: 'career',   Icon: Briefcase,  title: 'Sự nghiệp & Tiền bạc',     desc: 'Bạn đang loay hoay trong việc lựa chọn ngành nghề phù hợp?\nBạn cảm thấy mắc kẹt trong công việc hiện tại, mông lung về tương lai hoặc nỗ lực rất nhiều nhưng tài chính vẫn không khởi sắc?\nBạn tự hỏi liệu mình có đang đi đúng đường?',                                                                              tag: 'Hướng đi',   accentColor: 'rgba(200,148,63,0.08)',  borderColor: 'rgba(200,148,63,0.22)', tagColor: '#c8943f' },
-  { type: 'love',     Icon: Heart,      title: 'Tình yêu & hôn nhân',       desc: 'Bạn mệt mỏi với những mối quan hệ "chẳng đi đến đâu", kịch bản "đổ vỡ" lặp đi lặp lại, cảm giác cô đơn kéo dài khiến bạn bắt đầu nghi ngờ bản thân?\nBạn hoài nghi về cách mình yêu, cách mình xây dựng mối quan hệ?\nBạn muốn tìm ra kiểu người phù hợp – nơi là bến đỗ bình yên dành cho bạn?',        tag: 'Phong cách',   accentColor: 'rgba(185,77,112,0.08)',  borderColor: 'rgba(185,77,112,0.22)', tagColor: '#e87da0' },
-  { type: 'synastry', Icon: Users,      title: 'Bản đồ sao cặp đôi',        desc: 'Những tranh cãi bế tắc, im lặng lạnh lùng hay cảm giác không được thấu hiểu đang khiến mối quan hệ của bạn đứng bên bờ vực?\nBạn sợ "chọn sai người" hay "đi sai hướng" và đây chính là rào cản khiến bạn không cảm thấy hạnh phúc?\nBạn cần biết những điều cần cải thiện từ cả hai để mối quan hệ tốt đẹp hơn?', tag: 'Đồng hành', accentColor: 'rgba(120,77,186,0.08)',  borderColor: 'rgba(120,77,186,0.22)', tagColor: '#b08ce8' },
-  { type: 'transit',  Icon: TrendingUp, title: 'Vận hạn sắp tới',           desc: 'Thời gian này bạn không biết khi nào là lúc nên tiến lên, khi nào nên lùi lại?\nBạn lo sợ những biến cố bất ngờ hoặc khó ra quyết định trước những thay đổi lớn của cuộc sống?',                                                                                                                               tag: 'Chuẩn bị',    accentColor: 'rgba(64,112,184,0.08)',  borderColor: 'rgba(64,112,184,0.22)', tagColor: '#78a8f0' },
+const socials: Social[] = [
+  { Icon: Facebook, title: 'Facebook', href: 'https://www.facebook.com/hatgiongchiemtinh', description: 'Theo dõi câu chuyện chiêm tinh hàng ngày, mẹo đọc bản đồ sao và lịch sự kiện.', color: '#1877f2' },
+  { IconSvg: TikTokIcon, title: 'TikTok', href: 'https://www.tiktok.com/@hatgiongchiemtinh', description: 'Video ngắn về 12 cung hoàng đạo, luận giải nhanh & vận hạn theo tuần.', color: '#69c9d0' },
+  { Icon: Youtube, title: 'YouTube', href: 'https://www.youtube.com/@hatgiongchiemtinh', description: 'Buổi học chiêm tinh chiều sâu — podcast, workshop và phân tích case thật.', color: '#ff0000' },
 ]
 
 export default function FeaturesSection() {
@@ -24,7 +23,25 @@ export default function FeaturesSection() {
     <section id="features" className="relative z-10 py-28 sm:py-36">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Section header */}
+        {/* Services grid — moved to top, 4 cục cha */}
+        <div className="mb-32">
+          <div className="text-center mb-14">
+            <p className="section-eyebrow mb-4">Thời điểm hiện tại</p>
+            <h2
+              className="mb-3"
+              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: 'clamp(1.5rem, 4vw, 2.4rem)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}
+            >
+              Bạn đang gặp vấn đề gì cần tháo gỡ?
+            </h2>
+            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+              Chọn một trong bốn góc nhìn chiêm tinh chuyên sâu dưới đây
+            </p>
+          </div>
+
+          <ServicesGrid />
+        </div>
+
+        {/* Section header — Hạt Giống Chiêm Tinh */}
         <div className="text-center mb-20 flex flex-col items-center">
           <p className="section-eyebrow mb-4">Tại sao lựa chọn chúng tôi?</p>
           <h2 className="mb-6 leading-tight flex flex-col items-center">
@@ -43,65 +60,27 @@ export default function FeaturesSection() {
           </p>
         </div>
 
-        {/* Feature cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-32">
-          {features.map((f, i) => (
-            <div key={i} className="feature-card">
+        {/* Social cards (replaces old 3 feature cards) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {socials.map((s, i) => (
+            <a
+              key={i}
+              href={s.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="feature-card block"
+            >
               <div className="mb-5 flex items-center justify-center w-12 h-12 rounded-full" style={{ background: 'rgba(200,148,63,0.1)', border: '1px solid rgba(200,148,63,0.2)' }}>
-                <f.Icon size={22} style={{ color: '#d9ab55' }} strokeWidth={1.5} />
+                {s.Icon ? <s.Icon size={22} style={{ color: s.color }} strokeWidth={1.5} /> : <span style={{ color: s.color }}>{s.IconSvg}</span>}
               </div>
               <h3 className="mb-3 font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem', letterSpacing: '0.01em' }}>
-                {f.title}
+                {s.title}
               </h3>
               <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', lineHeight: 1.85, fontSize: '1rem' }}>
-                {f.description}
+                {s.description}
               </p>
-            </div>
+            </a>
           ))}
-        </div>
-
-        {/* Services grid */}
-        <div>
-          <div className="text-center mb-14">
-            <p className="section-eyebrow mb-4">Thời điểm hiện tại</p>
-            <h2
-              className="mb-3"
-              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: 'clamp(1.5rem, 4vw, 2.4rem)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}
-            >
-              Bạn đang gặp vấn đề gì cần tháo gỡ?
-            </h2>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
-              Chọn một trong bốn góc nhìn chiêm tinh chuyên sâu dưới đây
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {services.map(s => (
-              <Link
-                key={s.tag}
-                href={`/services?type=${s.type}`}
-                className="service-card-link p-7"
-                style={{ background: s.accentColor, border: `1px solid ${s.borderColor}` }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-full" style={{ background: 'rgba(6,6,15,0.5)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <s.Icon size={20} style={{ color: s.tagColor }} strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <span className="inline-block mb-2.5" style={{ color: s.tagColor, fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                      {s.tag}
-                    </span>
-                    <h3 className="font-semibold mb-2" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.25rem' }}>
-                      {s.title}
-                    </h3>
-                    <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.85, whiteSpace: 'pre-line' }}>
-                      {s.desc}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
         </div>
 
       </div>
