@@ -8,14 +8,15 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/db'
 import { getCatalog, getSection } from '@/lib/catalog/sections'
-import { deductCoin, InsufficientCoinError } from '@/lib/coin/service'
-import { generateAndCacheEssay } from '@/lib/essay/generate'
-import { unlockRefId, type InputData } from '@/lib/essay/key'
+import { deductCoin, getBalance, InsufficientCoinError } from '@/lib/coin/service'
+import { readEssay } from '@/lib/essay/cache'
+import { startSectionUnlockJob } from '@/lib/coin/unlock-job'
+import { profileHash, unlockRefId, type InputData } from '@/lib/essay/key'
 import { getSectionByIndex } from '@/lib/essay/parse'
 import { validateInputData } from '@/lib/preview-validation'
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 300 // allow up to 5min for lazy LLM gen
+export const maxDuration = 300 // background gen may run a few minutes
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
@@ -59,32 +60,11 @@ export async function POST(request: Request) {
     inputDataB = body.inputDataB as InputData
   }
 
-  // Step 1: generate (or load from cache) the full essay; compute profile hash
-  let hash: string
-  let essay: string
-  try {
-    const r = await generateAndCacheEssay({
-      userUid, service,
-      inputData, inputDataB,
-      startDate: body.startDate as string | undefined,
-      endDate: body.endDate as string | undefined,
-    })
-    hash = r.hash
-    essay = r.essay
-  } catch (e) {
-    return NextResponse.json({ error: 'Sinh nội dung lỗi: ' + (e as Error).message }, { status: 500 })
-  }
+  // profileUid = stable hash of the input — computable WITHOUT any LLM call,
+  // so we can run all pre-checks before spending generation cost.
+  const profileUid = profileHash(inputData, inputDataB)
 
-  const content = getSectionByIndex(essay, section.index)
-  if (!content) {
-    return NextResponse.json(
-      { error: 'Không tách được nội dung mục — vui lòng thử lại.' },
-      { status: 500 },
-    )
-  }
-
-  // Step 2: check DB for prior unlock — no charge if already paid
-  const profileUid = hash // 16-char hash doubles as profile identifier for now
+  // Step 1: already unlocked? Return cached content — no generation, no charge.
   const prior = await prisma.reading.findUnique({
     where: {
       userUid_profileUid_service_sectionId: { userUid, profileUid, service, sectionId },
@@ -93,6 +73,7 @@ export async function POST(request: Request) {
   })
   if (prior) {
     return NextResponse.json({
+      done: true,
       content: prior.content,
       sectionId,
       coinsCharged: 0,
@@ -100,36 +81,43 @@ export async function POST(request: Request) {
     })
   }
 
-  // Step 3: atomic deduct + persist Reading row
-  const refId = unlockRefId(service, hash, sectionId)
-  try {
-    await prisma.$transaction(async (tx) => {
-      await deductCoin({
-        userUid,
-        amount: section.coinPrice,
-        reason: `unlock-${sectionId}`,
-        refType: 'deduct',
-        refId,
-        tx,
-      })
-      await tx.reading.create({
-        data: { userUid, profileUid, service, sectionId, content },
-      })
-    })
-  } catch (e) {
-    if (e instanceof InsufficientCoinError) {
-      return NextResponse.json(
-        { error: `Không đủ xu — cần ${e.need}, hiện có ${e.have}` },
-        { status: 402 },
-      )
-    }
-    throw e
+  // Step 2: GATE — must hold enough coins BEFORE we spend any LLM cost.
+  const balance = await getBalance(userUid)
+  if (balance < section.coinPrice) {
+    return NextResponse.json(
+      { error: `Không đủ xu — cần ${section.coinPrice}, hiện có ${balance}`, need: section.coinPrice, have: balance },
+      { status: 402 },
+    )
   }
 
-  return NextResponse.json({
-    content,
-    sectionId,
-    coinsCharged: section.coinPrice,
-    alreadyUnlocked: false,
+  // Step 3: essay ĐÃ tạo trước đó → mở mục ngay (sync, không cần job/modal).
+  const cachedEssay = await readEssay(userUid, service, profileUid)
+  if (cachedEssay) {
+    const content = getSectionByIndex(cachedEssay, section.index)
+    if (!content) {
+      return NextResponse.json({ error: 'Không tách được nội dung mục — vui lòng thử lại.' }, { status: 500 })
+    }
+    try {
+      await prisma.$transaction(async (tx) => {
+        await deductCoin({ userUid, amount: section.coinPrice, reason: `unlock-${sectionId}`, refType: 'deduct', refId: unlockRefId(service, profileUid, sectionId), tx })
+        await tx.reading.create({ data: { userUid, profileUid, service, sectionId, content } })
+      })
+    } catch (e) {
+      if (e instanceof InsufficientCoinError) {
+        return NextResponse.json({ error: `Không đủ xu — cần ${e.need}, hiện có ${e.have}` }, { status: 402 })
+      }
+      throw e
+    }
+    return NextResponse.json({ done: true, content, sectionId, coinsCharged: section.coinPrice, alreadyUnlocked: false })
+  }
+
+  // Step 4: chưa có essay → tạo job chạy NGẦM (gen + tính tiền), client poll /api/job/[id].
+  const jobId = startSectionUnlockJob({
+    userUid, service, profileUid, sectionId,
+    inputData, inputDataB,
+    startDate: body.startDate as string | undefined,
+    endDate: body.endDate as string | undefined,
+    name: inputData.name,
   })
+  return NextResponse.json({ done: false, jobId })
 }

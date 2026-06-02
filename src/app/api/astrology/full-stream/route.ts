@@ -16,9 +16,8 @@ import {
   validateInputData,
   isValidDateString,
 } from '@/lib/preview-validation'
-import { profileHash, cacheKey, type InputData } from '@/lib/essay/key'
+import { profileHash, type InputData } from '@/lib/essay/key'
 import { readEssay, writeEssay } from '@/lib/essay/cache'
-import { relationsContextBlock, type RelationsType } from '@/lib/logic/relations/context'
 
 export const runtime = 'nodejs'
 
@@ -94,7 +93,6 @@ export async function POST(req: NextRequest) {
   const endDate = body.endDate as string | undefined
 
   const hash = profileHash(inputData, inputDataB)
-  const key = cacheKey(userUid, service, hash)
 
   const encoder = new TextEncoder()
   const { readable, writable } = new TransformStream()
@@ -106,7 +104,7 @@ export async function POST(req: NextRequest) {
   ;(async () => {
     try {
       // Cache hit — replay full text immediately, no LLM cost.
-      const cached = readEssay(key)
+      const cached = await readEssay(userUid, service, hash)
       if (cached) {
         send('cached', { hash })
         // Drip cached text in chunks so the UI feels live but doesn't block.
@@ -166,15 +164,9 @@ export async function POST(req: NextRequest) {
         // Phase E: pick the dedicated template for each relation type — falls
         // back to the original synastry template for `service === 'synastry'`.
         const templateName = service.startsWith('relations-') ? service : 'relationship'
+        // Each relations-* template is now fully self-contained → no context-block prepend.
         const result = buildRelationshipEssayPrompt(chart, chartB, blocks, profile, profileB, { templateName })
-        const basePrompt = typeof result === 'string' ? result : result.prompt
-        // Belt-and-suspenders: keep the lightweight context block even with the
-        // dedicated template so Claude can't accidentally fall back to romantic
-        // wording on edge cases (FILL instructions still mention "tình yêu").
-        const ctx = service.startsWith('relations-')
-          ? relationsContextBlock(service as RelationsType)
-          : ''
-        prompt = ctx + basePrompt
+        prompt = typeof result === 'string' ? result : result.prompt
       } else {
         // transit
         const { buildVanhanEssayPrompt } = await import('@/lib/logic/vanhan/prompt')
@@ -245,7 +237,7 @@ export async function POST(req: NextRequest) {
         reader.releaseLock()
       }
 
-      writeEssay(key, collected)
+      await writeEssay(userUid, service, hash, collected)
       send('done', { service, hash, cached: false })
     } catch (err) {
       send('error', { message: (err as Error).message || 'Lỗi không xác định' })

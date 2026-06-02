@@ -62,11 +62,13 @@ interface Props {
   showEmailField?: boolean
   twoActionMode?: boolean
   draftKey?: string
+  /** Hồ sơ đã lưu của user — hiện thành danh sách chọn nhanh ở đầu modal. */
+  savedProfiles?: { id: string; name: string; data: ProfileFormData }[]
   onSave: (data: ProfileFormData, saveProfile: boolean, action?: 'free' | 'paid' | 'reading', email?: string) => void
   onClose: () => void
 }
 
-export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, hideNote, showEmailField, twoActionMode, draftKey, onSave, onClose }: Props) {
+export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, hideNote, showEmailField, twoActionMode, draftKey, savedProfiles, onSave, onClose }: Props) {
   const [form, setForm] = useState<ProfileFormData>(initialData ?? EMPTY_PROFILE_FORM)
   const [yearMode, setYearMode] = useState<'select' | 'custom'>('select')
   const [customYearText, setCustomYearText] = useState('')
@@ -212,6 +214,30 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
 
         {/* Body */}
         <div className="px-6 py-5 space-y-4 form-compact" style={{ paddingBottom: '60px' }}>
+
+          {/* Chọn nhanh hồ sơ đã lưu */}
+          {savedProfiles && savedProfiles.length > 0 && (
+            <div>
+              <label style={labelStyle}>Chọn hồ sơ đã lưu</label>
+              <select
+                defaultValue=""
+                onChange={e => {
+                  const p = savedProfiles.find(x => x.id === e.target.value)
+                  if (!p) return
+                  setForm(p.data)
+                  setYearMode('custom')
+                  setCustomYearText(String(p.data.dob.year || ''))
+                  setYearError(''); setFormError('')
+                }}
+                style={{ width: '100%' }}
+              >
+                <option value="">— Nhập hồ sơ mới —</option>
+                {savedProfiles.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Row 1: Name + Gender same row */}
           <div className="grid gap-3 items-end" style={{ gridTemplateColumns: '1fr auto' }}>

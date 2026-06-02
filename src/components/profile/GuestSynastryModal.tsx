@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import LocationPicker from './LocationPicker'
 import { ProfileFormData, EMPTY_PROFILE_FORM } from './ProfileFormModal'
+import { PDF_EMAIL_ENABLED } from '@/lib/feature-flags'
+
+type SavedProfile = { id: string; name: string; data: ProfileFormData }
 
 const CUR_YEAR = new Date().getFullYear()
 const MONTHS = [[1,'1'],[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6'],[7,'7'],[8,'8'],[9,'9'],[10,'10'],[11,'11'],[12,'12']] as [number,string][]
@@ -70,9 +73,10 @@ function validate(p: PersonState, setYearError: (s: string) => void, setFormErro
   return { ...p.form, dob: { ...p.form.dob, year: finalYear } }
 }
 
-function PersonSection({ label, state }: {
+function PersonSection({ label, state, savedProfiles }: {
   label: string
   state: ReturnType<typeof usePersonState>
+  savedProfiles?: SavedProfile[]
 }) {
   const { form, setF, yearMode, setYearMode, customYear, setCustomYear, yearError, setYearError, formError } = state
   return (
@@ -80,6 +84,19 @@ function PersonSection({ label, state }: {
       <p style={{ color: '#c9a84c', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '1rem' }}>
         {label}
       </p>
+      {savedProfiles && savedProfiles.length > 0 && (
+        <div style={{ marginBottom: '0.85rem' }}>
+          <label style={labelStyle}>Chọn hồ sơ đã lưu</label>
+          <select
+            defaultValue=""
+            onChange={e => { const p = savedProfiles.find(x => x.id === e.target.value); if (p) state.resetWith(p.data) }}
+            style={{ width: '100%' }}
+          >
+            <option value="">— Nhập hồ sơ mới —</option>
+            {savedProfiles.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+      )}
       <div className="space-y-4 form-compact">
         {/* Row 1: Name + Gender */}
         <div className="grid gap-3 items-end" style={{ gridTemplateColumns: '1fr auto' }}>
@@ -206,13 +223,15 @@ export default function GuestSynastryModal({
   initialDataA,
   initialDataB,
   draftKey,
+  savedProfiles,
 }: {
   open: boolean
   onClose: () => void
-  onSubmit: (dataA: ProfileFormData, dataB: ProfileFormData, action?: 'free' | 'paid', email?: string) => void
+  onSubmit: (dataA: ProfileFormData, dataB: ProfileFormData, action?: 'free' | 'paid' | 'reading', email?: string) => void
   initialDataA?: ProfileFormData | null
   initialDataB?: ProfileFormData | null
   draftKey?: string
+  savedProfiles?: SavedProfile[]
 }) {
   const a = usePersonState()
   const b = usePersonState()
@@ -287,6 +306,13 @@ export default function GuestSynastryModal({
     onSubmit(data[0], data[1], 'paid', em)
   }
 
+  // Coin/stream flow — không cần email, 1 nút Hoàn Thành.
+  const handleReading = () => {
+    const data = validateBoth()
+    if (!data) return
+    onSubmit(data[0], data[1], 'reading')
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -309,44 +335,58 @@ export default function GuestSynastryModal({
 
         {/* Body */}
         <div className="px-6 py-5 space-y-8" style={{ paddingBottom: '60px' }}>
-          <PersonSection label="── THÔNG TIN CỦA BẠN ──" state={a} />
+          <PersonSection label="── THÔNG TIN CỦA BẠN ──" state={a} savedProfiles={savedProfiles} />
           <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.25), transparent)' }} />
-          <PersonSection label="── THÔNG TIN CỦA ĐỐI PHƯƠNG ──" state={b} />
+          <PersonSection label="── THÔNG TIN CỦA ĐỐI PHƯƠNG ──" state={b} savedProfiles={savedProfiles} />
 
-          {/* Email field */}
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.25rem', color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500 }}>
-              Email nhận báo cáo PDF <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => { setEmail(e.target.value); setEmailError('') }}
-              placeholder="email@example.com"
-              style={{ width: '100%' }}
-            />
-            {emailError && (
-              <p style={{ color: '#ef4444', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>⚠ {emailError}</p>
-            )}
-          </div>
+          {/* Email field — chỉ ở flow PDF cũ */}
+          {PDF_EMAIL_ENABLED && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.25rem', color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500 }}>
+                Email nhận báo cáo PDF <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setEmailError('') }}
+                placeholder="email@example.com"
+                style={{ width: '100%' }}
+              />
+              {emailError && (
+                <p style={{ color: '#ef4444', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.25rem' }}>⚠ {emailError}</p>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Footer — horizontal CTAs */}
-        <div className="px-6 pb-6 flex gap-3">
-          <button
-            onClick={handleFree}
-            className="flex-1 h-10 rounded-lg font-semibold"
-            style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
-          >
-            Xem miễn phí
-          </button>
-          <button
-            onClick={handlePaid}
-            className="flex-1 h-10 rounded-lg font-semibold"
-            style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
-          >
-            Xuất PDF chi tiết →
-          </button>
+        {/* Footer */}
+        <div className="px-6 pb-6">
+          {PDF_EMAIL_ENABLED ? (
+            <div className="flex gap-3">
+              <button
+                onClick={handleFree}
+                className="flex-1 h-10 rounded-lg font-semibold"
+                style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
+              >
+                Xem miễn phí
+              </button>
+              <button
+                onClick={handlePaid}
+                className="flex-1 h-10 rounded-lg font-semibold"
+                style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
+              >
+                Xuất PDF chi tiết →
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleReading}
+              className="w-full h-11 rounded-lg font-bold tracking-wider"
+              style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', letterSpacing: '0.06em', boxShadow: '0 4px 20px rgba(200,148,63,0.25)' }}
+            >
+              Hoàn Thành →
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -43,6 +43,8 @@ interface Profile {
   id: string
   profileUid: string
   name: string
+  ho?: string
+  dem?: string
   ten?: string
   note?: string
   dob: { day: number; month: number; year: number }
@@ -226,7 +228,9 @@ async function navigateToReading(
   try {
     localStorage.setItem(`previewInput:${profileUid}`, JSON.stringify(payload))
   } catch { /* storage full — degrade */ }
-  window.open(`/reading/${profileUid}/${encodeURIComponent(service)}`, '_blank')
+  // Same-tab navigation (window.open '_blank' bị popup-blocker chặn vì gọi sau
+  // các await → mất user-gesture). Điều hướng thẳng tới trang mở xu.
+  window.location.href = `/reading/${profileUid}/${encodeURIComponent(service)}`
 }
 
 // ── Custom profile picker ──────────────────────────────────────────
@@ -392,6 +396,12 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
   const [modalOpen, setModalOpen] = useState(false)
   const [modalTarget, setModalTarget] = useState<'A' | 'B'>('A')
   const [modalSaving, setModalSaving] = useState(false)
+  const [dupNotice, setDupNotice] = useState('')
+  useEffect(() => {
+    if (!dupNotice) return
+    const t = setTimeout(() => setDupNotice(''), 4000)
+    return () => clearTimeout(t)
+  }, [dupNotice])
 
   // Guest flow state
   const [guestService, setGuestService] = useState<ServiceDef | null>(null)
@@ -683,6 +693,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
     let profileId = `local_${Date.now()}`
     let profileUid = ''
     let savedPermanently = false
+    let isDuplicate = false
 
     // Thử POST lên server (cần đăng nhập)
     try {
@@ -702,6 +713,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
           profileId = String(data.profile.id)
           profileUid = data.profile.profileUid || ''
           savedPermanently = saveProfile
+          isDuplicate = data.duplicate === true
         }
       }
     } catch { /* non-logged-in hoặc lỗi mạng: dùng local data */ }
@@ -719,8 +731,9 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
       isTemp: !savedPermanently,
     }
 
-    // Thêm vào danh sách profiles (bao gồm cả temp — sẽ được filter trong picker)
-    setProfiles(prev => [newProfile, ...prev])
+    // Thêm vào danh sách — dedup theo id để dropdown không hiện bản trùng.
+    setProfiles(prev => prev.some(x => x.id === profileId) ? prev : [newProfile, ...prev])
+    if (isDuplicate) setDupNotice('Hồ sơ này đã có trong danh sách — dùng lại hồ sơ đã lưu.')
 
     if (modalTarget === 'A') {
       setProfileA(profileId)
@@ -732,6 +745,16 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
 
     setModalOpen(false)
     setModalSaving(false)
+
+    // Coin flow: dịch vụ 1 người → nhập xong "Hoàn Thành" là vào thẳng trang đọc.
+    // (Dịch vụ 2 người vẫn dùng picker chọn cả A+B rồi bấm xác nhận.)
+    if (selectedService && !selectedService.needsTwo) {
+      const inputThis = guestProfileToInput(formData, name)
+      const extra = selectedService.type === 'transit'
+        ? (() => { const t = new Date(); const e = new Date(t); e.setFullYear(t.getFullYear() + 1); return { startDate: t.toISOString().split('T')[0], endDate: e.toISOString().split('T')[0] } })()
+        : {}
+      navigateToReading(selectedService.type, inputThis, undefined, extra)
+    }
   }
 
   const getConfirmData = () => {
@@ -828,8 +851,36 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
   const hasAnyProfile = profiles.length > 0
   const fmtPrice = (p: number) => p.toLocaleString('vi-VN') + ' ₫'
 
+  // Hồ sơ đã lưu (permanent) → danh sách chọn nhanh trong modal nhập liệu.
+  const savedProfileOptions = profiles.filter(p => !p.isTemp).map(p => ({
+    id: p.id,
+    name: p.name,
+    data: {
+      ho: p.ho || '',
+      dem: p.dem || '',
+      ten: p.ten || (p.name.trim().split(/\s+/).pop() || p.name),
+      gender: p.gender || 'Female',
+      dob: p.dob,
+      tob: { hour: p.tob?.hour ?? -1, minute: p.tob?.minute ?? -1, unknown: p.tob?.unknown ?? false },
+      loc: p.loc,
+    } as ProfileFormData,
+  }))
+
   return (
     <div className="relative min-h-screen">
+      {/* Toast: hồ sơ trùng → báo đã có trong danh sách */}
+      {dupNotice && (
+        <div
+          style={{
+            position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 300,
+            background: 'rgba(18,13,46,0.97)', border: '1px solid rgba(200,148,63,0.4)', borderRadius: 10,
+            padding: '0.7rem 1.1rem', color: '#f0cc78', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)', maxWidth: '90vw', textAlign: 'center',
+          }}
+        >
+          ✓ {dupNotice}
+        </div>
+      )}
       {/* Background — same stack as home page (StarField fills #06060f + ZodiacBackground draws the rotating wheel) */}
       <StarField />
       <ZodiacBackground />
@@ -1332,6 +1383,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
         }
         saving={modalSaving}
         showSaveCheckbox
+        savedProfiles={savedProfileOptions}
         submitLabel={getModalSubmitLabel()}
         onSave={handleModalSave}
         onClose={() => { setModalOpen(false); setModalTarget('A') }}
@@ -1348,6 +1400,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
         showEmailField
         twoActionMode
         draftKey="guest_modal_single"
+        savedProfiles={savedProfileOptions}
         onSave={handleGuestModalSubmit}
         onClose={() => { setGuestModalOpen(false); setGuestService(null); setGuestInitialDataA(null) }}
       />
@@ -1360,6 +1413,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
         initialDataA={guestInitialDataA}
         initialDataB={guestInitialDataB}
         draftKey="guest_modal_synastry"
+        savedProfiles={savedProfileOptions}
       />
 
       <DiscountModal

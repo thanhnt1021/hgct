@@ -5,9 +5,11 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import CoinBalance from './CoinBalance'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-[#06060f]/95 to-[#06060f]/60 backdrop-blur-md border-b border-[#c8943f]/20 h-16 shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
@@ -31,8 +33,24 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Coin balance / login */}
-        <CoinBalance />
+        {/* Hồ sơ đã xem + Coin balance / login */}
+        <div className="flex items-center gap-2">
+          {user && (
+            <Link
+              href="/reading"
+              title="Hồ sơ đã xem"
+              style={{
+                color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem',
+                textDecoration: 'none', padding: '0.35rem 0.6rem', border: '1px solid rgba(200,148,63,0.25)',
+                borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', whiteSpace: 'nowrap',
+              }}
+            >
+              <span>📜</span>
+              <span className="hidden sm:inline">Đã xem</span>
+            </Link>
+          )}
+          <CoinBalance />
+        </div>
 
         {/* Mobile hamburger */}
         <button
