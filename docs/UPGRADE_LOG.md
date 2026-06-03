@@ -35,6 +35,7 @@ Tiếp nối `COIN_PRODUCTION_HARDENING_PLAN.md` (A–E) + nhiều fix UX/flow p
 
 ### Infra (đã live trên server)
 - nginx: thêm `location /api/coin/` với `proxy_ignore_client_abort on` + timeout 600s (cả block prod & demo) → server hoàn tất gen kể cả khi Cloudflare ngắt client (~100s). Snapshot tại `/home/hgct/nginx/conf.d/hgct.conf`.
+- ⚠️ **TẠM: webhook SePay đang chuyển hướng về DEMO** (`location = /api/payment/sepay-webhook` → `hgct-demo:65500` trong block prod nginx) để bạn bè test nạp xu trên demo (prod `main` chưa có code coin). **Trong lần `full update` tiếp theo (coin lên prod): XOÁ block chuyển hướng này → webhook trỏ lại trang chủ/prod.** Lúc đó prod đã có coin nên không cần demo nữa.
 
 ### Lưu ý vận hành
 - OpenRouter giữ `max_tokens: 32000` (KHÔNG giảm). Lỗi 402 từng gặp là do **spend limit của API key thấp** — đã nâng. Theo dõi số dư OpenRouter, nạp trước khi cạn.
