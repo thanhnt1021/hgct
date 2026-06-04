@@ -3,7 +3,7 @@
 // VISUAL ONLY — login page restyled to Celestial Sanctum design
 // All auth logic (handleSubmit, useAuth, routing) untouched
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
@@ -27,6 +27,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [next, setNext] = useState('/profile')
+  const [reason, setReason] = useState('')
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search)
+    const n = p.get('next')
+    if (n && n.startsWith('/')) setNext(n)
+    setReason(p.get('reason') || '')
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +46,7 @@ export default function LoginPage() {
       setError(result.error || 'Đăng nhập thất bại')
       setLoading(false)
     } else {
-      router.push('/profile')
+      router.push(next)
     }
   }
 
@@ -98,6 +107,20 @@ export default function LoginPage() {
           >
             Đăng nhập
           </h2>
+
+          {reason === 'topup' && (
+            <div
+              className="mb-5 p-3 rounded-lg text-sm text-center"
+              style={{
+                background: 'rgba(200,148,63,0.1)',
+                border: '1px solid rgba(200,148,63,0.3)',
+                color: '#d9ab55',
+                fontFamily: 'var(--font-vietnam)',
+              }}
+            >
+              Đăng nhập để có thể nạp xu và mở nội dung
+            </div>
+          )}
 
           {error && (
             <div
@@ -166,14 +189,14 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <GoogleSignInButton />
+          <GoogleSignInButton callbackUrl={next} />
 
           <div
             className="mt-5 text-center"
             style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
           >
             Chưa có tài khoản?{' '}
-            <Link href="/auth/register" style={{ color: '#d9ab55', fontWeight: 600, textDecoration: 'underline' }}>
+            <Link href={`/auth/register?next=${encodeURIComponent(next)}`} style={{ color: '#d9ab55', fontWeight: 600, textDecoration: 'underline' }}>
               Đăng ký ngay
             </Link>
           </div>

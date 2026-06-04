@@ -3,7 +3,7 @@
 // VISUAL ONLY — register page restyled to Celestial Sanctum design
 // All auth logic (handleSubmit, useAuth, form state, routing) untouched
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
@@ -26,6 +26,12 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ username: '', name: '', email: '', password: '', confirm: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [next, setNext] = useState('/profile')
+
+  useEffect(() => {
+    const n = new URLSearchParams(window.location.search).get('next')
+    if (n && n.startsWith('/')) setNext(n)
+  }, [])
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
@@ -35,7 +41,7 @@ export default function RegisterPage() {
     setLoading(true); setError('')
     const result = await register(form.username, form.name, form.email, form.password)
     if (!result.ok) { setError(result.error || 'Đăng ký thất bại'); setLoading(false) }
-    else router.push('/profile')
+    else router.push(next)
   }
 
   return (
@@ -150,7 +156,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <GoogleSignInButton />
+          <GoogleSignInButton callbackUrl={next} />
 
           <div
             className="mt-5 text-center"
@@ -158,7 +164,7 @@ export default function RegisterPage() {
           >
             Đã có tài khoản?{' '}
             <Link
-              href="/auth/login"
+              href={`/auth/login?next=${encodeURIComponent(next)}`}
               className="font-semibold transition-colors"
               style={{ color: '#d9ab55' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#f0cc78')}

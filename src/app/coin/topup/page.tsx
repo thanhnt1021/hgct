@@ -34,12 +34,31 @@ export default function CoinTopupPage() {
   const [bankExpanded, setBankExpanded] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(Math.floor(TIMEOUT_MS / 1000))
 
+  const [back, setBack] = useState('') // màn quay lại sau khi nạp xong (vd trang reading)
+
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    if (!isLoading && !user) router.push('/auth/login')
+    const b = new URLSearchParams(window.location.search).get('back')
+    if (b && b.startsWith('/')) setBack(b)
+  }, [])
+
+  // Guest → đăng nhập trước (kèm thông báo "nạp xu" + giữ nguyên next để quay lại trang nạp xu này).
+  useEffect(() => {
+    if (!isLoading && !user) {
+      const nextUrl = window.location.pathname + window.location.search
+      router.push(`/auth/login?reason=topup&next=${encodeURIComponent(nextUrl)}`)
+    }
   }, [user, isLoading, router])
+
+  // Nạp xong + có màn quay lại (vd trang reading) → tự quay về để dùng xu ngay.
+  useEffect(() => {
+    if (paid && back) {
+      const t = setTimeout(() => router.push(back), 1500)
+      return () => clearTimeout(t)
+    }
+  }, [paid, back, router])
 
   // Refresh balance on mount + whenever payment completes
   useEffect(() => {
@@ -148,14 +167,14 @@ export default function CoinTopupPage() {
 
           <div className="flex flex-col gap-3 max-w-xs mx-auto">
             <button
-              onClick={() => router.push('/services')}
+              onClick={() => router.push(back || '/services')}
               style={{
                 background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
                 color: '#06060f', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem',
                 letterSpacing: '0.06em', padding: '0.85rem 1.5rem', borderRadius: '4px', border: 'none', cursor: 'pointer',
               }}
             >
-              Bắt đầu xem luận giải →
+              {back ? 'Quay lại đọc tiếp →' : 'Bắt đầu xem luận giải →'}
             </button>
             <button
               onClick={() => { setPaid(false); setOrder(null); setError(''); setBankExpanded(false) }}
