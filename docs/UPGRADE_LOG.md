@@ -4,12 +4,11 @@ Nhật ký nâng cấp theo phiên bản. Mục mới nhất ở trên cùng.
 
 ---
 
-## v3.4 — Coin Rework: Production Hardening (branch `feature/coin-prod-hardening`)
+## v3.4 — Coin Rework Hardening + Mở lại đăng ký
 
-_2026-06-02 · **Trạng thái: đã build + chạy trên DEMO, CHƯA merge main / CHƯA lên production.**_
-_Lưu lại để không mất; chờ QA xong rồi `full update` (merge main + deploy prod + mở lại cho user)._
+_**Go-live PRODUCTION 2026-06-04** (merge `feature/coin-prod-hardening` — đã gộp `feature/reopen-registration` — → main → deploy prod). Production mở lại cho new user. Webhook SePay trỏ về prod (bỏ chuyển hướng demo). Giá xu để mức khuyến mãi 5k/10k/15k (chủ ý)._
 
-Tiếp nối `COIN_PRODUCTION_HARDENING_PLAN.md` (A–E) + nhiều fix UX/flow phát sinh khi test.
+Tiếp nối `COIN_PRODUCTION_HARDENING_PLAN.md` (A–E) + nhiều fix UX/flow + **mở lại đăng ký** (credentials + Google auto-create, rate-limit).
 
 ### Backend / độ tin cậy
 - **A. Essay → lưu DB** (bảng `essays`, thay cache `/tmp`): gen 1 lần/(user,profile,service), mọi mục cắt từ cùng 1 bài → **nhất quán + sống qua restart/redeploy + đọc lại vĩnh viễn**. `src/lib/essay/cache.ts` đọc/ghi DB; `generate.ts` race-safe re-read.
@@ -35,7 +34,7 @@ Tiếp nối `COIN_PRODUCTION_HARDENING_PLAN.md` (A–E) + nhiều fix UX/flow p
 
 ### Infra (đã live trên server)
 - nginx: thêm `location /api/coin/` với `proxy_ignore_client_abort on` + timeout 600s (cả block prod & demo) → server hoàn tất gen kể cả khi Cloudflare ngắt client (~100s). Snapshot tại `/home/hgct/nginx/conf.d/hgct.conf`.
-- ⚠️ **TẠM: webhook SePay đang chuyển hướng về DEMO** (`location = /api/payment/sepay-webhook` → `hgct-demo:65500` trong block prod nginx) để bạn bè test nạp xu trên demo (prod `main` chưa có code coin). **Trong lần `full update` tiếp theo (coin lên prod): XOÁ block chuyển hướng này → webhook trỏ lại trang chủ/prod.** Lúc đó prod đã có coin nên không cần demo nữa.
+- ✅ Webhook SePay: đã **bỏ chuyển hướng demo, trỏ lại prod** (prod giờ có code coin). Giữ `location /api/coin/` (`proxy_ignore_client_abort on` + timeout 600s) ở cả 2 block.
 
 ### Lưu ý vận hành
 - OpenRouter giữ `max_tokens: 32000` (KHÔNG giảm). Lỗi 402 từng gặp là do **spend limit của API key thấp** — đã nâng. Theo dõi số dư OpenRouter, nạp trước khi cạn.
