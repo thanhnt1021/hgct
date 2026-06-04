@@ -127,13 +127,13 @@ export default function ReadingClient({
     if (typeTimer.current) clearInterval(typeTimer.current)
   }, [])
 
-  useEffect(() => {
-    if (!isLoading && !user) router.push(`/auth/login?next=${encodeURIComponent(`/reading/${profileUid}/${service}`)}`)
-  }, [user, isLoading, router, profileUid, service])
+  // Guest XEM ĐƯỢC màn reading (các mục khoá). Chỉ yêu cầu đăng nhập khi bấm
+  // nạp xu / mở mục → điều hướng qua trang nạp xu (tự đưa về login + back).
+  const topupHref = `/coin/topup?back=${encodeURIComponent(`/reading/${profileUid}/${service}`)}`
 
-  // Read inputData from localStorage (keyed by profileUid)
+  // Read inputData from localStorage (keyed by profileUid) — guest cũng có
   useEffect(() => {
-    if (typeof window === 'undefined' || !user) return
+    if (typeof window === 'undefined') return
     try {
       const raw = localStorage.getItem(`previewInput:${profileUid}`)
       if (!raw) {
@@ -253,6 +253,7 @@ export default function ReadingClient({
 
   const handleUnlock = async (section: CatalogSection) => {
     if (!input) return
+    if (!user) { router.push(topupHref); return } // guest → nạp xu/đăng nhập trước
     const willGen = Object.keys(unlocked).length === 0 // essay chưa có → gen lần đầu (hiện modal)
     setUnlocking(section.id)
     setError('')
@@ -285,6 +286,7 @@ export default function ReadingClient({
 
   const handleUnlockBundle = async () => {
     if (!input) return
+    if (!user) { router.push(topupHref); return } // guest → nạp xu/đăng nhập trước
     const willGen = Object.keys(unlocked).length === 0
     setUnlocking('__bundle__')
     setError('')
@@ -436,7 +438,7 @@ export default function ReadingClient({
             <p style={{ color: '#8a8399', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
               Bản luận giải đầy đủ {sections.length} mục — mở từng mục bằng xu khi bạn sẵn sàng đọc.
               {balance != null && <> Bạn đang có <strong style={{ color: '#d9ab55' }}>{balance.toLocaleString('vi-VN')} xu</strong>.</>}
-              {' '}<Link href="/coin/topup" style={{ color: '#d9ab55', textDecoration: 'underline' }}>Nạp xu →</Link>
+              {' '}<Link href={topupHref} style={{ color: '#d9ab55', textDecoration: 'underline' }}>Nạp xu →</Link>
             </p>
             <p style={{ color: '#6b6585', fontSize: '0.72rem', marginBottom: '1.5rem', fontFamily: 'monospace' }}>
               Hồ sơ: {profileUid}
