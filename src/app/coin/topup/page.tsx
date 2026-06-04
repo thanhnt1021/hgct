@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/contexts/AuthContext'
-import { COIN_PACKAGES } from '@/lib/coin/packages'
+import type { CoinPackage } from '@/lib/coin/packages'
 
 interface OrderInfo {
   orderId: number
@@ -35,6 +35,14 @@ export default function CoinTopupPage() {
   const [secondsLeft, setSecondsLeft] = useState(Math.floor(TIMEOUT_MS / 1000))
 
   const [back, setBack] = useState('') // màn quay lại sau khi nạp xong (vd trang reading)
+  const [packages, setPackages] = useState<CoinPackage[]>([]) // giá theo env (fetch từ server)
+
+  useEffect(() => {
+    fetch('/api/coin/packages', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => setPackages(Array.isArray(d.packages) ? d.packages : []))
+      .catch(() => {})
+  }, [])
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -363,7 +371,7 @@ export default function CoinTopupPage() {
 
           {/* Packages */}
           <div className="flex flex-col gap-3">
-            {COIN_PACKAGES.filter(p => !p.hidden).map(p => {
+            {packages.map(p => {
               const disabled = !p.enabled || creating
               const loadingThis = creatingCode === p.code
               return (
