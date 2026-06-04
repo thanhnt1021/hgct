@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { createHash } from 'crypto'
+import { createHash, randomUUID } from 'crypto'
 import bcrypt from 'bcryptjs'
 import prisma from './db'
 
@@ -122,7 +122,29 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === 'google' && user.email) {
         const existing = await prisma.user.findUnique({ where: { email: user.email } })
         if (!existing) {
-          return false
+          // User Google mới → tự tạo tài khoản (không mật khẩu credentials).
+          const base = (user.email.split('@')[0] || 'user').toLowerCase().replace(/[^a-z0-9_.]/g, '') || 'user'
+          let username = base
+          for (let i = 0; i < 6; i++) {
+            const taken = await prisma.user.findUnique({ where: { username } })
+            if (!taken) break
+            username = `${base}${Math.floor(1000 + Math.random() * 9000)}`
+          }
+          try {
+            await prisma.user.create({
+              data: {
+                username,
+                email: user.email,
+                // passwordHash NOT NULL → đặt hash ngẫu nhiên không dùng được để login mật khẩu
+                passwordHash: await bcrypt.hash(randomUUID(), 12),
+                userUid: randomUUID(),
+                createdAt: new Date().toISOString(),
+              },
+            })
+          } catch (e) {
+            console.error('[auth] tạo user Google thất bại:', e)
+            return false
+          }
         }
       }
       return true
