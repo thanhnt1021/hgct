@@ -172,7 +172,10 @@ export default function LoginPage() {
             className="mt-5 text-center"
             style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}
           >
-            Website tạm thời không nhận đăng ký mới
+            Chưa có tài khoản?{' '}
+            <Link href="/auth/register" style={{ color: '#d9ab55', fontWeight: 600, textDecoration: 'underline' }}>
+              Đăng ký ngay
+            </Link>
           </div>
         </div>
 

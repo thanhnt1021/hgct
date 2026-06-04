@@ -80,3 +80,8 @@ export async function checkCtvLoginRateLimit(ip: string): Promise<boolean> {
 export async function checkCtvRegisterRateLimit(ip: string): Promise<boolean> {
   return allow(`rl:ctv:register:${ip}`, 3, 60 * 60)
 }
+
+/** User Register: 5 attempts per IP per hour (chống bot tạo tài khoản hàng loạt) */
+export async function checkRegisterRateLimit(ip: string): Promise<boolean> {
+  return allow(`rl:register:${ip}`, 5, 60 * 60)
+}
