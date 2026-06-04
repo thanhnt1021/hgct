@@ -6,9 +6,11 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/db'
 import { getCatalog } from '@/lib/catalog/sections'
-import { InsufficientCoinError } from '@/lib/coin/service'
+import { getBalance, InsufficientCoinError } from '@/lib/coin/service'
 import { generateAndCacheEssay } from '@/lib/essay/generate'
-import { unlockRefId, type InputData } from '@/lib/essay/key'
+import { readEssay } from '@/lib/essay/cache'
+import { startBundleUnlockJob } from '@/lib/coin/unlock-job'
+import { profileHash, unlockRefId, type InputData } from '@/lib/essay/key'
 import { splitSections } from '@/lib/essay/parse'
 import { validateInputData } from '@/lib/preview-validation'
 
@@ -54,8 +56,51 @@ export async function POST(request: Request) {
     inputDataB = body.inputDataB as InputData
   }
 
-  // Generate or load essay
-  let hash: string
+  // profileUid = hash, computable without LLM → pre-checks before generation.
+  const profileUid = profileHash(inputData, inputDataB)
+  const bundleRefId = unlockRefId(service, profileUid, 'bundle')
+
+  // Already bought the bundle? Replay stored sections — no generation, no charge.
+  const priorBundle = await prisma.coinTransaction.findFirst({
+    where: { userUid, refType: 'deduct', refId: bundleRefId },
+    select: { id: true },
+  })
+  if (priorBundle) {
+    const rows = await prisma.reading.findMany({
+      where: { userUid, profileUid, service },
+      select: { sectionId: true, content: true },
+    })
+    return NextResponse.json({
+      done: true,
+      sections: rows,
+      coinsCharged: 0,
+      alreadyUnlocked: true,
+    })
+  }
+
+  // GATE — must hold enough coins BEFORE spending any LLM cost.
+  const balance = await getBalance(userUid)
+  if (balance < catalog.bundlePrice!) {
+    return NextResponse.json(
+      { error: `Không đủ xu — cần ${catalog.bundlePrice}, hiện có ${balance}`, need: catalog.bundlePrice, have: balance },
+      { status: 402 },
+    )
+  }
+
+  // Chưa có essay → tạo job chạy NGẦM (gen + tính tiền trọn cục), client poll /api/job/[id].
+  const cachedEssay = await readEssay(userUid, service, profileUid)
+  if (!cachedEssay) {
+    const jobId = startBundleUnlockJob({
+      userUid, service, profileUid,
+      inputData, inputDataB,
+      startDate: body.startDate as string | undefined,
+      endDate: body.endDate as string | undefined,
+      name: inputData.name,
+    })
+    return NextResponse.json({ done: false, jobId })
+  }
+
+  // Đã có essay → tính tiền + lưu ngay (sync, cache hit).
   let essay: string
   try {
     const r = await generateAndCacheEssay({
@@ -63,32 +108,16 @@ export async function POST(request: Request) {
       startDate: body.startDate as string | undefined,
       endDate: body.endDate as string | undefined,
     })
-    hash = r.hash
     essay = r.essay
   } catch (e) {
     return NextResponse.json({ error: 'Sinh nội dung lỗi: ' + (e as Error).message }, { status: 500 })
   }
-  const profileUid = hash
 
   const parsed = splitSections(essay)
   const contents: { sectionId: string; content: string }[] = catalog.sections.map(s => {
     const sec = parsed.find(p => p.index === s.index)
     return { sectionId: s.id, content: sec?.text ?? '' }
   })
-
-  // Already bought the bundle? Replay.
-  const bundleRefId = unlockRefId(service, hash, 'bundle')
-  const priorBundle = await prisma.coinTransaction.findFirst({
-    where: { userUid, refType: 'deduct', refId: bundleRefId },
-    select: { id: true },
-  })
-  if (priorBundle) {
-    return NextResponse.json({
-      sections: contents,
-      coinsCharged: 0,
-      alreadyUnlocked: true,
-    })
-  }
 
   // Atomic: deduct bundle price + log + insert all Reading rows + mark each refId as already-paid
   try {
@@ -115,7 +144,7 @@ export async function POST(request: Request) {
       for (let i = 0; i < catalog.sections.length; i++) {
         const sec = catalog.sections[i]
         const content = contents[i].content
-        const refId = unlockRefId(service, hash, sec.id)
+        const refId = unlockRefId(service, profileUid, sec.id)
         await tx.reading.upsert({
           where: {
             userUid_profileUid_service_sectionId: {
@@ -154,6 +183,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({
+    done: true,
     sections: contents,
     coinsCharged: catalog.bundlePrice,
     alreadyUnlocked: false,

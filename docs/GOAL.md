@@ -30,7 +30,7 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 
 ## Pending / Cần Quyết Định
 
-- [ ] 🔴 **[TOP PRIORITY] Coin rework — production hardening** — thực thi `docs/COIN_PRODUCTION_HARDENING_PLAN.md` (A: essay→DB nhất quán · B: check xu trước gen · C: relations 4 thân bài + bỏ context dư · D: test double-spend · E: /security-review). **Điều kiện để mở lại production cho new user.** Giữ prod đóng đến khi xong A–E.
+- [x] 🟢 **Coin rework — production hardening (v3.4)** — đã thực thi A–E + nhiều fix UX + mở lại đăng ký, **go-live prod 2026-06-04**. Chi tiết `docs/UPGRADE_LOG.md`.
 - [ ] **Off-site DB backup (Cloudflare R2)** — hiện chỉ backup local trên server → SPOF. Đã chốt: R2 + rclone crypt + retention 30 ngày + monthly snapshot 12 tháng. Plan chi tiết: `/home/hgct/TODO_OFFSITE_BACKUP.md` trên server. Cần ~20 phút: user tạo bucket + API token trong CF dashboard → Claude config rclone + sửa `backup-db.sh` + test restore.
 - [ ] **Lucky wheel first-time buyer check** — hiện code KHÔNG verify user đã mua trước đó, ai vào checkout cũng quay được giảm giá. Cần query `prisma.order.count({ where: { userUid, paymentStatus: 'paid' } }) > 0` → ẩn wheel, chỉ cho referral code. Files ảnh hưởng: `src/components/checkout/DiscountModal.tsx`, `src/components/checkout/LuckyWheelModal.tsx`, cần tạo `src/app/api/user/has-previous-order/route.ts`.
 - [ ] Rate limiting — chưa có; cân nhắc lại khi traffic tăng đột biến
@@ -39,6 +39,9 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 - [ ] Fix font ℞ trong PDF: tìm font embed sẵn có glyph U+211E (℞) để Puppeteer render đúng chữ thay vì fallback "Px"
 
 ## Hiện tại đang ở đâu
+
+**2026-06-04:** Go-live **coin hardening (v3.4)** + **mở lại đăng ký** lên production. Coin gen chạy ngầm dạng job (never-fail, % thật), essay lưu DB (nhất quán, đọc lại vĩnh viễn), trang "Hồ sơ đã xem", modal nhập liệu đồng nhất (dropdown hồ sơ, redirect same-tab), profile dedup. Đăng ký mở lại: credentials (bcrypt + rate-limit) + Google tự tạo tài khoản user mới. Webhook SePay trỏ lại prod. Giá xu để khuyến mãi 5k/10k/15k. **Production mở lại cho new user.** Chi tiết: `docs/UPGRADE_LOG.md` (v3.4).
+
 
 **2026-06-01:** Go-live **coin rework** lên production (merge `feature/coin-rework-ui` → main). Đổi mô hình: trả-1-lần-lấy-PDF → **nạp xu + mở từng mục luận giải online**. Đã verify end-to-end CK thật trên demo (SePay → webhook → cộng xu, đơn `HGCT000341` real txn). Webhook tạm trỏ demo lúc test đã **revert về prod**. Luồng PDF/email cũ giữ sau flag `NEXT_PUBLIC_ENABLE_PDF_FLOW` (mặc định OFF). **⚠️ CHƯA XONG — gen nội dung khi unlock chưa chạy** (user tự fix sau). Production đang đóng với new user → giữ đóng đến khi gen nội dung xong rồi mới mở lại.
 

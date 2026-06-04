@@ -1,39 +1,36 @@
-// Filesystem cache for fully-generated essays. Keyed by user + service + profileHash.
-// Re-visits within the cache window reuse the cached text — user doesn't pay
-// the LLM cost twice and any already-unlocked sections render immediately.
+// Persistent essay storage in DB (table `essays`), keyed by user + profile + service.
+// Replaces the old /tmp filesystem cache: survives container restart/redeploy and
+// stays consistent. The essay is generated ONCE per (user, profile, service);
+// every section is sliced from this same row so a report never mixes content from
+// two different generations.
 
-import fs from 'fs'
-import path from 'path'
+import prisma from '@/lib/db'
 
-const DIR = '/tmp/hgct-essays'
-
-function ensureDir() {
-  if (!fs.existsSync(DIR)) fs.mkdirSync(DIR, { recursive: true })
-}
-
-export function readEssay(key: string): string | null {
+export async function readEssay(userUid: string, service: string, hash: string): Promise<string | null> {
   try {
-    const p = path.join(DIR, `${key}.txt`)
-    if (!fs.existsSync(p)) return null
-    return fs.readFileSync(p, 'utf8')
+    const row = await prisma.essay.findUnique({
+      where: { userUid_profileUid_service: { userUid, profileUid: hash, service } },
+      select: { content: true },
+    })
+    return row?.content ?? null
   } catch {
     return null
   }
 }
 
-export function writeEssay(key: string, text: string): void {
+// Upsert with update:{} → keep the FIRST generated essay (consistency under races).
+export async function writeEssay(userUid: string, service: string, hash: string, text: string, name?: string): Promise<void> {
   try {
-    ensureDir()
-    fs.writeFileSync(path.join(DIR, `${key}.txt`), text, 'utf8')
+    await prisma.essay.upsert({
+      where: { userUid_profileUid_service: { userUid, profileUid: hash, service } },
+      create: { userUid, profileUid: hash, service, content: text, name: name ?? null },
+      update: {},
+    })
   } catch {
-    // best-effort — caching is not critical
+    // best-effort — caller still holds the generated text in-memory for this request
   }
 }
 
-export function hasEssay(key: string): boolean {
-  try {
-    return fs.existsSync(path.join(DIR, `${key}.txt`))
-  } catch {
-    return false
-  }
+export async function hasEssay(userUid: string, service: string, hash: string): Promise<boolean> {
+  return (await readEssay(userUid, service, hash)) != null
 }

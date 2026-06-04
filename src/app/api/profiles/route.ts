@@ -43,6 +43,34 @@ export async function POST(request: Request) {
   const isTemp = body.isTemp === true
   const tempExpiry = isTemp ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null
 
+  // Chữ ký dữ liệu hồ sơ — để chống lưu trùng (cùng user nhập cùng 1 người nhiều lần).
+  const sig = (d: Record<string, unknown> | null | undefined): string => {
+    const o = (d || {}) as Record<string, unknown>
+    const dob = (o.dob || {}) as Record<string, number>
+    const tob = (o.tob || {}) as Record<string, number | boolean>
+    const loc = (o.loc || {}) as Record<string, number | string>
+    const num = (v: unknown) => (typeof v === 'number' ? v : 0)
+    return JSON.stringify({
+      ho: String(o.ho || '').trim(), dem: String(o.dem || '').trim(), ten: String(o.ten || '').trim(),
+      g: String(o.gender || ''),
+      d: `${dob.day || 0}-${dob.month || 0}-${dob.year || 0}`,
+      t: tob.unknown ? 'u' : `${num(tob.hour)}:${num(tob.minute)}`,
+      l: `${num(loc.lat).toFixed(4)},${num(loc.lon).toFixed(4)}`,
+    })
+  }
+
+  // Permanent: nếu đã có hồ sơ trùng dữ liệu → trả lại bản cũ (duplicate), KHÔNG tạo mới.
+  if (!isTemp) {
+    const existingList = await prisma.profile.findMany({ where: { userUid: uid, isTemp: false } })
+    const incomingSig = sig(body.data)
+    for (const p of existingList) {
+      const pd = decryptProfileData(p.data)
+      if (sig(pd as Record<string, unknown>) === incomingSig) {
+        return NextResponse.json({ profile: { ...p, data: pd }, duplicate: true })
+      }
+    }
+  }
+
   const profile = await prisma.profile.create({
     data: {
       userUid: uid,

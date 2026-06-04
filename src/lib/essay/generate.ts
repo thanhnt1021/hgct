@@ -9,15 +9,12 @@ import { calculateChart } from '@/lib/astrology/calculations'
 import { getKnowledgeFromDB } from '@/lib/astrology/knowledge'
 import { getCareerBlocks } from '@/lib/logic/career/manager'
 import { buildCareerPrompt } from '@/lib/logic/career/prompt'
-import { relationsContextBlock, type RelationsType } from '@/lib/logic/relations/context'
-import { profileHash, cacheKey, type InputData } from '@/lib/essay/key'
+import { profileHash, type InputData } from '@/lib/essay/key'
 import { readEssay, writeEssay } from '@/lib/essay/cache'
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || ''
-const MODEL = 'anthropic/claude-sonnet-4-6'
-const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 const SYSTEM_PROMPT =
   'Bạn là một chiêm tinh gia chuyên nghiệp, có kiến thức sâu rộng về chiêm tinh học phương Tây. Bạn viết bằng tiếng Việt, văn phong ấm áp, dễ hiểu, truyền cảm hứng.'
+
 
 export async function generateAndCacheEssay(opts: {
   userUid: string
@@ -26,11 +23,11 @@ export async function generateAndCacheEssay(opts: {
   inputDataB?: InputData
   startDate?: string
   endDate?: string
+  onProgress?: (charsReceived: number) => void
 }): Promise<{ hash: string; essay: string }> {
   const hash = profileHash(opts.inputData, opts.inputDataB)
-  const key = cacheKey(opts.userUid, opts.service, hash)
 
-  const cached = readEssay(key)
+  const cached = await readEssay(opts.userUid, opts.service, hash)
   if (cached) return { hash, essay: cached }
 
   const { dob, tob, loc, name, ten, gender } = opts.inputData
@@ -76,12 +73,10 @@ export async function generateAndCacheEssay(opts: {
     const { buildRelationshipEssayPrompt } = await import('@/lib/logic/relationship/prompt')
     const blocks = getRelationshipBlocks(chart, chartB, kb)
     const templateName = opts.service.startsWith('relations-') ? opts.service : 'relationship'
+    // Each relations-* template is now fully self-contained (per-type body) —
+    // no runtime context-block prepend needed.
     const result = buildRelationshipEssayPrompt(chart, chartB, blocks, profile, profileB, { templateName })
-    const basePrompt = typeof result === 'string' ? result : result.prompt
-    const ctx = opts.service.startsWith('relations-')
-      ? relationsContextBlock(opts.service as RelationsType)
-      : ''
-    prompt = ctx + basePrompt
+    prompt = typeof result === 'string' ? result : result.prompt
   } else if (opts.service === 'transit') {
     const { buildVanhanEssayPrompt } = await import('@/lib/logic/vanhan/prompt')
     const sd = opts.startDate || new Date().toISOString().split('T')[0]
@@ -91,66 +86,17 @@ export async function generateAndCacheEssay(opts: {
     throw new Error('Service không hợp lệ')
   }
 
-  // Use stream=true + collect chunks to avoid single-response timeout.
-  // Claude Sonnet 4.6 generates ~30 tok/s; 8000 tok ≈ 4.5 min, so non-stream
-  // single response can time out before completion. Streaming keeps the
-  // HTTP body alive with continuous chunks → no idle timeout.
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 600_000) // 10 min hard cap
-  let essay = ''
-  try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://hatgiongchiemtinh.com',
-        'X-Title': 'Hat Giong Chiem Tinh',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        stream: true,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: prompt },
-        ],
-        max_tokens: 8000,
-        temperature: 0.75,
-      }),
-      signal: controller.signal,
-    })
-    if (!res.ok || !res.body) throw new Error(`OpenRouter error: ${res.status}`)
+  // Robust generation — use the EXACT same never-fail streaming client as the
+  // legacy PDF report flow (reportProcessor): streams with internal retry
+  // (4 attempts, 5s/20s/60s backoff) and retries on stalled/interrupted streams.
+  const { generateEssayStreaming } = await import('@/lib/openrouter')
+  const essay = await generateEssayStreaming(SYSTEM_PROMPT, prompt, opts.onProgress ?? (() => {}))
+  if (!essay) throw new Error('OpenRouter returned empty essay')
 
-    const reader = res.body.getReader()
-    const dec = new TextDecoder()
-    let buf = ''
-    try {
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buf += dec.decode(value, { stream: true })
-        const lines = buf.split('\n')
-        buf = lines.pop() || ''
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const raw = line.slice(6).trim()
-          if (raw === '[DONE]') break
-          try {
-            const parsed = JSON.parse(raw)
-            const delta = parsed.choices?.[0]?.delta?.content
-            if (delta) essay += delta
-          } catch {}
-        }
-      }
-    } finally {
-      reader.releaseLock()
-    }
-
-    if (!essay) throw new Error('OpenRouter returned empty essay')
-  } finally {
-    clearTimeout(timeout)
-  }
-
-  writeEssay(key, essay)
-  return { hash, essay }
+  // Persist (keep-first on race) then re-read the canonical row so that if a
+  // concurrent request generated + stored a different essay first, every caller
+  // slices sections from the SAME canonical essay → no cross-section mismatch.
+  await writeEssay(opts.userUid, opts.service, hash, essay, opts.inputData?.name)
+  const canonical = await readEssay(opts.userUid, opts.service, hash)
+  return { hash, essay: canonical ?? essay }
 }

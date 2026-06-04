@@ -62,6 +62,24 @@ model Reading {
   @@map("readings")
 }
 
+// Full generated essay per (user, profile, service) — persistent storage that
+// replaces the old /tmp filesystem cache. Generated ONCE on the first unlock;
+// every section is sliced from this same essay so a report stays consistent
+// across unlocks and survives container restart/redeploy. Timeless: user can
+// revisit forever.
+model Essay {
+  id         Int      @id @default(autoincrement())
+  userUid    String   @map("user_uid")
+  profileUid String   @map("profile_uid")
+  service    String
+  name       String?  // tên hồ sơ — để liệt kê "Hồ sơ đã xem"
+  content    String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([userUid, profileUid, service])
+  @@map("essays")
+}
+
 model Profile {
   id         Int       @id @default(autoincrement())
   userUid    String    @map("user_uid")

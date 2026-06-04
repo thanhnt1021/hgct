@@ -344,7 +344,7 @@ export default function CoinTopupPage() {
 
           {/* Packages */}
           <div className="flex flex-col gap-3">
-            {COIN_PACKAGES.map(p => {
+            {COIN_PACKAGES.filter(p => !p.hidden).map(p => {
               const disabled = !p.enabled || creating
               const loadingThis = creatingCode === p.code
               return (
