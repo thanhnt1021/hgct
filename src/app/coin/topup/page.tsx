@@ -403,9 +403,6 @@ export default function CoinTopupPage() {
                         <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '1.35rem', fontWeight: 800, lineHeight: 1.1 }}>
                           {fmtXu(p.coins)} <span style={{ fontSize: '0.8rem', color: 'var(--as-copper-deep)', fontWeight: 600 }}>xu</span>
                         </p>
-                        <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.2rem' }}>
-                          ≈ {Math.round(p.amountVnd / p.coins).toLocaleString('vi-VN')}đ / xu
-                        </p>
                       </>
                     ) : (
                       <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginTop: '0.2rem' }}>Sắp ra mắt</p>

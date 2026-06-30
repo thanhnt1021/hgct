@@ -22,7 +22,6 @@ export const COIN_PACKAGES: CoinPackage[] = [
   { code: 'COIN001', coins: 300,  amountVnd: PRICE.COIN001,  enabled: true,  label: 'Gói 1' },
   { code: 'COIN002', coins: 900,  amountVnd: PRICE.COIN002,  enabled: true,  label: 'Gói 2' },
   { code: 'COIN003', coins: 2000, amountVnd: PRICE.COIN003,  enabled: true,  label: 'Gói 3' },
-  { code: 'COIN004', coins: 0,    amountVnd: 0,              enabled: false, label: 'Gói 4 — Sắp ra mắt' },
 ]
 
 export function getPackage(code: string): CoinPackage | null {
