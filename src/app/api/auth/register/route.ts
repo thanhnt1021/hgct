@@ -17,18 +17,15 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { username, email, password } = body as Record<string, unknown>
+    const { email, password } = body as Record<string, unknown>
 
-    if (!username || !email || !password) {
-      return NextResponse.json({ error: 'Thiếu thông tin bắt buộc' }, { status: 400 })
+    // Chỉ cần email + mật khẩu (không còn username).
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Thiếu email hoặc mật khẩu' }, { status: 400 })
     }
 
-    const cleanUsername = String(username).trim().toLowerCase()
     const cleanEmail = String(email).trim().toLowerCase()
 
-    if (!/^[a-z0-9_.]{3,30}$/.test(cleanUsername)) {
-      return NextResponse.json({ error: 'Tên đăng nhập 3–30 ký tự, chỉ gồm chữ thường, số, "_" hoặc "."' }, { status: 400 })
-    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       return NextResponse.json({ error: 'Email không hợp lệ' }, { status: 400 })
     }
@@ -36,17 +33,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Mật khẩu tối thiểu 6 ký tự' }, { status: 400 })
     }
 
-    // Check trùng email / username
-    const existing = await prisma.user.findFirst({
-      where: { OR: [{ email: cleanEmail }, { username: cleanUsername }] },
-    })
+    // Email đã dùng?
+    const existing = await prisma.user.findUnique({ where: { email: cleanEmail } })
     if (existing) {
-      return NextResponse.json({ error: 'Tên đăng nhập hoặc email đã được sử dụng' }, { status: 409 })
+      return NextResponse.json({ error: 'Email đã được sử dụng' }, { status: 409 })
     }
+
+    // DB vẫn cần username (unique) → tự suy ra từ email + đảm bảo duy nhất.
+    let base = cleanEmail.split('@')[0].replace(/[^a-z0-9_.]/g, '')
+    if (base.length < 3) base = `user${base}`
+    base = base.slice(0, 24)
+    let username = base
+    let n = 0
+    while (await prisma.user.findUnique({ where: { username } })) { n += 1; username = `${base}${n}` }
 
     await prisma.user.create({
       data: {
-        username: cleanUsername,
+        username,
         email: cleanEmail,
         passwordHash: await hashPassword(String(password)), // bcrypt (khớp auth.ts)
         userUid: randomUUID(),

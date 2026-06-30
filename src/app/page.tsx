@@ -1,33 +1,23 @@
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import StarField from '@/components/layout/StarField'
-import ZodiacBackground from '@/components/layout/ZodiacBackground'
-import HeroSection from '@/components/home/HeroSection'
-import FeaturesSection from '@/components/home/FeaturesSection'
-import ProcessSection from '@/components/home/ProcessSection'
-import CTASection from '@/components/home/CTASection'
-import CtvBlock from '@/components/home/CtvBlock'
+import AstroHero from '@/components/home/AstroHero'
+import AstroInputForm from '@/components/home/AstroInputForm'
+import AstroExplore from '@/components/home/AstroExplore'
+import AstroSeedSocial from '@/components/home/AstroSeedSocial'
 import FloatingButtons from '@/components/home/FloatingButtons'
-import prisma from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-export default async function HomePage() {
-  const rows = await prisma.config.findMany({
-    where: { key: { in: ['hero_subtitle', 'hero_cta_text', 'cta_body', 'cta_button_text'] } },
-  }).catch(() => [])
-  const cfg = Object.fromEntries(rows.map((r) => [r.key, r.value]))
-
+// Trang chủ AstroS (redesign — tông sáng).
+// S1 Navbar · S2 Hero (auto-slide + vòng hoàng đạo) · S3 Lập lá số + Khám Phá · S4 Seed + Social · Footer.
+export default function HomePage() {
   return (
-    <main className="relative min-h-screen">
-      <StarField />
-      <ZodiacBackground />
+    <main className="relative min-h-screen" style={{ background: 'linear-gradient(180deg, #e3c89a 0%, #edd5b1 50%, #e3c89a 100%)' }}>
       <Navbar />
-      <HeroSection subtitle={cfg.hero_subtitle} ctaText={cfg.hero_cta_text} />
-      <FeaturesSection />
-      <ProcessSection />
-      <CTASection body={cfg.cta_body} buttonText={cfg.cta_button_text} />
-      <CtvBlock />
+      <AstroHero />
+      <AstroInputForm />
+      <AstroExplore />
+      <AstroSeedSocial />
       <Footer />
       <FloatingButtons />
     </main>

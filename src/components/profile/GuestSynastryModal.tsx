@@ -17,11 +17,11 @@ const MINUTES = Array.from({length: 60}, (_, i) => i)
 
 const labelStyle: React.CSSProperties = {
   display: 'block', marginBottom: '0.25rem',
-  color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500,
+  color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500,
 }
 const subLabelStyle: React.CSSProperties = {
   display: 'block', marginBottom: '0.25rem',
-  color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem',
+  color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem',
 }
 
 interface PersonState {
@@ -81,7 +81,7 @@ function PersonSection({ label, state, savedProfiles }: {
   const { form, setF, yearMode, setYearMode, customYear, setCustomYear, yearError, setYearError, formError } = state
   return (
     <div>
-      <p style={{ color: '#c9a84c', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '1rem' }}>
+      <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '0.7rem', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '1rem' }}>
         {label}
       </p>
       {savedProfiles && savedProfiles.length > 0 && (
@@ -164,7 +164,7 @@ function PersonSection({ label, state, savedProfiles }: {
                       placeholder="VD: 1850" style={{ flex: 1, minWidth: 0 }} />
                     <button type="button"
                       onClick={() => { setYearMode('select'); setCustomYear(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
-                      style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
+                      style={{ color: 'var(--as-text-muted)', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
                   </div>
                 )}
                 {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.2rem' }}>{yearError}</p>}
@@ -179,7 +179,7 @@ function PersonSection({ label, state, savedProfiles }: {
                 <input type="checkbox" checked={form.tob.unknown}
                   onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
                   style={{ width: '1rem', height: '1rem', padding: 0 }} />
-                <span style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>Không rõ</span>
+                <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>Không rõ</span>
               </label>
             </div>
             {!form.tob.unknown && (
@@ -316,33 +316,33 @@ export default function GuestSynastryModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(22,54,83,0.5)', backdropFilter: 'blur(4px)' }}
       onClick={e => { if (e.target === e.currentTarget) handleClose() }}
     >
       <div
         className="w-full max-h-[90vh] overflow-y-auto rounded-2xl"
-        style={{ maxWidth: 580, background: 'rgba(16,12,38,0.98)', border: '1px solid rgba(201,168,76,0.25)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+        style={{ maxWidth: 580, background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)', boxShadow: 'var(--as-shadow-card)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
-          <h3 className="font-bold text-lg" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+        <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid var(--as-border-gold)' }}>
+          <h3 className="font-bold text-lg" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
             Thông tin của bạn và của đối phương
           </h3>
-          <button onClick={handleClose} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
+          <button onClick={handleClose} className="p-1.5 rounded-lg" style={{ color: 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)' }}>
             <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-8" style={{ paddingBottom: '60px' }}>
+        <div className="px-6 py-5 space-y-8 as-form" style={{ paddingBottom: '60px' }}>
           <PersonSection label="── THÔNG TIN CỦA BẠN ──" state={a} savedProfiles={savedProfiles} />
-          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.25), transparent)' }} />
+          <div style={{ height: '1px', background: 'var(--as-border-gold)' }} />
           <PersonSection label="── THÔNG TIN CỦA ĐỐI PHƯƠNG ──" state={b} savedProfiles={savedProfiles} />
 
           {/* Email field — chỉ ở flow PDF cũ */}
           {PDF_EMAIL_ENABLED && (
             <div>
-              <label style={{ display: 'block', marginBottom: '0.25rem', color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '0.25rem', color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 500 }}>
                 Email nhận báo cáo PDF <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
@@ -366,14 +366,14 @@ export default function GuestSynastryModal({
               <button
                 onClick={handleFree}
                 className="flex-1 h-10 rounded-lg font-semibold"
-                style={{ background: 'transparent', border: '1px solid rgba(200,148,63,0.35)', color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
+                style={{ background: 'transparent', border: '1px solid var(--as-border-gold)', color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
               >
                 Xem miễn phí
               </button>
               <button
                 onClick={handlePaid}
                 className="flex-1 h-10 rounded-lg font-semibold"
-                style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
+                style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}
               >
                 Xuất PDF chi tiết →
               </button>
@@ -382,7 +382,7 @@ export default function GuestSynastryModal({
             <button
               onClick={handleReading}
               className="w-full h-11 rounded-lg font-bold tracking-wider"
-              style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)', backgroundSize: '200% 200%', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', letterSpacing: '0.06em', boxShadow: '0 4px 20px rgba(200,148,63,0.25)' }}
+              style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', letterSpacing: '0.06em', boxShadow: 'var(--as-shadow-card)' }}
             >
               Hoàn Thành →
             </button>

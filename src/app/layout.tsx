@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, Be_Vietnam_Pro, Cinzel, Fraunces } from 'next/font/google'
+import { Playfair_Display, Be_Vietnam_Pro, Fraunces } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 import Providers from '@/components/Providers'
 
-const cinzel = Cinzel({
-  subsets: ['latin'],
+// Cinzel — local variable font. CHỈ dùng cho wordmark "ASTRO S" (thuần Latin).
+// KHÔNG dùng cho tiếng Việt (Cinzel thiếu dấu). Xem DESIGN.md §4.
+const cinzel = localFont({
+  src: '../../public/fonts/Cinzel-VariableFont_wght.ttf',
   variable: '--font-cinzel',
-  weight: ['400', '700'],
+  weight: '400 700',
   display: 'swap',
 })
 
@@ -34,27 +37,27 @@ const beVietnamPro = Be_Vietnam_Pro({
 })
 
 export const viewport: Viewport = {
-  themeColor: '#06060f',
+  themeColor: '#F7ECD9',
   maximumScale: 1,
 }
 
 export const metadata: Metadata = {
-  title: 'Hạt Giống Chiêm Tinh — Bản đồ sao của bạn nói gì?',
-  description: 'Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Cặp Đôi và Vận Hạn. Báo cáo PDF chi tiết gửi qua email trong vài phút.',
+  title: 'AstroS — Bản đồ sao của bạn nói gì?',
+  description: 'AstroS — Hạt Giống Chiêm Tinh, Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Mối Quan Hệ và Vận Hạn.',
   icons: { icon: '/favicon.ico' },
   metadataBase: new URL('https://hatgiongchiemtinh.com'),
   openGraph: {
-    title: 'Hạt Giống Chiêm Tinh — Bản đồ sao của bạn nói gì?',
-    description: 'Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Cặp Đôi và Vận Hạn.',
+    title: 'AstroS — Bản đồ sao của bạn nói gì?',
+    description: 'AstroS — Hạt Giống Chiêm Tinh, Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Mối Quan Hệ và Vận Hạn.',
     url: 'https://hatgiongchiemtinh.com',
-    siteName: 'Hạt Giống Chiêm Tinh',
+    siteName: 'AstroS',
     type: 'website',
     images: [{ url: 'https://hatgiongchiemtinh.com/api/og', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hạt Giống Chiêm Tinh — Bản đồ sao của bạn nói gì?',
-    description: 'Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Cặp Đôi và Vận Hạn.',
+    title: 'AstroS — Bản đồ sao của bạn nói gì?',
+    description: 'AstroS — Hạt Giống Chiêm Tinh, Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa.',
     images: ['https://hatgiongchiemtinh.com/api/og'],
   },
 }
@@ -79,10 +82,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans antialiased">
         <Providers>
-          <div style={{ textAlign: 'center', padding: '5px 8px', fontSize: '0.68rem', background: '#06060f', borderBottom: '1px solid rgba(201,168,76,0.06)' }}>
-            <a href="https://hatgiongchiemtinh.com/privacy" rel="privacy-policy" style={{ color: '#6b6585', fontFamily: 'sans-serif' }}>Chính sách bảo mật</a>
-            <span style={{ color: '#3a3555', margin: '0 0.4rem' }}>·</span>
-            <a href="https://hatgiongchiemtinh.com/terms" style={{ color: '#6b6585', fontFamily: 'sans-serif' }}>Điều khoản sử dụng</a>
+          <div style={{ textAlign: 'center', padding: '5px 8px', fontSize: '0.68rem', background: 'var(--as-bg-warm)', borderBottom: '1px solid var(--as-border-soft)' }}>
+            <a href="https://hatgiongchiemtinh.com/privacy" rel="privacy-policy" style={{ color: 'var(--as-text-muted)', fontFamily: 'sans-serif' }}>Chính sách bảo mật</a>
+            <span style={{ color: 'var(--as-text-muted)', margin: '0 0.4rem' }}>·</span>
+            <a href="https://hatgiongchiemtinh.com/terms" style={{ color: 'var(--as-text-muted)', fontFamily: 'sans-serif' }}>Điều khoản sử dụng</a>
           </div>
           <main>{children}</main>
         </Providers>

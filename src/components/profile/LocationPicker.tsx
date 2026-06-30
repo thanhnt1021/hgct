@@ -103,7 +103,7 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
           style={{
             display: 'block',
             marginBottom: '0.5rem',
-            color: '#8a8399',
+            color: 'var(--as-text-muted)',
             fontFamily: 'var(--font-vietnam)',
             fontSize: '0.75rem',
             fontWeight: 500,
@@ -149,13 +149,12 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
                 right: 0,
                 marginTop: '4px',
                 zIndex: 100,
-                background: 'rgba(11,11,31,0.98)',
-                border: '1px solid rgba(200,148,63,0.2)',
+                background: 'var(--as-surface-raised)',
+                border: '1px solid var(--as-border-gold)',
                 borderRadius: '0.75rem',
-                boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
+                boxShadow: 'var(--as-shadow-card)',
                 maxHeight: '220px',
                 overflowY: 'auto',
-                backdropFilter: 'blur(20px)',
               }}
             >
               {results.map((r, i) => (
@@ -165,11 +164,11 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
                   onClick={() => select(r)}
                   className="w-full text-left transition-all"
                   style={{
-                    color: '#f4efe6',
+                    color: 'var(--as-text-strong)',
                     padding: '6px 12px',
-                    borderBottom: i < results.length - 1 ? '1px solid rgba(200,148,63,0.07)' : 'none',
+                    borderBottom: i < results.length - 1 ? '1px solid var(--as-border-soft)' : 'none',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(38,28,86,0.5)')}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(22,54,83,0.06)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   <span className="font-medium" style={{ fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
@@ -177,7 +176,7 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
                   </span>
                   <span
                     className="block truncate"
-                    style={{ color: '#4a4560', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.1rem' }}
+                    style={{ color: 'var(--as-text-muted)', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)', marginTop: '0.1rem' }}
                   >
                     {r.display_name}
                   </span>
@@ -194,21 +193,21 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
           disabled={loading}
           className="col-span-2 h-8 flex items-center justify-center gap-1 flex-shrink-0"
           style={{
-            background: 'rgba(200,148,63,0.1)',
-            border: '1px solid rgba(200,148,63,0.25)',
+            background: 'var(--as-cta)',
+            border: '1px solid var(--as-cta)',
             borderRadius: '0.5rem',
-            color: '#d9ab55',
+            color: 'var(--as-text-on-dark)',
             cursor: loading ? 'default' : 'pointer',
             fontSize: '0.72rem',
             fontFamily: 'var(--font-vietnam)',
-            transition: 'background 0.15s',
+            transition: 'opacity 0.15s',
           }}
-          onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.background = 'rgba(200,148,63,0.2)' }}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(200,148,63,0.1)'}
+          onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = '0.85' }}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
         >
           {loading ? (
             <div className="w-3 h-3 border-2 rounded-full animate-spin"
-              style={{ borderColor: 'rgba(200,148,63,0.25)', borderTopColor: '#d9ab55' }} />
+              style={{ borderColor: 'rgba(237,213,177,0.4)', borderTopColor: 'var(--as-text-on-dark)' }} />
           ) : (
             <>
               <Search size={12} />
@@ -222,7 +221,7 @@ export default function LocationPicker({ value, onChange, label = 'Nơi sinh' }:
       {value.lat !== 0 && (
         <p
           className="mt-1 text-xs"
-          style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}
+          style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}
         >
           ✦ {value.address} · {value.lat.toFixed(4)}, {value.lon.toFixed(4)} · {value.tz}
         </p>

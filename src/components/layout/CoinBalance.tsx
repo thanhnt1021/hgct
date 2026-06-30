@@ -34,21 +34,23 @@ export default function CoinBalance() {
     }
   }, [user, fetchBalance])
 
+  // Guest → vẫn hiện pill "0 xu"; bấm vào ra trang đăng nhập kèm thông báo nạp xu.
   if (!user) {
     return (
       <Link
-        href="/auth/login"
+        href="/auth/login?reason=topup"
+        title="Đăng nhập để nạp xu vào tài khoản"
         style={{
-          color: '#d9ab55',
-          fontFamily: 'var(--font-vietnam)',
-          fontSize: '0.78rem',
-          textDecoration: 'none',
-          padding: '0.35rem 0.75rem',
-          border: '1px solid rgba(200,148,63,0.25)',
-          borderRadius: '4px',
+          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+          color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', fontWeight: 600,
+          background: 'rgba(22,54,83,0.06)', border: '1px solid var(--as-border-gold)', borderRadius: '999px',
+          padding: '0.3rem 0.7rem', textDecoration: 'none', whiteSpace: 'nowrap',
         }}
       >
-        Đăng nhập
+        <span style={{ color: 'var(--as-cta)' }}>✦</span>
+        <span>0</span>
+        <span style={{ color: 'var(--as-text-muted)', fontSize: '0.72rem' }}>xu</span>
+        <span style={{ color: 'var(--as-cta)', marginLeft: '0.15rem' }}>+</span>
       </Link>
     )
   }
@@ -61,22 +63,22 @@ export default function CoinBalance() {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.4rem',
-        color: '#f4efe6',
+        color: 'var(--as-text-strong)',
         fontFamily: 'var(--font-vietnam)',
         fontSize: '0.82rem',
         fontWeight: 600,
-        background: 'rgba(200,148,63,0.08)',
-        border: '1px solid rgba(200,148,63,0.28)',
-        borderRadius: '4px',
-        padding: '0.35rem 0.75rem',
+        background: 'rgba(22,54,83,0.06)',
+        border: '1px solid var(--as-border-gold)',
+        borderRadius: '999px',
+        padding: '0.3rem 0.7rem',
         textDecoration: 'none',
         whiteSpace: 'nowrap',
       }}
     >
-      <span style={{ color: '#d9ab55' }}>✦</span>
+      <span style={{ color: 'var(--as-cta)' }}>✦</span>
       <span>{coin == null ? '…' : coin.toLocaleString('vi-VN')}</span>
-      <span style={{ color: '#9090a8', fontSize: '0.72rem' }}>xu</span>
-      <span style={{ color: '#d9ab55', marginLeft: '0.15rem' }}>+</span>
+      <span style={{ color: 'var(--as-text-muted)', fontSize: '0.72rem' }}>xu</span>
+      <span style={{ color: 'var(--as-cta)', marginLeft: '0.15rem' }}>+</span>
     </Link>
   )
 }

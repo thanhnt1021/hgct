@@ -5,8 +5,8 @@ import { X } from 'lucide-react'
 
 const SEGMENTS = [5, 10, 15, 18, 20, 25, 28, 30]
 const COLORS = [
-  '#7c3aed', '#a855f7', '#7c3aed', '#6d28d9',
-  '#a855f7', '#7c3aed', '#9333ea', '#6d28d9',
+  '#163653', '#063755', '#163653', '#063755',
+  '#063755', '#163653', '#063755', '#163653',
 ]
 
 // Exact price table per service
@@ -98,20 +98,20 @@ export default function LuckyWheelModal({ open, service, onClose, onResult }: Pr
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(22,54,83,0.5)', backdropFilter: 'blur(4px)' }}
       onClick={e => { if (e.target === e.currentTarget && !spinning) onClose() }}
     >
       <div
         className="w-full rounded-2xl"
-        style={{ maxWidth: 360, background: 'rgba(16,12,38,0.99)', border: '1px solid rgba(168,85,247,0.3)', boxShadow: '0 24px 80px rgba(0,0,0,0.7)' }}
+        style={{ maxWidth: 360, background: 'var(--as-surface)', border: '1px solid var(--as-border-soft)', boxShadow: 'var(--as-shadow-card)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3" style={{ borderBottom: '1px solid rgba(168,85,247,0.15)' }}>
-          <h3 className="font-bold text-base" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+        <div className="flex items-center justify-between px-5 pt-5 pb-3" style={{ borderBottom: '1px solid var(--as-border-soft)' }}>
+          <h3 className="font-bold text-base" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
             Vòng Xoay May Mắn 🎡
           </h3>
           {!spinning && (
-            <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
+            <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: 'var(--as-text-muted)', background: 'var(--as-surface-raised)' }}>
               <X size={18} />
             </button>
           )}
@@ -125,7 +125,7 @@ export default function LuckyWheelModal({ open, service, onClose, onResult }: Pr
               position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)',
               width: 0, height: 0,
               borderLeft: '10px solid transparent', borderRight: '10px solid transparent',
-              borderTop: '20px solid #f0cc78',
+              borderTop: '20px solid #163653',
               zIndex: 10,
             }} />
             <svg
@@ -135,7 +135,7 @@ export default function LuckyWheelModal({ open, service, onClose, onResult }: Pr
                 transform: `rotate(${rotation}deg)`,
                 transition: spinning ? 'transform 4.5s cubic-bezier(0.17,0.67,0.12,1)' : 'none',
                 borderRadius: '50%',
-                boxShadow: '0 0 30px rgba(168,85,247,0.3)',
+                boxShadow: '0 0 30px rgba(22,54,83,0.3)',
               }}
             >
               {segments.map((seg, i) => (
@@ -157,19 +157,19 @@ export default function LuckyWheelModal({ open, service, onClose, onResult }: Pr
                 </g>
               ))}
               {/* Center circle */}
-              <circle cx={cx} cy={cy} r={20} fill="rgba(16,12,38,0.9)" stroke="rgba(240,204,120,0.5)" strokeWidth="2" />
+              <circle cx={cx} cy={cy} r={20} fill="#163653" stroke="rgba(237,213,177,0.6)" strokeWidth="2" />
             </svg>
           </div>
 
           {/* Result */}
           {result !== null && (
-            <div className="text-center rounded-xl px-5 py-3 w-full" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
-              <p className="text-sm font-semibold" style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)' }}>
+            <div className="text-center rounded-xl px-5 py-3 w-full" style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)' }}>
                 Chúc mừng! Bạn trúng -{result}%
               </p>
               {exactPrice && (
-                <p className="text-xs mt-1" style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
-                  <span style={{ textDecoration: 'line-through', color: '#6b7280' }}>{fmt(basePrice)}</span>
+                <p className="text-xs mt-1" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
+                  <span style={{ textDecoration: 'line-through', color: 'var(--as-text-muted)' }}>{fmt(basePrice)}</span>
                   {' → '}
                   <strong style={{ color: '#4ade80' }}>{fmt(exactPrice)}</strong>
                 </p>
@@ -184,10 +184,11 @@ export default function LuckyWheelModal({ open, service, onClose, onResult }: Pr
               disabled={spinning}
               className="w-full h-11 rounded-xl font-semibold"
               style={{
-                background: spinning ? 'rgba(107,114,128,0.3)' : 'linear-gradient(135deg, #7c3aed, #a855f7)',
-                color: '#fff',
+                background: spinning ? 'rgba(107,114,128,0.3)' : 'var(--as-cta)',
+                color: 'var(--as-text-on-dark)',
                 fontFamily: 'var(--font-vietnam)',
                 fontSize: '0.92rem',
+                boxShadow: spinning ? 'none' : 'var(--as-shadow-glow)',
               }}
             >
               {spinning ? 'Đang quay...' : 'Quay ngay!'}
@@ -196,7 +197,7 @@ export default function LuckyWheelModal({ open, service, onClose, onResult }: Pr
             <button
               onClick={handleConfirm}
               className="w-full h-11 rounded-xl font-semibold"
-              style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78)', color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}
+              style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem', boxShadow: 'var(--as-shadow-glow)' }}
             >
               Thanh toán ngay →
             </button>

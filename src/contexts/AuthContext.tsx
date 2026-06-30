@@ -18,7 +18,7 @@ interface AuthContextType {
   user: User | null
   isLoading: boolean
   login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>
-  register: (username: string, name: string, email: string, password: string) => Promise<{ ok: boolean; error?: string }>
+  register: (name: string, email: string, password: string) => Promise<{ ok: boolean; error?: string }>
   logout: () => void
   upgradeToPremium: (code: string) => Promise<{ ok: boolean; error?: string }>
 }
@@ -57,19 +57,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true }
   }
 
-  const register = async (username: string, name: string, email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
-    if (!username || !name || !email || !password) return { ok: false, error: 'Vui lòng điền đầy đủ thông tin' }
+  const register = async (name: string, email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
+    if (!email || !password) return { ok: false, error: 'Vui lòng nhập email và mật khẩu' }
     if (password.length < 6) return { ok: false, error: 'Mật khẩu ít nhất 6 ký tự' }
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, name, email, password }),
+        body: JSON.stringify({ name, email, password }),
       })
       const data = await res.json()
       if (!res.ok) return { ok: false, error: data.error || 'Đăng ký thất bại' }
-      // Auto login after register
-      const loginResult = await signIn('credentials', { username, password, redirect: false })
+      // Auto login after register — đăng nhập bằng email
+      const loginResult = await signIn('credentials', { username: email, password, redirect: false })
       if (loginResult?.error) return { ok: false, error: 'Đăng ký thành công nhưng đăng nhập thất bại' }
       return { ok: true }
     } catch {

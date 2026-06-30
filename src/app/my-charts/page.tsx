@@ -35,7 +35,7 @@ const MINUTES = Array.from({length: 60}, (_, i) => i)
 const labelStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.25rem',
-  color: '#94a3b8',
+  color: 'var(--as-text)',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.75rem',
   fontWeight: 500,
@@ -44,7 +44,7 @@ const labelStyle: React.CSSProperties = {
 const subLabelStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.25rem',
-  color: '#6b7280',
+  color: 'var(--as-text-muted)',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.75rem',
 }
@@ -182,7 +182,7 @@ export default function MyChartsPage() {
   if (isLoading || !user) return null
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a1a' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 pt-24 pb-16">
 
@@ -190,15 +190,15 @@ export default function MyChartsPage() {
         <div className="mb-8 flex items-center gap-4">
           <button
             onClick={() => router.push('/profile')}
-            style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}
+            style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}
           >
             ← Hồ sơ
           </button>
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
               Danh sách Bản đồ sao
             </h1>
-            <p className="text-sm mt-0.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
               {profiles.length} hồ sơ đã lưu
             </p>
           </div>
@@ -207,20 +207,20 @@ export default function MyChartsPage() {
         {/* Loading */}
         {loading && (
           <div className="flex justify-center py-16">
-            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(201,168,76,0.2)', borderTopColor: '#c9a84c' }} />
+            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--as-border-soft)', borderTopColor: 'var(--as-cta)' }} />
           </div>
         )}
 
         {/* Empty state */}
         {!loading && profiles.length === 0 && (
-          <div className="rounded-2xl p-10 text-center" style={{ background: 'rgba(26,21,53,0.6)', border: '1px dashed rgba(201,168,76,0.2)' }}>
-            <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>
+          <div className="rounded-2xl p-10 text-center" style={{ background: 'var(--as-surface)', border: '1px dashed var(--as-border-soft)', boxShadow: 'var(--as-shadow-card)' }}>
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', marginBottom: '1rem' }}>
               Chưa có hồ sơ nào.
             </p>
             <button
               onClick={() => router.push('/profile')}
               className="px-5 py-2.5 rounded-xl font-semibold text-sm"
-              style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}
+              style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', borderRadius: '999px', boxShadow: 'var(--as-shadow-glow)' }}
             >
               + Thêm bản đồ sao
             </button>
@@ -231,12 +231,12 @@ export default function MyChartsPage() {
         {!loading && profiles.length > 0 && (
           <div className="space-y-4">
             {profiles.map(p => (
-              <div key={p.id} className="rounded-2xl overflow-hidden" style={{ background: 'rgba(26,21,53,0.6)', border: editingId === p.id ? '1px solid rgba(201,168,76,0.35)' : '1px solid rgba(201,168,76,0.12)' }}>
+              <div key={p.id} className="rounded-2xl overflow-hidden" style={{ background: 'var(--as-surface)', border: editingId === p.id ? '1px solid var(--as-border-gold)' : '1px solid var(--as-border-soft)', boxShadow: 'var(--as-shadow-card)' }}>
                 {/* Row */}
                 <div className="flex items-center gap-3 px-5 py-4 flex-wrap">
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>{p.name}</p>
-                    <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                    <p className="font-semibold" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>{p.name}</p>
+                    <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
                       {p.gender === 'Female' ? '♀' : p.gender === 'Male' ? '♂' : '⊕'} ·{' '}
                       {p.dob.day > 0 && p.dob.month > 0 && p.dob.year > 0
                         ? `${p.dob.day}/${p.dob.month}/${p.dob.year}`
@@ -249,29 +249,29 @@ export default function MyChartsPage() {
                     <button
                       onClick={() => editingId === p.id ? cancelEdit() : openEdit(p)}
                       className="px-2.5 py-1.5 rounded-lg text-xs"
-                      style={{ color: editingId === p.id ? '#94a3b8' : '#c9a84c', background: editingId === p.id ? 'rgba(107,114,128,0.15)' : 'rgba(201,168,76,0.1)', fontFamily: 'var(--font-vietnam)' }}
+                      style={{ color: editingId === p.id ? 'var(--as-text-muted)' : 'var(--as-cta)', background: editingId === p.id ? 'rgba(22,54,83,0.06)' : 'rgba(22,54,83,0.07)', fontFamily: 'var(--font-vietnam)' }}
                     >
                       {editingId === p.id ? 'Hủy' : 'Sửa'}
                     </button>
                     {deleteConfirm === p.id ? (
                       <>
                         <button onClick={() => handleDelete(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xác nhận xóa</button>
-                        <button onClick={() => setDeleteConfirm(null)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#94a3b8', background: 'rgba(148,163,184,0.1)', fontFamily: 'var(--font-vietnam)' }}>Hủy</button>
+                        <button onClick={() => setDeleteConfirm(null)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: 'var(--as-text-muted)', background: 'rgba(22,54,83,0.06)', fontFamily: 'var(--font-vietnam)' }}>Hủy</button>
                       </>
                     ) : (
-                      <button onClick={() => setDeleteConfirm(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: '#6b7280', background: 'rgba(107,114,128,0.1)', fontFamily: 'var(--font-vietnam)' }}>Xóa</button>
+                      <button onClick={() => setDeleteConfirm(p.id)} className="px-2.5 py-1.5 rounded-lg text-xs" style={{ color: 'var(--as-text-muted)', background: 'rgba(22,54,83,0.06)', fontFamily: 'var(--font-vietnam)' }}>Xóa</button>
                     )}
                     <button
                       onClick={() => { sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : (p.tob.hour >= 0 ? p.tob.hour : 12), minute: p.tob.unknown ? 0 : (p.tob.minute >= 0 ? p.tob.minute : 0) }, loc: p.loc })); router.push('/services') }}
                       className="px-2.5 py-1.5 rounded-lg text-xs"
-                      style={{ color: '#c9a84c', background: 'rgba(61,43,94,0.5)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}
+                      style={{ color: 'var(--as-cta)', background: 'rgba(22,54,83,0.07)', border: '1px solid var(--as-border-soft)', fontFamily: 'var(--font-vietnam)' }}
                     >
                       Dịch vụ
                     </button>
                     <button
                       onClick={() => router.push(`/chart?id=${p.id}`)}
                       className="px-2.5 py-1.5 rounded-lg text-xs"
-                      style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+                      style={{ color: 'var(--as-text-on-dark)', background: 'var(--as-cta)', border: '1px solid var(--as-border-soft)', fontFamily: 'var(--font-vietnam)' }}
                     >
                       Bản đồ ✦
                     </button>
@@ -280,7 +280,7 @@ export default function MyChartsPage() {
 
                 {/* Inline edit form */}
                 {editingId === p.id && form && (
-                  <div className="px-5 pb-5 pt-2" style={{ borderTop: '1px solid rgba(201,168,76,0.15)' }}>
+                  <div className="px-5 pb-5 pt-2 as-form" style={{ borderTop: '1px solid var(--as-border-soft)' }}>
                     <div className="space-y-4 form-compact">
 
                       {/* Row 1: Name + Gender same row */}
@@ -362,7 +362,7 @@ export default function MyChartsPage() {
                                   <button
                                     type="button"
                                     onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
-                                    style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}
+                                    style={{ color: 'var(--as-text-muted)', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}
                                   >✕</button>
                                 </div>
                               )}
@@ -377,7 +377,7 @@ export default function MyChartsPage() {
                             <label style={{ ...labelStyle, marginBottom: 0 }}>Giờ sinh</label>
                             <label className="flex items-center gap-1.5 cursor-pointer">
                               <input type="checkbox" checked={form.tob.unknown} onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })} style={{ width: '1rem', height: '1rem', padding: 0 }} />
-                              <span style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>Không rõ</span>
+                              <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>Không rõ</span>
                             </label>
                           </div>
                           {!form.tob.unknown && (
@@ -408,7 +408,7 @@ export default function MyChartsPage() {
                       <div>
                         <label style={labelStyle}>
                           Biệt danh / Ghi chú{' '}
-                          <span style={{ color: '#4a4560', fontSize: '0.7rem', fontWeight: 400 }}>(tuỳ chọn)</span>
+                          <span style={{ color: 'var(--as-text-muted)', fontSize: '0.7rem', fontWeight: 400 }}>(tuỳ chọn)</span>
                         </label>
                         <input
                           type="text"
@@ -424,10 +424,10 @@ export default function MyChartsPage() {
                       )}
 
                       <div className="flex gap-3 pt-1">
-                        <button onClick={handleSave} disabled={saving} className="flex-1 h-9 rounded-lg font-semibold" style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)', opacity: saving ? 0.7 : 1 }}>
+                        <button onClick={handleSave} disabled={saving} className="flex-1 h-9 rounded-lg font-semibold" style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', borderRadius: '999px', boxShadow: 'var(--as-shadow-glow)', opacity: saving ? 0.7 : 1 }}>
                           {saving ? 'Đang lưu...' : 'Cập nhật hồ sơ'}
                         </button>
-                        <button onClick={cancelEdit} className="px-6 h-9 rounded-lg font-semibold" style={{ background: 'rgba(107,114,128,0.15)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+                        <button onClick={cancelEdit} className="px-6 h-9 rounded-lg font-semibold" style={{ background: 'rgba(22,54,83,0.06)', color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
                           Hủy
                         </button>
                       </div>
@@ -445,7 +445,7 @@ export default function MyChartsPage() {
             <button
               onClick={() => router.push('/profile')}
               className="px-6 py-3 rounded-xl font-semibold text-sm"
-              style={{ background: 'rgba(201,168,76,0.1)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}
+              style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', border: 'none', fontFamily: 'var(--font-vietnam)', borderRadius: '999px', boxShadow: 'var(--as-shadow-glow)' }}
             >
               + Thêm bản đồ sao mới
             </button>

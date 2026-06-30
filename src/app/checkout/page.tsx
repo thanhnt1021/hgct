@@ -34,7 +34,7 @@ const SERVICE_ETA: Record<string, string> = {
 const labelStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.5rem',
-  color: '#d9ab55',
+  color: 'var(--as-copper-deep)',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.62rem',
   fontWeight: 700,
@@ -268,8 +268,8 @@ function CheckoutInner() {
   // Auth still resolving
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#06060f' }}>
-        <div className="w-10 h-10 rounded-full animate-spin" style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
+        <div className="w-10 h-10 rounded-full animate-spin" style={{ border: '2px solid var(--as-border-soft)', borderTopColor: 'var(--as-cta)' }} />
       </div>
     )
   }
@@ -277,13 +277,13 @@ function CheckoutInner() {
   // Brief loading spinner while getting jobId
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#06060f' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
         <div className="text-center">
           <div
             className="w-10 h-10 rounded-full animate-spin mx-auto mb-4"
-            style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }}
+            style={{ border: '2px solid var(--as-border-soft)', borderTopColor: 'var(--as-cta)' }}
           />
-          <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em' }}>
+          <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em' }}>
             {retryMsg || 'ĐANG KẾT NỐI'}
           </p>
         </div>
@@ -292,16 +292,16 @@ function CheckoutInner() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#06060f' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       <Navbar />
 
       <div className="max-w-lg mx-auto px-4 pt-28 pb-16">
         <div
           className="rounded-2xl p-8 sm:p-10"
           style={{
-            background: 'rgba(18,13,46,0.7)',
-            border: '1px solid rgba(200,148,63,0.16)',
-            backdropFilter: 'blur(20px)',
+            background: 'var(--as-surface)',
+            border: '1px solid var(--as-border-soft)',
+            boxShadow: 'var(--as-shadow-card)',
           }}
         >
           {/* Header */}
@@ -310,8 +310,8 @@ function CheckoutInner() {
             <p className="section-eyebrow mb-2">Xác nhận đặt báo cáo</p>
             <h1
               style={{
-                color: '#f4efe6',
-                fontFamily: 'var(--font-vietnam)',
+                color: 'var(--as-text-strong)',
+                fontFamily: 'var(--font-playfair)',
                 fontSize: '1.4rem',
                 fontWeight: 700,
                 letterSpacing: '0.04em',
@@ -320,25 +320,25 @@ function CheckoutInner() {
             >
               Luận giải {SERVICE_NAMES[service] || service}
             </h1>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
               {displayName}
             </p>
           </div>
 
           {/* Gold divider */}
-          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.3), transparent)', marginBottom: '2rem' }} />
+          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--as-border-gold), transparent)', marginBottom: '2rem' }} />
 
           {/* Order summary */}
           <div className="space-y-3 mb-5">
             {[
-              { label: 'Dịch vụ', value: `Luận giải ${SERVICE_NAMES[service] || service}`, valueColor: '#f4efe6' },
+              { label: 'Dịch vụ', value: `Luận giải ${SERVICE_NAMES[service] || service}`, valueColor: 'var(--as-text-strong)' },
               ...(service === 'transit' && transitStartDate && transitEndDate
-                ? [{ label: 'Giai đoạn', value: `${fmtDate(transitStartDate)} → ${fmtDate(transitEndDate)}`, valueColor: '#f4efe6' }]
+                ? [{ label: 'Giai đoạn', value: `${fmtDate(transitStartDate)} → ${fmtDate(transitEndDate)}`, valueColor: 'var(--as-text-strong)' }]
                 : []),
-              { label: 'Thời gian tạo', value: `~ ${eta} phút`, valueColor: '#d9ab55' },
+              { label: 'Thời gian tạo', value: `~ ${eta} phút`, valueColor: 'var(--as-copper-deep)' },
             ].map(row => (
               <div key={row.label} className="flex justify-between items-baseline">
-                <span style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.04em' }}>
+                <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.04em' }}>
                   {row.label}
                 </span>
                 <span style={{ color: row.valueColor, fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
@@ -350,23 +350,23 @@ function CheckoutInner() {
 
           {/* Profile review block */}
           {inputData && (
-            <div className="rounded-lg p-4 mb-8" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(200,148,63,0.1)' }}>
+            <div className="rounded-lg p-4 mb-8" style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-soft)' }}>
               {service === 'synastry' ? (
                 <div className="space-y-3">
                   <div>
-                    <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.08em', fontWeight: 700, marginBottom: '0.2rem' }}>NGƯỜI THỨ NHẤT</p>
-                    <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, margin: 0 }}>{nameA}</p>
-                    <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                    <p style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.08em', fontWeight: 700, marginBottom: '0.2rem' }}>NGƯỜI THỨ NHẤT</p>
+                    <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, margin: 0 }}>{nameA}</p>
+                    <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
                       {[fmtDob(inputData.dob as Record<string, number>), fmtLoc(inputData.loc as Record<string, unknown>)].filter(Boolean).join(' · ')}
                     </p>
                   </div>
                   {inputDataB && (
                     <>
-                      <div style={{ height: '1px', background: 'rgba(200,148,63,0.08)' }} />
+                      <div style={{ height: '1px', background: 'var(--as-border-soft)' }} />
                       <div>
-                        <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.08em', fontWeight: 700, marginBottom: '0.2rem' }}>NGƯỜI THỨ HAI</p>
-                        <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, margin: 0 }}>{nameB}</p>
-                        <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                        <p style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.08em', fontWeight: 700, marginBottom: '0.2rem' }}>NGƯỜI THỨ HAI</p>
+                        <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, margin: 0 }}>{nameB}</p>
+                        <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.15rem' }}>
                           {[fmtDob(inputDataB.dob as Record<string, number>), fmtLoc(inputDataB.loc as Record<string, unknown>)].filter(Boolean).join(' · ')}
                         </p>
                       </div>
@@ -375,8 +375,8 @@ function CheckoutInner() {
                 </div>
               ) : (
                 <div>
-                  <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, marginBottom: '0.2rem' }}>{nameA}</p>
-                  <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
+                  <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', fontWeight: 600, marginBottom: '0.2rem' }}>{nameA}</p>
+                  <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
                     {[fmtDob(inputData.dob as Record<string, number>), fmtLoc(inputData.loc as Record<string, unknown>)].filter(Boolean).join(' · ')}
                   </p>
                 </div>
@@ -402,12 +402,12 @@ function CheckoutInner() {
               </p>
             )}
             {!emailInvalid && user?.email && email === user.email && (
-              <p style={{ color: '#4a4560', fontSize: '0.75rem', marginTop: '0.5rem', fontFamily: 'var(--font-vietnam)', fontStyle: 'italic' }}>
+              <p style={{ color: 'var(--as-text-muted)', fontSize: '0.75rem', marginTop: '0.5rem', fontFamily: 'var(--font-vietnam)', fontStyle: 'italic' }}>
                 ✦ Lấy từ tài khoản đăng nhập
               </p>
             )}
             {!emailInvalid && !email && (
-              <p style={{ color: '#8a8399', fontSize: '0.75rem', marginTop: '0.5rem', fontFamily: 'var(--font-vietnam)' }}>
+              <p style={{ color: 'var(--as-text-muted)', fontSize: '0.75rem', marginTop: '0.5rem', fontFamily: 'var(--font-vietnam)' }}>
                 Báo cáo PDF sẽ được gửi đến địa chỉ email này
               </p>
             )}
@@ -421,20 +421,19 @@ function CheckoutInner() {
                 disabled={!canSubmit || loading}
                 className="w-full py-4 font-bold text-sm tracking-wider"
                 style={{
-                  background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
-                  backgroundSize: '200% 200%',
-                  color: '#06060f',
-                  borderRadius: '4px',
+                  background: 'var(--as-cta)',
+                  color: 'var(--as-text-on-dark)',
+                  borderRadius: '999px',
                   fontFamily: 'var(--font-vietnam)',
                   letterSpacing: '0.1em',
                   opacity: (!canSubmit || loading) ? 0.4 : 1,
-                  boxShadow: (canSubmit && !loading) ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
+                  boxShadow: (canSubmit && !loading) ? 'var(--as-shadow-glow)' : 'none',
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
                 Tạo báo cáo &amp; Gửi Email
               </button>
-              <p style={{ color: '#4a4560', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
+              <p style={{ color: 'var(--as-text-muted)', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
                 Báo cáo PDF sẽ được gửi đến email trong {eta} phút
               </p>
             </>
@@ -445,20 +444,19 @@ function CheckoutInner() {
                 disabled={!canSubmit || loading}
                 className="w-full py-4 font-bold text-sm tracking-wider"
                 style={{
-                  background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
-                  backgroundSize: '200% 200%',
-                  color: '#06060f',
-                  borderRadius: '4px',
+                  background: 'var(--as-cta)',
+                  color: 'var(--as-text-on-dark)',
+                  borderRadius: '999px',
                   fontFamily: 'var(--font-vietnam)',
                   letterSpacing: '0.1em',
                   opacity: (!canSubmit || loading) ? 0.4 : 1,
-                  boxShadow: (canSubmit && !loading) ? '0 4px 24px rgba(200,148,63,0.3)' : 'none',
+                  boxShadow: (canSubmit && !loading) ? 'var(--as-shadow-glow)' : 'none',
                   transition: 'opacity 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
                 Tiến hành thanh toán →
               </button>
-              <p style={{ color: '#4a4560', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
+              <p style={{ color: 'var(--as-text-muted)', fontSize: '0.75rem', textAlign: 'center', marginTop: '0.85rem', fontFamily: 'var(--font-vietnam)' }}>
                 Hoàn tất thanh toán để nhận báo cáo PDF qua email
               </p>
             </>
@@ -468,7 +466,7 @@ function CheckoutInner() {
           <div className="text-center mt-5">
             <button
               onClick={() => router.push(profileUidA ? '/services' : '/services?edit=1')}
-              style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', background: 'none', border: '1px solid rgba(200,148,63,0.2)', borderRadius: '8px', padding: '6px 16px', cursor: 'pointer', textDecoration: 'underline' }}
+              style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', background: 'none', border: '1px solid var(--as-border-gold)', borderRadius: '999px', padding: '6px 16px', cursor: 'pointer', textDecoration: 'underline' }}
             >
               ← Sửa thông tin
             </button>

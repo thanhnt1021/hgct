@@ -80,13 +80,53 @@
   --purple:        var(--nebula-glow);
   --purple-light:  var(--nebula-rim);
   --accent-red:    var(--danger);
+
+  /* ═══ AstroS rebrand tokens (DESIGN.md) — tông SÁNG chủ đạo, navy phụ ═══ */
+  /* ── CHỈ 2 MÀU CHỦ ĐẠO ── nền kem #edd5b1 (+ shade) · navy #163653 ── */
+  /* Kem (chủ đạo) + shade liên quan */
+  --as-bg:            #edd5b1;   /* nền chính */
+  --as-bg-warm:       #e3c89a;   /* shade đậm hơn */
+  --as-surface:       #f4e6cd;   /* card kem sáng */
+  --as-surface-raised:#faf1de;
+  --as-champagne:     #edd5b1;
+  /* Navy (màu còn lại) + shade */
+  --as-navy-deep:     #163653;
+  --as-navy:          #163653;
+  --as-navy-soft:     #1a2148;   /* navy hơi sáng cho card */
+  --as-teal-deep:     #163653;
+  --as-teal-mid:      #1a2148;
+  /* Accent = navy trên kem (gộp về 2 màu) */
+  --as-gold:          #163653;
+  --as-gold-cream:    #edd5b1;
+  --as-copper:        #163653;
+  --as-copper-deep:   #163653;
+  --as-cta:           #163653;   /* nút CTA = navy */
+  --as-cta-hover:     #1a2148;
+  /* Text */
+  --as-text-strong:   #163653;
+  --as-text:          #2a2f52;   /* navy nhạt cho body */
+  --as-text-muted:    #6b6a82;
+  --as-text-on-dark:  #edd5b1;   /* kem trên navy / CTA */
+  /* Viền (navy mảnh) */
+  --as-border-gold:   rgba(22,54,83,0.28);
+  --as-border-soft:   rgba(22,54,83,0.12);
+  /* Gradient (chỉ kem ↔ navy) */
+  --as-gradient-night: linear-gradient(90deg, #edd5b1 0%, #163653 100%);
+  --as-gradient-gold:  linear-gradient(90deg, #163653 0%, #edd5b1 100%);
+  --as-glow-warm:      radial-gradient(ellipse 80% 50% at 60% 30%, rgba(22,54,83,0.07) 0%, rgba(237,213,177,0) 70%);
+  /* Phụ trợ */
+  --as-radius-md: .5rem;  --as-radius-lg: .875rem;  --as-radius-pill: 999px;
+  --as-shadow-card: 0 8px 30px rgba(22,54,83,0.12);
+  /* Elevation cho CTA: viền champagne mảnh + đổ bóng → nút LUÔN nổi bật kể cả khi cùng tông nền (card #063755) */
+  --as-shadow-glow: 0 0 0 1.5px rgba(237,213,177,0.45), 0 5px 16px rgba(0,0,0,0.42);
+  --as-focus-ring: 0 0 0 3px rgba(22,54,83,0.18);
 }
 
 /* ── Base ─────────────────────────────────────────────────────── */
 
 body {
-  background: var(--void-deep);
-  color: var(--lunar-bright);
+  background: var(--as-bg);
+  color: var(--as-text);
   font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.7;
@@ -94,15 +134,15 @@ body {
 
 /* ── Scrollbar ────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--void-night); }
-::-webkit-scrollbar-thumb { background: var(--nebula-rim); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--gold-base); }
+::-webkit-scrollbar-track { background: var(--as-bg-warm); }
+::-webkit-scrollbar-thumb { background: var(--as-border-gold); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--as-cta); }
 
 /* ── Form elements ────────────────────────────────────────────── */
 input, select, textarea {
-  background: rgba(11, 11, 31, 0.9);
-  border: 1px solid rgba(200, 148, 63, 0.2);
-  color: var(--lunar-bright);
+  background: var(--as-surface);
+  border: 1px solid var(--as-border-gold);
+  color: var(--as-text-strong);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -113,25 +153,25 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--gold-warm);
-  box-shadow: 0 0 0 3px rgba(217, 171, 85, 0.1);
+  border-color: var(--as-gold);
+  box-shadow: var(--as-focus-ring);
 }
 
 input::placeholder, textarea::placeholder {
-  color: var(--lunar-shadow);
+  color: var(--as-text-muted);
   font-style: italic;
 }
 
 select option {
-  background: var(--void-night);
-  color: var(--lunar-bright);
+  background: var(--as-surface);
+  color: var(--as-text-strong);
 }
 
 /* Checkbox override */
 input[type="checkbox"] {
   width: auto;
   padding: 0;
-  accent-color: var(--gold-warm);
+  accent-color: var(--as-cta);
 }
 
 /* ── Keyframes ────────────────────────────────────────────────── */
@@ -225,39 +265,39 @@ input[type="checkbox"] {
 
 /* ── Cards ────────────────────────────────────────────────────── */
 .sanctum-card {
-  background: rgba(28, 21, 64, 0.6);
-  border: 1px solid rgba(200, 148, 63, 0.14);
+  background: var(--as-surface);
+  border: 1px solid var(--as-border-soft);
   border-radius: 1.25rem;
-  backdrop-filter: blur(20px);
+  box-shadow: var(--as-shadow-card);
   transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .sanctum-card:hover {
-  border-color: rgba(200, 148, 63, 0.38);
+  border-color: var(--as-border-gold);
   transform: translateY(-3px);
   box-shadow: 0 20px 56px rgba(0, 0, 0, 0.5), 0 0 32px rgba(200, 148, 63, 0.07);
 }
 
 /* Legacy card classes — updated to new palette */
 .card {
-  background: rgba(28, 21, 64, 0.6);
-  border: 1px solid rgba(200, 148, 63, 0.14);
+  background: var(--as-surface);
+  border: 1px solid var(--as-border-soft);
   border-radius: 1.25rem;
-  backdrop-filter: blur(20px);
+  box-shadow: var(--as-shadow-card);
   transition: border-color 0.3s ease, transform 0.3s ease;
 }
 
 .card:hover {
-  border-color: rgba(200, 148, 63, 0.38);
+  border-color: var(--as-border-gold);
   transform: translateY(-3px);
 }
 
 .feature-card {
-  background: rgba(18, 13, 46, 0.65);
-  border: 1px solid rgba(200, 148, 63, 0.12);
+  background: var(--as-surface);
+  border: 1px solid var(--as-border-soft);
   border-radius: 1rem;
   padding: 2rem;
-  backdrop-filter: blur(16px);
+  box-shadow: var(--as-shadow-card);
   transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -269,11 +309,10 @@ input[type="checkbox"] {
 
 /* ── Buttons ──────────────────────────────────────────────────── */
 .btn-gold {
-  background: linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%);
-  background-size: 200% 200%;
-  color: #06060f;
+  background: var(--as-cta);
+  color: var(--as-text-on-dark);
   font-weight: 600;
-  border-radius: 4px;
+  border-radius: 999px;
   padding: 0.7rem 1.8rem;
   font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
   letter-spacing: 0.02em;
@@ -338,7 +377,7 @@ input[type="checkbox"] {
 
 /* ── Nav links ────────────────────────────────────────────────── */
 .nav-link {
-  color: var(--lunar-dim);
+  color: var(--as-text);
   font-family: var(--font-vietnam), 'Be Vietnam Pro', system-ui, sans-serif;
   font-size: 0.82rem;
   font-weight: 500;
@@ -347,8 +386,85 @@ input[type="checkbox"] {
 }
 
 .nav-link:hover {
-  color: var(--lunar-bright);
+  color: var(--as-cta);
 }
+
+/* ── Mọi nút CTA (background var(--as-cta)) TỰ NỔI BẬT toàn web ──
+   Viền champagne mảnh + đổ bóng (var(--as-shadow-glow)) → nút tách khỏi nền dù cùng tông
+   (vd nút navy trên card teal #063755). Card dùng màu literal nên KHÔNG bị dính rule này. */
+[style*="background: var(--as-cta)"],
+[style*="background:var(--as-cta)"] {
+  box-shadow: var(--as-shadow-glow);
+  transition: transform .15s ease, box-shadow .2s ease, filter .15s ease;
+}
+[style*="background: var(--as-cta)"]:hover,
+[style*="background:var(--as-cta)"]:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.12);
+}
+
+/* AstroS nav link (tông sáng) */
+.as-nav-link:hover { color: var(--as-gold) !important; }
+.as-footer-link:hover { color: var(--as-champagne) !important; }
+
+/* AstroS form (tông sáng) — override input tối toàn cục cho khu vực form trang chủ */
+.as-form input, .as-form select, .as-form textarea {
+  background: var(--as-surface) !important;
+  border: 1px solid var(--as-border-gold) !important;
+  color: var(--as-text-strong) !important;
+  border-radius: 8px;
+}
+.as-form input::placeholder, .as-form textarea::placeholder { color: var(--as-text-muted) !important; }
+.as-form input:focus, .as-form select:focus, .as-form textarea:focus {
+  border-color: var(--as-gold) !important;
+  box-shadow: var(--as-focus-ring) !important;
+}
+.as-form select option { background: var(--as-surface); color: var(--as-text-strong); }
+
+/* Form trong card NAVY (S3) — input nền tối trong, viền mảnh vàng */
+.as-form-dark input, .as-form-dark select, .as-form-dark textarea {
+  background: rgba(247,236,217,0.07) !important;
+  border: 1px solid var(--as-border-gold) !important;
+  color: var(--as-text-on-dark) !important;
+  border-radius: 8px;
+}
+.as-form-dark input::placeholder, .as-form-dark textarea::placeholder { color: rgba(247,236,217,0.45) !important; }
+.as-form-dark input:focus, .as-form-dark select:focus, .as-form-dark textarea:focus {
+  border-color: var(--as-gold) !important; box-shadow: var(--as-focus-ring) !important;
+}
+.as-form-dark select option { background: var(--as-navy-soft); color: var(--as-text-on-dark); }
+
+/* AstroS — vòng hoàng đạo quay (chỉ dùng trong S2) */
+@keyframes asSpin { to { transform: rotate(360deg); } }
+@keyframes asSpinRev { to { transform: rotate(-360deg); } }
+@keyframes signPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes asTwinkle { 0%,100% { opacity: 0.25; } 50% { opacity: 0.9; } }
+@keyframes asFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+@keyframes asStarPulse { 0%,100% { opacity: 0.85; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+
+/* Starfield mờ trên nền cát sáng (chấm vàng/đồng) */
+.as-starfield {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 18%, rgba(22,54,83,0.45) 0%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 67% 9%, rgba(22,54,83,0.4) 0%, transparent 100%),
+    radial-gradient(1.6px 1.6px at 84% 28%, rgba(22,54,83,0.38) 0%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 33% 62%, rgba(22,54,83,0.32) 0%, transparent 100%),
+    radial-gradient(1.3px 1.3px at 52% 38%, rgba(22,54,83,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 84%, rgba(22,54,83,0.28) 0%, transparent 100%),
+    radial-gradient(1px 1px at 91% 70%, rgba(22,54,83,0.32) 0%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 45% 14%, rgba(22,54,83,0.28) 0%, transparent 100%);
+}
+
+/* Nút mũi tên carousel */
+.as-arrow {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; border-radius: 999px; cursor: pointer;
+  background: var(--as-surface); border: 1px solid var(--as-border-gold);
+  color: var(--as-cta); font-size: 1.2rem; flex-shrink: 0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.as-arrow:hover { background: var(--as-cta); color: var(--as-text-on-dark); transform: scale(1.06); }
 
 /* ── Footer ───────────────────────────────────────────────────── */
 .footer-link {
