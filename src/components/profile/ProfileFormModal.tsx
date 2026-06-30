@@ -36,7 +36,7 @@ const MINUTES = Array.from({length: 60}, (_, i) => i)
 const labelStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.25rem',
-  color: '#94a3b8',
+  color: 'var(--as-text-strong)',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.75rem',
   fontWeight: 500,
@@ -45,7 +45,7 @@ const labelStyle: React.CSSProperties = {
 const subLabelStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.25rem',
-  color: '#6b7280',
+  color: 'var(--as-text-muted)',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.75rem',
 }
@@ -195,25 +195,25 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(22,54,83,0.5)', backdropFilter: 'blur(4px)' }}
       onClick={e => { if (e.target === e.currentTarget) handleClose() }}
     >
       <div
         className="w-full max-h-[90vh] overflow-y-auto rounded-2xl"
-        style={{ maxWidth: 560, background: 'rgba(16,12,38,0.98)', border: '1px solid rgba(201,168,76,0.25)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+        style={{ maxWidth: 560, background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)', boxShadow: 'var(--as-shadow-card)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
-          <h3 className="font-bold text-lg" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+        <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid var(--as-border-gold)' }}>
+          <h3 className="font-bold text-lg" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
             {title ?? 'Hồ sơ'}
           </h3>
-          <button onClick={handleClose} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
+          <button onClick={handleClose} className="p-1.5 rounded-lg" style={{ color: 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)' }}>
             <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4 form-compact" style={{ paddingBottom: '60px' }}>
+        <div className="px-6 py-5 space-y-4 form-compact as-form" style={{ paddingBottom: '60px' }}>
 
           {/* Chọn nhanh hồ sơ đã lưu */}
           {savedProfiles && savedProfiles.length > 0 && (
@@ -309,7 +309,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
                         placeholder="VD: 1850" style={{ flex: 1, minWidth: 0 }} />
                       <button type="button"
                         onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
-                        style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
+                        style={{ color: 'var(--as-text-muted)', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
                     </div>
                   )}
                   {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.2rem' }}>{yearError}</p>}
@@ -325,7 +325,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
                   <input type="checkbox" checked={form.tob.unknown}
                     onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
                     style={{ width: '1rem', height: '1rem', padding: 0 }} />
-                  <span style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>Không rõ</span>
+                  <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>Không rõ</span>
                 </label>
               </div>
               {!form.tob.unknown && (
@@ -358,7 +358,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
           {!hideNote && <div>
             <label style={labelStyle}>
               Biệt danh / Ghi chú{' '}
-              <span style={{ color: '#4a4560', fontSize: '0.7rem', fontWeight: 400 }}>(tuỳ chọn)</span>
+              <span style={{ color: 'var(--as-text-muted)', fontSize: '0.7rem', fontWeight: 400 }}>(tuỳ chọn)</span>
             </label>
             <input
               type="text"
@@ -375,9 +375,9 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
                 type="checkbox"
                 checked={saveProfile}
                 onChange={e => setSaveProfile(e.target.checked)}
-                style={{ width: '1rem', height: '1rem', padding: 0, accentColor: '#c9a84c' }}
+                style={{ width: '1rem', height: '1rem', padding: 0, accentColor: 'var(--as-cta)' }}
               />
-              <span style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+              <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
                 Lưu hồ sơ vào danh sách
               </span>
             </label>
@@ -415,14 +415,13 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
             disabled={saving}
             className="w-full h-11 rounded-lg font-bold tracking-wider"
             style={{
-              background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
-              backgroundSize: '200% 200%',
-              color: '#06060f',
+              background: 'var(--as-cta)',
+              color: 'var(--as-text-on-dark)',
               fontFamily: 'var(--font-vietnam)',
               fontSize: '0.9rem',
               letterSpacing: '0.06em',
               opacity: saving ? 0.7 : 1,
-              boxShadow: '0 4px 20px rgba(200,148,63,0.25)',
+              boxShadow: 'var(--as-shadow-card)',
               cursor: saving ? 'not-allowed' : 'pointer',
             }}
           >

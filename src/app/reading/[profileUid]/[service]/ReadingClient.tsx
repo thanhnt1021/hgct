@@ -68,9 +68,11 @@ interface UnlockedMap {
 export default function ReadingClient({
   profileUid,
   service,
+  embedded = false,
 }: {
   profileUid: string
   service: string
+  embedded?: boolean
 }) {
   const router = useRouter()
   const { user, isLoading } = useAuth()
@@ -327,10 +329,10 @@ export default function ReadingClient({
   const allUnlocked = sections.length > 0 && sections.every(s => unlocked[s.id])
 
   return (
-    <div className="relative min-h-screen" style={{ fontFamily: 'var(--font-vietnam)' }}>
-      <StarField />
-      <ZodiacBackground />
-      <Navbar />
+    <div className="relative" style={embedded
+      ? { fontFamily: 'var(--font-vietnam)' }
+      : { fontFamily: 'var(--font-vietnam)', minHeight: '100vh', background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
+      {!embedded && <><StarField /><ZodiacBackground /><Navbar /></>}
 
       {/* Loading modal — only when content is actually being generated the first
           time (modalKind set). Subsequent unlocks reuse the stored essay → instant,
@@ -346,7 +348,7 @@ export default function ReadingClient({
           <div
             style={{
               maxWidth: 420, width: '100%', textAlign: 'center',
-              background: 'rgba(18,13,46,0.96)', border: '1px solid rgba(200,148,63,0.4)',
+              background: '#063755', border: '1px solid var(--as-border-gold)',
               borderRadius: 16, padding: '2.5rem 2rem', boxShadow: '0 8px 48px rgba(0,0,0,0.6)',
             }}
           >
@@ -373,7 +375,7 @@ export default function ReadingClient({
               <div
                 style={{
                   width: `${progress}%`, height: '100%', borderRadius: 999,
-                  background: 'linear-gradient(90deg, #c8943f, #f0cc78)',
+                  background: 'var(--as-cta)',
                   transition: 'width 0.9s ease',
                 }}
               />
@@ -400,29 +402,21 @@ export default function ReadingClient({
         </div>
       )}
 
-      <div className="relative z-10" style={{ maxWidth: 780, margin: '0 auto', padding: '6rem 1rem 4rem' }}>
+      <div className="relative z-10" style={{ maxWidth: embedded ? '100%' : 780, margin: '0 auto', padding: embedded ? 0 : '6rem 1rem 4rem' }}>
 
-        <Link
-          href="/services"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            background: 'rgba(18,13,46,0.7)',
-            border: '1px solid rgba(200,148,63,0.3)',
-            color: '#d9ab55',
-            borderRadius: '6px',
-            padding: '0.5rem 1rem',
-            fontFamily: 'var(--font-vietnam)',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            textDecoration: 'none',
-            marginBottom: '1.5rem',
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          ← Quay lại trang dịch vụ
-        </Link>
+        {!embedded && (
+          <Link
+            href="/services"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+              background: '#063755', border: '1px solid rgba(200,148,63,0.3)', color: '#d9ab55',
+              borderRadius: '6px', padding: '0.5rem 1rem', fontFamily: 'var(--font-vietnam)',
+              fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', marginBottom: '1.5rem',
+            }}
+          >
+            ← Quay lại trang dịch vụ
+          </Link>
+        )}
 
         {error && (
           <div style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.35)', borderRadius: 12, padding: '1rem 1.25rem', color: '#fca5a5', marginBottom: '1.5rem' }}>
@@ -432,23 +426,23 @@ export default function ReadingClient({
 
         {catalog && (
           <>
-            <h1 style={{ color: '#f4efe6', fontSize: 'clamp(1.5rem, 4vw, 2.1rem)', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '0.02em' }}>
+            <h1 style={{ color: 'var(--as-text-strong)', fontSize: 'clamp(1.5rem, 4vw, 2.1rem)', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '0.02em', fontFamily: 'var(--font-playfair)' }}>
               {catalog.label}
             </h1>
-            <p style={{ color: '#8a8399', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+            <p style={{ color: 'var(--as-text)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
               Bản luận giải đầy đủ {sections.length} mục — mở từng mục bằng xu khi bạn sẵn sàng đọc.
-              {balance != null && <> Bạn đang có <strong style={{ color: '#d9ab55' }}>{balance.toLocaleString('vi-VN')} xu</strong>.</>}
-              {' '}<Link href={topupHref} style={{ color: '#d9ab55', textDecoration: 'underline' }}>Nạp xu →</Link>
+              {balance != null && <> Bạn đang có <strong style={{ color: 'var(--as-cta)' }}>{balance.toLocaleString('vi-VN')} xu</strong>.</>}
+              {' '}<Link href={topupHref} style={{ color: 'var(--as-cta)', textDecoration: 'underline' }}>Nạp xu →</Link>
             </p>
-            <p style={{ color: '#6b6585', fontSize: '0.72rem', marginBottom: '1.5rem', fontFamily: 'monospace' }}>
+            <p style={{ color: 'var(--as-text-muted)', fontSize: '0.72rem', marginBottom: '1.5rem', fontFamily: 'monospace' }}>
               Hồ sơ: {profileUid}
             </p>
 
             {bundlePrice != null && !allUnlocked && (
               <div
                 style={{
-                  background: 'linear-gradient(135deg, rgba(200,148,63,0.12) 0%, rgba(200,148,63,0.04) 100%)',
-                  border: '1px solid rgba(200,148,63,0.35)',
+                  background: '#063755',
+                  border: '1px solid var(--as-border-gold)',
                   borderRadius: 12,
                   padding: '1.25rem 1.5rem',
                   marginBottom: '1.5rem',
@@ -475,9 +469,8 @@ export default function ReadingClient({
                   onClick={handleUnlockBundle}
                   disabled={unlocking === '__bundle__'}
                   style={{
-                    background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
-                    backgroundSize: '200% 200%',
-                    color: '#06060f',
+                    background: 'var(--as-cta)',
+                    color: 'var(--as-text-on-dark)',
                     border: 'none',
                     borderRadius: '6px',
                     padding: '0.65rem 1.5rem',
@@ -502,7 +495,7 @@ export default function ReadingClient({
                   <div
                     key={s.id}
                     style={{
-                      background: 'rgba(18,13,46,0.7)',
+                      background: '#063755',
                       border: `1px solid ${u ? 'rgba(200,148,63,0.4)' : 'rgba(255,255,255,0.06)'}`,
                       borderRadius: 12,
                       padding: '1.25rem 1.5rem',
@@ -562,8 +555,8 @@ export default function ReadingClient({
                         onClick={() => handleUnlock(s)}
                         disabled={isUnlocking || !loaded}
                         style={{
-                          background: isUnlocking || !loaded ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                          color: isUnlocking || !loaded ? '#6b6585' : '#06060f',
+                          background: isUnlocking || !loaded ? 'rgba(247,236,217,0.15)' : 'var(--as-cta)',
+                          color: isUnlocking || !loaded ? 'rgba(247,236,217,0.5)' : 'var(--as-text-on-dark)',
                           border: 'none',
                           borderRadius: '6px',
                           padding: '0.55rem 1.25rem',
@@ -582,7 +575,7 @@ export default function ReadingClient({
               })}
             </div>
 
-            <p style={{ color: '#6b6585', fontSize: '0.78rem', marginTop: '2rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--as-text-muted)', fontSize: '0.78rem', marginTop: '2rem', textAlign: 'center' }}>
               Tổng cộng nếu mở hết: {(bundlePrice ?? totalCost).toLocaleString('vi-VN')} xu · Mua thêm xu bất cứ lúc nào.
             </p>
           </>

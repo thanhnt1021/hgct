@@ -9,35 +9,17 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Search, Plus, Heart, UsersRound } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
-import StarField from '@/components/layout/StarField'
-import ZodiacBackground from '@/components/layout/ZodiacBackground'
 import ServicesGrid from '@/components/home/ServicesGrid'
 import { useAuth } from '@/contexts/AuthContext'
 import ProfileFormModal, { ProfileFormData } from '@/components/profile/ProfileFormModal'
 import GuestSynastryModal from '@/components/profile/GuestSynastryModal'
 import DiscountModal from '@/components/checkout/DiscountModal'
+import AstroServiceModal, { type ServiceDef as AstroServiceDef } from '@/components/home/AstroServiceModal'
 import { PDF_EMAIL_ENABLED } from '@/lib/feature-flags'
 
-// Sub-listings shown when arriving via /services?group=love or ?group=relations
+// (Bỏ group view: love + synastry giờ là service đơn, vào thẳng qua /services?type=love | ?type=synastry)
 interface SubOption { type: string; title: string; subtitle: string; emoji: string }
-const GROUP_OPTIONS: Record<string, { label: string; subs: SubOption[] }> = {
-  love: {
-    label: 'Tình yêu & Hôn nhân',
-    subs: [
-      { type: 'love',     title: 'Tình duyên (cá nhân)',  subtitle: 'Bản đồ tình cảm cá nhân của bạn — bạn yêu thế nào, cần gì, và bài học tình cảm là gì.', emoji: '💝' },
-      { type: 'synastry', title: 'Cặp đôi (so 2 người)', subtitle: 'So sánh hai bản đồ sao để hiểu sự kết nối, điểm hòa hợp và những khác biệt giữa hai bạn.', emoji: '💑' },
-    ],
-  },
-  relations: {
-    label: 'Mối quan hệ',
-    subs: [
-      { type: 'relations-parents',   title: 'Với bố mẹ / người thân lớn tuổi', subtitle: 'Hiểu khác biệt thế hệ và cách kết nối ấm áp hơn với gia đình.',                emoji: '👨‍👩‍👧' },
-      { type: 'relations-children',  title: 'Với con cái',                       subtitle: 'Đọc bản đồ sao của con để đồng hành phù hợp với năng lượng riêng của con.', emoji: '🧒' },
-      { type: 'relations-colleague', title: 'Với đồng nghiệp',                   subtitle: 'Cách hợp tác chuyên nghiệp và giảm xung đột trong công việc.',              emoji: '🤝' },
-      { type: 'relations-friend',    title: 'Với bạn bè / cộng đồng',             subtitle: 'Hiểu sợi dây gắn kết và cách đồng hành bền vững với bạn bè thân thiết.',   emoji: '🫂' },
-    ],
-  },
-}
+const GROUP_OPTIONS: Record<string, { label: string; subs: SubOption[] }> = {}
 
 interface Profile {
   id: string
@@ -66,14 +48,10 @@ interface ServiceDef {
 }
 
 const DEFAULT_SERVICES: ServiceDef[] = [
-  { type: 'career',               name: 'Sự nghiệp & Tiền bạc',         icon: '💼', description: '', color: 'rgba(200,148,63,0.08)',  border: 'rgba(200,148,63,0.22)',  tagColor: '#c8943f' },
-  { type: 'love',                 name: 'Tình duyên (cá nhân)',          icon: '💝', description: '', color: 'rgba(185,77,112,0.08)',  border: 'rgba(185,77,112,0.22)',  tagColor: '#b84d70' },
-  { type: 'synastry',             name: 'Cặp đôi (so 2 người)',          icon: '💑', description: '', color: 'rgba(120,77,186,0.08)',  border: 'rgba(120,77,186,0.22)',  tagColor: '#7c4dba', needsTwo: true },
-  { type: 'transit',              name: 'Vận hạn',                       icon: '🧭', description: '', color: 'rgba(64,112,184,0.08)',  border: 'rgba(64,112,184,0.22)',  tagColor: '#4070b8' },
-  { type: 'relations-parents',    name: 'Mối quan hệ với bố mẹ / người thân', icon: '👨‍👩‍👧', description: '', color: 'rgba(120,77,186,0.08)', border: 'rgba(120,77,186,0.22)', tagColor: '#b08ce8', needsTwo: true },
-  { type: 'relations-children',   name: 'Mối quan hệ với con cái',       icon: '🧒', description: '', color: 'rgba(120,77,186,0.08)', border: 'rgba(120,77,186,0.22)', tagColor: '#b08ce8', needsTwo: true },
-  { type: 'relations-colleague',  name: 'Mối quan hệ với đồng nghiệp',    icon: '🤝', description: '', color: 'rgba(120,77,186,0.08)', border: 'rgba(120,77,186,0.22)', tagColor: '#b08ce8', needsTwo: true },
-  { type: 'relations-friend',     name: 'Mối quan hệ với bạn bè',         icon: '🫂', description: '', color: 'rgba(120,77,186,0.08)', border: 'rgba(120,77,186,0.22)', tagColor: '#b08ce8', needsTwo: true },
+  { type: 'career',   name: 'Sự nghiệp & Tiền bạc', icon: '💼', description: '', color: 'var(--as-surface)', border: 'var(--as-border-soft)', tagColor: 'var(--as-copper-deep)' },
+  { type: 'love',     name: 'Tình duyên cá nhân',   icon: '💝', description: '', color: 'var(--as-surface)', border: 'var(--as-border-soft)', tagColor: 'var(--as-copper-deep)' },
+  { type: 'synastry', name: 'Mối quan hệ cặp đôi',  icon: '💑', description: '', color: 'var(--as-surface)', border: 'var(--as-border-soft)', tagColor: 'var(--as-copper-deep)', needsTwo: true },
+  { type: 'transit',  name: 'Vận hạn',              icon: '🧭', description: '', color: 'var(--as-surface)', border: 'var(--as-border-soft)', tagColor: 'var(--as-copper-deep)' },
 ]
 
 // Per-service landing copy: pain points + benefits the user will get.
@@ -129,50 +107,6 @@ const LANDING_COPY: Record<string, { pains: string[]; benefits: string[] }> = {
       'Thời điểm vàng để hành động (công việc, tiền bạc, đầu tư, tình cảm)',
       'Lĩnh vực nào trong cuộc sống đang được mở ra — hoặc bị thử thách',
       'Cơ hội nào bạn nên nắm bắt ngay, thời điểm đẹp để bạn quyết định những dự định của chính mình',
-    ],
-  },
-  'relations-parents': {
-    pains: [
-      'Bạn cảm thấy bố mẹ và mình như nói hai ngôn ngữ khác nhau, ai cũng có lý nhưng không ai thấu hiểu ai?',
-      'Bạn muốn kết nối lại nhưng không biết bắt đầu từ đâu, hay sợ chạm vào những vết cũ?',
-    ],
-    benefits: [
-      'Hiểu vì sao bố mẹ và bạn nhìn cuộc đời theo cách rất khác nhau',
-      'Cách kết nối phù hợp với năng lượng của mỗi người, giảm xung đột',
-      'Nhìn lại những bài học cảm xúc mà mối quan hệ này đang mang đến cho cả hai',
-    ],
-  },
-  'relations-children': {
-    pains: [
-      'Bạn không hiểu tại sao con lại có tính cách khác mình đến vậy?',
-      'Bạn lo lắng vì nuôi dạy con theo cách mình nghĩ là tốt nhưng con vẫn khép kín hoặc phản kháng?',
-    ],
-    benefits: [
-      'Đọc tính cách bẩm sinh + nhu cầu cảm xúc của con qua bản đồ sao của con',
-      'Cách đồng hành phù hợp với năng lượng riêng của con, không áp đặt',
-      'Hiểu vai trò chiêm tinh của bạn trong hành trình lớn lên của con',
-    ],
-  },
-  'relations-colleague': {
-    pains: [
-      'Bạn làm việc với một số đồng nghiệp rất ăn ý, nhưng có một số người càng cố hợp tác càng mệt?',
-      'Bạn muốn giảm xung đột không cần thiết và xây dựng môi trường làm việc chuyên nghiệp hơn?',
-    ],
-    benefits: [
-      'Hiểu phong cách làm việc + cách giao tiếp của đồng nghiệp',
-      'Điểm bổ trợ tự nhiên giữa hai bên trong công việc',
-      'Cách xử lý xung đột phù hợp với năng lượng của mỗi người',
-    ],
-  },
-  'relations-friend': {
-    pains: [
-      'Bạn có những người bạn rất hợp và những người bạn dù lâu năm nhưng đôi khi vẫn như xa lạ?',
-      'Bạn muốn hiểu sâu hơn về một tình bạn quan trọng để giữ nó bền vững?',
-    ],
-    benefits: [
-      'Hiểu sợi dây gắn kết giữa bạn và người bạn này',
-      'Điểm đồng điệu tự nhiên + những khác biệt cần thấu hiểu',
-      'Cách đồng hành lâu dài, chân thành, không gồng lên giữ một mối quan hệ đã cạn duyên',
     ],
   },
 }
@@ -265,7 +199,7 @@ function ProfilePicker({
     <div>
       <label
         className="block mb-3"
-        style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em' }}
+        style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.06em' }}
       >
         {label}
       </label>
@@ -277,8 +211,8 @@ function ProfilePicker({
         className="w-full flex items-center gap-2 mb-2"
         style={{
           background: 'transparent',
-          border: '1px solid rgba(200,148,63,0.28)',
-          color: '#d9ab55',
+          border: '1px solid var(--as-border-gold)',
+          color: 'var(--as-text-strong)',
           borderRadius: '6px',
           padding: '0.55rem 0.875rem',
           fontFamily: 'var(--font-vietnam)',
@@ -286,7 +220,7 @@ function ProfilePicker({
           cursor: 'pointer',
           transition: 'background 0.15s',
         }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(200,148,63,0.07)')}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(22,54,83,0.06)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
       >
         <Plus size={14} /> Nhập thông tin mới
@@ -297,19 +231,19 @@ function ProfilePicker({
         <div
           className="flex items-center justify-between rounded-lg px-3 py-2.5 mb-2"
           style={{
-            background: 'rgba(245,158,11,0.08)',
-            border: '1px solid rgba(245,158,11,0.3)',
+            background: 'rgba(22,54,83,0.06)',
+            border: '1px solid var(--as-border-gold)',
           }}
         >
           <div>
-            <p style={{ color: '#f59e0b', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
+            <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
               {tempSelected.name}
             </p>
-            <p style={{ color: '#92400e', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.1rem' }}>
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.1rem' }}>
               Chưa lưu vào danh sách
             </p>
           </div>
-          <span style={{ color: '#f59e0b', fontSize: '0.72rem', fontFamily: 'var(--font-vietnam)', background: 'rgba(245,158,11,0.15)', padding: '2px 8px', borderRadius: '4px' }}>
+          <span style={{ color: 'var(--as-copper-deep)', fontSize: '0.72rem', fontFamily: 'var(--font-vietnam)', background: 'rgba(22,54,83,0.06)', padding: '2px 8px', borderRadius: '4px' }}>
             ✦ Đã chọn
           </span>
         </div>
@@ -320,9 +254,9 @@ function ProfilePicker({
         <>
           <div
             className="flex items-center gap-2 rounded-lg px-3 mb-2"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(200,148,63,0.1)', minHeight: 36 }}
+            style={{ background: 'var(--as-surface)', border: '1px solid var(--as-border-gold)', minHeight: 36 }}
           >
-            <Search size={13} style={{ color: '#6b7280', flexShrink: 0 }} />
+            <Search size={13} style={{ color: 'var(--as-text-muted)', flexShrink: 0 }} />
             <input
               type="text"
               value={search}
@@ -330,19 +264,19 @@ function ProfilePicker({
               placeholder="Tìm hồ sơ đã lưu..."
               style={{
                 background: 'transparent', border: 'none', outline: 'none',
-                color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem',
+                color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem',
                 width: '100%', padding: '0.4rem 0',
               }}
             />
             {search && (
-              <button onClick={() => setSearch('')} style={{ color: '#6b7280', flexShrink: 0, lineHeight: 1 }}>✕</button>
+              <button onClick={() => setSearch('')} style={{ color: 'var(--as-text-muted)', flexShrink: 0, lineHeight: 1 }}>✕</button>
             )}
           </div>
 
           {/* Profile list — chỉ permanent */}
           <div className="space-y-1 overflow-y-auto pr-0.5" style={{ maxHeight: 180 }}>
             {filteredList.length === 0 && (
-              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', textAlign: 'center', padding: '0.875rem' }}>
+              <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', textAlign: 'center', padding: '0.875rem' }}>
                 Không tìm thấy hồ sơ
               </p>
             )}
@@ -355,17 +289,17 @@ function ProfilePicker({
                   onClick={() => onChange(p.id)}
                   className="w-full text-left rounded-lg px-3 py-2.5"
                   style={{
-                    background: isSelected ? 'rgba(200,148,63,0.12)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${isSelected ? 'rgba(200,148,63,0.32)' : 'rgba(255,255,255,0.05)'}`,
+                    background: isSelected ? 'rgba(22,54,83,0.06)' : 'var(--as-surface)',
+                    border: `1px solid ${isSelected ? 'var(--as-border-gold)' : 'var(--as-border-soft)'}`,
                     transition: 'all 0.15s',
                   }}
-                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
-                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)' }}
+                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(22,54,83,0.04)' }}
+                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'var(--as-surface)' }}
                 >
-                  <p style={{ color: isSelected ? '#f0cc78' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
+                  <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontWeight: 600, fontSize: '0.88rem', margin: 0 }}>
                     {p.name}
                   </p>
-                  <p style={{ color: '#8b8fa8', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontStyle: 'italic', minHeight: '1em', marginTop: '0.15rem' }}>
+                  <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontStyle: 'italic', minHeight: '1em', marginTop: '0.15rem' }}>
                     {p.note || ''}
                   </p>
                 </button>
@@ -387,6 +321,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [profilesLoaded, setProfilesLoaded] = useState(false)
   const [selectedService, setSelectedService] = useState<ServiceDef | null>(null)
+  const [astroModal, setAstroModal] = useState<AstroServiceDef | null>(null)
   const [profileA, setProfileA] = useState('')
   const [profileB, setProfileB] = useState('')
   const [transitStartDate, setTransitStartDate] = useState('')
@@ -867,23 +802,20 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
   }))
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       {/* Toast: hồ sơ trùng → báo đã có trong danh sách */}
       {dupNotice && (
         <div
           style={{
             position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 300,
-            background: 'rgba(18,13,46,0.97)', border: '1px solid rgba(200,148,63,0.4)', borderRadius: 10,
-            padding: '0.7rem 1.1rem', color: '#f0cc78', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)', maxWidth: '90vw', textAlign: 'center',
+            background: 'var(--as-cta)', border: '1px solid var(--as-border-gold)', borderRadius: 10,
+            padding: '0.7rem 1.1rem', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem',
+            boxShadow: 'var(--as-shadow-card)', maxWidth: '90vw', textAlign: 'center',
           }}
         >
           ✓ {dupNotice}
         </div>
       )}
-      {/* Background — same stack as home page (StarField fills #06060f + ZodiacBackground draws the rotating wheel) */}
-      <StarField />
-      <ZodiacBackground />
       <Navbar />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 pt-28 pb-16">
@@ -896,27 +828,26 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                 href="/services"
                 className="inline-flex items-center gap-2 mb-5"
                 style={{
-                  background: 'rgba(18,13,46,0.7)',
-                  border: '1px solid rgba(200,148,63,0.3)',
-                  color: '#d9ab55',
+                  background: 'transparent',
+                  border: '1px solid var(--as-border-gold)',
+                  color: 'var(--as-text-strong)',
                   borderRadius: '6px',
                   padding: '0.5rem 1rem',
                   fontFamily: 'var(--font-vietnam)',
                   fontSize: '0.85rem',
                   fontWeight: 600,
                   textDecoration: 'none',
-                  backdropFilter: 'blur(8px)',
                 }}
               >
                 ← Quay lại 4 cục
               </Link>
-              <p className="section-eyebrow mb-4">Chiêm tinh chuyên sâu</p>
+              <p className="section-eyebrow mb-4" style={{ color: 'var(--as-copper-deep)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Chiêm tinh chuyên sâu</p>
               <h1
-                style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', fontWeight: 700, marginBottom: '0.75rem', letterSpacing: '0.03em' }}
+                style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', fontWeight: 700, marginBottom: '0.75rem', letterSpacing: '0.03em' }}
               >
                 {groupView.label}
               </h1>
-              <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>
+              <p style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>
                 Chọn loại bạn muốn khám phá để bắt đầu.
               </p>
             </div>
@@ -932,18 +863,18 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                     onClick={() => handleServiceClick(svc)}
                     className="svc-card text-left p-7 rounded-xl"
                     style={{
-                      background: 'rgba(18,13,46,0.7)',
-                      border: '1px solid rgba(200,148,63,0.22)',
-                      backdropFilter: 'blur(8px)',
+                      background: 'var(--as-surface)',
+                      border: '1px solid var(--as-border-soft)',
+                      boxShadow: 'var(--as-shadow-card)',
                     }}
                   >
                     <div className="flex items-start gap-4">
                       <span className="text-4xl flex-shrink-0" style={{ lineHeight: 1.2 }}>{sub.emoji}</span>
                       <div>
-                        <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem', letterSpacing: '0.02em', margin: 0, marginBottom: '0.5rem' }}>
+                        <h3 className="font-bold" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1.05rem', letterSpacing: '0.02em', margin: 0, marginBottom: '0.5rem' }}>
                           {sub.title}
                         </h3>
-                        <p style={{ color: '#9b8fb5', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.7, margin: 0 }}>
+                        <p style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.7, margin: 0 }}>
                           {sub.subtitle}
                         </p>
                       </div>
@@ -952,17 +883,17 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                 )
               })}
             </div>
-            <style>{`.svc-card{transition:transform .25s ease,box-shadow .25s ease}.svc-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.4);border-color:rgba(200,148,63,0.5)!important}`}</style>
+            <style>{`.svc-card{transition:transform .25s ease,box-shadow .25s ease}.svc-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(22,54,83,.18);border-color:var(--as-border-gold)!important}`}</style>
           </>
         ) : !selectedService ? (
           <>
             {/* Header */}
             <div className="text-center mb-14">
-              <p className="section-eyebrow mb-5">Chiêm tinh chuyên sâu</p>
+              <p className="section-eyebrow mb-5" style={{ color: 'var(--as-copper-deep)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Chiêm tinh chuyên sâu</p>
               <h1
                 style={{
-                  color: '#f4efe6',
-                  fontFamily: 'var(--font-vietnam)',
+                  color: 'var(--as-text-strong)',
+                  fontFamily: 'var(--font-playfair)',
                   fontSize: 'clamp(1.5rem, 4vw, 2.2rem)',
                   fontWeight: 700,
                   marginBottom: '0.75rem',
@@ -971,10 +902,10 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
               >
                 Cùng bạn tháo gỡ các vấn đề
               </h1>
-              <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>
+              <p style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}>
                 {PDF_EMAIL_ENABLED
-                  ? <>Chọn lĩnh vực mà bạn quan tâm để nhận bản luận giải tổng quan <strong style={{ color: '#d9ab55' }}>MIỄN PHÍ</strong></>
-                  : <>Chọn lĩnh vực để đọc luận giải chiêm tinh — mở từng mục bằng <strong style={{ color: '#d9ab55' }}>xu</strong></>}
+                  ? <>Chọn lĩnh vực mà bạn quan tâm để nhận bản luận giải tổng quan <strong style={{ color: 'var(--as-copper-deep)' }}>MIỄN PHÍ</strong></>
+                  : <>Chọn lĩnh vực để đọc luận giải chiêm tinh — mở từng mục bằng <strong style={{ color: 'var(--as-copper-deep)' }}>xu</strong></>}
               </p>
             </div>
 
@@ -982,7 +913,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
             <ServicesGrid />
 
             {/* Service grid (legacy 8 cards — chỉ hiện khi PDF_EMAIL_ENABLED bật để tương thích flow cũ) */}
-            <style>{`.svc-card{transition:transform .25s ease,box-shadow .25s ease}.svc-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.4)}`}</style>
+            <style>{`.svc-card{transition:transform .25s ease,box-shadow .25s ease}.svc-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(22,54,83,.18);border-color:var(--as-border-gold)!important}`}</style>
             {PDF_EMAIL_ENABLED && <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-12">
               {services.map(s => (
                 <button
@@ -992,7 +923,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                   style={{
                     background: s.color,
                     border: `1px solid ${s.border}`,
-                    backdropFilter: 'blur(12px)',
+                    boxShadow: 'var(--as-shadow-card)',
                     height: '100%',
                   }}
                 >
@@ -1002,20 +933,20 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                       <div className="flex items-center gap-2 mb-2" style={{ minHeight: '2.2rem' }}>
                         <h3
                           className="font-bold"
-                          style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem', letterSpacing: '0.02em', margin: 0 }}
+                          style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1.05rem', letterSpacing: '0.02em', margin: 0 }}
                         >
                           {s.name}
                         </h3>
                         {s.needsTwo && (
                           <span
                             className="inline-block px-2 py-0.5 rounded-sm"
-                            style={{ background: 'rgba(120,77,186,0.2)', color: '#9b6dd6', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.1em', flexShrink: 0 }}
+                            style={{ background: 'rgba(22,54,83,0.06)', color: 'var(--as-copper-deep)', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', letterSpacing: '0.1em', flexShrink: 0 }}
                           >
                             Cần 2 hồ sơ
                           </span>
                         )}
                       </div>
-                      <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+                      <p style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
                         {s.description}
                       </p>
                       {PDF_EMAIL_ENABLED && displayPrices?.[s.type] != null && (
@@ -1023,7 +954,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                           <p style={{ color: s.tagColor, fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700 }}>
                             {fmtPrice(displayPrices[s.type])}
                           </p>
-                          <p style={{ color: '#9b8fb5', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', fontStyle: 'italic', marginTop: '0.2rem' }}>
+                          <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', fontStyle: 'italic', marginTop: '0.2rem' }}>
                             (Bấm xem chi tiết để nhận ưu đãi)
                           </p>
                         </div>
@@ -1036,7 +967,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
 
             {/* Loading indicator khi user đang fetch profiles */}
             {user && !profilesLoaded && (
-              <p className="text-center mt-6" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+              <p className="text-center mt-6" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
                 Đang tải…
               </p>
             )}
@@ -1049,16 +980,15 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
               href="/services"
               className="mb-6 inline-flex items-center gap-2"
               style={{
-                background: 'rgba(18,13,46,0.7)',
-                border: '1px solid rgba(200,148,63,0.3)',
-                color: '#d9ab55',
+                background: 'transparent',
+                border: '1px solid var(--as-border-gold)',
+                color: 'var(--as-text-strong)',
                 borderRadius: '6px',
                 padding: '0.5rem 1rem',
                 fontFamily: 'var(--font-vietnam)',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 textDecoration: 'none',
-                backdropFilter: 'blur(8px)',
               }}
             >
               ← Quay lại
@@ -1067,8 +997,8 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
             <h1
               className="text-center mb-2"
               style={{
-                color: '#f4efe6',
-                fontFamily: 'var(--font-vietnam)',
+                color: 'var(--as-text-strong)',
+                fontFamily: 'var(--font-playfair)',
                 fontSize: 'clamp(1.4rem, 4vw, 2rem)',
                 fontWeight: 700,
                 letterSpacing: '0.04em',
@@ -1077,23 +1007,23 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
             >
               {selectedService.icon} {selectedService.name}
             </h1>
-            <div className="mx-auto mb-8" style={{ width: '60px', height: '1px', background: 'linear-gradient(90deg, transparent, #d9ab55, transparent)' }} />
+            <div className="mx-auto mb-8" style={{ width: '60px', height: '1px', background: 'linear-gradient(90deg, transparent, var(--as-copper-deep), transparent)' }} />
 
             {/* Pain points — "Có phải" */}
             <p
               className="mb-3"
-              style={{ color: '#e87da0', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}
+              style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}
             >
               Có phải
             </p>
             <div
               className="rounded-2xl p-6 mb-10"
-              style={{ background: 'rgba(18,13,46,0.72)', border: '1px solid rgba(185,77,112,0.22)', backdropFilter: 'blur(8px)' }}
+              style={{ background: 'var(--as-surface)', border: '1px solid var(--as-border-soft)', boxShadow: 'var(--as-shadow-card)' }}
             >
               <ul className="space-y-3" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {LANDING_COPY[selectedService.type].pains.map((p, i) => (
-                  <li key={i} className="flex items-start gap-3" style={{ color: '#c9c3d6', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem', lineHeight: 1.8 }}>
-                    <span style={{ color: '#e87da0', flexShrink: 0, marginTop: '0.15rem' }}>•</span>
+                  <li key={i} className="flex items-start gap-3" style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem', lineHeight: 1.8 }}>
+                    <span style={{ color: 'var(--as-copper-deep)', flexShrink: 0, marginTop: '0.15rem' }}>•</span>
                     <span>{p}</span>
                   </li>
                 ))}
@@ -1103,18 +1033,18 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
             {/* Benefits — "Hạt giống chiêm tinh cho bạn góc nhìn về" */}
             <p
               className="mb-3"
-              style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}
+              style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}
             >
               Hạt giống chiêm tinh cho bạn góc nhìn về
             </p>
             <div
               className="rounded-2xl p-6 mb-10"
-              style={{ background: 'rgba(18,13,46,0.72)', border: '1px solid rgba(200,148,63,0.22)', backdropFilter: 'blur(8px)' }}
+              style={{ background: 'linear-gradient(160deg, #063755, #163653)', border: '1px solid var(--as-border-gold)', boxShadow: '0 16px 44px rgba(22,54,83,0.3)' }}
             >
               <ul className="space-y-3" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {LANDING_COPY[selectedService.type].benefits.map((b, i) => (
-                  <li key={i} className="flex items-start gap-3" style={{ color: '#e8e0f0', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem', lineHeight: 1.8 }}>
-                    <span style={{ color: '#d9ab55', flexShrink: 0, marginTop: '0.15rem' }}>✦</span>
+                  <li key={i} className="flex items-start gap-3" style={{ color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem', lineHeight: 1.8 }}>
+                    <span style={{ color: 'var(--as-champagne)', flexShrink: 0, marginTop: '0.15rem' }}>✦</span>
                     <span>{b}</span>
                   </li>
                 ))}
@@ -1124,28 +1054,27 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
             {/* CTA — open the input modal */}
             <div className="text-center">
               <button
-                onClick={() => openGuestFlow(selectedService)}
+                onClick={() => setAstroModal({ service: selectedService.type, title: selectedService.name, needsTwo: !!selectedService.needsTwo })}
                 className="inline-block"
                 style={{
-                  background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
-                  backgroundSize: '200% 200%',
-                  color: '#06060f',
+                  background: 'var(--as-cta)',
+                  color: 'var(--as-text-on-dark)',
                   border: 'none',
-                  borderRadius: '6px',
-                  padding: '1rem 2.5rem',
+                  borderRadius: '999px',
+                  padding: '1rem 2.75rem',
                   fontFamily: 'var(--font-vietnam)',
                   fontSize: '0.95rem',
                   fontWeight: 700,
                   letterSpacing: '0.06em',
                   cursor: 'pointer',
-                  boxShadow: '0 6px 28px rgba(200,148,63,0.3)',
+                  boxShadow: 'var(--as-shadow-glow)',
                   textTransform: 'uppercase',
                 }}
               >
-                Bấm vào đây để nhập thông tin →
+                Tạo bản đồ sao →
               </button>
               {selectedService.needsTwo && (
-                <p className="mt-3" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', fontStyle: 'italic' }}>
+                <p className="mt-3" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', fontStyle: 'italic' }}>
                   Cần thông tin sinh của 2 người để so sánh
                 </p>
               )}
@@ -1157,9 +1086,9 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
             <button
               onClick={() => setSelectedService(null)}
               className="mb-8 flex items-center gap-2 text-sm transition-colors"
-              style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#d9ab55')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#4a4560')}
+              style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--as-text-strong)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--as-text-muted)')}
             >
               ← Quay lại
             </button>
@@ -1167,9 +1096,9 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
             <div
               className="rounded-2xl p-8"
               style={{
-                background: 'rgba(18,13,46,0.75)',
-                border: '1px solid rgba(200,148,63,0.18)',
-                backdropFilter: 'blur(20px)',
+                background: 'var(--as-surface)',
+                border: '1px solid var(--as-border-soft)',
+                boxShadow: 'var(--as-shadow-card)',
               }}
             >
               {/* Service header */}
@@ -1178,12 +1107,12 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                 <div>
                   <h2
                     className="font-bold"
-                    style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem', letterSpacing: '0.03em' }}
+                    style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1.1rem', letterSpacing: '0.03em' }}
                   >
                     {selectedService.name}
                   </h2>
                   {selectedService.needsTwo && (
-                    <p className="text-xs mt-0.5" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)' }}>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
                       Cần 2 hồ sơ để so sánh
                     </p>
                   )}
@@ -1192,7 +1121,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
 
               <div
                 className="mb-6"
-                style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.2), transparent)' }}
+                style={{ height: '1px', background: 'var(--as-border-soft)' }}
               />
 
               <div className="space-y-6">
@@ -1208,7 +1137,7 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
 
                     {selectedService.needsTwo && (
                       <>
-                        <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
+                        <div style={{ height: '1px', background: 'var(--as-border-soft)' }} />
                         <ProfilePicker
                           profiles={profiles}
                           selectedId={profileB}
@@ -1221,11 +1150,11 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                   </>
                 ) : (
                   <div className="py-6 text-center">
-                    <p className="mb-1" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+                    <p className="mb-1" style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
                       {user ? 'Bạn chưa có hồ sơ nào.' : 'Không cần tài khoản — nhập thông tin trực tiếp.'}
                     </p>
                     {!user && (
-                      <p className="mb-4" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+                      <p className="mb-4" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
                         Điền thông tin → xác nhận → đọc luận giải ngay trên trang.
                       </p>
                     )}
@@ -1235,8 +1164,8 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                       className="flex items-center gap-2 mx-auto"
                       style={{
                         background: 'transparent',
-                        border: '1px solid rgba(200,148,63,0.28)',
-                        color: '#d9ab55',
+                        border: '1px solid var(--as-border-gold)',
+                        color: 'var(--as-text-strong)',
                         borderRadius: '6px',
                         padding: '0.6rem 1.25rem',
                         fontFamily: 'var(--font-vietnam)',
@@ -1252,10 +1181,10 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                 {/* ── Transit date range picker ─────────────────────── */}
                 {false && selectedService?.type === 'transit' && (
                   <div>
-                    <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)', marginBottom: '1.25rem' }} />
+                    <div style={{ height: '1px', background: 'var(--as-border-soft)', marginBottom: '1.25rem' }} />
                     <div className="grid grid-cols-2 gap-3 mb-3">
                       <div>
-                        <label style={{ display: 'block', marginBottom: '0.4rem', color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.06em' }}>
+                        <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.06em' }}>
                           TỪ NGÀY
                         </label>
                         <input
@@ -1263,16 +1192,16 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                           value={transitStartDate}
                           onChange={e => setTransitStartDate(e.target.value)}
                           style={{
-                            width: '100%', background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(200,148,63,0.22)', borderRadius: '6px',
-                            padding: '0.52rem 0.7rem', color: '#f4efe6',
+                            width: '100%', background: 'var(--as-surface)',
+                            border: '1px solid var(--as-border-gold)', borderRadius: '6px',
+                            padding: '0.52rem 0.7rem', color: 'var(--as-text-strong)',
                             fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem',
-                            outline: 'none', colorScheme: 'dark',
+                            outline: 'none', colorScheme: 'light',
                           }}
                         />
                       </div>
                       <div>
-                        <label style={{ display: 'block', marginBottom: '0.4rem', color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.06em' }}>
+                        <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.06em' }}>
                           ĐẾN NGÀY
                         </label>
                         <input
@@ -1280,23 +1209,23 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                           value={transitEndDate}
                           onChange={e => setTransitEndDate(e.target.value)}
                           style={{
-                            width: '100%', background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(200,148,63,0.22)', borderRadius: '6px',
-                            padding: '0.52rem 0.7rem', color: '#f4efe6',
+                            width: '100%', background: 'var(--as-surface)',
+                            border: '1px solid var(--as-border-gold)', borderRadius: '6px',
+                            padding: '0.52rem 0.7rem', color: 'var(--as-text-strong)',
                             fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem',
-                            outline: 'none', colorScheme: 'dark',
+                            outline: 'none', colorScheme: 'light',
                           }}
                         />
                       </div>
                     </div>
                     {transitStartDate && transitEndDate && transitDaysApart <= 0 && (
-                      <p style={{ color: '#f87171', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', marginBottom: '0.5rem' }}>
+                      <p style={{ color: '#b3261e', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', marginBottom: '0.5rem' }}>
                         ⚠ Ngày kết thúc phải sau ngày bắt đầu
                       </p>
                     )}
                     {transitDaysApart > 365 && (
-                      <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: '6px', padding: '0.55rem 0.8rem' }}>
-                        <p style={{ color: '#d4a017', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', margin: 0 }}>
+                      <div style={{ background: 'rgba(22,54,83,0.06)', border: '1px solid var(--as-border-gold)', borderRadius: '6px', padding: '0.55rem 0.8rem' }}>
+                        <p style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem', margin: 0 }}>
                           ⚠ Vui lòng chọn khoảng thời gian tối đa 1 năm
                         </p>
                       </div>
@@ -1313,14 +1242,14 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                           disabled={!canConfirm}
                           className="w-full py-3.5 font-bold text-sm tracking-wider"
                           style={{
-                            background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
+                            background: 'var(--as-cta)',
                             backgroundSize: '200% 200%',
-                            color: '#06060f',
+                            color: 'var(--as-text-on-dark)',
                             borderRadius: '4px',
                             fontFamily: 'var(--font-vietnam)',
                             letterSpacing: '0.08em',
                             opacity: canConfirm ? 1 : 0.35,
-                            boxShadow: canConfirm ? '0 4px 20px rgba(200,148,63,0.25)' : 'none',
+                            boxShadow: canConfirm ? 'var(--as-shadow-card)' : 'none',
                             transition: 'opacity 0.2s ease',
                             cursor: canConfirm ? 'pointer' : 'not-allowed',
                           }}
@@ -1333,8 +1262,8 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                           className="w-full py-3 font-semibold text-sm"
                           style={{
                             background: 'transparent',
-                            border: '1px solid rgba(200,148,63,0.35)',
-                            color: canConfirm ? '#d9ab55' : '#4a4560',
+                            border: '1px solid var(--as-border-gold)',
+                            color: canConfirm ? 'var(--as-text-strong)' : 'var(--as-text-muted)',
                             borderRadius: '4px',
                             fontFamily: 'var(--font-vietnam)',
                             opacity: canConfirm ? 1 : 0.35,
@@ -1350,14 +1279,14 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
                         disabled={!canConfirm}
                         className="w-full py-3.5 font-bold text-sm tracking-wider"
                         style={{
-                          background: 'linear-gradient(135deg, #c8943f, #f0cc78, #c8943f)',
+                          background: 'var(--as-cta)',
                           backgroundSize: '200% 200%',
-                          color: '#06060f',
+                          color: 'var(--as-text-on-dark)',
                           borderRadius: '4px',
                           fontFamily: 'var(--font-vietnam)',
                           letterSpacing: '0.08em',
                           opacity: canConfirm ? 1 : 0.35,
-                          boxShadow: canConfirm ? '0 4px 20px rgba(200,148,63,0.25)' : 'none',
+                          boxShadow: canConfirm ? 'var(--as-shadow-card)' : 'none',
                           transition: 'opacity 0.2s ease',
                           cursor: canConfirm ? 'pointer' : 'not-allowed',
                         }}
@@ -1373,7 +1302,10 @@ export default function ServicesClient({ serviceConfigs, prices, displayPrices }
         )}
       </div>
 
-      {/* Modal nhập thông tin mới (old flow — user có profile) */}
+      {/* Modal nhập thông tin MỚI (giống S1 hero) → saveChart + /ket-qua/{id} đúng loại */}
+      {astroModal && <AstroServiceModal def={astroModal} onClose={() => setAstroModal(null)} />}
+
+      {/* Modal cũ (giữ lại cho luồng user có profile / synastry cũ — không còn mở từ nút landing) */}
       <ProfileFormModal
         open={modalOpen}
         title={

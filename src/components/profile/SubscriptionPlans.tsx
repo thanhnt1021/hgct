@@ -114,19 +114,19 @@ export default function SubscriptionPlans() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-1" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+      <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
         Gói dịch vụ
       </h2>
-      <p className="text-sm mb-6" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+      <p className="text-sm mb-6" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
         Chọn gói phù hợp với nhu cầu chiêm tinh của bạn.
       </p>
 
       {/* Current plan badge */}
       {isPremium && (
         <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full"
-          style={{ background: isLifetime(planType) ? 'rgba(167,139,250,0.1)' : 'rgba(201,168,76,0.1)', border: `1px solid ${isLifetime(planType) ? 'rgba(167,139,250,0.3)' : 'rgba(201,168,76,0.3)'}` }}>
-          <Star size={13} style={{ color: isLifetime(planType) ? '#a78bfa' : '#d9ab55' }} />
-          <span style={{ color: isLifetime(planType) ? '#a78bfa' : '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', fontWeight: 600 }}>
+          style={{ background: isLifetime(planType) ? 'rgba(167,139,250,0.12)' : 'rgba(22,54,83,0.08)', border: `1px solid ${isLifetime(planType) ? 'rgba(167,139,250,0.4)' : 'var(--as-border-gold)'}` }}>
+          <Star size={13} style={{ color: isLifetime(planType) ? '#7c5cd6' : 'var(--as-copper-deep)' }} />
+          <span style={{ color: isLifetime(planType) ? '#7c5cd6' : 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', fontWeight: 600 }}>
             Gói hiện tại: {currentLabel}
           </span>
         </div>
@@ -134,13 +134,13 @@ export default function SubscriptionPlans() {
 
       {/* Billing toggle */}
       <div className="flex items-center justify-center mb-8">
-        <div className="flex items-center p-1 rounded-full" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="flex items-center p-1 rounded-full" style={{ background: 'var(--as-champagne)', border: '1px solid var(--as-border-soft)' }}>
           <button
             onClick={() => setBilling('monthly')}
             className="px-5 py-2 rounded-full text-sm font-medium transition-all"
             style={{
-              background: billing === 'monthly' ? 'rgba(255,255,255,0.1)' : 'transparent',
-              color: billing === 'monthly' ? '#f4efe6' : '#6b7280',
+              background: billing === 'monthly' ? 'var(--as-cta)' : 'transparent',
+              color: billing === 'monthly' ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)',
               fontFamily: 'var(--font-vietnam)',
             }}
           >
@@ -150,8 +150,8 @@ export default function SubscriptionPlans() {
             onClick={() => setBilling('yearly')}
             className="px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2"
             style={{
-              background: billing === 'yearly' ? 'rgba(255,255,255,0.1)' : 'transparent',
-              color: billing === 'yearly' ? '#f4efe6' : '#6b7280',
+              background: billing === 'yearly' ? 'var(--as-cta)' : 'transparent',
+              color: billing === 'yearly' ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)',
               fontFamily: 'var(--font-vietnam)',
             }}
           >
@@ -177,31 +177,31 @@ export default function SubscriptionPlans() {
             <div key={plan.id}
               className="rounded-2xl p-5 flex flex-col relative"
               style={{
-                background: isRec ? 'rgba(41,31,70,0.8)' : 'rgba(26,21,53,0.5)',
+                background: isRec ? '#063755' : 'var(--as-surface)',
                 border: active
                   ? `2px solid ${plan.color}`
                   : isRec
-                  ? `1.5px solid rgba(201,168,76,0.35)`
-                  : '1px solid rgba(201,168,76,0.1)',
-                boxShadow: isRec ? '0 0 32px rgba(201,168,76,0.06)' : 'none',
+                  ? `1.5px solid var(--as-border-gold)`
+                  : '1px solid var(--as-border-soft)',
+                boxShadow: 'var(--as-shadow-card)',
               }}
             >
               {/* Recommended badge */}
               {isRec && !active && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)', whiteSpace: 'nowrap' }}>
+                  style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', whiteSpace: 'nowrap' }}>
                   ✦ Phổ biến nhất
                 </div>
               )}
               {active && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ background: plan.color, color: '#0a0a1a', fontFamily: 'var(--font-vietnam)', whiteSpace: 'nowrap' }}>
+                  style={{ background: plan.color, color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', whiteSpace: 'nowrap' }}>
                   Đang dùng
                 </div>
               )}
 
               {/* Plan name */}
-              <p className="font-bold text-base mb-3" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+              <p className="font-bold text-base mb-3" style={{ color: isRec ? 'var(--as-text-on-dark)' : 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
                 {plan.name}
               </p>
 
@@ -210,28 +210,28 @@ export default function SubscriptionPlans() {
                 {pricing ? (
                   <>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold" style={{ color: plan.color, fontFamily: 'var(--font-vietnam)', letterSpacing: '-0.02em' }}>
+                      <span className="text-3xl font-bold" style={{ color: isRec ? 'var(--as-text-on-dark)' : 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', letterSpacing: '-0.02em' }}>
                         {pricing.price}
                       </span>
-                      <span className="text-sm" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+                      <span className="text-sm" style={{ color: isRec ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
                         {pricing.period}
                       </span>
                     </div>
                     {billing === 'yearly' && 'perMonth' in pricing && (
-                      <p className="text-xs mt-1" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>
+                      <p className="text-xs mt-1" style={{ color: '#3db88a', fontFamily: 'var(--font-vietnam)' }}>
                         {(pricing as typeof PLANS[1]['yearly']).perMonth}
                       </p>
                     )}
                     {billing === 'monthly' && (
-                      <p className="text-xs mt-1" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+                      <p className="text-xs mt-1" style={{ color: isRec ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
                         Chu kỳ 30 ngày từ ngày thanh toán
                       </p>
                     )}
                   </>
                 ) : (
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>0đ</span>
-                    <span className="text-sm" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>/mãi mãi</span>
+                    <span className="text-3xl font-bold" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)' }}>0đ</span>
+                    <span className="text-sm" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>/mãi mãi</span>
                   </div>
                 )}
               </div>
@@ -239,14 +239,14 @@ export default function SubscriptionPlans() {
               {/* Features */}
               <ul className="flex-1 space-y-2.5 mb-6">
                 {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: '#c4b89a', fontFamily: 'var(--font-vietnam)' }}>
-                    <Check size={13} style={{ color: plan.color, marginTop: '0.25rem', flexShrink: 0 }} />
+                  <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: isRec ? 'var(--as-text-on-dark)' : 'var(--as-text)', fontFamily: 'var(--font-vietnam)' }}>
+                    <Check size={13} style={{ color: isRec ? 'var(--as-text-on-dark)' : plan.color, marginTop: '0.25rem', flexShrink: 0 }} />
                     {f}
                   </li>
                 ))}
                 {plan.locked.map(f => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: '#3d3558', fontFamily: 'var(--font-vietnam)' }}>
-                    <X size={13} style={{ color: '#3d3558', marginTop: '0.25rem', flexShrink: 0 }} />
+                  <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: isRec ? 'rgba(237,213,177,0.5)' : 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
+                    <X size={13} style={{ color: isRec ? 'rgba(237,213,177,0.5)' : 'var(--as-text-muted)', marginTop: '0.25rem', flexShrink: 0 }} />
                     {f}
                   </li>
                 ))}
@@ -255,12 +255,12 @@ export default function SubscriptionPlans() {
               {/* CTA */}
               {active ? (
                 <div className="py-2.5 text-center rounded-xl text-sm font-semibold"
-                  style={{ background: `${plan.color}18`, color: plan.color, border: `1px solid ${plan.color}44`, fontFamily: 'var(--font-vietnam)' }}>
+                  style={{ background: isRec ? 'rgba(237,213,177,0.15)' : `${plan.color}18`, color: isRec ? 'var(--as-text-on-dark)' : plan.color, border: `1px solid ${isRec ? 'rgba(237,213,177,0.4)' : `${plan.color}44`}`, fontFamily: 'var(--font-vietnam)' }}>
                   Gói hiện tại
                 </div>
               ) : plan.id === 'free' ? (
                 <div className="py-2.5 text-center rounded-xl text-sm"
-                  style={{ color: '#4a4560', border: '1px solid rgba(255,255,255,0.05)', fontFamily: 'var(--font-vietnam)' }}>
+                  style={{ color: 'var(--as-text-muted)', border: '1px solid var(--as-border-soft)', fontFamily: 'var(--font-vietnam)' }}>
                   Gói cơ bản
                 </div>
               ) : (
@@ -269,11 +269,12 @@ export default function SubscriptionPlans() {
                   className="py-2.5 rounded-xl text-sm font-semibold w-full transition-all"
                   style={{
                     background: isRec
-                      ? 'linear-gradient(135deg,#c8943f,#f0cc78)'
+                      ? 'var(--as-champagne)'
                       : `${plan.color}22`,
-                    color: isRec ? '#0a0a1a' : plan.color,
+                    color: isRec ? 'var(--as-text-strong)' : plan.color,
                     border: isRec ? 'none' : `1px solid ${plan.color}44`,
                     fontFamily: 'var(--font-vietnam)',
+                    borderRadius: 999,
                   }}
                 >
                   {isRec ? 'Nâng cấp ngay →' : 'Chọn gói này →'}
@@ -285,16 +286,16 @@ export default function SubscriptionPlans() {
       </div>
 
       {/* Feature comparison note */}
-      <p className="text-center text-xs mb-8" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+      <p className="text-center text-xs mb-8" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
         Gói Năm: 365 ngày từ ngày thanh toán · Hủy bất cứ lúc nào
       </p>
 
       {/* Activation code */}
-      <div className="rounded-2xl p-5" style={{ background: 'rgba(26,21,53,0.5)', border: '1px solid rgba(255,255,255,0.05)' }}>
-        <p className="text-sm font-medium mb-1" style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+      <div className="rounded-2xl p-5" style={{ background: 'var(--as-surface)', border: '1px solid var(--as-border-soft)', boxShadow: 'var(--as-shadow-card)' }}>
+        <p className="text-sm font-medium mb-1" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)' }}>
           Có mã kích hoạt đặc biệt?
         </p>
-        <p className="text-xs mb-3" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+        <p className="text-xs mb-3" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
           Nhập mã để kích hoạt gói dịch vụ ngay lập tức.
         </p>
         {activationSuccess ? (
@@ -318,11 +319,13 @@ export default function SubscriptionPlans() {
                 disabled={activating || !activationCode.trim()}
                 className="px-5 py-2 rounded-xl font-semibold text-sm"
                 style={{
-                  background: activationCode.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.1)',
-                  color: activationCode.trim() ? '#0a0a1a' : '#6b7280',
+                  background: activationCode.trim() ? 'var(--as-cta)' : 'rgba(22,54,83,0.12)',
+                  color: activationCode.trim() ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)',
                   fontFamily: 'var(--font-vietnam)',
                   opacity: activating ? 0.7 : 1,
                   whiteSpace: 'nowrap',
+                  borderRadius: 999,
+                  boxShadow: activationCode.trim() ? 'var(--as-shadow-glow)' : 'none',
                 }}
               >
                 {activating ? 'Đang xử lý...' : 'Kích hoạt'}
@@ -338,7 +341,7 @@ export default function SubscriptionPlans() {
       {/* Toast */}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl text-sm max-w-sm text-center"
-          style={{ background: 'rgba(11,11,31,0.97)', border: '1px solid rgba(201,168,76,0.2)', color: '#f4efe6', fontFamily: 'var(--font-vietnam)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+          style={{ background: 'var(--as-cta)', border: '1px solid var(--as-border-gold)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', boxShadow: 'var(--as-shadow-glow)' }}>
           {toastMsg}
         </div>
       )}

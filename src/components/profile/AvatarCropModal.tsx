@@ -102,22 +102,22 @@ export default function AvatarCropModal({ file, onSave, onClose }: Props) {
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(22,54,83,0.5)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
         className="rounded-2xl p-6 flex flex-col items-center gap-4"
-        style={{ background: '#0e0e1f', border: '1px solid rgba(201,168,76,0.2)', minWidth: 300 }}
+        style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)', minWidth: 300, boxShadow: 'var(--as-shadow-card)' }}
       >
-        <h3 className="font-bold text-base" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+        <h3 className="font-bold text-base" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
           Chỉnh ảnh đại diện
         </h3>
-        <p className="text-xs" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+        <p className="text-xs" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
           Kéo để điều chỉnh vị trí ảnh
         </p>
 
         {/* Crop area */}
-        <div style={{ position: 'relative', width: SIZE, height: SIZE, borderRadius: '50%', overflow: 'hidden', cursor: 'grab', border: '2px solid rgba(201,168,76,0.4)' }}
+        <div style={{ position: 'relative', width: SIZE, height: SIZE, borderRadius: '50%', overflow: 'hidden', cursor: 'grab', border: '2px solid var(--as-border-gold)' }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -125,7 +125,7 @@ export default function AvatarCropModal({ file, onSave, onClose }: Props) {
         >
           <canvas ref={canvasRef} width={SIZE} height={SIZE} style={{ display: 'block' }} />
           {!imgLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>
+            <div className="absolute inset-0 flex items-center justify-center" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>
               Đang tải...
             </div>
           )}
@@ -133,26 +133,26 @@ export default function AvatarCropModal({ file, onSave, onClose }: Props) {
 
         {/* Scale slider */}
         <div className="w-full flex items-center gap-3">
-          <span style={{ color: '#6b7280', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)' }}>Thu</span>
+          <span style={{ color: 'var(--as-text-muted)', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)' }}>Thu</span>
           <input
             type="range" min={0.5} max={3} step={0.01}
             value={scale}
             onChange={e => handleScale(parseFloat(e.target.value))}
-            style={{ flex: 1, accentColor: '#c9a84c' }}
+            style={{ flex: 1, accentColor: 'var(--as-cta)' }}
           />
-          <span style={{ color: '#6b7280', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)' }}>Phóng</span>
+          <span style={{ color: 'var(--as-text-muted)', fontSize: '0.75rem', fontFamily: 'var(--font-vietnam)' }}>Phóng</span>
         </div>
 
         {/* Buttons */}
         <div className="flex gap-3 w-full">
           <button onClick={onClose}
             className="flex-1 py-2.5 rounded-xl text-sm font-medium"
-            style={{ background: 'rgba(255,255,255,0.06)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+            style={{ background: 'transparent', color: 'var(--as-text-strong)', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)' }}>
             Hủy
           </button>
           <button onClick={handleSave} disabled={!imgLoaded || saving}
             className="flex-1 py-2.5 rounded-xl text-sm font-bold"
-            style={{ background: imgLoaded ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: imgLoaded ? '#06060f' : '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+            style={{ background: imgLoaded ? 'var(--as-cta)' : 'rgba(22,54,83,0.12)', color: imgLoaded ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', boxShadow: imgLoaded ? 'var(--as-shadow-glow)' : 'none' }}>
             {saving ? 'Đang lưu...' : 'Lưu ảnh'}
           </button>
         </div>

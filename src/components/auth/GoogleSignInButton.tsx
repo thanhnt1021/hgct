@@ -32,12 +32,12 @@ export default function GoogleSignInButton({ callbackUrl = '/profile' }: { callb
     <>
       {/* Divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1.25rem 0' }}>
-        <div style={{ flex: 1, height: 1, background: 'rgba(200,148,63,0.15)' }} />
-        <span style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>hoặc</span>
-        <div style={{ flex: 1, height: 1, background: 'rgba(200,148,63,0.15)' }} />
+        <div style={{ flex: 1, height: 1, background: 'var(--as-border-soft)' }} />
+        <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>hoặc</span>
+        <div style={{ flex: 1, height: 1, background: 'var(--as-border-soft)' }} />
       </div>
 
-      {/* Google Button */}
+      {/* Google Button — nền trắng, chữ navy, đọc rõ */}
       <button
         onClick={handleClick}
         disabled={loading}
@@ -48,19 +48,20 @@ export default function GoogleSignInButton({ callbackUrl = '/profile' }: { callb
           justifyContent: 'center',
           gap: '0.6rem',
           padding: '0.75rem 1rem',
-          borderRadius: '4px',
-          background: loading ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          color: '#e8e0d0',
+          borderRadius: '999px',
+          background: '#ffffff',
+          border: '1px solid var(--as-border-gold)',
+          color: 'var(--as-text-strong)',
           fontFamily: 'var(--font-vietnam)',
           fontSize: '0.88rem',
-          fontWeight: 500,
+          fontWeight: 600,
           cursor: loading ? 'not-allowed' : 'pointer',
           opacity: loading ? 0.7 : 1,
-          transition: 'background 0.15s',
+          boxShadow: 'var(--as-shadow-card)',
+          transition: 'background 0.15s, transform 0.15s',
         }}
-        onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)' }}
-        onMouseLeave={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)' }}
+        onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = '#faf1de' }}
+        onMouseLeave={e => { if (!loading) (e.currentTarget as HTMLButtonElement).style.background = '#ffffff' }}
       >
         {/* Google G icon */}
         <svg width="18" height="18" viewBox="0 0 48 48">

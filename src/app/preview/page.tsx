@@ -369,7 +369,7 @@ export default function PreviewPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#06060f',
+        background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)',
         display: 'flex',
         flexDirection: 'column',
         fontFamily: 'var(--font-vietnam, sans-serif)',
@@ -404,22 +404,22 @@ export default function PreviewPage() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0.75rem 1.25rem',
-          background: 'rgba(6,6,15,0.97)',
-          borderBottom: '1px solid rgba(200,148,63,0.15)',
+          background: 'var(--as-surface)',
+          borderBottom: '1px solid var(--as-border-soft)',
           flexShrink: 0,
           gap: '0.75rem',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
           <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{serviceIcon}</span>
-          <span style={{ color: '#f4efe6', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span style={{ color: 'var(--as-text-strong)', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             Xem trước — {serviceName}
           </span>
           <span
             style={{
-              background: 'rgba(200,148,63,0.15)',
-              color: '#d9ab55',
-              border: '1px solid rgba(200,148,63,0.3)',
+              background: 'var(--as-cta)',
+              color: 'var(--as-text-on-dark)',
+              border: '1px solid var(--as-border-soft)',
               borderRadius: '4px',
               padding: '1px 8px',
               fontSize: '0.68rem',
@@ -435,9 +435,9 @@ export default function PreviewPage() {
           <button
             onClick={handleGetFullReport}
             style={{
-              background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-              color: '#06060f',
-              borderRadius: '4px',
+              background: 'var(--as-cta)',
+              color: 'var(--as-text-on-dark)',
+              borderRadius: '999px',
               padding: '0.45rem 1rem',
               fontWeight: 700,
               fontSize: '0.82rem',
@@ -446,6 +446,7 @@ export default function PreviewPage() {
               border: 'none',
               cursor: 'pointer',
               flexShrink: 0,
+              boxShadow: 'var(--as-shadow-glow)',
             }}
           >
             Nhận báo cáo đầy đủ →
@@ -457,7 +458,7 @@ export default function PreviewPage() {
       {error && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', padding: '2rem' }}>
           <p style={{ color: '#f87171', fontSize: '1rem', textAlign: 'center' }}>⚠ {error}</p>
-          <a href="/services" style={{ color: '#d9ab55', fontSize: '0.9rem', textDecoration: 'underline' }}>
+          <a href="/services" style={{ color: 'var(--as-cta)', fontSize: '0.9rem', textDecoration: 'underline' }}>
             ← Quay lại trang dịch vụ
           </a>
         </div>
@@ -466,16 +467,17 @@ export default function PreviewPage() {
       {/* Unified text area — intro typewriters first, AI stream appends seamlessly after */}
       {!error && (
         <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 1rem', maxWidth: 720, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
-          <p style={{ color: '#6b6585', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 600 }}>
+          <p style={{ color: 'var(--as-text-muted)', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 600 }}>
             PHẦN 1 — TỔNG QUAN
           </p>
           <div
             style={{
-              background: 'rgba(10,8,28,0.6)',
-              border: '1px solid rgba(201,168,76,0.12)',
+              background: 'var(--as-surface)',
+              border: '1px solid var(--as-border-soft)',
               borderRadius: 12,
               padding: 'clamp(1.25rem, 4vw, 2rem)',
-              color: '#e8e0f0',
+              color: 'var(--as-text)',
+              boxShadow: 'var(--as-shadow-card)',
               lineHeight: 1.9,
               whiteSpace: 'pre-wrap',
               fontSize: 'clamp(0.88rem, 2.5vw, 0.97rem)',
@@ -490,7 +492,7 @@ export default function PreviewPage() {
                   display: 'inline-block',
                   width: '0.55em',
                   height: '1.1em',
-                  background: '#d9ab55',
+                  background: 'var(--as-cta)',
                   verticalAlign: 'text-bottom',
                   borderRadius: '1px',
                   animation: 'blink 1s step-end infinite',
@@ -506,15 +508,16 @@ export default function PreviewPage() {
           {/* Locked sections — show after typewriter finishes */}
           {typingDone && lockedSections.length > 0 && (
             <div style={{ marginTop: '2rem' }}>
-              <p style={{ color: '#6b6585', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 600 }}>
+              <p style={{ color: 'var(--as-text-muted)', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 600 }}>
                 CÁC PHẦN CÒN LẠI
               </p>
               <div
                 style={{
-                  background: 'rgba(10,8,28,0.4)',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'var(--as-surface)',
+                  border: '1px solid var(--as-border-soft)',
                   borderRadius: 12,
                   overflow: 'hidden',
+                  boxShadow: 'var(--as-shadow-card)',
                 }}
               >
                 {lockedSections.map((s, i) => (
@@ -522,16 +525,16 @@ export default function PreviewPage() {
                     key={i}
                     style={{
                       padding: '0.85rem 1.25rem',
-                      borderBottom: i < lockedSections.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                      borderBottom: i < lockedSections.length - 1 ? '1px solid var(--as-border-soft)' : 'none',
                       display: 'flex',
                       alignItems: 'flex-start',
                       gap: '0.75rem',
                     }}
                   >
-                    <span style={{ color: '#4a3f6b', fontSize: '0.9rem', flexShrink: 0, marginTop: '0.1rem' }}>🔒</span>
+                    <span style={{ color: 'var(--as-text-muted)', fontSize: '0.9rem', flexShrink: 0, marginTop: '0.1rem' }}>🔒</span>
                     <div>
-                      <p style={{ color: '#6b6585', fontSize: '0.85rem', fontWeight: 600, margin: 0, marginBottom: '0.2rem' }}>{s.title}</p>
-                      <p style={{ color: '#4a3f6b', fontSize: '0.75rem', margin: 0, lineHeight: 1.5 }}>{s.subtitle}</p>
+                      <p style={{ color: 'var(--as-text-strong)', fontSize: '0.85rem', fontWeight: 600, margin: 0, marginBottom: '0.2rem' }}>{s.title}</p>
+                      <p style={{ color: 'var(--as-text-muted)', fontSize: '0.75rem', margin: 0, lineHeight: 1.5 }}>{s.subtitle}</p>
                     </div>
                   </div>
                 ))}
@@ -542,25 +545,26 @@ export default function PreviewPage() {
                 <div
                   style={{
                     marginTop: '1.5rem',
-                    background: 'rgba(200,148,63,0.06)',
-                    border: '1px solid rgba(200,148,63,0.2)',
+                    background: 'var(--as-surface-raised)',
+                    border: '1px solid var(--as-border-soft)',
                     borderRadius: 12,
                     padding: 'clamp(1.25rem, 4vw, 2rem)',
                     textAlign: 'center',
+                    boxShadow: 'var(--as-shadow-card)',
                   }}
                 >
-                  <p style={{ color: '#f4efe6', fontWeight: 700, fontSize: 'clamp(0.95rem, 2.5vw, 1.05rem)', marginBottom: '0.6rem' }}>
+                  <p style={{ color: 'var(--as-text-strong)', fontWeight: 700, fontSize: 'clamp(0.95rem, 2.5vw, 1.05rem)', marginBottom: '0.6rem' }}>
                     Nhận báo cáo đầy đủ {lockedSections.length + 1} phần
                   </p>
-                  <p style={{ color: '#8a8399', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                  <p style={{ color: 'var(--as-text-muted)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
                     Bản luận giải chi tiết, cá nhân hoá gửi thẳng vào email của bạn.
                   </p>
                   <button
                     onClick={handleGetFullReport}
                     style={{
-                      background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                      color: '#06060f',
-                      borderRadius: '6px',
+                      background: 'var(--as-cta)',
+                      color: 'var(--as-text-on-dark)',
+                      borderRadius: '999px',
                       padding: '0.75rem 2rem',
                       fontWeight: 700,
                       fontSize: '0.9rem',
@@ -569,6 +573,7 @@ export default function PreviewPage() {
                       letterSpacing: '0.04em',
                       width: '100%',
                       maxWidth: 320,
+                      boxShadow: 'var(--as-shadow-glow)',
                     }}
                   >
                     Nhận báo cáo đầy đủ →

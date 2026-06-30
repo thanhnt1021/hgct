@@ -187,15 +187,15 @@ function PaymentInner() {
   const statusBanner = (() => {
     if (failCount === 0) return null
     if (failCount <= 3) return null  // silent
-    if (failCount <= 10) return { text: '⏳ Đang kết nối lại...', color: '#d9ab55' }
-    if (failCount <= 20) return { text: '🔄 Hệ thống đang cập nhật. Giao dịch vẫn an toàn.', color: '#d9ab55' }
+    if (failCount <= 10) return { text: '⏳ Đang kết nối lại...', color: '#163653' }
+    if (failCount <= 20) return { text: '🔄 Hệ thống đang cập nhật. Giao dịch vẫn an toàn.', color: '#163653' }
     return { text: '⚠️ Mất kết nối. Đã CK thì hệ thống sẽ tự xác nhận khi khôi phục.', color: '#e87070' }
   })()
 
   // ── Paid state ──
   if (paymentStatus === 'paid') {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#06060f' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
         <div className="text-center px-6">
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -203,14 +203,14 @@ function PaymentInner() {
           >
             <span style={{ fontSize: '2.2rem' }}>✓</span>
           </div>
-          <h2 style={{ color: '#3db88a', fontFamily: 'var(--font-vietnam)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+          <h2 style={{ color: '#3db88a', fontFamily: 'var(--font-playfair)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
             Thanh toán thành công!
           </h2>
-          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+          <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
             Đang chuyển sang trang xử lý báo cáo...
           </p>
           <div className="w-8 h-8 rounded-full animate-spin mx-auto mt-6"
-            style={{ border: '2px solid rgba(200,148,63,0.15)', borderTopColor: '#d9ab55' }} />
+            style={{ border: '2px solid var(--as-border-soft)', borderTopColor: 'var(--as-cta)' }} />
         </div>
       </div>
     )
@@ -220,15 +220,15 @@ function PaymentInner() {
   if (showExpiredChoice) {
     if (claimDone) {
       return (
-        <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#06060f' }}>
+        <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
           <div className="max-w-sm w-full rounded-2xl p-8 text-center"
-            style={{ background: 'rgba(18,13,46,0.8)', border: '1px solid rgba(61,184,138,0.2)' }}>
+            style={{ background: 'var(--as-surface)', border: '1px solid rgba(61,184,138,0.2)', boxShadow: 'var(--as-shadow-card)' }}>
             <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>📬</p>
-            <h2 style={{ color: '#3db88a', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+            <h2 style={{ color: '#3db88a', fontFamily: 'var(--font-playfair)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>
               Đã ghi nhận!
             </h2>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.7 }}>
-              Admin sẽ xác nhận và tạo báo cáo trong vòng <strong style={{ color: '#d9ab55' }}>30 phút</strong>.<br />
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.7 }}>
+              Admin sẽ xác nhận và tạo báo cáo trong vòng <strong style={{ color: 'var(--as-copper-deep)' }}>30 phút</strong>.<br />
               Báo cáo sẽ gửi đến email của bạn.
             </p>
           </div>
@@ -238,18 +238,18 @@ function PaymentInner() {
 
     if (showClaimForm) {
       return (
-        <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#06060f' }}>
+        <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
           <div className="max-w-sm w-full rounded-2xl p-8"
-            style={{ background: 'rgba(18,13,46,0.8)', border: '1px solid rgba(200,148,63,0.2)' }}>
-            <h2 style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', textAlign: 'center' }}>
+            style={{ background: 'var(--as-surface)', border: '1px solid var(--as-border-gold)', boxShadow: 'var(--as-shadow-card)' }}>
+            <h2 style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', textAlign: 'center' }}>
               🖐️ Báo đã chuyển khoản
             </h2>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.83rem', lineHeight: 1.7, marginBottom: '1.5rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.83rem', lineHeight: 1.7, marginBottom: '1.5rem', textAlign: 'center' }}>
               Điền thông tin để admin xác nhận nhanh hơn
             </p>
             <div className="space-y-4">
               <div>
-                <label style={{ display: 'block', color: '#d9ab55', fontSize: '0.65rem', letterSpacing: '0.06em', fontWeight: 700, marginBottom: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
+                <label style={{ display: 'block', color: 'var(--as-copper-deep)', fontSize: '0.65rem', letterSpacing: '0.06em', fontWeight: 700, marginBottom: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
                   Số tiền đã chuyển
                 </label>
                 <input
@@ -262,7 +262,7 @@ function PaymentInner() {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', color: '#d9ab55', fontSize: '0.65rem', letterSpacing: '0.06em', fontWeight: 700, marginBottom: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
+                <label style={{ display: 'block', color: 'var(--as-copper-deep)', fontSize: '0.65rem', letterSpacing: '0.06em', fontWeight: 700, marginBottom: '0.4rem', fontFamily: 'var(--font-vietnam)' }}>
                   Nội dung chuyển khoản
                 </label>
                 <input
@@ -279,21 +279,22 @@ function PaymentInner() {
                 disabled={claimSubmitting}
                 className="w-full py-3 font-bold text-sm"
                 style={{
-                  background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                  color: '#06060f',
-                  borderRadius: '4px',
+                  background: 'var(--as-cta)',
+                  color: 'var(--as-text-on-dark)',
+                  borderRadius: '999px',
                   fontFamily: 'var(--font-vietnam)',
                   opacity: claimSubmitting ? 0.7 : 1,
                   cursor: claimSubmitting ? 'not-allowed' : 'pointer',
                   border: 'none',
                   letterSpacing: '0.08em',
+                  boxShadow: 'var(--as-shadow-glow)',
                 }}
               >
                 {claimSubmitting ? 'Đang gửi...' : 'Gửi thông tin →'}
               </button>
               <button
                 onClick={() => setShowClaimForm(false)}
-                style={{ width: '100%', background: 'none', border: 'none', color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.83rem', cursor: 'pointer', paddingTop: '0.5rem' }}
+                style={{ width: '100%', background: 'none', border: 'none', color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.83rem', cursor: 'pointer', paddingTop: '0.5rem' }}
               >
                 ← Quay lại
               </button>
@@ -304,24 +305,24 @@ function PaymentInner() {
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#06060f' }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
         <div className="max-w-sm w-full rounded-2xl p-8 text-center"
-          style={{ background: 'rgba(18,13,46,0.8)', border: '1px solid rgba(200,148,63,0.15)' }}>
+          style={{ background: 'var(--as-surface)', border: '1px solid var(--as-border-soft)', boxShadow: 'var(--as-shadow-card)' }}>
           <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏱</p>
-          <h2 style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+          <h2 style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>
             Hết thời gian chờ
           </h2>
-          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.7, marginBottom: '2rem' }}>
+          <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.7, marginBottom: '2rem' }}>
             Phiên thanh toán đã hết hạn (15 phút).
           </p>
           <div className="flex flex-col gap-3">
             <button
               onClick={() => setShowClaimForm(true)}
               style={{
-                background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                color: '#06060f', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem',
+                background: 'var(--as-cta)',
+                color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem',
                 fontWeight: 700, letterSpacing: '0.06em', padding: '0.85rem 1.5rem',
-                borderRadius: '4px', border: 'none', cursor: 'pointer',
+                borderRadius: '999px', border: 'none', cursor: 'pointer', boxShadow: 'var(--as-shadow-glow)',
               }}
             >
               ✋ Tôi đã chuyển khoản rồi
@@ -329,9 +330,9 @@ function PaymentInner() {
             <button
               onClick={() => router.push('/services')}
               style={{
-                background: 'transparent', color: '#8a8399', fontFamily: 'var(--font-vietnam)',
-                fontSize: '0.85rem', padding: '0.85rem 1.5rem', borderRadius: '4px',
-                border: '1px solid rgba(200,148,63,0.15)', cursor: 'pointer',
+                background: 'transparent', color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)',
+                fontSize: '0.85rem', padding: '0.85rem 1.5rem', borderRadius: '999px',
+                border: '1px solid var(--as-border-gold)', cursor: 'pointer',
               }}
             >
               Chưa CK — Quay lại chọn dịch vụ
@@ -344,13 +345,13 @@ function PaymentInner() {
 
   // ── Waiting for payment ──
   return (
-    <div className="min-h-screen" style={{ background: '#06060f' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       <Navbar />
 
       {/* Connection status banner */}
       {statusBanner && (
         <div className="fixed top-0 left-0 right-0 z-50 text-center py-2 px-4"
-          style={{ background: 'rgba(18,13,46,0.95)', borderBottom: `1px solid ${statusBanner.color}33` }}>
+          style={{ background: 'var(--as-surface)', borderBottom: `1px solid ${statusBanner.color}33` }}>
           <p style={{ color: statusBanner.color, fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>
             {statusBanner.text}
           </p>
@@ -361,20 +362,20 @@ function PaymentInner() {
 
         {/* Service + name */}
         <div className="text-center mb-5">
-          <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.12em', fontWeight: 700, marginBottom: '0.3rem' }}>
+          <p style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.12em', fontWeight: 700, marginBottom: '0.3rem' }}>
             THANH TOÁN
           </p>
-          <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem', fontWeight: 700, marginBottom: displayName ? '0.25rem' : 0 }}>
+          <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1rem', fontWeight: 700, marginBottom: displayName ? '0.25rem' : 0 }}>
             {SERVICE_NAMES[service] || 'Báo cáo chiêm tinh'}
           </p>
           {displayName && (
-            <p style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>{displayName}</p>
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>{displayName}</p>
           )}
           {/* Amount */}
           <div style={{ marginTop: '0.6rem' }}>
             {originalAmount > 0 && discountPct > 0 ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
-                <span style={{ color: '#4a4560', textDecoration: 'line-through', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+                <span style={{ color: 'var(--as-text-muted)', textDecoration: 'line-through', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
                   {formatAmount(originalAmount)}
                 </span>
                 <span style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', fontWeight: 700, background: 'rgba(74,222,128,0.12)', padding: '1px 7px', borderRadius: '4px' }}>
@@ -402,8 +403,8 @@ function PaymentInner() {
             </div>
           ) : (
             <div className="flex items-center justify-center"
-              style={{ width: 240, height: 240, background: 'rgba(255,255,255,0.04)', borderRadius: '16px', border: '2px dashed rgba(200,148,63,0.3)' }}>
-              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem' }}>
+              style={{ width: 240, height: 240, background: 'var(--as-surface)', borderRadius: '16px', border: '2px dashed var(--as-border-gold)' }}>
+              <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem' }}>
                 QR không khả dụng
               </p>
             </div>
@@ -412,21 +413,21 @@ function PaymentInner() {
 
         {/* Transfer code — primary action for manual transfer */}
         <div className="rounded-xl px-4 py-4 mb-4 text-center"
-          style={{ background: 'rgba(26,15,60,0.7)', border: '1px solid rgba(200,148,63,0.2)' }}>
-          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+          style={{ background: '#063755', border: '1px solid var(--as-border-gold)' }}>
+          <p style={{ color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
             NỘI DUNG CHUYỂN KHOẢN
           </p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
-            <span style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.06em' }}>
+            <span style={{ color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.06em' }}>
               {transferCode}
             </span>
             <button
               onClick={() => handleCopy(transferCode)}
               style={{
-                background: copied ? 'rgba(61,184,138,0.2)' : 'rgba(200,148,63,0.15)',
-                border: `1px solid ${copied ? 'rgba(61,184,138,0.4)' : 'rgba(200,148,63,0.3)'}`,
-                borderRadius: '8px', padding: '0.3rem 0.75rem',
-                cursor: 'pointer', color: copied ? '#3db88a' : '#d9ab55',
+                background: copied ? 'rgba(61,184,138,0.2)' : 'rgba(237,213,177,0.15)',
+                border: `1px solid ${copied ? 'rgba(61,184,138,0.4)' : 'rgba(237,213,177,0.3)'}`,
+                borderRadius: '999px', padding: '0.3rem 0.75rem',
+                cursor: 'pointer', color: copied ? '#3db88a' : 'var(--as-text-on-dark)',
                 fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 700, transition: 'all 0.2s',
               }}
             >
@@ -437,19 +438,19 @@ function PaymentInner() {
 
         {/* Bank details — collapsible */}
         <div className="rounded-xl mb-4 overflow-hidden"
-          style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+          style={{ border: '1px solid var(--as-border-soft)' }}>
           <button
             onClick={() => setBankExpanded(v => !v)}
             className="w-full flex items-center justify-between px-4 py-3"
-            style={{ background: 'rgba(255,255,255,0.03)', border: 'none', cursor: 'pointer' }}
+            style={{ background: 'var(--as-surface)', border: 'none', cursor: 'pointer' }}
           >
-            <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+            <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
               Thông tin tài khoản ngân hàng
             </span>
-            <span style={{ color: '#6b6585', fontSize: '0.7rem' }}>{bankExpanded ? '▲' : '▼'}</span>
+            <span style={{ color: 'var(--as-text-muted)', fontSize: '0.7rem' }}>{bankExpanded ? '▲' : '▼'}</span>
           </button>
           {bankExpanded && (
-            <div className="px-4 pb-4 space-y-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <div className="px-4 pb-4 space-y-2" style={{ background: 'var(--as-surface-raised)' }}>
               {[
                 { label: 'Ngân hàng', value: bankName },
                 { label: 'Số tài khoản', value: bankAccount },
@@ -457,11 +458,11 @@ function PaymentInner() {
                 { label: 'Số tiền', value: formatAmount(amount) },
               ].map(row => (
                 <div key={row.label} className="flex justify-between items-baseline gap-4"
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.4rem' }}>
-                  <span style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', flexShrink: 0 }}>
+                  style={{ borderBottom: '1px solid var(--as-border-soft)', paddingBottom: '0.4rem' }}>
+                  <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', flexShrink: 0 }}>
                     {row.label}:
                   </span>
-                  <span style={{ color: '#c8bfda', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'right' }}>
+                  <span style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'right' }}>
                     {row.value || '—'}
                   </span>
                 </div>
@@ -474,17 +475,17 @@ function PaymentInner() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
             <span className="animate-pulse" style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#3db88a', flexShrink: 0 }} />
-            <p style={{ color: '#4a6660', fontFamily: 'var(--font-vietnam)', fontSize: '0.74rem', lineHeight: 1.5, margin: 0 }}>
+            <p style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.74rem', lineHeight: 1.5, margin: 0 }}>
               Tự động xác nhận khi nhận tiền.{' '}
-              <span style={{ color: '#6b6040' }}>Đã CK chưa thấy? Đợi 1–2 phút.</span>
+              <span style={{ color: 'var(--as-text-muted)' }}>Đã CK chưa thấy? Đợi 1–2 phút.</span>
             </p>
           </div>
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <p style={{ color: countdownPaused ? '#6b6585' : (secondsLeft < 60 ? '#f87171' : '#f4efe6'), fontFamily: 'var(--font-vietnam)', fontSize: '1.3rem', fontWeight: 800, letterSpacing: '0.05em', margin: 0, opacity: countdownPaused ? 0.5 : 1 }}>
+            <p style={{ color: countdownPaused ? 'var(--as-text-muted)' : (secondsLeft < 60 ? '#f87171' : 'var(--as-text-strong)'), fontFamily: 'var(--font-vietnam)', fontSize: '1.3rem', fontWeight: 800, letterSpacing: '0.05em', margin: 0, opacity: countdownPaused ? 0.5 : 1 }}>
               {formatCountdown(secondsLeft)}
             </p>
             {countdownPaused && (
-              <p style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', margin: 0 }}>tạm dừng</p>
+              <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.6rem', margin: 0 }}>tạm dừng</p>
             )}
           </div>
         </div>
@@ -493,7 +494,7 @@ function PaymentInner() {
         <div className="text-center">
           <button
             onClick={() => router.push('/services')}
-            style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(74,69,96,0.4)' }}
+            style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--as-border-gold)' }}
           >
             Hủy giao dịch
           </button>
@@ -505,7 +506,7 @@ function PaymentInner() {
 
 export default function PaymentPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ background: '#06060f' }} />}>
+    <Suspense fallback={<div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }} />}>
       <PaymentInner />
     </Suspense>
   )

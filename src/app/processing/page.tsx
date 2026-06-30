@@ -210,24 +210,24 @@ function ProcessingInner() {
   // ── Error state ──
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#06060f' }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
         <div className="max-w-md w-full text-center">
           <div
             className="rounded-2xl p-10"
             style={{
-              background: 'rgba(18,13,46,0.7)',
+              background: 'var(--as-surface)',
               border: '1px solid rgba(196,82,82,0.25)',
-              backdropFilter: 'blur(20px)',
+              boxShadow: 'var(--as-shadow-card)',
             }}
           >
             <p style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚠</p>
             <h2
               className="font-bold mb-3"
-              style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)', fontSize: '1.1rem', letterSpacing: '0.03em' }}
+              style={{ color: '#e87070', fontFamily: 'var(--font-playfair)', fontSize: '1.1rem', letterSpacing: '0.03em' }}
             >
               Có lỗi xảy ra
             </h2>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: recoveryToken ? '1.5rem' : '2rem', lineHeight: 1.8 }}>
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: recoveryToken ? '1.5rem' : '2rem', lineHeight: 1.8 }}>
               {errorMsg}
             </p>
 
@@ -235,21 +235,21 @@ function ProcessingInner() {
             {recoveryToken && (
               <div style={{
                 padding: '16px 20px',
-                background: 'rgba(200,148,63,0.06)',
-                border: '1px solid rgba(200,148,63,0.2)',
+                background: 'var(--as-surface-raised)',
+                border: '1px solid var(--as-border-gold)',
                 borderRadius: '12px',
                 marginBottom: '1.5rem',
                 textAlign: 'center',
               }}>
-                <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>
+                <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>
                   Mã khôi phục của bạn
                 </p>
-                <p style={{ color: '#d9ab55', fontFamily: 'monospace', fontSize: '1.6rem', fontWeight: 700, letterSpacing: '0.25em', marginBottom: '10px' }}>
+                <p style={{ color: 'var(--as-cta)', fontFamily: 'monospace', fontSize: '1.6rem', fontWeight: 700, letterSpacing: '0.25em', marginBottom: '10px' }}>
                   {recoveryToken}
                 </p>
-                <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', lineHeight: 1.6 }}>
+                <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', lineHeight: 1.6 }}>
                   Chúng tôi đã gửi link khôi phục vào email của bạn.<br />
-                  Dùng mã này tại <strong style={{ color: '#8a8399' }}>/recover</strong> để thử lại bất kỳ lúc nào.
+                  Dùng mã này tại <strong style={{ color: 'var(--as-text-strong)' }}>/recover</strong> để thử lại bất kỳ lúc nào.
                 </p>
               </div>
             )}
@@ -260,12 +260,13 @@ function ProcessingInner() {
                   href={`/recover?token=${recoveryToken}`}
                   className="px-5 py-2.5 text-sm font-bold"
                   style={{
-                    background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                    color: '#06060f',
-                    borderRadius: '4px',
+                    background: 'var(--as-cta)',
+                    color: 'var(--as-text-on-dark)',
+                    borderRadius: '999px',
                     fontFamily: 'var(--font-vietnam)',
                     letterSpacing: '0.06em',
                     fontSize: '0.72rem',
+                    boxShadow: 'var(--as-shadow-glow)',
                   }}
                 >
                   Khôi phục ngay →
@@ -275,12 +276,13 @@ function ProcessingInner() {
                   href="/services"
                   className="px-5 py-2.5 text-sm font-bold"
                   style={{
-                    background: 'linear-gradient(135deg, #c8943f, #f0cc78)',
-                    color: '#06060f',
-                    borderRadius: '4px',
+                    background: 'var(--as-cta)',
+                    color: 'var(--as-text-on-dark)',
+                    borderRadius: '999px',
                     fontFamily: 'var(--font-vietnam)',
                     letterSpacing: '0.06em',
                     fontSize: '0.72rem',
+                    boxShadow: 'var(--as-shadow-glow)',
                   }}
                 >
                   Thử lại
@@ -290,10 +292,10 @@ function ProcessingInner() {
                 href="mailto:support@hatgiongchiemtinh.com"
                 className="px-5 py-2.5 text-sm"
                 style={{
-                  background: 'rgba(11,11,31,0.8)',
-                  color: '#8a8399',
-                  border: '1px solid rgba(200,148,63,0.15)',
-                  borderRadius: '4px',
+                  background: 'var(--as-surface-raised)',
+                  color: 'var(--as-text-muted)',
+                  border: '1px solid var(--as-border-gold)',
+                  borderRadius: '999px',
                   fontFamily: 'var(--font-vietnam)',
                   fontSize: '0.85rem',
                 }}
@@ -310,7 +312,7 @@ function ProcessingInner() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: '#06060f' }}
+      style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}
     >
       <div className="max-w-md w-full text-center">
 
@@ -319,9 +321,9 @@ function ProcessingInner() {
           <div
             className="mb-6 rounded-xl px-4 py-2.5"
             style={{
-              background: 'rgba(200,148,63,0.06)',
-              border: '1px solid rgba(200,148,63,0.2)',
-              color: '#d9ab55',
+              background: 'var(--as-surface-raised)',
+              border: '1px solid var(--as-border-gold)',
+              color: 'var(--as-copper-deep)',
               fontFamily: 'var(--font-vietnam)',
               fontSize: '0.8rem',
             }}
@@ -334,14 +336,14 @@ function ProcessingInner() {
         <div className="flex items-center justify-center gap-5 mb-10">
           <span
             className="animate-pulse"
-            style={{ color: '#d9ab55', fontSize: '0.7rem', animationDuration: '2s' }}
+            style={{ color: 'var(--as-copper-deep)', fontSize: '0.7rem', animationDuration: '2s' }}
           >
             ✦
           </span>
-          <span style={{ color: '#d9ab55', fontSize: '1.1rem' }}>✦</span>
+          <span style={{ color: 'var(--as-copper-deep)', fontSize: '1.1rem' }}>✦</span>
           <span
             className="animate-pulse"
-            style={{ color: '#d9ab55', fontSize: '0.7rem', animationDuration: '2s', animationDelay: '0.7s' }}
+            style={{ color: 'var(--as-copper-deep)', fontSize: '0.7rem', animationDuration: '2s', animationDelay: '0.7s' }}
           >
             ✦
           </span>
@@ -351,8 +353,8 @@ function ProcessingInner() {
         <h2
           className="font-bold mb-3"
           style={{
-            color: '#f4efe6',
-            fontFamily: 'var(--font-vietnam)',
+            color: 'var(--as-text-strong)',
+            fontFamily: 'var(--font-playfair)',
             fontSize: '1.3rem',
             letterSpacing: '0.04em',
           }}
@@ -362,14 +364,14 @@ function ProcessingInner() {
 
         <p
           className="mb-10 leading-relaxed"
-          style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}
+          style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem' }}
         >
           <span className="mr-2">{icon}</span>
           Vũ trụ đang biên soạn luận giải{' '}
-          <strong style={{ color: '#d9ab55' }}>{serviceName}</strong>
+          <strong style={{ color: 'var(--as-copper-deep)' }}>{serviceName}</strong>
           {' '}riêng cho
           {displayName && (
-            <><br /><strong style={{ color: '#f4efe6' }}>{displayName}</strong></>
+            <><br /><strong style={{ color: 'var(--as-text-strong)' }}>{displayName}</strong></>
           )}
         </p>
 
@@ -377,16 +379,16 @@ function ProcessingInner() {
         <div
           className="rounded-2xl p-8 mb-5"
           style={{
-            background: 'rgba(18,13,46,0.75)',
-            border: '1px solid rgba(200,148,63,0.16)',
-            backdropFilter: 'blur(20px)',
+            background: 'var(--as-surface)',
+            border: '1px solid var(--as-border-soft)',
+            boxShadow: 'var(--as-shadow-card)',
           }}
         >
           {/* Motivational text + percent */}
           <div className="flex justify-between items-end gap-3 mb-3">
             <span
               style={{
-                color: '#c9a84c',
+                color: 'var(--as-text)',
                 fontFamily: 'var(--font-vietnam)',
                 fontSize: '0.82rem',
                 fontStyle: 'italic',
@@ -400,7 +402,7 @@ function ProcessingInner() {
             </span>
             <span
               style={{
-                color: '#d9ab55',
+                color: 'var(--as-cta)',
                 fontFamily: 'var(--font-vietnam)',
                 fontWeight: 700,
                 fontSize: '0.85rem',
@@ -414,14 +416,14 @@ function ProcessingInner() {
           {/* Progress bar */}
           <div
             className="h-1.5 rounded-full overflow-hidden"
-            style={{ background: 'rgba(200,148,63,0.08)' }}
+            style={{ background: 'var(--as-border-soft)' }}
           >
             <div
               className="h-full rounded-full"
               style={{
                 width: `${visualProgress}%`,
-                background: 'linear-gradient(90deg, #c8943f, #f0cc78)',
-                boxShadow: '0 0 12px rgba(200,148,63,0.5)',
+                background: 'var(--as-cta)',
+                boxShadow: 'var(--as-shadow-glow)',
                 transition: 'width 700ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             />
@@ -468,13 +470,13 @@ function ProcessingInner() {
         </div>
 
         {frozenWarning ? (
-          <p style={{ color: '#d9ab55', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)', lineHeight: 1.7 }}>
+          <p style={{ color: 'var(--as-copper-deep)', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)', lineHeight: 1.7 }}>
             Đang kiểm tra kết nối — hệ thống sẽ tự khôi phục nếu có sự cố...
           </p>
         ) : (
-          <p style={{ color: '#4a4560', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)' }}>
+          <p style={{ color: 'var(--as-text-muted)', fontSize: '0.78rem', fontFamily: 'var(--font-vietnam)' }}>
             Dự kiến hoàn thành trong khoảng{' '}
-            <strong style={{ color: '#8a8399' }}>{eta} phút</strong>
+            <strong style={{ color: 'var(--as-text-strong)' }}>{eta} phút</strong>
           </p>
         )}
 
@@ -503,16 +505,16 @@ function ProcessingInner() {
       {/* Cancel confirm modal */}
       {showCancelConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(6,6,15,0.85)', backdropFilter: 'blur(4px)' }}>
+          style={{ background: 'rgba(22,54,83,0.5)', backdropFilter: 'blur(4px)' }}>
           <div className="rounded-2xl p-6 w-full max-w-sm"
-            style={{ background: 'rgba(18,13,46,0.98)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            style={{ background: 'var(--as-surface)', border: '1px solid rgba(239,68,68,0.2)', boxShadow: 'var(--as-shadow-card)' }}>
             <p style={{ fontSize: '1.75rem', marginBottom: '0.75rem', textAlign: 'center' }}>⚠</p>
             <h3 className="font-bold mb-2 text-center"
-              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+              style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1rem' }}>
               Hủy báo cáo?
             </h3>
             <p className="mb-5 text-center"
-              style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.7 }}>
+              style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.7 }}>
               Báo cáo sẽ không được tạo và sẽ không lưu vào lịch sử.
             </p>
             <div className="flex gap-3">
@@ -536,9 +538,9 @@ function ProcessingInner() {
                 disabled={cancelling}
                 className="flex-1 py-2.5 rounded-xl text-sm"
                 style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  color: '#8a8399',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'var(--as-surface-raised)',
+                  color: 'var(--as-text-muted)',
+                  border: '1px solid var(--as-border-soft)',
                   fontFamily: 'var(--font-vietnam)',
                   cursor: 'pointer',
                 }}
@@ -555,17 +557,17 @@ function ProcessingInner() {
 
 function ProcessingFallback() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: '#06060f' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       <div style={{
         width: '48px',
         height: '48px',
         borderRadius: '50%',
-        border: '3px solid rgba(201,168,76,0.2)',
-        borderTopColor: '#c9a84c',
+        border: '3px solid var(--as-border-soft)',
+        borderTopColor: 'var(--as-cta)',
         animation: 'spin 0.9s linear infinite',
         marginBottom: '1.25rem',
       }} />
-      <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
+      <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem' }}>
         Đang tải...
       </p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

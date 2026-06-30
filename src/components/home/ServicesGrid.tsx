@@ -1,55 +1,53 @@
 'use client'
 
-// Trang chủ — 4 cục cha. Bấm vào → CHUYỂN TRANG (không dropdown).
-// Cha có sub (Tình yêu / Mối quan hệ) → /services?group=...
-// Cha lẻ (Sự nghiệp / Vận hạn) → /services?type=...
+// 4 cục cha (dùng ở /services). Bấm → CHUYỂN TRANG.
+// Style khớp card "Khám Phá AstroS" trang chủ: thẻ kem, icon-circle gold-tint centered, tiêu đề Playfair navy.
 
 import Link from 'next/link'
 import { Wallet, Heart, UsersRound, Compass, type LucideIcon } from 'lucide-react'
 
-interface Parent {
-  Icon: LucideIcon
-  title: string
-  href: string
-  accent: string
-  border: string
-  color: string
-}
+interface Parent { Icon: LucideIcon; title: string; desc: string; href: string }
 
 const PARENTS: Parent[] = [
-  { Icon: Wallet,     title: 'Sự nghiệp & Tiền bạc',  href: '/services?type=career',     accent: 'rgba(200,148,63,0.08)', border: 'rgba(200,148,63,0.22)', color: '#c8943f' },
-  { Icon: Heart,      title: 'Tình yêu & Hôn nhân',   href: '/services?group=love',      accent: 'rgba(185,77,112,0.08)', border: 'rgba(185,77,112,0.22)', color: '#e87da0' },
-  { Icon: UsersRound, title: 'Mối quan hệ',           href: '/services?group=relations', accent: 'rgba(120,77,186,0.08)', border: 'rgba(120,77,186,0.22)', color: '#b08ce8' },
-  { Icon: Compass,    title: 'Vận hạn',               href: '/services?type=transit',    accent: 'rgba(64,112,184,0.08)', border: 'rgba(64,112,184,0.22)', color: '#78a8f0' },
+  { Icon: Wallet,     title: 'Sự nghiệp & Tiền bạc', desc: 'Định hướng sự nghiệp, tối ưu tài năng và thu hút tài lộc.', href: '/services?type=career' },
+  { Icon: Heart,      title: 'Tình duyên cá nhân',   desc: 'Bản đồ tình cảm cá nhân: bạn yêu thế nào, cần gì và bài học tình duyên của bạn.', href: '/services?type=love' },
+  { Icon: UsersRound, title: 'Mối quan hệ cặp đôi',  desc: 'So sánh hai bản đồ sao để hiểu sự kết nối, điểm hòa hợp và khác biệt giữa hai bạn.', href: '/services?type=synastry' },
+  { Icon: Compass,    title: 'Vận hạn',              desc: 'Dự báo vận hạn, nắm bắt cơ hội và hóa giải thách thức.', href: '/services?type=transit' },
 ]
 
 export default function ServicesGrid() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {PARENTS.map(p => (
         <Link
           key={p.title}
           href={p.href}
-          className="service-card-link block"
-          style={{ background: p.accent, border: `1px solid ${p.border}` }}
+          className="svc-grid-card block"
+          style={{
+            background: 'var(--as-surface)', border: '1px solid var(--as-border-soft)',
+            borderRadius: 'var(--as-radius-lg)', padding: '1.75rem 1.5rem', textAlign: 'center',
+            boxShadow: 'var(--as-shadow-card)', textDecoration: 'none',
+          }}
         >
-          <div className="flex items-center gap-4 p-7" style={{ minHeight: '5.5rem' }}>
-            <div
-              className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full"
-              style={{ background: 'rgba(6,6,15,0.5)', border: '1px solid rgba(255,255,255,0.05)' }}
-            >
-              <p.Icon size={22} style={{ color: p.color }} strokeWidth={1.5} />
-            </div>
-            <h3
-              className="font-semibold flex-1"
-              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.15rem' }}
-            >
-              {p.title}
-            </h3>
-            <span style={{ color: p.color, fontSize: '1.25rem' }}>→</span>
+          <div style={{
+            width: 56, height: 56, borderRadius: '50%', margin: '0 auto 1rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(203,152,94,0.12)', border: '1px solid var(--as-border-gold)',
+          }}>
+            <p.Icon size={24} style={{ color: 'var(--as-cta)' }} strokeWidth={1.6} />
           </div>
+          <h3 style={{ fontFamily: 'var(--font-playfair)', color: 'var(--as-text-strong)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+            {p.title}
+          </h3>
+          <p style={{ fontFamily: 'var(--font-vietnam)', color: 'var(--as-text)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '0.9rem' }}>
+            {p.desc}
+          </p>
+          <span style={{ fontFamily: 'var(--font-vietnam)', color: 'var(--as-copper-deep)', fontSize: '0.82rem', fontWeight: 600 }}>
+            Xem chi tiết →
+          </span>
         </Link>
       ))}
+      <style>{`.svc-grid-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}.svc-grid-card:hover{transform:translateY(-4px);box-shadow:0 18px 50px rgba(22,54,83,.18);border-color:var(--as-border-gold)!important}`}</style>
     </div>
   )
 }

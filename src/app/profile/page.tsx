@@ -10,11 +10,11 @@ function SidebarAvatar({ user, avatarVersion }: SidebarAvatarProps) {
   const [showCustom, setShowCustom] = useState(true)
   const [showGoogle, setShowGoogle] = useState(false)
   useEffect(() => { setShowCustom(true); setShowGoogle(false) }, [avatarVersion])
-  const borderColor = user.planType === 'lifetime' ? 'rgba(255,215,100,0.5)' : user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.1)'
+  const borderColor = user.planType === 'lifetime' ? 'var(--as-border-gold)' : user.isPremium ? 'var(--as-border-gold)' : 'var(--as-border-soft)'
   const style = { width: 36, height: 36, borderRadius: '50%', border: `1px solid ${borderColor}`, flexShrink: 0 as const }
   if (showCustom) return <img src={`/api/user/avatar?v=${avatarVersion}`} alt="avatar" style={{ ...style, objectFit: 'cover' }} referrerPolicy="no-referrer" onError={() => { setShowCustom(false); setShowGoogle(!!user.image) }} />
   if (showGoogle && user.image) return <img src={user.image} alt="avatar" style={{ ...style, objectFit: 'cover' }} referrerPolicy="no-referrer" onError={() => setShowGoogle(false)} />
-  return <div style={{ ...style, background: user.isPremium ? 'rgba(201,168,76,0.12)' : 'rgba(61,43,94,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '1rem' }}>{user.isPremium ? '✦' : '○'}</span></div>
+  return <div style={{ ...style, background: user.isPremium ? 'rgba(22,54,83,0.08)' : 'rgba(22,54,83,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '1rem' }}>{user.isPremium ? '✦' : '○'}</span></div>
 }
 import Navbar from '@/components/layout/Navbar'
 import ProfileInfo from '@/components/profile/ProfileInfo'
@@ -39,6 +39,10 @@ function ProfileContent() {
   const urlTab = (searchParams.get('tab') || 'info') as TabId
 
   const [activeTab, setActiveTab] = useState<TabId>(urlTab)
+  // Tab "Gói dịch vụ" + "Lịch sử & Báo cáo" chỉ hiện cho tài khoản Lifetime.
+  const isLifetime = user?.planType === 'lifetime'
+  const LIFETIME_ONLY: TabId[] = ['plans', 'history']
+  const visibleTabs = TABS.filter(t => !LIFETIME_ONLY.includes(t.id) || isLifetime)
   const [displayTen, setDisplayTen] = useState('')
   const [avatarVersion, setAvatarVersion] = useState(Date.now())
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -83,7 +87,7 @@ function ProfileContent() {
     router.replace(`/profile?tab=${id}`, { scroll: false })
   }
 
-  const tab = activeTab
+  const tab: TabId = (LIFETIME_ONLY.includes(activeTab) && !isLifetime) ? 'info' : activeTab
   const planLabel = user.planType === 'lifetime' ? 'Lifetime ★' : user.planType === 'cao_cap' ? 'Cao cấp ✦' : user.isPremium ? 'Tiêu chuẩn ✦' : 'Miễn phí'
 
   const sidebarContent = (
@@ -93,28 +97,28 @@ function ProfileContent() {
         <div className="flex items-center gap-3">
           <SidebarAvatar user={user} avatarVersion={avatarVersion} />
           <div className="min-w-0">
-            <p className="text-sm font-semibold truncate" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
               {displayTen || user.username}
             </p>
-            <p className="text-xs" style={{ color: user.isPremium ? '#d9ab55' : '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+            <p className="text-xs" style={{ color: user.isPremium ? 'var(--as-cta)' : 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
               {planLabel}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="mx-4 mb-3" style={{ height: 1, background: 'rgba(201,168,76,0.06)' }} />
+      <div className="mx-4 mb-3" style={{ height: 1, background: 'var(--as-border-soft)' }} />
 
       <nav className="px-3 flex-1 space-y-0.5">
-        {TABS.map(({ id, label, Icon }) => (
+        {visibleTabs.map(({ id, label, Icon }) => (
           <button
             key={id}
             onClick={() => handleTabClick(id)}
             className="w-full flex items-center gap-3 rounded-xl text-sm"
             style={{
-              background: tab === id ? 'rgba(201,168,76,0.07)' : 'transparent',
-              color: tab === id ? '#d9ab55' : '#6b7280',
-              borderLeft: `2px solid ${tab === id ? '#c9a84c' : 'transparent'}`,
+              background: tab === id ? 'rgba(22,54,83,0.06)' : 'transparent',
+              color: tab === id ? 'var(--as-cta)' : 'var(--as-text-muted)',
+              borderLeft: `2px solid ${tab === id ? 'var(--as-cta)' : 'transparent'}`,
               fontFamily: 'var(--font-vietnam)',
               fontWeight: tab === id ? 600 : 400,
               padding: '0.625rem 0.75rem 0.625rem 0.625rem',
@@ -131,19 +135,19 @@ function ProfileContent() {
 
       {/* Link to services */}
       <div className="px-3 mt-3">
-        <div className="mx-1 mb-3" style={{ height: 1, background: 'rgba(201,168,76,0.06)' }} />
+        <div className="mx-1 mb-3" style={{ height: 1, background: 'var(--as-border-soft)' }} />
         <Link
           href="/services"
           className="w-full flex items-center gap-3 rounded-xl text-sm"
           style={{
-            color: '#6b7280',
+            color: 'var(--as-text-muted)',
             padding: '0.625rem 0.75rem',
             fontFamily: 'var(--font-vietnam)',
             minHeight: 44,
             transition: 'color 0.15s, background 0.15s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#d9ab55'; e.currentTarget.style.background = 'rgba(201,168,76,0.07)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = '#6b7280'; e.currentTarget.style.background = 'transparent' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--as-cta)'; e.currentTarget.style.background = 'rgba(22,54,83,0.06)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--as-text-muted)'; e.currentTarget.style.background = 'transparent' }}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
@@ -155,13 +159,13 @@ function ProfileContent() {
       {/* Spacer + Logout */}
       <div className="flex-1" />
       <div className="px-3 pb-5">
-        <div className="mx-1 mb-3" style={{ height: 1, background: 'rgba(201,168,76,0.06)' }} />
+        <div className="mx-1 mb-3" style={{ height: 1, background: 'var(--as-border-soft)' }} />
         <button
           onClick={() => { logout(); router.push('/') }}
           className="w-full flex items-center gap-3 rounded-xl text-sm"
           style={{
             background: 'transparent',
-            color: '#6b7280',
+            color: 'var(--as-text-muted)',
             padding: '0.625rem 0.75rem',
             fontFamily: 'var(--font-vietnam)',
             textAlign: 'left',
@@ -169,7 +173,7 @@ function ProfileContent() {
             transition: 'color 0.15s',
           }}
           onMouseEnter={e => (e.currentTarget.style.color = '#c45252')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--as-text-muted)')}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
@@ -181,23 +185,23 @@ function ProfileContent() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a1a' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       <Navbar />
 
       {/* ── Mobile header strip (hamburger + current tab) ── */}
       <div
         className="md:hidden fixed left-0 right-0 z-30 flex items-center gap-3 px-3"
-        style={{ top: 64, height: 44, background: '#06060f', borderBottom: '1px solid rgba(201,168,76,0.07)' }}
+        style={{ top: 64, height: 44, background: 'var(--as-surface)', borderBottom: '1px solid var(--as-border-soft)' }}
       >
         <button
           onClick={() => setSidebarOpen(true)}
-          style={{ color: '#9090a8', padding: '8px', minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ color: 'var(--as-text-muted)', padding: '8px', minWidth: 36, minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           aria-label="Mở menu"
         >
           <Menu size={20} />
         </button>
-        <span style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 600 }}>
-          {TABS.find(t => t.id === tab)?.label}
+        <span style={{ color: 'var(--as-cta)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 600 }}>
+          {visibleTabs.find(t => t.id === tab)?.label}
         </span>
       </div>
 
@@ -205,7 +209,7 @@ function ProfileContent() {
       {sidebarOpen && (
         <div
           className="md:hidden fixed inset-0 z-40"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          style={{ background: 'rgba(22,54,83,0.5)' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -228,17 +232,17 @@ function ProfileContent() {
           `}
           style={{
             width: 248,
-            background: '#06060f',
-            borderRight: '1px solid rgba(201,168,76,0.08)',
+            background: 'var(--as-surface)',
+            borderRight: '1px solid var(--as-border-soft)',
             overflowY: 'auto',
           }}
         >
           {/* Mobile: close button row */}
           <div className="md:hidden flex items-center justify-between px-4 pt-4 pb-2">
-            <span style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', letterSpacing: '0.06em' }}>MENU</span>
+            <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', letterSpacing: '0.06em' }}>MENU</span>
             <button
               onClick={() => setSidebarOpen(false)}
-              style={{ color: '#6b7280', padding: '6px', minWidth: 32, minHeight: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ color: 'var(--as-text-muted)', padding: '6px', minWidth: 32, minHeight: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               aria-label="Đóng menu"
             >
               <X size={18} />
@@ -252,8 +256,8 @@ function ProfileContent() {
         <main className="flex-1 overflow-x-hidden min-w-0 px-4 md:px-8 pb-16 pt-12 md:pt-8">
           {tab === 'info'    && <ProfileInfo />}
           {tab === 'charts'  && <ChartList />}
-          {tab === 'history' && <HistoryReports />}
-          {tab === 'plans'   && <SubscriptionPlans />}
+          {tab === 'history' && isLifetime && <HistoryReports />}
+          {tab === 'plans'   && isLifetime && <SubscriptionPlans />}
         </main>
 
         </div>{/* end max-w-7xl */}

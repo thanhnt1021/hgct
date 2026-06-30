@@ -30,7 +30,7 @@ const EMPTY_FORM = {
 const labelStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.5rem',
-  color: '#8a8399',
+  color: 'var(--as-text-on-dark)',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.75rem',
   fontWeight: 500,
@@ -40,13 +40,13 @@ const labelStyle: React.CSSProperties = {
 const subLabelStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.25rem',
-  color: '#4a4560',
+  color: 'rgba(247,236,217,0.6)',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.75rem',
   letterSpacing: '0.04em',
 }
 
-const divider = <div style={{ height: '1px', background: 'rgba(200,148,63,0.1)' }} />
+const divider = <div style={{ height: '1px', background: 'rgba(247,236,217,0.12)' }} />
 
 function InputPageInner() {
   const router = useRouter()
@@ -149,7 +149,7 @@ function InputPageInner() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#06060f' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       <Navbar />
 
       <div className="max-w-2xl mx-auto px-4 pt-24 pb-10">
@@ -161,8 +161,8 @@ function InputPageInner() {
           </p>
           <h1
             style={{
-              color: '#f4efe6',
-              fontFamily: 'var(--font-vietnam)',
+              color: 'var(--as-text-strong)',
+              fontFamily: 'var(--font-playfair)',
               fontSize: '1.5rem',
               fontWeight: 700,
               letterSpacing: '0.03em',
@@ -171,7 +171,7 @@ function InputPageInner() {
           >
             {forSynastry ? 'Thông tin người thứ hai' : 'Nhập thông tin'}
           </h1>
-          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
+          <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
             {forSynastry
               ? 'Nhập thông tin của người bạn muốn so sánh bản đồ sao'
               : forChart
@@ -183,11 +183,11 @@ function InputPageInner() {
 
         {/* Form card */}
         <div
-          className="rounded-2xl p-5 sm:p-6"
+          className="rounded-2xl p-5 sm:p-6 as-form-dark"
           style={{
-            background: 'rgba(18,13,46,0.7)',
-            border: '1px solid rgba(200,148,63,0.16)',
-            backdropFilter: 'blur(20px)',
+            background: '#063755',
+            border: '1px solid var(--as-border-soft)',
+            boxShadow: 'var(--as-shadow-card)',
           }}
         >
           <div className="space-y-4 form-compact">
@@ -264,7 +264,7 @@ function InputPageInner() {
                           placeholder="VD: 1850" style={{ flex: 1, minWidth: 0 }} />
                         <button type="button"
                           onClick={() => { setYearMode('select'); setCustomYearText(''); setF('dob', { ...form.dob, year: 0 }); setYearError('') }}
-                          style={{ color: '#6b7280', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
+                          style={{ color: 'rgba(247,236,217,0.6)', fontSize: '0.85rem', padding: '0 0.4rem', flexShrink: 0 }}>✕</button>
                       </div>
                     )}
                     {yearError && <p style={{ color: '#ef4444', fontSize: '0.72rem', marginTop: '0.2rem' }}>{yearError}</p>}
@@ -283,7 +283,7 @@ function InputPageInner() {
                       onChange={e => setF('tob', { ...form.tob, unknown: e.target.checked })}
                       style={{ width: '1rem', height: '1rem', padding: 0 }}
                     />
-                    <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
+                    <span style={{ color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
                       Không rõ
                     </span>
                   </label>
@@ -322,7 +322,7 @@ function InputPageInner() {
             <div>
               <label style={labelStyle}>
                 Biệt danh / Ghi chú{' '}
-                <span style={{ color: '#4a4560', fontSize: '0.65rem', fontWeight: 400 }}>(tuỳ chọn)</span>
+                <span style={{ color: 'rgba(247,236,217,0.6)', fontSize: '0.65rem', fontWeight: 400 }}>(tuỳ chọn)</span>
               </label>
               <input
                 type="text"
@@ -342,13 +342,13 @@ function InputPageInner() {
                   onChange={e => setSaveProfile(e.target.checked)}
                   style={{ width: '1rem', height: '1rem', padding: 0, flexShrink: 0 }}
                 />
-                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
+                <span style={{ color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem' }}>
                   Lưu hồ sơ
                 </span>
               </label>
             ) : (
-              <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                <Link href="/auth/login" style={{ color: '#d9ab55' }}>Đăng nhập</Link> để lưu hồ sơ
+              <p style={{ color: 'rgba(247,236,217,0.6)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                <Link href="/auth/login" style={{ color: 'var(--as-champagne)' }}>Đăng nhập</Link> để lưu hồ sơ
               </p>
             )}
 
@@ -365,13 +365,12 @@ function InputPageInner() {
                 disabled={saving}
                 className="w-full h-9 font-bold text-sm tracking-wider"
                 style={{
-                  background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
-                  backgroundSize: '200% 200%',
-                  color: '#06060f',
-                  borderRadius: '0.5rem',
+                  background: 'var(--as-cta)',
+                  color: 'var(--as-text-on-dark)',
+                  borderRadius: '999px',
                   fontFamily: 'var(--font-vietnam)',
                   letterSpacing: '0.1em',
-                  boxShadow: '0 4px 24px rgba(200,148,63,0.3)',
+                  boxShadow: 'var(--as-shadow-glow)',
                   opacity: saving ? 0.7 : 1,
                   transition: 'opacity 0.2s ease',
                 }}
@@ -389,7 +388,7 @@ function InputPageInner() {
 
 export default function InputPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ background: '#06060f' }} />}>
+    <Suspense fallback={<div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }} />}>
       <InputPageInner />
     </Suspense>
   )

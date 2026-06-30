@@ -148,7 +148,7 @@ export default function CoinTopupPage() {
   // ── Paid state — same shape as /payment "paid", but shows coin balance ──
   if (paid && order) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#06060f' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
         <div className="text-center px-6">
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
@@ -156,20 +156,20 @@ export default function CoinTopupPage() {
           >
             <span style={{ fontSize: '2.2rem' }}>✓</span>
           </div>
-          <h2 style={{ color: '#3db88a', fontFamily: 'var(--font-vietnam)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+          <h2 style={{ color: '#3db88a', fontFamily: 'var(--font-playfair)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
             Nạp xu thành công!
           </h2>
-          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-            Đã cộng <strong style={{ color: '#d9ab55' }}>{fmtXu(order.coins)} xu</strong> vào tài khoản.
+          <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+            Đã cộng <strong style={{ color: 'var(--as-copper-deep)' }}>{fmtXu(order.coins)} xu</strong> vào tài khoản.
           </p>
 
           <div className="rounded-xl px-5 py-4 mb-6 inline-block"
-            style={{ background: 'rgba(200,148,63,0.08)', border: '1px solid rgba(200,148,63,0.25)' }}>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
+            style={{ background: 'var(--as-surface)', border: '1px solid var(--as-border-soft)', boxShadow: 'var(--as-shadow-card)' }}>
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', letterSpacing: '0.08em', marginBottom: '0.35rem' }}>
               SỐ DƯ HIỆN TẠI
             </p>
-            <p style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)', fontSize: '1.9rem', fontWeight: 800, margin: 0 }}>
-              {balance != null ? fmtXu(balance) : '…'} <span style={{ fontSize: '0.9rem', color: '#d9ab55', fontWeight: 600 }}>xu</span>
+            <p style={{ color: 'var(--as-cta)', fontFamily: 'var(--font-vietnam)', fontSize: '1.9rem', fontWeight: 800, margin: 0 }}>
+              {balance != null ? fmtXu(balance) : '…'} <span style={{ fontSize: '0.9rem', color: 'var(--as-copper-deep)', fontWeight: 600 }}>xu</span>
             </p>
           </div>
 
@@ -177,9 +177,9 @@ export default function CoinTopupPage() {
             <button
               onClick={() => router.push(back || '/services')}
               style={{
-                background: 'linear-gradient(135deg, #c8943f 0%, #f0cc78 50%, #c8943f 100%)',
-                color: '#06060f', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem',
-                letterSpacing: '0.06em', padding: '0.85rem 1.5rem', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                background: 'var(--as-cta)',
+                color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem',
+                letterSpacing: '0.06em', padding: '0.85rem 1.5rem', borderRadius: '999px', border: 'none', cursor: 'pointer', boxShadow: 'var(--as-shadow-glow)',
               }}
             >
               {back ? 'Quay lại đọc tiếp →' : 'Bắt đầu xem luận giải →'}
@@ -187,8 +187,8 @@ export default function CoinTopupPage() {
             <button
               onClick={() => { setPaid(false); setOrder(null); setError(''); setBankExpanded(false) }}
               style={{
-                background: 'transparent', color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem',
-                padding: '0.6rem', borderRadius: '4px', border: '1px solid rgba(200,148,63,0.2)', cursor: 'pointer',
+                background: 'transparent', color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem',
+                padding: '0.6rem', borderRadius: '999px', border: '1px solid var(--as-border-gold)', cursor: 'pointer',
               }}
             >
               Nạp thêm
@@ -202,20 +202,20 @@ export default function CoinTopupPage() {
   // ── Waiting for payment — faithful clone of /payment ──
   if (order && !paid) {
     return (
-      <div className="min-h-screen" style={{ background: '#06060f' }}>
+      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
         <Navbar />
 
         <div className="max-w-sm mx-auto px-4 pt-24 pb-16">
 
           {/* Title + amount */}
           <div className="text-center mb-5">
-            <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.12em', fontWeight: 700, marginBottom: '0.3rem' }}>
+            <p style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.65rem', letterSpacing: '0.12em', fontWeight: 700, marginBottom: '0.3rem' }}>
               THANH TOÁN
             </p>
-            <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem', fontWeight: 700, marginBottom: '0.25rem' }}>
+            <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1rem', fontWeight: 700, marginBottom: '0.25rem' }}>
               Nạp xu HGCT
             </p>
-            <p style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+            <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
               {fmtXu(order.coins)} xu
             </p>
             <div style={{ marginTop: '0.6rem' }}>
@@ -235,8 +235,8 @@ export default function CoinTopupPage() {
               </div>
             ) : (
               <div className="flex items-center justify-center"
-                style={{ width: 240, height: 240, background: 'rgba(255,255,255,0.04)', borderRadius: '16px', border: '2px dashed rgba(200,148,63,0.3)' }}>
-                <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem' }}>
+                style={{ width: 240, height: 240, background: 'var(--as-surface)', borderRadius: '16px', border: '2px dashed var(--as-border-gold)' }}>
+                <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem' }}>
                   QR không khả dụng
                 </p>
               </div>
@@ -245,21 +245,21 @@ export default function CoinTopupPage() {
 
           {/* Transfer code — primary action for manual transfer */}
           <div className="rounded-xl px-4 py-4 mb-4 text-center"
-            style={{ background: 'rgba(26,15,60,0.7)', border: '1px solid rgba(200,148,63,0.2)' }}>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+            style={{ background: '#063755', border: '1px solid var(--as-border-gold)' }}>
+            <p style={{ color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
               NỘI DUNG CHUYỂN KHOẢN
             </p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
-              <span style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.06em' }}>
+              <span style={{ color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.06em' }}>
                 {order.transferCode}
               </span>
               <button
                 onClick={() => handleCopy(order.transferCode)}
                 style={{
-                  background: copied ? 'rgba(61,184,138,0.2)' : 'rgba(200,148,63,0.15)',
-                  border: `1px solid ${copied ? 'rgba(61,184,138,0.4)' : 'rgba(200,148,63,0.3)'}`,
-                  borderRadius: '8px', padding: '0.3rem 0.75rem',
-                  cursor: 'pointer', color: copied ? '#3db88a' : '#d9ab55',
+                  background: copied ? 'rgba(61,184,138,0.2)' : 'rgba(237,213,177,0.15)',
+                  border: `1px solid ${copied ? 'rgba(61,184,138,0.4)' : 'rgba(237,213,177,0.3)'}`,
+                  borderRadius: '999px', padding: '0.3rem 0.75rem',
+                  cursor: 'pointer', color: copied ? '#3db88a' : 'var(--as-text-on-dark)',
                   fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 700, transition: 'all 0.2s',
                 }}
               >
@@ -270,19 +270,19 @@ export default function CoinTopupPage() {
 
           {/* Bank details — collapsible */}
           <div className="rounded-xl mb-4 overflow-hidden"
-            style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+            style={{ border: '1px solid var(--as-border-soft)' }}>
             <button
               onClick={() => setBankExpanded(v => !v)}
               className="w-full flex items-center justify-between px-4 py-3"
-              style={{ background: 'rgba(255,255,255,0.03)', border: 'none', cursor: 'pointer' }}
+              style={{ background: 'var(--as-surface)', border: 'none', cursor: 'pointer' }}
             >
-              <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
+              <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>
                 Thông tin tài khoản ngân hàng
               </span>
-              <span style={{ color: '#6b6585', fontSize: '0.7rem' }}>{bankExpanded ? '▲' : '▼'}</span>
+              <span style={{ color: 'var(--as-text-muted)', fontSize: '0.7rem' }}>{bankExpanded ? '▲' : '▼'}</span>
             </button>
             {bankExpanded && (
-              <div className="px-4 pb-4 space-y-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <div className="px-4 pb-4 space-y-2" style={{ background: 'var(--as-surface-raised)' }}>
                 {[
                   { label: 'Ngân hàng', value: order.bankName },
                   { label: 'Số tài khoản', value: order.bankAccount },
@@ -290,11 +290,11 @@ export default function CoinTopupPage() {
                   { label: 'Số tiền', value: formatAmount(order.amount) },
                 ].map(row => (
                   <div key={row.label} className="flex justify-between items-baseline gap-4"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.4rem' }}>
-                    <span style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', flexShrink: 0 }}>
+                    style={{ borderBottom: '1px solid var(--as-border-soft)', paddingBottom: '0.4rem' }}>
+                    <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', flexShrink: 0 }}>
                       {row.label}:
                     </span>
-                    <span style={{ color: '#c8bfda', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'right' }}>
+                    <span style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 600, textAlign: 'right' }}>
                       {row.value || '—'}
                     </span>
                   </div>
@@ -307,13 +307,13 @@ export default function CoinTopupPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
               <span className="animate-pulse" style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#3db88a', flexShrink: 0 }} />
-              <p style={{ color: '#4a6660', fontFamily: 'var(--font-vietnam)', fontSize: '0.74rem', lineHeight: 1.5, margin: 0 }}>
+              <p style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.74rem', lineHeight: 1.5, margin: 0 }}>
                 Tự động cộng xu khi nhận tiền.{' '}
-                <span style={{ color: '#6b6040' }}>Đã CK chưa thấy? Đợi 1–2 phút.</span>
+                <span style={{ color: 'var(--as-text-muted)' }}>Đã CK chưa thấy? Đợi 1–2 phút.</span>
               </p>
             </div>
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <p style={{ color: secondsLeft < 60 ? '#f87171' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.3rem', fontWeight: 800, letterSpacing: '0.05em', margin: 0 }}>
+              <p style={{ color: secondsLeft < 60 ? '#f87171' : 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '1.3rem', fontWeight: 800, letterSpacing: '0.05em', margin: 0 }}>
                 {formatCountdown(secondsLeft)}
               </p>
             </div>
@@ -323,7 +323,7 @@ export default function CoinTopupPage() {
           <div className="text-center">
             <button
               onClick={() => { setOrder(null); setError(''); setBankExpanded(false) }}
-              style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(74,69,96,0.4)' }}
+              style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--as-border-gold)' }}
             >
               Chọn gói khác
             </button>
@@ -339,35 +339,35 @@ export default function CoinTopupPage() {
 
   // ── Package selection — celestial card, same look as /checkout ──
   return (
-    <div className="min-h-screen" style={{ background: '#06060f' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       <Navbar />
       <div className="max-w-lg mx-auto px-4 pt-28 pb-16">
         <div className="rounded-2xl p-8 sm:p-10"
-          style={{ background: 'rgba(18,13,46,0.7)', border: '1px solid rgba(200,148,63,0.16)', backdropFilter: 'blur(20px)' }}>
+          style={{ background: 'var(--as-surface)', border: '1px solid var(--as-border-soft)', boxShadow: 'var(--as-shadow-card)' }}>
 
           {/* Header */}
           <div className="text-center mb-8">
             <span className="text-5xl block mb-4">🪙</span>
-            <p className="section-eyebrow mb-2" style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+            <p className="section-eyebrow mb-2" style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               Nạp xu
             </p>
-            <h1 style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.4rem', fontWeight: 700, letterSpacing: '0.04em', marginBottom: '0.5rem' }}>
+            <h1 style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1.4rem', fontWeight: 700, letterSpacing: '0.04em', marginBottom: '0.5rem' }}>
               Chọn gói nạp xu
             </h1>
-            <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.6 }}>
+            <p style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem', lineHeight: 1.6 }}>
               Xu dùng để mở từng mục trong các bản luận giải chiêm tinh.
             </p>
             {balance != null && (
               <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full"
-                style={{ background: 'rgba(200,148,63,0.1)', border: '1px solid rgba(200,148,63,0.25)' }}>
-                <span style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>Số dư:</span>
-                <span style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem', fontWeight: 700 }}>{fmtXu(balance)} xu</span>
+                style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)' }}>
+                <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>Số dư:</span>
+                <span style={{ color: 'var(--as-cta)', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem', fontWeight: 700 }}>{fmtXu(balance)} xu</span>
               </div>
             )}
           </div>
 
           {/* Gold divider */}
-          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(200,148,63,0.3), transparent)', marginBottom: '1.75rem' }} />
+          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--as-border-gold), transparent)', marginBottom: '1.75rem' }} />
 
           {/* Packages */}
           <div className="flex flex-col gap-3">
@@ -383,40 +383,40 @@ export default function CoinTopupPage() {
                   className="w-full flex items-center justify-between"
                   style={{
                     textAlign: 'left',
-                    background: 'rgba(255,255,255,0.025)',
-                    border: `1px solid ${p.enabled ? 'rgba(200,148,63,0.18)' : 'rgba(255,255,255,0.05)'}`,
+                    background: 'var(--as-surface-raised)',
+                    border: `1px solid ${p.enabled ? 'var(--as-border-gold)' : 'var(--as-border-soft)'}`,
                     borderRadius: 12,
                     padding: '1rem 1.15rem',
                     cursor: disabled ? 'not-allowed' : 'pointer',
                     opacity: p.enabled ? 1 : 0.5,
                     transition: 'border-color 0.2s ease, background 0.2s ease',
                   }}
-                  onMouseEnter={e => { if (p.enabled && !creating) { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(200,148,63,0.55)'; el.style.background = 'rgba(200,148,63,0.06)' } }}
-                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = p.enabled ? 'rgba(200,148,63,0.18)' : 'rgba(255,255,255,0.05)'; el.style.background = 'rgba(255,255,255,0.025)' }}
+                  onMouseEnter={e => { if (p.enabled && !creating) { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--as-cta)'; el.style.background = 'var(--as-champagne)' } }}
+                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = p.enabled ? 'var(--as-border-gold)' : 'var(--as-border-soft)'; el.style.background = 'var(--as-surface-raised)' }}
                 >
                   <div>
-                    <p style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+                    <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
                       {p.label}
                     </p>
                     {p.enabled ? (
                       <>
-                        <p style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1.35rem', fontWeight: 800, lineHeight: 1.1 }}>
-                          {fmtXu(p.coins)} <span style={{ fontSize: '0.8rem', color: '#d9ab55', fontWeight: 600 }}>xu</span>
+                        <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '1.35rem', fontWeight: 800, lineHeight: 1.1 }}>
+                          {fmtXu(p.coins)} <span style={{ fontSize: '0.8rem', color: 'var(--as-copper-deep)', fontWeight: 600 }}>xu</span>
                         </p>
-                        <p style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.2rem' }}>
+                        <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.2rem' }}>
                           ≈ {Math.round(p.amountVnd / p.coins).toLocaleString('vi-VN')}đ / xu
                         </p>
                       </>
                     ) : (
-                      <p style={{ color: '#6b6585', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginTop: '0.2rem' }}>Sắp ra mắt</p>
+                      <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginTop: '0.2rem' }}>Sắp ra mắt</p>
                     )}
                   </div>
                   {p.enabled && (
                     <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: '1rem' }}>
-                      <p style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem', fontWeight: 700 }}>
+                      <p style={{ color: 'var(--as-cta)', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem', fontWeight: 700 }}>
                         {loadingThis ? '…' : formatAmount(p.amountVnd)}
                       </p>
-                      <p style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.15rem' }}>
+                      <p style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.15rem' }}>
                         {loadingThis ? 'Đang tạo…' : 'Chọn →'}
                       </p>
                     </div>

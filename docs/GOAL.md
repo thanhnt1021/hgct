@@ -1,6 +1,6 @@
 # GOAL
 
-_Last reviewed: 2026-05-30_
+_Last reviewed: 2026-06-16_
 
 ## Mục tiêu cuối cùng
 
@@ -26,9 +26,11 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 - [x] Milestone 1: Payment + operations — SePay integration, admin dashboard, Telegram bots, job recovery
 - [ ] Milestone 2: Chất lượng báo cáo AI — cải thiện prompt, output quality, thêm dịch vụ mới
 - [ ] Milestone 3: Stability & monitoring — alerting, auto-recovery nâng cao, backup, uptime SLA
-- [ ] Milestone 4: Mở rộng tính năng người dùng — subscription management, history UI, sharing, community
+- [ ] Milestone 4: Mở rộng tính năng người dùng — subscription management, history UI, sharing, community, **rebrand AstroS + redesign trang chủ**
 
 ## Pending / Cần Quyết Định
+
+- [x] 🟢 **AstroS rebrand + redesign (Jun16-01 → Jun30-01)** — **go-live prod 2026-06-30**. Rebrand → AstroS, theme 2 màu (kem #edd5b1 + navy #163653) toàn site, flow input → ket-qua (bản đồ sao + 3 lõi / nhà trội / gu tình yêu / synastry + an toàn / vận hạn transit) → unlock xu inline. 4 service đổi tên (Tình duyên cá nhân, Mối quan hệ cặp đôi), bỏ relations-* rác. Sheet AI: 3 lõi, gu Sao Kim, MOON an toàn, vận hạn transit-house chuẩn. Design system: `docs/DESIGN.md`.
 
 - [x] 🟢 **Coin rework — production hardening (v3.4)** — đã thực thi A–E + nhiều fix UX + mở lại đăng ký, **go-live prod 2026-06-04**. Chi tiết `docs/UPGRADE_LOG.md`.
 - [ ] **Off-site DB backup (Cloudflare R2)** — hiện chỉ backup local trên server → SPOF. Đã chốt: R2 + rclone crypt + retention 30 ngày + monthly snapshot 12 tháng. Plan chi tiết: `/home/hgct/TODO_OFFSITE_BACKUP.md` trên server. Cần ~20 phút: user tạo bucket + API token trong CF dashboard → Claude config rclone + sửa `backup-db.sh` + test restore.
@@ -39,6 +41,8 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 - [ ] Fix font ℞ trong PDF: tìm font embed sẵn có glyph U+211E (℞) để Puppeteer render đúng chữ thay vì fallback "Px"
 
 ## Hiện tại đang ở đâu
+
+**2026-06-30:** Go-live **AstroS rebrand + redesign** lên production (merge `Jun30-01` → main). Toàn site theme 2 màu kem/navy. Trang chủ: form S2 → ket-qua cá nhân (bản đồ sao + 3 lõi + 4 cục unlock); 4 nút service S1 + landing /services → modal nhập mới → ket-qua từng loại (nhà trội / gu tình yêu / synastry + cảm giác an toàn / vận hạn transit). Nội dung AI sinh + lưu Google Sheet → DB (`knowledgeBase`): cột 3 lõi, gu Sao Kim, AI MOON AN TOÀN; vận hạn dùng thuật toán transit-house chuẩn (`getVanHanBlocks` + chart overlay `getOuterPlanetCycleData`). Lá số lưu localStorage (dedupe theo người). Bỏ tab Lịch sử/Gói dịch vụ trừ Lifetime. **Route mua coin (webhook SePay) chuyển sang prod.**
 
 **2026-06-04:** Go-live **coin hardening (v3.4)** + **mở lại đăng ký** lên production. Coin gen chạy ngầm dạng job (never-fail, % thật), essay lưu DB (nhất quán, đọc lại vĩnh viễn), trang "Hồ sơ đã xem", modal nhập liệu đồng nhất (dropdown hồ sơ, redirect same-tab), profile dedup. Đăng ký mở lại: credentials (bcrypt + rate-limit) + Google tự tạo tài khoản user mới. Webhook SePay trỏ lại prod. Giá xu để khuyến mãi 5k/10k/15k. **Production mở lại cho new user.** Chi tiết: `docs/UPGRADE_LOG.md` (v3.4).
 

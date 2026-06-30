@@ -41,7 +41,7 @@ const career: CatalogService = {
 
 const love: CatalogService = {
   type: 'love',
-  label: 'Tình duyên (cá nhân)',
+  label: 'Tình duyên cá nhân',
   bundlePrice: 300, // cộng dồn lẻ 356 → tròn xuống 300
   sections: [
     { id: 'love-1', index: 1, title: 'Bạn thật sự cần điều gì trong tình yêu?',                              subtitle: 'Hiểu rõ nhu cầu cảm xúc, cách yêu và điều bạn luôn tìm kiếm trong các mối quan hệ.',                                coinPrice: 69  },
@@ -53,7 +53,7 @@ const love: CatalogService = {
 
 const synastry: CatalogService = {
   type: 'synastry',
-  label: 'Cặp đôi',
+  label: 'Mối quan hệ cặp đôi',
   bundlePrice: 800, // cộng dồn lẻ 805 → tròn xuống 800
   sections: [
     { id: 'synastry-1', index: 1, title: 'Vì sao hai bạn lại gặp nhau và có sự kết nối đặc biệt này?', subtitle: 'Khám phá bức tranh tổng thể của mối quan hệ và năng lượng khi hai bạn ở cạnh nhau.',                                coinPrice: 119 },

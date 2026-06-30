@@ -82,15 +82,15 @@ const sections = [
     num: '10',
     title: 'Liên hệ',
     items: [
-      <>Email: <a href="mailto:support@hatgiongchiemtinh.com" style={{ color: '#d9ab55' }}>support@hatgiongchiemtinh.com</a></>,
-      <>Website: <a href="https://hatgiongchiemtinh.com" style={{ color: '#d9ab55' }}>hatgiongchiemtinh.com</a></>,
+      <>Email: <a href="mailto:support@hatgiongchiemtinh.com" style={{ color: 'var(--as-cta)' }}>support@hatgiongchiemtinh.com</a></>,
+      <>Website: <a href="https://hatgiongchiemtinh.com" style={{ color: 'var(--as-cta)' }}>hatgiongchiemtinh.com</a></>,
     ],
   },
 ]
 
 export default function TermsPage() {
   return (
-    <div style={{ minHeight: '100vh', background: '#06060f' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #edd5b1 0%, #e3c89a 100%)' }}>
       <div className="max-w-3xl mx-auto px-4 py-16">
 
         {/* Back link */}
@@ -98,7 +98,7 @@ export default function TermsPage() {
           <Link
             href="/"
             style={{
-              color: '#d9ab55',
+              color: 'var(--as-cta)',
               fontFamily: 'var(--font-vietnam)',
               fontSize: '0.85rem',
               textDecoration: 'none',
@@ -115,20 +115,20 @@ export default function TermsPage() {
         <div className="mb-12 text-center">
           <h1
             style={{
-              fontFamily: 'var(--font-cinzel, var(--font-vietnam))',
+              fontFamily: 'var(--font-playfair)',
               fontSize: '2rem',
               fontWeight: 700,
-              color: '#d9ab55',
+              color: 'var(--as-text-strong)',
               letterSpacing: '0.06em',
               marginBottom: '0.5rem',
             }}
           >
             Điều Khoản Sử Dụng
           </h1>
-          <p style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: '0.4rem' }}>
+          <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: '0.4rem' }}>
             Hạt Giống Chiêm Tinh — hatgiongchiemtinh.com
           </p>
-          <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>
+          <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>
             Cập nhật lần cuối: 10/03/2026
           </p>
         </div>
@@ -139,10 +139,11 @@ export default function TermsPage() {
             <div
               key={section.num}
               style={{
-                background: 'rgba(18,13,46,0.6)',
-                border: '1px solid rgba(200,148,63,0.12)',
+                background: 'var(--as-surface)',
+                border: '1px solid var(--as-border-soft)',
                 borderRadius: '1rem',
                 padding: '1.5rem 1.75rem',
+                boxShadow: 'var(--as-shadow-card)',
               }}
             >
               <div
@@ -155,7 +156,7 @@ export default function TermsPage() {
               >
                 <span
                   style={{
-                    color: '#c8943f',
+                    color: 'var(--as-text-muted)',
                     fontFamily: 'var(--font-vietnam)',
                     fontSize: '0.7rem',
                     fontWeight: 700,
@@ -167,8 +168,8 @@ export default function TermsPage() {
                 </span>
                 <h2
                   style={{
-                    color: '#d9ab55',
-                    fontFamily: 'var(--font-vietnam)',
+                    color: 'var(--as-text-strong)',
+                    fontFamily: 'var(--font-playfair)',
                     fontSize: '0.95rem',
                     fontWeight: 700,
                     letterSpacing: '0.03em',
@@ -182,7 +183,7 @@ export default function TermsPage() {
                   <li
                     key={i}
                     style={{
-                      color: '#c9c3d6',
+                      color: 'var(--as-text)',
                       fontFamily: 'var(--font-vietnam)',
                       fontSize: '0.88rem',
                       lineHeight: 1.7,
@@ -198,7 +199,7 @@ export default function TermsPage() {
                         width: '4px',
                         height: '4px',
                         borderRadius: '50%',
-                        background: '#c8943f',
+                        background: 'var(--as-cta)',
                         opacity: 0.6,
                         display: 'block',
                       }}
@@ -216,7 +217,7 @@ export default function TermsPage() {
           style={{
             marginTop: '3rem',
             textAlign: 'center',
-            color: '#4a4560',
+            color: 'var(--as-text-muted)',
             fontFamily: 'var(--font-vietnam)',
             fontSize: '0.78rem',
           }}

@@ -269,7 +269,7 @@ export default function HistoryReports() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+      <div className="flex items-center justify-center py-16" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
         <RefreshCw size={18} className="animate-spin mr-2" />
         Đang tải lịch sử...
       </div>
@@ -278,10 +278,10 @@ export default function HistoryReports() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-2" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+      <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
         Lịch sử & Báo cáo
       </h2>
-      <p className="text-sm mb-6" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+      <p className="text-sm mb-6" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
         Tất cả báo cáo đã tạo trên tài khoản của bạn.
       </p>
 
@@ -293,9 +293,9 @@ export default function HistoryReports() {
               <button key={t} onClick={() => { setFilterType(t); setPage(0) }}
                 className="px-3 rounded-lg text-xs font-medium flex-shrink-0"
                 style={{
-                  background: filterType === t ? (t === 'all' ? 'rgba(201,168,76,0.15)' : `${SERVICE_COLORS[t]}22`) : 'rgba(255,255,255,0.04)',
-                  color: filterType === t ? (t === 'all' ? '#d9ab55' : SERVICE_COLORS[t]) : '#6b7280',
-                  border: `1px solid ${filterType === t ? (t === 'all' ? 'rgba(201,168,76,0.3)' : `${SERVICE_COLORS[t]}55`) : 'rgba(255,255,255,0.06)'}`,
+                  background: filterType === t ? (t === 'all' ? 'var(--as-cta)' : `${SERVICE_COLORS[t]}22`) : 'transparent',
+                  color: filterType === t ? (t === 'all' ? 'var(--as-text-on-dark)' : SERVICE_COLORS[t]) : 'var(--as-text-muted)',
+                  border: `1px solid ${filterType === t ? (t === 'all' ? 'var(--as-cta)' : `${SERVICE_COLORS[t]}55`) : 'var(--as-border-soft)'}`,
                   fontFamily: 'var(--font-vietnam)',
                   minHeight: 36,
                 }}>
@@ -308,9 +308,9 @@ export default function HistoryReports() {
               <button key={s} onClick={() => { setFilterStatus(s); setPage(0) }}
                 className="px-3 rounded-lg text-xs flex-shrink-0"
                 style={{
-                  background: filterStatus === s ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
-                  color: filterStatus === s ? '#f4efe6' : '#6b7280',
-                  border: `1px solid ${filterStatus === s ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)'}`,
+                  background: filterStatus === s ? 'rgba(22,54,83,0.08)' : 'transparent',
+                  color: filterStatus === s ? 'var(--as-text-strong)' : 'var(--as-text-muted)',
+                  border: `1px solid ${filterStatus === s ? 'var(--as-border-gold)' : 'var(--as-border-soft)'}`,
                   fontFamily: 'var(--font-vietnam)',
                   minHeight: 36,
                   whiteSpace: 'nowrap',
@@ -324,17 +324,17 @@ export default function HistoryReports() {
 
       {/* Empty */}
       {entries.length === 0 && (
-        <div className="rounded-2xl p-10 text-center" style={{ background: 'rgba(26,21,53,0.6)', border: '1px dashed rgba(201,168,76,0.15)' }}>
-          <FileText size={32} style={{ color: '#4a4560', margin: '0 auto 1rem' }} />
-          <p className="mb-1" style={{ color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+        <div className="rounded-2xl p-10 text-center" style={{ background: 'var(--as-surface)', border: '1px dashed var(--as-border-gold)', boxShadow: 'var(--as-shadow-card)' }}>
+          <FileText size={32} style={{ color: 'var(--as-text-muted)', margin: '0 auto 1rem' }} />
+          <p className="mb-1" style={{ color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)' }}>
             Bạn chưa có báo cáo nào.
           </p>
-          <p className="text-sm mb-5" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+          <p className="text-sm mb-5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
             Hãy đặt báo cáo chiêm tinh đầu tiên!
           </p>
           <button onClick={() => router.push('/services')}
             className="px-6 py-2.5 rounded-xl font-semibold text-sm"
-            style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}>
+            style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', borderRadius: 999, boxShadow: 'var(--as-shadow-glow)' }}>
             Xem dịch vụ →
           </button>
         </div>
@@ -342,7 +342,7 @@ export default function HistoryReports() {
 
       {/* No results after filter */}
       {entries.length > 0 && filtered.length === 0 && (
-        <div className="text-center py-8" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+        <div className="text-center py-8" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
           Không có báo cáo nào phù hợp với bộ lọc.
         </div>
       )}
@@ -374,8 +374,9 @@ export default function HistoryReports() {
             return (
               <div key={entry.jobId} className="rounded-xl px-4 py-3"
                 style={{
-                  background: 'rgba(26,21,53,0.6)',
-                  border: `1px solid ${isExpired ? 'rgba(239,68,68,0.15)' : 'rgba(201,168,76,0.08)'}`,
+                  background: 'var(--as-surface)',
+                  border: `1px solid ${isExpired ? 'rgba(239,68,68,0.3)' : 'var(--as-border-soft)'}`,
+                  boxShadow: 'var(--as-shadow-card)',
                   opacity: isExpired ? 0.72 : 1,
                 }}>
                 {/* Row 1: service badge + name + deleted badge */}
@@ -385,7 +386,7 @@ export default function HistoryReports() {
                     {SERVICE_LABELS[entry.service] || entry.service}
                   </span>
                   <p className="font-semibold truncate flex-1 min-w-0"
-                    style={{ color: isExpired ? '#94a3b8' : '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
+                    style={{ color: isExpired ? 'var(--as-text-muted)' : 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.88rem' }}>
                     {entry.name}
                   </p>
                   {isExpired && (
@@ -424,18 +425,18 @@ export default function HistoryReports() {
                   </div>
                 )}
                 {/* Row 2: date + email */}
-                <p className="truncate mb-2" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>
+                <p className="truncate mb-2" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem' }}>
                   {new Date(entry.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · {entry.email}
                 </p>
                 {/* Progress bar for processing jobs */}
                 {isProcessing && (
                   <div className="mb-2">
                     <div className="flex justify-between items-center mb-1">
-                      <span style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem' }}>
+                      <span style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem' }}>
                         {st?.label || 'Đang xử lý...'}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.75rem' }}>
+                        <span style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.75rem' }}>
                           {st?.progress ?? 0}%
                         </span>
                         <button
@@ -455,11 +456,11 @@ export default function HistoryReports() {
                         </button>
                       </div>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(200,148,63,0.08)' }}>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(22,54,83,0.1)' }}>
                       <div className="h-full rounded-full" style={{
                         width: `${st?.progress ?? 0}%`,
-                        background: 'linear-gradient(90deg, #c8943f, #f0cc78)',
-                        boxShadow: '0 0 8px rgba(200,148,63,0.4)',
+                        background: 'var(--as-cta)',
+                        boxShadow: '0 0 8px rgba(22,54,83,0.3)',
                         transition: 'width 700ms cubic-bezier(0.4, 0, 0.2, 1)',
                       }} />
                     </div>
@@ -474,7 +475,7 @@ export default function HistoryReports() {
                   <button
                     onClick={() => manualRefresh(entry.jobId)}
                     disabled={refreshing[entry.jobId]}
-                    style={{ color: '#6b7280', background: 'rgba(255,255,255,0.04)', padding: '0.375rem', borderRadius: '0.5rem', minWidth: 32, minHeight: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ color: 'var(--as-text-muted)', background: 'transparent', border: '1px solid var(--as-border-soft)', padding: '0.375rem', borderRadius: '0.5rem', minWidth: 32, minHeight: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     title="Làm mới trạng thái"
                   >
                     <RefreshCw size={13} className={refreshing[entry.jobId] ? 'animate-spin' : ''} />
@@ -484,9 +485,9 @@ export default function HistoryReports() {
                     disabled={!pdfAvailable}
                     className="flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium"
                     style={{
-                      background: pdfAvailable ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.03)',
-                      color: pdfAvailable ? '#d9ab55' : '#4a4560',
-                      border: `1px solid ${pdfAvailable ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)'}`,
+                      background: pdfAvailable ? 'var(--as-cta)' : 'transparent',
+                      color: pdfAvailable ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)',
+                      border: `1px solid ${pdfAvailable ? 'var(--as-cta)' : 'var(--as-border-soft)'}`,
                       fontFamily: 'var(--font-vietnam)',
                       cursor: pdfAvailable ? 'pointer' : 'not-allowed',
                       minHeight: 36,
@@ -502,9 +503,9 @@ export default function HistoryReports() {
                         disabled={sharing[entry.jobId]}
                         className="flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium"
                         style={{
-                          background: 'rgba(61,43,94,0.4)',
-                          color: '#a78bfa',
-                          border: '1px solid rgba(167,139,250,0.2)',
+                          background: 'transparent',
+                          color: 'var(--as-text-strong)',
+                          border: '1px solid var(--as-border-gold)',
                           fontFamily: 'var(--font-vietnam)',
                           cursor: 'pointer',
                           minHeight: 36,
@@ -517,7 +518,7 @@ export default function HistoryReports() {
                       </button>
                       {shareMsg[entry.jobId] && (
                         <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs px-2 py-0.5 rounded"
-                          style={{ background: 'rgba(26,21,53,0.95)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.2)', fontFamily: 'var(--font-vietnam)' }}>
+                          style={{ background: 'var(--as-surface-raised)', color: 'var(--as-text-strong)', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)' }}>
                           {shareMsg[entry.jobId]}
                         </span>
                       )}
@@ -533,17 +534,17 @@ export default function HistoryReports() {
       {/* Cancel job modal */}
       {cancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(6,6,15,0.85)', backdropFilter: 'blur(4px)' }}>
+          style={{ background: 'rgba(22,54,83,0.5)' }}>
           <div className="rounded-2xl p-6 w-full max-w-sm"
-            style={{ background: 'rgba(18,13,46,0.98)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            style={{ background: 'var(--as-surface-raised)', border: '1px solid rgba(239,68,68,0.3)' }}>
             <p style={{ fontSize: '1.75rem', marginBottom: '0.75rem', textAlign: 'center' }}>⚠</p>
             <h3 className="font-bold mb-2 text-center"
-              style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+              style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1rem' }}>
               Hủy báo cáo?
             </h3>
             <p className="mb-5 text-center"
-              style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.7 }}>
-              Hủy báo cáo <span style={{ color: '#f4efe6', fontWeight: 600 }}>{cancelModal.name}</span>?{' '}
+              style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.7 }}>
+              Hủy báo cáo <span style={{ color: 'var(--as-text-strong)', fontWeight: 600 }}>{cancelModal.name}</span>?{' '}
               Đơn hàng sẽ bị xóa khỏi lịch sử.
             </p>
             <div className="flex gap-3">
@@ -567,9 +568,9 @@ export default function HistoryReports() {
                 disabled={cancelling}
                 className="flex-1 py-2.5 rounded-xl text-sm"
                 style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  color: '#8a8399',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'transparent',
+                  color: 'var(--as-text-strong)',
+                  border: '1px solid var(--as-border-gold)',
                   fontFamily: 'var(--font-vietnam)',
                   cursor: 'pointer',
                 }}
@@ -584,14 +585,14 @@ export default function HistoryReports() {
       {/* Confirm save modal */}
       {confirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(6,6,15,0.85)', backdropFilter: 'blur(4px)' }}>
+          style={{ background: 'rgba(22,54,83,0.5)' }}>
           <div className="rounded-2xl p-6 w-full max-w-sm"
-            style={{ background: 'rgba(18,13,46,0.98)', border: '1px solid rgba(74,222,128,0.2)' }}>
-            <h3 className="font-bold mb-2" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+            style={{ background: 'var(--as-surface-raised)', border: '1px solid rgba(74,222,128,0.3)' }}>
+            <h3 className="font-bold mb-2" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1rem' }}>
               Lưu hồ sơ vĩnh viễn
             </h3>
-            <p className="mb-5" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
-              Lưu hồ sơ <span style={{ color: '#f4efe6', fontWeight: 600 }}>{confirmModal.names}</span> để giữ PDF mãi mãi?
+            <p className="mb-5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+              Lưu hồ sơ <span style={{ color: 'var(--as-text-strong)', fontWeight: 600 }}>{confirmModal.names}</span> để giữ PDF mãi mãi?
             </p>
             <div className="flex gap-3">
               <button
@@ -611,8 +612,8 @@ export default function HistoryReports() {
                 disabled={confirming}
                 className="flex-1 py-2.5 rounded-xl text-sm"
                 style={{
-                  background: 'rgba(255,255,255,0.04)', color: '#6b7280',
-                  border: '1px solid rgba(255,255,255,0.06)', fontFamily: 'var(--font-vietnam)',
+                  background: 'transparent', color: 'var(--as-text-strong)',
+                  border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)',
                   cursor: 'pointer',
                 }}
               >
@@ -627,14 +628,14 @@ export default function HistoryReports() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-5 gap-2">
           <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-            style={{ color: page === 0 ? '#4a4560' : '#d9ab55', background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.1)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', padding: '0.5rem 0.875rem', borderRadius: '0.5rem', minHeight: 44, display: 'flex', alignItems: 'center' }}>
+            style={{ color: page === 0 ? 'var(--as-text-muted)' : 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', padding: '0.5rem 0.875rem', borderRadius: '0.5rem', minHeight: 44, display: 'flex', alignItems: 'center' }}>
             ← Trước
           </button>
-          <span style={{ color: '#6b7280', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>
+          <span style={{ color: 'var(--as-text-muted)', fontSize: '0.82rem', fontFamily: 'var(--font-vietnam)' }}>
             {page + 1} / {totalPages}
           </span>
           <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-            style={{ color: page >= totalPages - 1 ? '#4a4560' : '#d9ab55', background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.1)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', padding: '0.5rem 0.875rem', borderRadius: '0.5rem', minHeight: 44, display: 'flex', alignItems: 'center' }}>
+            style={{ color: page >= totalPages - 1 ? 'var(--as-text-muted)' : 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', padding: '0.5rem 0.875rem', borderRadius: '0.5rem', minHeight: 44, display: 'flex', alignItems: 'center' }}>
             Sau →
           </button>
         </div>

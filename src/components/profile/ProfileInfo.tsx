@@ -226,18 +226,19 @@ export default function ProfileInfo() {
   if (!user) return null
 
   const cardStyle: React.CSSProperties = {
-    background: 'rgba(26,21,53,0.6)',
-    border: '1px solid rgba(201,168,76,0.12)',
+    background: 'var(--as-surface)',
+    border: '1px solid var(--as-border-soft)',
     borderRadius: '1rem',
     padding: '1.5rem',
     marginBottom: '1.5rem',
+    boxShadow: 'var(--as-shadow-card)',
   }
 
   const displayName = mainChart ? [mainChart.ho, mainChart.dem, mainChart.ten].filter(Boolean).join(' ') : ''
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-6" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+      <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
         Thông tin cá nhân
       </h2>
 
@@ -253,12 +254,12 @@ export default function ProfileInfo() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: user.isPremium ? 'rgba(201,168,76,0.12)' : 'rgba(107,114,128,0.1)', border: `1px solid ${user.isPremium ? 'rgba(201,168,76,0.3)' : 'rgba(107,114,128,0.2)'}` }}>
+              style={{ background: user.isPremium ? 'rgba(22,54,83,0.08)' : 'rgba(22,54,83,0.05)', border: `1px solid ${user.isPremium ? 'var(--as-border-gold)' : 'var(--as-border-soft)'}` }}>
               <span style={{ fontSize: '1.1rem' }}>{user.isPremium ? '✦' : '○'}</span>
             </div>
             <div>
-              <p style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginBottom: '0.1rem' }}>LOẠI TÀI KHOẢN</p>
-              <p style={{ color: user.isPremium ? '#d9ab55' : '#94a3b8', fontFamily: 'var(--font-vietnam)', fontWeight: 700 }}>
+              <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginBottom: '0.1rem' }}>LOẠI TÀI KHOẢN</p>
+              <p style={{ color: user.isPremium ? 'var(--as-copper-deep)' : 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontWeight: 700 }}>
                 {user.planType === 'lifetime' ? 'Lifetime ★' : user.planType === 'cao_cap' ? 'Cao cấp ✦' : user.isPremium ? 'Tiêu chuẩn ✦' : 'Miễn phí'}
               </p>
             </div>
@@ -266,15 +267,15 @@ export default function ProfileInfo() {
           {!user.isPremium && (
             <button onClick={() => router.push('/profile?tab=plans')}
               className="px-4 py-2 rounded-xl font-semibold text-sm"
-              style={{ background: 'rgba(201,168,76,0.12)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)' }}>
+              style={{ background: 'transparent', color: 'var(--as-text-strong)', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)' }}>
               Xem gói dịch vụ →
             </button>
           )}
         </div>
         {!user.isPremium && (
-          <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(201,168,76,0.08)' }}>
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--as-border-soft)' }}>
             <button onClick={() => setShowUpgrade(v => !v)} className="text-sm"
-              style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+              style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
               {showUpgrade ? '▲ Ẩn' : '▼ Nhập mã kích hoạt'}
             </button>
             {showUpgrade && (
@@ -284,7 +285,7 @@ export default function ProfileInfo() {
                   placeholder="Mã kích hoạt..." className="flex-1" style={{ fontFamily: 'var(--font-vietnam)' }} />
                 <button onClick={handleUpgrade} disabled={upgrading || !upgradeCode.trim()}
                   className="px-4 py-2 rounded-xl font-semibold text-sm"
-                  style={{ background: upgradeCode.trim() ? '#c9a84c' : 'rgba(201,168,76,0.15)', color: upgradeCode.trim() ? '#0a0a1a' : '#6b7280' }}>
+                  style={{ background: upgradeCode.trim() ? 'var(--as-cta)' : 'rgba(22,54,83,0.12)', color: upgradeCode.trim() ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)', borderRadius: 999, boxShadow: upgradeCode.trim() ? 'var(--as-shadow-glow)' : 'none' }}>
                   {upgrading ? '...' : 'Kích hoạt'}
                 </button>
               </div>
@@ -298,15 +299,15 @@ export default function ProfileInfo() {
       <div style={cardStyle}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Bản đồ sao của bạn</h3>
-            <p className="text-xs mt-0.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+            <h3 className="font-bold" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>Bản đồ sao của bạn</h3>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
               Bản đồ sao gắn liền với tài khoản
             </p>
           </div>
           <button
             onClick={() => { setModalInitialData(mainChart ?? EMPTY_PROFILE_FORM); setMainChartModalOpen(true) }}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm"
-            style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)', fontFamily: 'var(--font-vietnam)' }}
+            style={{ color: 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)' }}
           >
             <Pencil size={13} /> {mainChart ? 'Sửa' : 'Cập nhật'}
           </button>
@@ -314,26 +315,26 @@ export default function ProfileInfo() {
 
         {mainChartLoading ? (
           <div className="flex justify-center py-4">
-            <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(201,168,76,0.2)', borderTopColor: '#c9a84c' }} />
+            <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(22,54,83,0.15)', borderTopColor: 'var(--as-cta)' }} />
           </div>
         ) : mainChart ? (
           /* Compact stacked card — same pattern as ChartList */
           <div className="rounded-xl px-4 py-3"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(201,168,76,0.1)' }}>
+            style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-soft)' }}>
             {/* Row 1: gender icon + name */}
             <div className="flex items-center gap-2 mb-1">
               <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(61,43,94,0.6)', fontSize: '0.8rem' }}>
+                style={{ background: 'rgba(22,54,83,0.08)', fontSize: '0.8rem' }}>
                 {mainChart.gender === 'Female' ? '♀' : mainChart.gender === 'Male' ? '♂' : '⊕'}
               </div>
               <p className="font-semibold truncate flex-1 min-w-0"
-                style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}>
+                style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.92rem' }}>
                 {displayName || '(Chưa có tên)'}
               </p>
             </div>
             {/* Row 2: meta — single line, truncate */}
             <p className="truncate mb-2.5"
-              style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', paddingLeft: '2.25rem' }}>
+              style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', paddingLeft: '2.25rem' }}>
               {mainChart.dob.day > 0 ? `${mainChart.dob.day}/${mainChart.dob.month}/${mainChart.dob.year}` : 'Chưa có ngày'} ·{' '}
               {mainChart.tob.unknown ? 'Không rõ giờ' : mainChart.tob.hour >= 0 ? `${String(mainChart.tob.hour).padStart(2,'0')}:${String(mainChart.tob.minute).padStart(2,'0')}` : 'Chưa có giờ'} ·{' '}
               {mainChart.loc.address}
@@ -343,7 +344,7 @@ export default function ProfileInfo() {
               {mainChartProfileId && (
                 <button
                   onClick={() => router.push(`/chart?id=${mainChartProfileId}`)}
-                  style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
+                  style={{ color: 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
                   Bản đồ ✦
                 </button>
               )}
@@ -356,20 +357,20 @@ export default function ProfileInfo() {
                   }))
                   router.push('/services')
                 }}
-                style={{ color: '#d9ab55', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
+                style={{ color: 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
                 Dịch vụ →
               </button>
             </div>
           </div>
         ) : (
           /* CTA when not set */
-          <div className="text-center py-5 rounded-xl" style={{ border: '1px dashed rgba(201,168,76,0.15)' }}>
-            <p className="text-sm mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+          <div className="text-center py-5 rounded-xl" style={{ border: '1px dashed var(--as-border-gold)' }}>
+            <p className="text-sm mb-3" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
               Cập nhật thông tin để xem bản đồ sao của bạn ✦
             </p>
             <button onClick={() => { setModalInitialData(EMPTY_PROFILE_FORM); setMainChartModalOpen(true) }}
               className="px-5 py-2 rounded-xl font-semibold text-sm"
-              style={{ background: '#c9a84c', color: '#0a0a1a', fontFamily: 'var(--font-vietnam)' }}>
+              style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', borderRadius: 999, boxShadow: 'var(--as-shadow-glow)' }}>
               + Thêm thông tin ngay
             </button>
           </div>
@@ -378,7 +379,7 @@ export default function ProfileInfo() {
 
       {/* Avatar */}
       <div style={cardStyle}>
-        <h3 className="font-bold mb-4" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Ảnh đại diện</h3>
+        <h3 className="font-bold mb-4" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>Ảnh đại diện</h3>
         <div className="flex flex-wrap items-center gap-4">
           {/* Avatar circle — always circular, state-driven fallback chain */}
           <div className="relative flex-shrink-0" style={{ width: 64, height: 64 }}>
@@ -387,7 +388,7 @@ export default function ProfileInfo() {
                 key={avatarVersion}
                 src={`/api/user/avatar?v=${avatarVersion}`}
                 alt="avatar"
-                style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(201,168,76,0.3)', display: 'block' }}
+                style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--as-border-gold)', display: 'block' }}
                 onError={() => setAvatarFallback(user.image ? 'google' : 'initials')}
               />
             )}
@@ -396,17 +397,17 @@ export default function ProfileInfo() {
                 src={user.image}
                 alt="avatar"
                 referrerPolicy="no-referrer"
-                style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(201,168,76,0.3)', display: 'block' }}
+                style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--as-border-gold)', display: 'block' }}
                 onError={() => setAvatarFallback('initials')}
               />
             )}
             {(avatarFallback === 'initials' || (avatarFallback === 'google' && !user.image)) && (
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#261c56,#38287a)', color: '#d9ab55', border: '2px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 700, fontFamily: 'var(--font-vietnam)' }}>
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', border: '2px solid var(--as-border-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: 700, fontFamily: 'var(--font-vietnam)' }}>
                 {(user.name || user.username || '?')[0].toUpperCase()}
               </div>
             )}
             {avatarUploading && (
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(22,54,83,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               </div>
             )}
@@ -417,10 +418,10 @@ export default function ProfileInfo() {
               onChange={e => { const f = e.target.files?.[0]; if (f) setAvatarCropFile(f); e.target.value = '' }} />
             <button onClick={() => fileInputRef.current?.click()}
               className="px-4 py-2 rounded-xl text-sm font-semibold"
-              style={{ background: 'rgba(201,168,76,0.12)', color: '#d9ab55', border: '1px solid rgba(201,168,76,0.25)', fontFamily: 'var(--font-vietnam)', minHeight: 44 }}>
+              style={{ background: 'transparent', color: 'var(--as-text-strong)', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)', minHeight: 44 }}>
               Đổi ảnh đại diện
             </button>
-            <p className="mt-2 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+            <p className="mt-2 text-xs" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
               JPG, PNG · Cắt hình tròn 200×200px
             </p>
           </div>
@@ -436,23 +437,23 @@ export default function ProfileInfo() {
 
       {/* Account info */}
       <div style={cardStyle}>
-        <h3 className="font-bold mb-4" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Thông tin tài khoản</h3>
+        <h3 className="font-bold mb-4" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>Thông tin tài khoản</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>TÊN ĐĂNG NHẬP</label>
-            <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+            <label className="block text-xs mb-1.5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>TÊN ĐĂNG NHẬP</label>
+            <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-soft)', color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)' }}>
               {user.username}
             </div>
           </div>
           {/* Email tài khoản — readonly nếu đã có, editable nếu chưa */}
           <div>
-            <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL TÀI KHOẢN</label>
+            <label className="block text-xs mb-1.5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL TÀI KHOẢN</label>
             {accountEmail ? (
               <>
-                <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.1)', color: '#94a3b8', fontFamily: 'var(--font-vietnam)' }}>
+                <div className="px-3 py-2.5 rounded-lg text-sm" style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-soft)', color: 'var(--as-text)', fontFamily: 'var(--font-vietnam)' }}>
                   {accountEmail}
                 </div>
-                <p className="mt-1 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+                <p className="mt-1 text-xs" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
                   Email đăng nhập hoặc email Google, không thể thay đổi.
                 </p>
               </>
@@ -464,13 +465,13 @@ export default function ProfileInfo() {
                     placeholder="Nhập email của bạn..." className="flex-1" style={{ fontFamily: 'var(--font-vietnam)' }} />
                   <button onClick={handleSetAccountEmail} disabled={acEmailLoading || !newAccountEmail.trim()}
                     className="px-4 py-2 rounded-xl font-semibold text-sm"
-                    style={{ background: newAccountEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: newAccountEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap', minHeight: 44 }}>
+                    style={{ background: newAccountEmail.trim() ? 'var(--as-cta)' : 'rgba(22,54,83,0.12)', color: newAccountEmail.trim() ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)', whiteSpace: 'nowrap', minHeight: 44, borderRadius: 999, boxShadow: newAccountEmail.trim() ? 'var(--as-shadow-glow)' : 'none' }}>
                     {acEmailLoading ? 'Đang lưu...' : 'Xác nhận'}
                   </button>
                 </div>
                 {acEmailError && <p className="mt-1.5 text-xs" style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)' }}>{acEmailError}</p>}
                 {acEmailSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Đã thêm email tài khoản thành công!</p>}
-                <p className="mt-1 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+                <p className="mt-1 text-xs" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
                   Dùng để đăng nhập bằng email và khôi phục mật khẩu.
                 </p>
               </>
@@ -478,19 +479,19 @@ export default function ProfileInfo() {
           </div>
           {/* Email nhận PDF — editable */}
           <div>
-            <label className="block text-xs mb-1.5" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL NHẬN BÁO CÁO PDF</label>
+            <label className="block text-xs mb-1.5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', letterSpacing: '0.05em' }}>EMAIL NHẬN BÁO CÁO PDF</label>
             <div className="flex flex-col sm:flex-row gap-2">
               <input type="email" value={acEmail} onChange={e => setAcEmail(e.target.value)}
                 placeholder="email@example.com" className="flex-1" style={{ fontFamily: 'var(--font-vietnam)' }} />
               <button onClick={handleUpdateEmail} disabled={acLoading || !acEmail.trim()}
                 className="px-4 py-2 rounded-xl font-semibold text-sm"
-                style={{ background: acEmail.trim() ? 'linear-gradient(135deg,#c8943f,#f0cc78)' : 'rgba(201,168,76,0.15)', color: acEmail.trim() ? '#06060f' : '#6b7280', whiteSpace: 'nowrap', minHeight: 44 }}>
+                style={{ background: acEmail.trim() ? 'var(--as-cta)' : 'rgba(22,54,83,0.12)', color: acEmail.trim() ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)', whiteSpace: 'nowrap', minHeight: 44, borderRadius: 999, boxShadow: acEmail.trim() ? 'var(--as-shadow-glow)' : 'none' }}>
                 {acLoading ? 'Đang lưu...' : 'Lưu'}
               </button>
             </div>
             {acError && <p className="mt-1.5 text-xs" style={{ color: '#e87070', fontFamily: 'var(--font-vietnam)' }}>{acError}</p>}
             {acSuccess && <p className="mt-1.5 text-xs" style={{ color: '#4ade80', fontFamily: 'var(--font-vietnam)' }}>Đã cập nhật email nhận PDF!</p>}
-            <p className="mt-1 text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>
+            <p className="mt-1 text-xs" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
               PDF báo cáo sẽ được gửi đến địa chỉ này.
             </p>
           </div>
@@ -500,9 +501,9 @@ export default function ProfileInfo() {
       {/* Change password */}
       <div style={cardStyle}>
         <div className="flex items-center justify-between">
-          <h3 className="font-bold" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>Đổi mật khẩu</h3>
+          <h3 className="font-bold" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>Đổi mật khẩu</h3>
           <button onClick={() => { setShowCp(v => !v); setCpError(''); setCpSuccess(false); setCpCurrent(''); setCpNew(''); setCpConfirm('') }}
-            style={{ color: '#d9ab55', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
+            style={{ color: 'var(--as-cta)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem' }}>
             {showCp ? 'Hủy' : 'Đổi mật khẩu'}
           </button>
         </div>
@@ -514,7 +515,7 @@ export default function ProfileInfo() {
             <input type="password" value={cpNew} onChange={e => setCpNew(e.target.value)} placeholder="Mật khẩu mới" style={{ fontFamily: 'var(--font-vietnam)' }} />
             <input type="password" value={cpConfirm} onChange={e => setCpConfirm(e.target.value)} placeholder="Xác nhận mật khẩu mới" style={{ fontFamily: 'var(--font-vietnam)' }} />
             <button onClick={handleChangePassword} disabled={cpLoading}
-              style={{ background: 'linear-gradient(135deg,#c8943f,#f0cc78)', color: '#06060f', padding: '0.6rem 1.5rem', borderRadius: '4px', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem', opacity: cpLoading ? 0.7 : 1 }}>
+              style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', padding: '0.6rem 1.5rem', borderRadius: 999, fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.85rem', opacity: cpLoading ? 0.7 : 1, boxShadow: 'var(--as-shadow-glow)' }}>
               {cpLoading ? 'Đang lưu...' : 'Lưu mật khẩu mới'}
             </button>
           </div>
@@ -534,18 +535,18 @@ export default function ProfileInfo() {
       {/* Duplicate name dialog */}
       {dupCheckOpen && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(22,54,83,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
           onClick={() => { setDupCheckOpen(false); if (pendingFormData) { setModalInitialData(pendingFormData); setMainChartModalOpen(true) } }}
         >
           <div
-            style={{ background: '#120d2e', border: '1px solid rgba(200,148,63,0.25)', borderRadius: '1rem', padding: '1.5rem', maxWidth: '420px', width: '100%' }}
+            style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)', borderRadius: '1rem', padding: '1.5rem', maxWidth: '420px', width: '100%' }}
             onClick={e => e.stopPropagation()}
           >
-            <p className="font-bold mb-2" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)', fontSize: '1rem' }}>
+            <p className="font-bold mb-2" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)', fontSize: '1rem' }}>
               Đã tồn tại hồ sơ
             </p>
-            <p className="text-sm mb-5" style={{ color: '#8a8399', fontFamily: 'var(--font-vietnam)', lineHeight: 1.7 }}>
-              Đã có hồ sơ tên <strong style={{ color: '#d9ab55' }}>{dupProfile?.name}</strong> trong danh sách. Bạn có muốn cập nhật hồ sơ đó làm thông tin của bản thân không?
+            <p className="text-sm mb-5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', lineHeight: 1.7 }}>
+              Đã có hồ sơ tên <strong style={{ color: 'var(--as-copper-deep)' }}>{dupProfile?.name}</strong> trong danh sách. Bạn có muốn cập nhật hồ sơ đó làm thông tin của bản thân không?
             </p>
             <div className="flex gap-2 flex-wrap">
               <button
@@ -553,7 +554,7 @@ export default function ProfileInfo() {
                   setDupCheckOpen(false)
                   if (pendingFormData && dupProfile) await doSaveMainChart(pendingFormData, dupProfile.id)
                 }}
-                style={{ background: 'linear-gradient(135deg,#c8943f,#f0cc78)', color: '#06060f', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', border: 'none' }}
+                style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', padding: '0.5rem 1.1rem', borderRadius: 999, fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', border: 'none', boxShadow: 'var(--as-shadow-glow)' }}
               >
                 Có, dùng hồ sơ đó
               </button>
@@ -562,7 +563,7 @@ export default function ProfileInfo() {
                   setDupCheckOpen(false)
                   if (pendingFormData) { setModalInitialData(pendingFormData); setMainChartModalOpen(true) }
                 }}
-                style={{ background: 'rgba(11,11,31,0.8)', color: '#8a8399', border: '1px solid rgba(200,148,63,0.1)', padding: '0.5rem 1.1rem', borderRadius: '8px', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', cursor: 'pointer' }}
+                style={{ background: 'transparent', color: 'var(--as-text-strong)', border: '1px solid var(--as-border-gold)', padding: '0.5rem 1.1rem', borderRadius: 999, fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', cursor: 'pointer' }}
               >
                 Đổi tên khác
               </button>

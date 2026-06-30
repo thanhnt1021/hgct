@@ -72,19 +72,19 @@ export default function DiscountModal({ open, service, email, onClose, onProceed
     <>
       <div
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}
+        style={{ background: 'rgba(22,54,83,0.5)', backdropFilter: 'blur(4px)' }}
         onClick={e => { if (e.target === e.currentTarget) onClose() }}
       >
         <div
-          className="w-full rounded-2xl"
-          style={{ maxWidth: 420, background: 'rgba(16,12,38,0.98)', border: '1px solid rgba(201,168,76,0.25)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+          className="w-full rounded-2xl as-form"
+          style={{ maxWidth: 420, background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)', boxShadow: 'var(--as-shadow-card)' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
-            <h3 className="font-bold text-base" style={{ color: '#f4efe6', fontFamily: 'var(--font-vietnam)' }}>
+          <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid var(--as-border-gold)' }}>
+            <h3 className="font-bold text-base" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
               {firstTime === false ? 'Tiếp tục thanh toán' : 'Ưu đãi đặc biệt'}
             </h3>
-            <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
+            <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)' }}>
               <X size={18} />
             </button>
           </div>
@@ -92,12 +92,12 @@ export default function DiscountModal({ open, service, email, onClose, onProceed
           {/* Body */}
           <div className="px-6 py-5 space-y-5">
             {/* Option A: Referral code — always shown */}
-            <div className="rounded-xl p-4" style={{ border: '1px solid rgba(201,168,76,0.2)', background: 'rgba(201,168,76,0.04)' }}>
-              <p className="font-semibold text-sm mb-1" style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)' }}>
+            <div className="rounded-xl p-4" style={{ border: '1px solid var(--as-border-gold)', background: 'var(--as-surface)' }}>
+              <p className="font-semibold text-sm mb-1" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)' }}>
                 Có mã đại sứ?
               </p>
-              <p className="text-xs mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
-                Nhập mã để được giảm xuống còn <strong style={{ color: '#f0cc78' }}>99.000đ</strong> (flat)
+              <p className="text-xs mb-3" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
+                Nhập mã để được giảm xuống còn <strong style={{ color: 'var(--as-text-strong)' }}>99.000đ</strong> (flat)
               </p>
               <div className="flex gap-2">
                 <input
@@ -113,7 +113,7 @@ export default function DiscountModal({ open, service, email, onClose, onProceed
                   onClick={handleVerifyCode}
                   disabled={verifying}
                   className="px-4 h-9 rounded-lg font-semibold text-sm"
-                  style={{ background: 'linear-gradient(135deg, #c8943f, #f0cc78)', color: '#06060f', fontFamily: 'var(--font-vietnam)', opacity: verifying ? 0.7 : 1, flexShrink: 0 }}
+                  style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', opacity: verifying ? 0.7 : 1, flexShrink: 0 }}
                 >
                   {verifying ? '...' : 'Áp dụng'}
                 </button>
@@ -127,22 +127,22 @@ export default function DiscountModal({ open, service, email, onClose, onProceed
             {showWheelSection && (
               <>
                 <div className="flex items-center gap-3">
-                  <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
-                  <span className="text-xs" style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)' }}>HOẶC</span>
-                  <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                  <div style={{ flex: 1, height: '1px', background: 'var(--as-border-gold)' }} />
+                  <span className="text-xs" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>HOẶC</span>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--as-border-gold)' }} />
                 </div>
 
-                <div className="rounded-xl p-4 text-center" style={{ border: '1px solid rgba(201,168,76,0.2)', background: 'rgba(201,168,76,0.04)' }}>
-                  <p className="font-semibold text-sm mb-1" style={{ color: '#f0cc78', fontFamily: 'var(--font-vietnam)' }}>
+                <div className="rounded-xl p-4 text-center" style={{ border: '1px solid var(--as-border-gold)', background: 'var(--as-surface)' }}>
+                  <p className="font-semibold text-sm mb-1" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)' }}>
                     Vòng Xoay May Mắn 🎡
                   </p>
-                  <p className="text-xs mb-3" style={{ color: '#6b7280', fontFamily: 'var(--font-vietnam)' }}>
+                  <p className="text-xs mb-3" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
                     Quay thử để nhận ưu đãi ngẫu nhiên từ 5% đến 30%
                   </p>
                   <button
                     onClick={() => setShowWheel(true)}
                     className="w-full h-10 rounded-lg font-semibold text-sm"
-                    style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', color: '#fff', fontFamily: 'var(--font-vietnam)' }}
+                    style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)' }}
                   >
                     Quay ngay →
                   </button>
@@ -156,8 +156,8 @@ export default function DiscountModal({ open, service, email, onClose, onProceed
               className="w-full text-center text-sm py-2.5 rounded-lg font-semibold"
               style={
                 firstTime === false
-                  ? { background: 'linear-gradient(135deg, #c8943f, #f0cc78)', color: '#06060f', fontFamily: 'var(--font-vietnam)' }
-                  : { color: '#4a4560', fontFamily: 'var(--font-vietnam)' }
+                  ? { background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)' }
+                  : { color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }
               }
             >
               {firstTime === false ? 'Tiếp tục thanh toán →' : 'Bỏ qua, tiếp tục với giá gốc'}
