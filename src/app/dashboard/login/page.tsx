@@ -70,7 +70,7 @@ export default function DashboardLoginPage() {
               fontSize: '1rem',
               letterSpacing: '0.06em',
             }}>
-              Hạt Giống Chiêm Tinh
+              AstroS
             </span>
           </div>
           <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginTop: 4 }}>

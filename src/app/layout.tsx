@@ -43,12 +43,18 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: 'AstroS — Bản đồ sao của bạn nói gì?',
-  description: 'AstroS — Hạt Giống Chiêm Tinh, Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Mối Quan Hệ và Vận Hạn.',
-  icons: { icon: '/favicon.ico' },
+  description: 'AstroS — Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Mối Quan Hệ và Vận Hạn.',
+  icons: {
+    icon: [
+      { url: '/favicon.png', type: 'image/png', sizes: '64x64' },
+      { url: '/favicon-32.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
   metadataBase: new URL('https://hatgiongchiemtinh.com'),
   openGraph: {
     title: 'AstroS — Bản đồ sao của bạn nói gì?',
-    description: 'AstroS — Hạt Giống Chiêm Tinh, Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Mối Quan Hệ và Vận Hạn.',
+    description: 'AstroS — Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa về Sự Nghiệp, Tình Duyên, Mối Quan Hệ và Vận Hạn.',
     url: 'https://hatgiongchiemtinh.com',
     siteName: 'AstroS',
     type: 'website',
@@ -57,7 +63,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'AstroS — Bản đồ sao của bạn nói gì?',
-    description: 'AstroS — Hạt Giống Chiêm Tinh, Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa.',
+    description: 'AstroS — Khai Mở Chính Mình. Luận giải chiêm tinh cá nhân hóa.',
     images: ['https://hatgiongchiemtinh.com/api/og'],
   },
 }

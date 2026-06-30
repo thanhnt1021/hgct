@@ -127,7 +127,7 @@ GIỌNG VĂN BẮT BUỘC (người đọc là học sinh/sinh viên dưới 22 
 [KTLUẬN] [FILL: 2-3 câu "Lời nhắn cho {name}:" + tổng kết chiến lược phát triển. Giọng khích lệ, tin tưởng. Dùng [bold]từ khóa[/]]
 
 [CLOSING]
-Cảm ơn bạn đã lựa chọn Hạt Giống Chiêm Tinh.
+Cảm ơn bạn đã lựa chọn AstroS.
 
 Hy vọng những góc nhìn từ bản luận giải này sẽ giúp bạn hiểu rõ hơn "hạt giống" riêng mà bạn mang theo, và tự tin hơn trên hành trình khám phá bản thân phía trước.
 
@@ -135,4 +135,4 @@ Chúc bạn luôn đủ can đảm thử những điều mới, đủ kiên nh�
 
 Trân trọng,
 
-Hạt Giống Chiêm Tinh
+AstroS

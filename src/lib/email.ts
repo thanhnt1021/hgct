@@ -27,7 +27,7 @@ interface SendEmailOptions {
 export async function sendEmail({ to, subject, html, attachments }: SendEmailOptions) {
   try {
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'Hạt Giống Chiêm Tinh <support@hatgiongchiemtinh.com>',
+      from: process.env.EMAIL_FROM || 'AstroS <support@hatgiongchiemtinh.com>',
       to,
       subject,
       html,
@@ -100,11 +100,11 @@ export function makePdfFilename(service: string, name: string, nameB?: string): 
 
 export function makeEmailSubject(service: string, name: string, nameB?: string): string {
   const svc = SERVICE_CONFIG[service]
-  if (!svc) return `✦ Báo cáo Chiêm Tinh của ${name} | Hạt Giống Chiêm Tinh`
+  if (!svc) return `✦ Báo cáo Chiêm Tinh của ${name} | AstroS`
   const who = (service === 'synastry' || service === 'relationship') && nameB
     ? `${name} & ${nameB}`
     : name
-  return `✦ Báo cáo ${svc.label} — ${who} | Hạt Giống Chiêm Tinh`
+  return `✦ Báo cáo ${svc.label} — ${who} | AstroS`
 }
 
 export function buildReportEmailHtml(name: string, service: string, nameB?: string): string {
@@ -150,7 +150,7 @@ export function buildReportEmailHtml(name: string, service: string, nameB?: stri
     <!-- Header -->
     <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
       <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:${color};">✦ ✦ ✦</p>
-      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;white-space:nowrap;font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;">Hạt Giống Chiêm Tinh</h1>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;white-space:nowrap;font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;">AstroS</h1>
       <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
     </div>
 
@@ -198,7 +198,7 @@ export function buildReportEmailHtml(name: string, service: string, nameB?: stri
     <!-- Footer -->
     <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
       <!-- Fix 1: màu sáng hơn để readable trên nền tối -->
-      <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#6b7280;">Hạt Giống Chiêm Tinh © 2026</p>
+      <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#6b7280;">AstroS © 2026</p>
       <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Kết quả chiêm tinh mang tính tham khảo,<br>không thay thế lời khuyên chuyên nghiệp.</p>
     </div>
 
@@ -234,7 +234,7 @@ export async function sendRecoveryEmail({
   <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
     <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
       <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:#c9a84c;">✦ ✦ ✦</p>
-      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">Hạt Giống Chiêm Tinh</h1>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">AstroS</h1>
       <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
     </div>
     <div style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
@@ -261,7 +261,7 @@ export async function sendRecoveryEmail({
       </p>
     </div>
     <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Mã khôi phục có hiệu lực vĩnh viễn.<br>Hạt Giống Chiêm Tinh © 2026</p>
+      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Mã khôi phục có hiệu lực vĩnh viễn.<br>AstroS © 2026</p>
     </div>
   </div>
 </body>
@@ -269,7 +269,7 @@ export async function sendRecoveryEmail({
 
   return sendEmail({
     to,
-    subject: `⚠ Khôi phục báo cáo ${svc.label} — Mã: ${token} | Hạt Giống Chiêm Tinh`,
+    subject: `⚠ Khôi phục báo cáo ${svc.label} — Mã: ${token} | AstroS`,
     html,
   })
 }
@@ -301,7 +301,7 @@ export async function sendAutoRetryEmail({
   <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
     <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
       <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:#c9a84c;">✦ ✦ ✦</p>
-      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">Hạt Giống Chiêm Tinh</h1>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">AstroS</h1>
       <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
     </div>
     <div style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
@@ -327,7 +327,7 @@ export async function sendAutoRetryEmail({
       </p>
     </div>
     <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Hạt Giống Chiêm Tinh © 2026</p>
+      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">AstroS © 2026</p>
     </div>
   </div>
 </body>
@@ -335,7 +335,7 @@ export async function sendAutoRetryEmail({
 
   return sendEmail({
     to,
-    subject: `🔄 Đang tạo lại báo cáo ${svc.label} | Hạt Giống Chiêm Tinh`,
+    subject: `🔄 Đang tạo lại báo cáo ${svc.label} | AstroS`,
     html,
   })
 }
@@ -362,7 +362,7 @@ export async function sendRetargetEmail({
   <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
     <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
       <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:#c9a84c;">✦ ✦ ✦</p>
-      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">Hạt Giống Chiêm Tinh</h1>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">AstroS</h1>
       <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
     </div>
     <div style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
@@ -390,7 +390,7 @@ export async function sendRetargetEmail({
       </p>
     </div>
     <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Hạt Giống Chiêm Tinh © 2026</p>
+      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">AstroS © 2026</p>
     </div>
   </div>
 </body>
@@ -398,7 +398,7 @@ export async function sendRetargetEmail({
 
   return sendEmail({
     to,
-    subject: `✦ Hoàn tất đơn ${svc.label} của bạn | Hạt Giống Chiêm Tinh`,
+    subject: `✦ Hoàn tất đơn ${svc.label} của bạn | AstroS`,
     html,
   })
 }
@@ -436,7 +436,7 @@ export async function sendCtvCommissionEmail({
   <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
     <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
       <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:#c9a84c;">✦ ✦ ✦</p>
-      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">Hạt Giống Chiêm Tinh</h1>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">AstroS</h1>
       <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
     </div>
     <div style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
@@ -469,7 +469,7 @@ export async function sendCtvCommissionEmail({
       </div>
     </div>
     <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Hạt Giống Chiêm Tinh © 2026</p>
+      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">AstroS © 2026</p>
     </div>
   </div>
 </body>
@@ -477,7 +477,7 @@ export async function sendCtvCommissionEmail({
 
   return sendEmail({
     to,
-    subject: `💰 Hoa hồng mới ${commissionStr} — Báo cáo ${svc.label} | Hạt Giống Chiêm Tinh`,
+    subject: `💰 Hoa hồng mới ${commissionStr} — Báo cáo ${svc.label} | AstroS`,
     html,
   })
 }
@@ -504,7 +504,7 @@ export async function sendRetentionEmail({
   <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
     <div style="text-align:center;padding:36px 16px 28px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px 16px 0 0;border:1px solid rgba(201,168,76,0.2);border-bottom:none;">
       <p style="margin:0 0 8px;font-size:24px;letter-spacing:0.3em;color:#c9a84c;">✦ ✦ ✦</p>
-      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">Hạt Giống Chiêm Tinh</h1>
+      <h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:0.1em;color:#f5f0e8;text-transform:uppercase;font-family:Georgia,serif;">AstroS</h1>
       <p style="margin:8px 0 0;font-size:16px;color:#6b7280;letter-spacing:0.08em;">hatgiongchiemtinh.com</p>
     </div>
     <div style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></div>
@@ -514,7 +514,7 @@ export async function sendRetentionEmail({
       </div>
       <p style="margin:0 0 8px;font-size:17px;color:#9ca3af;">${name ? `Xin chào ${escHtml(name)},` : 'Xin chào,'}</p>
       <p style="margin:0 0 20px;font-size:16px;line-height:1.8;color:#b8a99a;">
-        Đã 7 ngày kể từ khi bạn nhận được <strong style="color:#f5f0e8;">Báo cáo ${svc.label}</strong> từ Hạt Giống Chiêm Tinh.
+        Đã 7 ngày kể từ khi bạn nhận được <strong style="color:#f5f0e8;">Báo cáo ${svc.label}</strong> từ AstroS.
         Hy vọng những luận giải từ bản đồ sao đã mang lại cho bạn thêm góc nhìn rõ ràng.
       </p>
       <p style="margin:0 0 20px;font-size:16px;line-height:1.8;color:#b8a99a;">
@@ -534,7 +534,7 @@ export async function sendRetentionEmail({
       </p>
     </div>
     <div style="padding:24px 32px;background:#060612;border-radius:0 0 16px 16px;border:1px solid rgba(201,168,76,0.1);border-top:none;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">Hạt Giống Chiêm Tinh © 2026</p>
+      <p style="margin:0;font-size:11px;color:#55606e;font-style:italic;">AstroS © 2026</p>
     </div>
   </div>
 </body>
@@ -542,7 +542,7 @@ export async function sendRetentionEmail({
 
   return sendEmail({
     to,
-    subject: `✦ Một tuần sau báo cáo ${svc.label} — bạn có câu hỏi gì không? | Hạt Giống Chiêm Tinh`,
+    subject: `✦ Một tuần sau báo cáo ${svc.label} — bạn có câu hỏi gì không? | AstroS`,
     html,
   })
 }

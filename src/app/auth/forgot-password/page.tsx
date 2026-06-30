@@ -52,27 +52,17 @@ export default function ForgotPasswordPage() {
         <div className="text-center mb-10">
           <Link href="/" className="inline-block">
             <div className="flex items-center justify-center gap-2.5 mb-2">
-              <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
-                <circle cx="11" cy="11" r="2.5" fill="#163653" opacity="0.9"/>
-                <circle cx="3"  cy="4"  r="1.2" fill="#163653" opacity="0.55"/>
-                <circle cx="19" cy="5"  r="1"   fill="#163653" opacity="0.45"/>
-                <circle cx="4"  cy="19" r="1"   fill="#163653" opacity="0.4"/>
-                <circle cx="18" cy="18" r="1.3" fill="#163653" opacity="0.5"/>
-                <line x1="11" y1="11" x2="3"  y2="4"  stroke="#163653" strokeWidth="0.6" opacity="0.3"/>
-                <line x1="11" y1="11" x2="19" y2="5"  stroke="#163653" strokeWidth="0.6" opacity="0.25"/>
-                <line x1="11" y1="11" x2="4"  y2="19" stroke="#163653" strokeWidth="0.6" opacity="0.22"/>
-                <line x1="11" y1="11" x2="18" y2="18" stroke="#163653" strokeWidth="0.6" opacity="0.28"/>
-              </svg>
+              <img src="/logo-notext.png" alt="AstroS" style={{ height: 30, width: 'auto' }} />
               <span
                 style={{
                   color: 'var(--as-text-strong)',
-                  fontFamily: 'var(--font-vietnam)',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  letterSpacing: '0.06em',
+                  fontFamily: 'var(--font-cinzel)',
+                  fontWeight: 600,
+                  fontSize: '1.2rem',
+                  letterSpacing: '0.2em',
                 }}
               >
-                Hạt Giống Chiêm Tinh
+                ASTRO S
               </span>
             </div>
           </Link>

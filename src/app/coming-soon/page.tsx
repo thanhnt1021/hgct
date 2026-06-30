@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import StarField from '@/components/layout/StarField'
 
 export const metadata: Metadata = {
-  title: 'Coming Soon — Hạt Giống Chiêm Tinh',
+  title: 'Coming Soon — AstroS',
   robots: { index: false, follow: false },
 }
 
@@ -23,7 +23,7 @@ export default function ComingSoonPage() {
           href="https://hatgiongchiemtinh.com"
           className="inline-block font-vietnam text-sm text-gold-base/90 hover:text-gold-base underline underline-offset-4 transition"
         >
-          Về Hạt Giống Chiêm Tinh →
+          Về AstroS →
         </a>
       </div>
     </main>

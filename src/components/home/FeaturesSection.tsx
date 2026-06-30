@@ -41,7 +41,7 @@ export default function FeaturesSection() {
           <ServicesGrid />
         </div>
 
-        {/* Section header — Hạt Giống Chiêm Tinh */}
+        {/* Section header — AstroS */}
         <div className="text-center mb-20 flex flex-col items-center">
           <p className="section-eyebrow mb-4">Tại sao lựa chọn chúng tôi?</p>
           <h2 className="mb-6 leading-tight flex flex-col items-center">

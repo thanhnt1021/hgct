@@ -47,7 +47,7 @@ export default function DaisuLoginPage() {
             Trang Đại Sứ
           </h1>
           <p style={{ color: '#4a4560', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-            Hạt Giống Chiêm Tinh
+            AstroS
           </p>
         </div>
 

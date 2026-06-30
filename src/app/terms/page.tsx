@@ -13,7 +13,7 @@ const sections = [
     num: '02',
     title: 'Mô tả dịch vụ',
     items: [
-      'Hạt Giống Chiêm Tinh là nền tảng chiêm tinh trực tuyến',
+      'AstroS là nền tảng chiêm tinh trực tuyến',
       'Cung cấp công cụ tính toán bản đồ sao, lá số và thông tin chiêm tinh',
       'Dịch vụ được cung cấp theo hình thức "as is" (nguyên trạng)',
     ],
@@ -58,7 +58,7 @@ const sections = [
     num: '07',
     title: 'Sở hữu trí tuệ',
     items: [
-      'Toàn bộ nội dung, thiết kế và mã nguồn thuộc quyền sở hữu của Hạt Giống Chiêm Tinh',
+      'Toàn bộ nội dung, thiết kế và mã nguồn thuộc quyền sở hữu của AstroS',
       'Không sao chép, phân phối hay tái sử dụng khi chưa có sự đồng ý bằng văn bản',
     ],
   },
@@ -126,7 +126,7 @@ export default function TermsPage() {
             Điều Khoản Sử Dụng
           </h1>
           <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: '0.4rem' }}>
-            Hạt Giống Chiêm Tinh — hatgiongchiemtinh.com
+            AstroS — hatgiongchiemtinh.com
           </p>
           <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>
             Cập nhật lần cuối: 10/03/2026
@@ -222,7 +222,7 @@ export default function TermsPage() {
             fontSize: '0.78rem',
           }}
         >
-          © 2026 Hạt Giống Chiêm Tinh. All rights reserved.
+          © 2026 AstroS. All rights reserved.
         </p>
       </div>
     </div>

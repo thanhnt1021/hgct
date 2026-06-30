@@ -16,7 +16,7 @@ export default function AstroSeedSocial() {
       {/* Seed text */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <p style={{ fontFamily: 'var(--font-vietnam)', color: 'var(--as-champagne)', fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-          Hạt Giống Chiêm Tinh
+          AstroS
         </p>
         <h2 style={{ fontFamily: 'var(--font-playfair)', color: 'var(--as-gold-cream)', fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', fontWeight: 600, fontStyle: 'italic', margin: '0.5rem 0 1.25rem' }}>
           Hiểu mình — Đánh thức — Phát triển

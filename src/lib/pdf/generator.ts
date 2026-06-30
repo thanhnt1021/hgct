@@ -186,7 +186,7 @@ function trimKeywordBoldLine(line: string): string {
 
 const VN_CONJUNCTIONS = new Set(['và','với','của','về','trong','cho','hay','hoặc','là','nhưng','từ','đến','tới','ra','vào','lên','xuống','qua','lại','cùng','theo'])
 const PROSE_STARTERS = ['Anh ','Chị ','Bạn ','Với ','Khi ','Để ','Việc ','Điều ','Đây ','Đó ','Như ','Nếu ','Tuy ','Dù ','Mặc ','Vì ','Do ','Bởi ','Qua ','Sau ','Trước ']
-const SIGN_KEYS = ['Trân trọng','Claude –','Claude -','Chúc ','— Claude','– Claude','Hạt Giống Chiêm Tinh','Cảm ơn bạn đã','Mong rằng bản luận giải']
+const SIGN_KEYS = ['Trân trọng','Claude –','Claude -','Chúc ','— Claude','– Claude','AstroS','Cảm ơn bạn đã','Mong rằng bản luận giải']
 
 function isVnTitleHeading(s: string): boolean {
   if (s.length > 80 || /[.,:;!?]$/.test(s)) return false
@@ -483,7 +483,7 @@ body { margin: 0; font-family: 'Nunito', sans-serif; font-size: 14.9pt; color: #
     ${coverName}
   </div>
   <div class="cover-spacer"></div>
-  <div class="cover-footer">Hạt Giống Chiêm Tinh</div>
+  <div class="cover-footer">AstroS</div>
 </div>
 ${contentHtml}
 </body></html>`
@@ -493,7 +493,7 @@ ${contentHtml}
 // Keeping closing text in prompts is intentional — it nudges AI to output [CLOSING] marker.
 // Everything after [CLOSING] from AI is stripped and replaced with this.
 const CLOSING_BLOCKS: Partial<Record<string, string>> = {
-  career: `Cảm ơn bạn đã lựa chọn Hạt Giống Chiêm Tinh.
+  career: `Cảm ơn bạn đã lựa chọn AstroS.
 
 Hy vọng những góc nhìn từ bản luận giải này sẽ giúp bạn nhìn rõ hơn những tiềm năng bên trong mình, hiểu được "hạt giống" riêng mà bạn mang theo và tìm thấy con đường phù hợp để phát triển.
 
@@ -501,9 +501,9 @@ Chúc bạn luôn đủ kiên nhẫn, đủ tin tưởng vào bản thân và t�
 
 Trân trọng,
 
-Hạt Giống Chiêm Tinh`,
+AstroS`,
 
-  love: `Cảm ơn bạn đã dành thời gian để nhìn lại hành trình yêu của mình qua góc nhìn của Hạt Giống Chiêm Tinh.
+  love: `Cảm ơn bạn đã dành thời gian để nhìn lại hành trình yêu của mình qua góc nhìn của AstroS.
 
 Nếu hành trình yêu của bạn từng có những chờ đợi, những trải nghiệm chưa trọn vẹn hay những câu hỏi chưa có lời đáp, thì điều đó không có nghĩa là bạn kém may mắn trong tình yêu. Đôi khi đó chỉ là cách cuộc đời giúp bạn hiểu mình sâu sắc hơn trước khi bước vào một mối quan hệ thật sự phù hợp.
 
@@ -513,9 +513,9 @@ Chúc bạn luôn giữ được sự dịu dàng với chính mình và khi th�
 
 Trân trọng,
 
-Hạt Giống Chiêm Tinh`,
+AstroS`,
 
-  synastry: `Cảm ơn bạn đã dành thời gian để nhìn lại mối quan hệ của mình qua góc nhìn của Hạt Giống Chiêm Tinh.
+  synastry: `Cảm ơn bạn đã dành thời gian để nhìn lại mối quan hệ của mình qua góc nhìn của AstroS.
 
 Mỗi mối quan hệ đều giống như một cuộc gặp gỡ giữa hai "bầu trời" khác nhau. Có những điểm hòa hợp khiến hai người dễ dàng tìm thấy nhau, và cũng có những khác biệt giúp mỗi người học cách trưởng thành hơn trong tình yêu.
 
@@ -527,9 +527,9 @@ Chúc hai bạn luôn tìm thấy sự bình yên và ý nghĩa trên hành trì
 
 Trân trọng,
 
-Hạt Giống Chiêm Tinh`,
+AstroS`,
 
-  transit: `Cảm ơn bạn đã tin tưởng Hạt Giống Chiêm Tinh.
+  transit: `Cảm ơn bạn đã tin tưởng AstroS.
 
 Mong rằng bản luận giải này, cũng như những góc nhìn từ chiêm tinh sẽ giúp bạn hiểu mình rõ hơn, nhẹ lòng hơn trước những điều đang diễn ra và tự tin bước tiếp trên con đường của mình.
 
@@ -537,7 +537,7 @@ Chúc bạn luôn tìm thấy sự bình an và đúng hướng trên hành trì
 
 Trân trọng,
 
-Hạt Giống Chiêm Tinh`,
+AstroS`,
 }
 
 // Service → scallop border stroke color
@@ -709,7 +709,7 @@ const FOOTER_TEMPLATE = (() => {
   font-size: 10pt;
   color: #9ca3af;
   text-align: center;
-"><div style="border-top: 0.8pt solid #fca5a5; padding-top: 3mm;">Hạt Giống Chiêm Tinh</div></div>`
+"><div style="border-top: 0.8pt solid #fca5a5; padding-top: 3mm;">AstroS</div></div>`
 })()
 
 export async function generatePdf(essayText: string, options: PdfOptions, onProgress?: (pct: number) => void): Promise<Buffer | null> {

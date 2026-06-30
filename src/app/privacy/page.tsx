@@ -122,7 +122,7 @@ export default function PrivacyPage() {
             Chính Sách Bảo Mật
           </h1>
           <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.9rem', marginBottom: '0.4rem' }}>
-            Hạt Giống Chiêm Tinh — hatgiongchiemtinh.com
+            AstroS — hatgiongchiemtinh.com
           </p>
           <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>
             Cập nhật lần cuối: 10/03/2026
@@ -218,7 +218,7 @@ export default function PrivacyPage() {
             fontSize: '0.78rem',
           }}
         >
-          © 2026 Hạt Giống Chiêm Tinh. All rights reserved.
+          © 2026 AstroS. All rights reserved.
         </p>
       </div>
     </div>

@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 <tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#1a1428;border-radius:12px;overflow:hidden;">
   <tr><td style="background:linear-gradient(135deg,#1a1428,#2d1f4e);padding:36px 32px;text-align:center;">
-    <div style="font-size:13px;letter-spacing:0.15em;color:#c9a84c;text-transform:uppercase;margin-bottom:8px;">Hạt Giống Chiêm Tinh</div>
+    <div style="font-size:13px;letter-spacing:0.15em;color:#c9a84c;text-transform:uppercase;margin-bottom:8px;">AstroS</div>
     <div style="font-size:22px;font-weight:700;color:#f4efe6;margin-bottom:6px;">Bản Xem Trước · ${escHtml(serviceLabel)}</div>
     ${safeName ? `<div style="font-size:14px;color:#9090a8;">Dành cho ${safeName}</div>` : ''}
   </td></tr>
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
 
   const result = await sendEmail({
     to: email,
-    subject: `Bản xem trước ${serviceLabel}${name ? ` · ${name}` : ''} — Hạt Giống Chiêm Tinh`,
+    subject: `Bản xem trước ${serviceLabel}${name ? ` · ${name}` : ''} — AstroS`,
     html,
     attachments: [
       {

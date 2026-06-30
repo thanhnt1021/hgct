@@ -35,7 +35,7 @@ const HTML = `<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <p class="brand">✦ Hạt Giống Chiêm Tinh ✦</p>
+  <p class="brand">✦ AstroS ✦</p>
   <h1 class="heading">Bầu trời lúc bạn chào đời<br>nói gì về bạn?</h1>
   <p class="subtitle">Luận giải chiêm tinh cá nhân hoá • PDF chi tiết qua email</p>
   <p class="domain">hatgiongchiemtinh.com</p>

@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     await sendEmail({
       to: email.trim().toLowerCase(),
-      subject: 'Đặt lại mật khẩu — Hạt Giống Chiêm Tinh',
+      subject: 'Đặt lại mật khẩu — AstroS',
       html: `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
     <div style="text-align:center;padding:32px;background:linear-gradient(135deg,#0f0f28,#1a1535);border-radius:16px;border:1px solid rgba(201,168,76,0.2);">
       <p style="margin:0 0 8px;font-size:20px;letter-spacing:0.3em;color:#d9ab55;">✦ ✦ ✦</p>
-      <h1 style="margin:0 0 24px;font-size:20px;font-weight:400;letter-spacing:0.12em;color:#f5f0e8;">Hạt Giống Chiêm Tinh</h1>
+      <h1 style="margin:0 0 24px;font-size:20px;font-weight:400;letter-spacing:0.12em;color:#f5f0e8;">AstroS</h1>
       <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#f4efe6;">Đặt lại mật khẩu</h2>
       <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#b8a99a;">
         Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.<br>

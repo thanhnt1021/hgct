@@ -29,19 +29,19 @@ async function getReportData(id: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const data = await getReportData(id)
-  if (!data) return { title: 'Báo cáo chiêm tinh | Hạt Giống Chiêm Tinh' }
+  if (!data) return { title: 'Báo cáo chiêm tinh | AstroS' }
 
   const SERVICE_LABELS: Record<string, string> = {
     career: 'Sự Nghiệp', love: 'Tình Yêu', synastry: 'Cặp Đôi', transit: 'Vận Hạn',
   }
   const label = SERVICE_LABELS[data.service] || data.service
   return {
-    title: `Báo cáo ${label} - ${data.name} | Hạt Giống Chiêm Tinh`,
-    description: `Xem báo cáo chiêm tinh ${label} của ${data.name} được tạo bởi Hạt Giống Chiêm Tinh.`,
+    title: `Báo cáo ${label} - ${data.name} | AstroS`,
+    description: `Xem báo cáo chiêm tinh ${label} của ${data.name} được tạo bởi AstroS.`,
     openGraph: {
       title: `Báo cáo ${label} - ${data.name}`,
       description: `Báo cáo chiêm tinh ${label} của ${data.name}`,
-      siteName: 'Hạt Giống Chiêm Tinh',
+      siteName: 'AstroS',
     },
   }
 }
