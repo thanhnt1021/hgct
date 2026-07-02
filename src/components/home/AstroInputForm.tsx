@@ -34,7 +34,12 @@ export default function AstroInputForm() {
   const [saved, setSaved] = useState<SavedChart[]>([])
   const setF = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
-  useEffect(() => { setSaved(listCharts()) }, [])
+  useEffect(() => {
+    const refresh = () => setSaved(listCharts())
+    refresh()
+    window.addEventListener('charts-synced', refresh)  // hồ sơ tài khoản sync xong → nạp lại
+    return () => window.removeEventListener('charts-synced', refresh)
+  }, [])
 
   const handleSubmit = () => {
     setErr('')

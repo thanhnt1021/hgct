@@ -80,6 +80,25 @@ model Essay {
   @@map("essays")
 }
 
+// Lá số đã lưu của user (đăng nhập) — bản đồng bộ trên DB dùng chung → hiện ở
+// mọi thiết bị/origin. Client vẫn lưu localStorage; khi đăng nhập thì gộp 2 nguồn.
+// chartKey = fullKey phía client (người + view + service + người B, BẤT BIẾN thứ tự cho cặp đôi).
+model SavedChart {
+  id         Int      @id @default(autoincrement())
+  userUid    String   @map("user_uid")
+  chartKey   String   @map("chart_key")
+  name       String
+  view       String?
+  service    String?
+  inputData  Json     @map("input_data")
+  inputDataB Json?    @map("input_data_b")
+  savedAt    DateTime @default(now()) @map("saved_at")
+
+  @@unique([userUid, chartKey])
+  @@index([userUid])
+  @@map("saved_charts")
+}
+
 model Profile {
   id         Int       @id @default(autoincrement())
   userUid    String    @map("user_uid")

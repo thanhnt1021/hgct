@@ -1,7 +1,8 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useSession, signIn, signOut } from 'next-auth/react'
+import { syncCharts } from '@/lib/chartStore'
 
 interface User {
   username: string
@@ -47,6 +48,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     : null
 
   const isLoading = status === 'loading'
+
+  // Đăng nhập → kéo lá số đã lưu từ DB gộp vào localStorage (đồng bộ mọi thiết bị/origin).
+  // Đổi localStorage xong → phát event để danh sách đang mở tự nạp lại.
+  useEffect(() => {
+    if (!sessionUser?.uid) return
+    syncCharts().then(changed => {
+      if (changed && typeof window !== 'undefined') window.dispatchEvent(new Event('charts-synced'))
+    })
+  }, [sessionUser?.uid])
 
   const login = async (username: string, password: string): Promise<{ ok: boolean; error?: string }> => {
     const result = await signIn('credentials', { username, password, redirect: false })

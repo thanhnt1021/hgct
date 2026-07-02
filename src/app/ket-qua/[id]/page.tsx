@@ -11,6 +11,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import ReadingClient from '@/app/reading/[profileUid]/[service]/ReadingClient'
 import { getChart, saveChart } from '@/lib/chartStore'
+import { useAuth } from '@/contexts/AuthContext'
 
 type Core = { key: string; label: string; sign: string; text: string }
 type House = { house: number; label: string; score: number; text: string }
@@ -51,6 +52,7 @@ async function computeProfileUid(input: Input & { name?: string }, inputB?: Inpu
 export default function KetQuaPage() {
   const params = useParams<{ id: string }>()
   const id = params?.id as string
+  const { user, isLoading: authLoading } = useAuth()
   const [input, setInput] = useState<Input | null>(null)
   const [svg, setSvg] = useState('')
   const [cores, setCores] = useState<Core[]>([])
@@ -119,6 +121,19 @@ export default function KetQuaPage() {
             ✎ Sửa
           </Link>
         </div>
+
+        {/* Khách chưa đăng nhập: lá số chỉ lưu tạm trên thiết bị này → nhắc đăng nhập để lưu vĩnh viễn */}
+        {!authLoading && !user && !err && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem', background: '#063755', border: '1px solid var(--as-border-gold)', borderRadius: 'var(--as-radius-lg)', padding: '0.85rem 1.15rem', marginBottom: '1.5rem' }}>
+            <span aria-hidden style={{ fontSize: '1.05rem', color: 'var(--as-champagne)' }}>✦</span>
+            <p style={{ flex: 1, minWidth: 220, fontFamily: 'var(--font-vietnam)', color: 'rgba(247,236,217,0.9)', fontSize: '0.83rem', lineHeight: 1.55, margin: 0 }}>
+              Bản đồ sao này đang được lưu tạm trên thiết bị của bạn. <strong style={{ color: 'var(--as-gold-cream)' }}>Đăng nhập</strong> để lưu giữ trọn vẹn hành trình chiêm tinh — xem lại mọi lá số &amp; luận giải trên mọi thiết bị, bất cứ lúc nào.
+            </p>
+            <Link href={`/auth/login?next=/ket-qua/${id}`} style={{ background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontWeight: 700, fontSize: '0.82rem', padding: '0.5rem 1.1rem', borderRadius: '999px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              Đăng nhập
+            </Link>
+          </div>
+        )}
 
         {loading && <p style={{ fontFamily: 'var(--font-vietnam)', color: 'var(--as-text)' }}>Đang lập bản đồ sao…</p>}
         {err && (

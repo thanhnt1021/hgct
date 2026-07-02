@@ -9,7 +9,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import LocationPicker from '@/components/profile/LocationPicker'
 import Link from 'next/link'
-import { getChart, saveChart, listCharts, personLabel, type SavedChart } from '@/lib/chartStore'
+import { getChart, saveChart, listCharts, listCouples, coupleLabel, personLabel, type SavedChart } from '@/lib/chartStore'
 import { maskDate, maskTime, dateError, timeError } from '@/lib/dateMask'
 import { useParams } from 'next/navigation'
 
@@ -26,6 +26,7 @@ export default function QuanHePage() {
   const service = 'synastry'  // Mối quan hệ cặp đôi → Cặp đôi (bỏ các loại relations cũ)
   const [form, setForm] = useState({ ten: '', dateStr: '', timeStr: '', unknown: false, loc: { address: 'Hà Nội, Việt Nam', lat: 21.0245, lon: 105.8412, tz: 'Asia/Ho_Chi_Minh' } })
   const [saved, setSaved] = useState<SavedChart[]>([])
+  const [couples, setCouples] = useState<SavedChart[]>([])
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const setF = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
@@ -34,7 +35,11 @@ export default function QuanHePage() {
     const sv = getChart(id)
     if (sv) setPersonA(sv.inputData as PInput)
     else setErr('Không tìm thấy lá số người thứ nhất (có thể đã xoá cache).')
-    setSaved(listCharts())
+    const refresh = () => { setSaved(listCharts()); setCouples(listCouples()) }
+    refresh()
+    // Khi AuthContext sync xong lá số từ DB → nạp lại danh sách (cặp đôi đã lưu ở thiết bị khác cũng hiện).
+    window.addEventListener('charts-synced', refresh)
+    return () => window.removeEventListener('charts-synced', refresh)
   }, [id])
 
   const pickSaved = (sid: string) => {
@@ -74,6 +79,23 @@ export default function QuanHePage() {
           <h1 style={{ fontFamily: 'var(--font-playfair)', color: 'var(--as-gold-cream)', fontSize: 'clamp(1.4rem,3vw,1.95rem)', fontWeight: 600, textAlign: 'center', marginBottom: '1.5rem' }}>
             Mối quan hệ cặp đôi, Người thứ hai
           </h1>
+
+          {/* Cặp đôi đã lưu → mở lại thẳng kết quả (giữ nội dung đã mua, không tính phí lại) */}
+          {couples.length > 0 && (
+            <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--as-border-gold)' }}>
+              <label style={lbl}>Xem lại cặp đôi đã lưu</label>
+              <div className="flex flex-col gap-2">
+                {couples.map(c => (
+                  <button key={c.id} type="button" onClick={() => { window.location.href = `/ket-qua/${c.id}` }}
+                    className="text-left w-full"
+                    style={{ background: 'rgba(247,236,217,0.06)', border: '1px solid var(--as-border-gold)', borderRadius: 'var(--as-radius-md)', padding: '0.7rem 0.9rem', cursor: 'pointer', color: 'var(--as-gold-cream)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', fontWeight: 600 }}>
+                    ☍ {coupleLabel(c)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-4">
             <div>
               <div className="flex items-center justify-between">

@@ -82,7 +82,7 @@ interface DuyenSoData {
   items: { house: number; content: string }[]
 }
 
-interface RelBrief {
+export interface RelBrief {
   meta: {
     name_A: string; name_B: string
     full_name_A: string; full_name_B: string

@@ -48,6 +48,8 @@ export async function generateAndCacheEssay(opts: {
 
   const kb = await getKnowledgeFromDB()
   let prompt: string
+  // Với quan hệ (synastry/relations): giữ brief để UNMASK "Nhân Vật A/B" → tên thật ở output (như bản PDF cũ).
+  let relBrief: import('@/lib/logic/relationship/prompt').RelBrief | null = null
 
   if (opts.service === 'career') {
     const blocks = getCareerBlocks(chart, kb)
@@ -77,6 +79,7 @@ export async function generateAndCacheEssay(opts: {
     // no runtime context-block prepend needed.
     const result = buildRelationshipEssayPrompt(chart, chartB, blocks, profile, profileB, { templateName })
     prompt = typeof result === 'string' ? result : result.prompt
+    relBrief = typeof result === 'string' ? null : result.brief
   } else if (opts.service === 'transit') {
     const { buildVanhanEssayPrompt } = await import('@/lib/logic/vanhan/prompt')
     const sd = opts.startDate || new Date().toISOString().split('T')[0]
@@ -90,13 +93,23 @@ export async function generateAndCacheEssay(opts: {
   // legacy PDF report flow (reportProcessor): streams with internal retry
   // (4 attempts, 5s/20s/60s backoff) and retries on stalled/interrupted streams.
   const { generateEssayStreaming } = await import('@/lib/openrouter')
-  const essay = await generateEssayStreaming(SYSTEM_PROMPT, prompt, opts.onProgress ?? (() => {}))
+  let essay = await generateEssayStreaming(SYSTEM_PROMPT, prompt, opts.onProgress ?? (() => {}))
   if (!essay) throw new Error('OpenRouter returned empty essay')
+
+  // UNMASK: quan hệ → đổi "Nhân Vật A/B" trở lại tên thật (giống reportProcessor bản PDF cũ)
+  if (relBrief) {
+    const { sanitizeRelationshipOutput } = await import('@/lib/logic/relationship/prompt')
+    essay = sanitizeRelationshipOutput(essay, relBrief)
+  }
 
   // Persist (keep-first on race) then re-read the canonical row so that if a
   // concurrent request generated + stored a different essay first, every caller
   // slices sections from the SAME canonical essay → no cross-section mismatch.
-  await writeEssay(opts.userUid, opts.service, hash, essay, opts.inputData?.name)
+  // Cặp đôi → lưu tên "A & B" để list "Hồ sơ đã xem" nhận diện đúng cặp đôi (không chỉ người 1).
+  const savedName = opts.inputDataB?.name
+    ? `${opts.inputData?.name || 'Người 1'} & ${opts.inputDataB.name}`
+    : opts.inputData?.name
+  await writeEssay(opts.userUid, opts.service, hash, essay, savedName)
   const canonical = await readEssay(opts.userUid, opts.service, hash)
   return { hash, essay: canonical ?? essay }
 }

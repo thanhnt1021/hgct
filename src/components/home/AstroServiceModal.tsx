@@ -106,7 +106,12 @@ export default function AstroServiceModal({ def, onClose }: { def: ServiceDef; o
   const setAk = (k: keyof PersonForm, v: unknown) => setA(s => ({ ...s, [k]: v }))
   const setBk = (k: keyof PersonForm, v: unknown) => setB(s => ({ ...s, [k]: v }))
 
-  useEffect(() => { setSaved(listCharts()) }, [])
+  useEffect(() => {
+    const refresh = () => setSaved(listCharts())
+    refresh()
+    window.addEventListener('charts-synced', refresh)  // hồ sơ tài khoản sync xong → nạp lại
+    return () => window.removeEventListener('charts-synced', refresh)
+  }, [])
 
   const submit = () => {
     setErr('')

@@ -8,7 +8,8 @@ import { listCharts } from '@/lib/chartStore'
 export default function KetQuaIndex() {
   const router = useRouter()
   useEffect(() => {
-    const charts = listCharts()
+    // Chỉ trỏ tới lá số local thật (bỏ hồ sơ tài khoản id 'p_…' — chưa có trang kết quả riêng)
+    const charts = listCharts().filter(c => !String(c.id).startsWith('p_'))
     if (charts.length) router.replace(`/ket-qua/${charts[0].id}`)
     else router.replace('/#lap-la-so')
   }, [router])
