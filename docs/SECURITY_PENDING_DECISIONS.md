@@ -14,10 +14,22 @@ Code đã sửa xong trong working tree `/home/hgct/hgct`, **chưa build/deploy 
 | `src/lib/ctv/auth.ts` | Bỏ hardcode fallback `'ctv-fallback-secret'` — giờ throw lỗi nếu thiếu cả `CTV_JWT_SECRET` lẫn `NEXTAUTH_SECRET` |
 | `src/lib/telegram/admin.ts` | 2 chỗ hiện email khách trong tin nhắn Telegram admin giờ có `escHtml()` |
 
-**Rủi ro nếu deploy:**
+**🔴 CONFIRMED BUG (2026-07-09) — `ctv/auth.ts` hiện KHÔNG build được, không phải chỉ là rủi ro runtime:**
+Thử build thật `hgct-prod` với code này trong tree → **build fail 100% mọi lần**, bất kể `.env.local` prod có set secret hay không:
+```
+Build error occurred
+[Error: Failed to collect page data for /api/ctv/logout]
+```
+Lý do: `.env.local`/`.env` bị `.dockerignore` loại khỏi build context (đúng, vì secret phải inject lúc container chạy qua `env_file`, không bake vào image). Nhưng code hiện tại throw **ngay lúc module import** (top-level, ngoài function) — mà bước `next build` chạy "collect page data" nghĩa là **import thử route module trong lúc build**, không có env nào cả → throw → build chết. Vậy nên **không phải chỉ rủi ro nếu thiếu env — nó LUÔN throw lúc build**, vì lúc build không có env nào hết, kể cả khi prod đã set đúng.
+
+**Cách sửa đúng (chưa làm):** đừng throw ở top-level module scope. Chuyển check vào trong function (lazy, chỉ chạy lúc có request thật, lúc đó mới có runtime env) — ví dụ đổi `const SECRET = ...` (chạy lúc import) thành 1 hàm `getSecret()` gọi lúc cần ký/verify JWT, throw bên trong hàm đó thay vì ở module scope.
+
+**Rủi ro nếu deploy (sau khi sửa lại theo hướng lazy ở trên):**
 - `kb-sync`: thấp — chỉ đổi cách so sánh, không đổi giá trị secret. Nếu lệch → cron sync KB 401 liên tục, thấy ngay qua log `hgct-cron`.
-- `ctv/auth.ts`: **quan trọng nhất phải check trước khi deploy** — nếu prod **thiếu cả 2** biến `CTV_JWT_SECRET` và `NEXTAUTH_SECRET` → module throw lúc import → **toàn bộ site sập ngay lúc container khởi động**, không chỉ CTV. Cần verify `.env.local` của `hgct-prod` có 1 trong 2 giá trị thật TRƯỚC khi build.
+- `ctv/auth.ts`: sau khi sửa lazy, cần verify `.env.local` của `hgct-prod` có `CTV_JWT_SECRET` hoặc `NEXTAUTH_SECRET` thật — nếu thiếu, chỉ throw lúc có ai gọi API CTV thật (500 lỗi cho riêng luồng đó), không sập cả site như bản top-level hiện tại.
 - `telegram/admin.ts`: không rủi ro, chỉ escape HTML.
+
+**⚠️ Bài học vận hành quan trọng hơn cả bug trên:** khi build Docker từ `/home/hgct/hgct`, image lấy **TOÀN BỘ working tree trên đĩa**, không chỉ phần đã `git commit`. Tối nay build `hgct-prod` để đẩy giá xu (chỉ định commit riêng, không đụng 3 file security) vẫn **vô tình kéo theo `ctv/auth.ts` uncommitted** vào build vì nó nằm sẵn trên đĩa → build fail. Đã fix tạm bằng `git stash` 6 file này ra trước khi build, `stash pop` lại sau khi xong — nhưng đây là rủi ro sẽ lặp lại bất cứ khi nào deploy prod trong lúc có code uncommitted khác nằm trong tree. Cân nhắc: luôn `git stash` code chưa sẵn sàng trước khi build prod, hoặc build từ 1 worktree/clone riêng chỉ chứa đúng commit muốn deploy.
 
 **Rủi ro nếu KHÔNG deploy (giữ nguyên):**
 - `kb-sync` vẫn có thể bị timing attack dò `CRON_SECRET` về lý thuyết — thực tế cần rất nhiều request chính xác, endpoint chỉ ảnh hưởng KB sync, không phải endpoint tiền.
