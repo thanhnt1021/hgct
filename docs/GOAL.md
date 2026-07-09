@@ -30,12 +30,13 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 
 ## Pending / Cần Quyết Định
 
-**⚠️ Security audit 2026-07-02 (VIRUS_DOCKER_CHECKIN.md) — top priority:**
-**🔲 CÒN LẠI — chưa làm, cần chủ dự án tự tay xử lý:**
-- [ ] 🔴 **Build + deploy production để 3 fix code có hiệu lực** (`kb-sync` timing-safe, escape email Telegram, bỏ hardcode fallback secret CTV — code đã sửa xong trong working tree `/home/hgct/hgct`, xem 3 dòng ✅ bên dưới). Owner chủ động **không cho build lúc audit** (2026-07-02) — tự làm sau: `commit` → `merge main` (đã đang ở main) → `cd /home/hgct && docker compose build hgct-prod && docker compose up -d --force-recreate hgct-prod`.
-- [ ] 🟡 Rate-limiter (`src/lib/ratelimit.ts`) fail-open khi Upstash Redis lỗi/outage — mọi giới hạn (login/register/unlock) tự tắt hết. Cần quyết định: chấp nhận đánh đổi (ưu tiên uptime), hay đổi fail-closed cho endpoint nhạy cảm (ưu tiên an toàn, rủi ro: Upstash sập → user không login được).
-- [ ] 🟡 HSTS/CSP nginx — chưa làm, để riêng vì rủi ro cao nếu làm ẩu (HSTS cache browser khó revert, CSP có thể vỡ giao diện). Khi làm: CSP bật `Report-Only` trước, HSTS `max-age` ngắn trước rồi mới tăng dần, test kỹ trên demo trước.
-- [ ] 🟢 Sửa bug false-negative trong `security-check.sh` — báo "✗ NO backup cron" sai (cron backup DB có thật, chạy tốt) — không urgent.
+**⚠️ Security audit 2026-07-02 (VIRUS_DOCKER_CHECKIN.md) — top priority, 3 việc còn treo cần chủ dự án chốt:**
+- [ ] Deploy 3 fix code bảo mật lên prod (`kb-sync` timing-safe, escape email Telegram, bỏ hardcode fallback secret CTV) + commit 3 file đã live (nginx headers, docker-compose, SEPAY doc)
+- [ ] Rate-limiter fail-open vs fail-closed chọn lọc (`src/lib/ratelimit.ts`)
+- [ ] HSTS/CSP nginx — chưa làm, rủi ro cao nếu làm ẩu
+- [ ] 🟢 Bug nhỏ, không urgent: `security-check.sh` báo sai "✗ NO backup cron"
+
+→ **Phân tích rủi ro đầy đủ từng việc: `docs/SECURITY_PENDING_DECISIONS.md`** — đọc file đó mỗi khi `check goal`/`update goal`.
 
 **✅ Đã làm xong 2026-07-02 (security audit `VIRUS_DOCKER_CHECKIN.md`):**
 - [x] 🟢 ~~Webhook SePay route sang `hgct-demo` thay vì prod~~ — gỡ block TEMP trong `nginx/conf.d/hgct.conf`, reload live (không downtime), verify bằng request test thật (log xác nhận vào đúng `hgct-prod`). Sync `infra/nginx/conf.d/` + `infra/docker-compose.yml` khớp live. Backup config cũ: `nginx/conf.d/hgct.conf.bak.20260702_091627`. **Chưa commit** — chờ lệnh.
@@ -59,7 +60,7 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 
 - [x] 🟢 **Coin rework — production hardening (v3.4)** — đã thực thi A–E + nhiều fix UX + mở lại đăng ký, **go-live prod 2026-06-04**. Chi tiết `docs/UPGRADE_LOG.md`.
 
-- [x] 🟢 **Bảng giá nạp xu preview + mã ưu đãi (2026-07-09)** — live trên `demo.hatgiongchiemtinh.com` (`COIN_TEST_PRICES=true`): Gói 1 69k/250xu, Gói 2 99k/450xu, Gói 3 199k/800xu, Gói 4 399k/2000xu (gói 4 mở, trước đó "chờ giá"). Mã ưu đãi "Thanhphuong" → 300 xu/50.000đ, validate cả ở API lộ gói ẩn (`/api/coin/promo`) lẫn lúc tạo đơn (`topup-order`). **Chỉ áp dụng cho demo** — giá thật trên `hatgiongchiemtinh.com` (prod) giữ nguyên 99k/219k/599k, gói 4 vẫn tắt, chưa quyết định giá thật. Commit `676073d`. Đồng thời phát hiện + fix: `hgct-demo` git bị tụt 18 commit so với `origin/main` (do quick-deploy chỉ rsync file, không đụng git) — đã đồng bộ lại, ghi rule chống lặp lại vào `CLAUDE.md`.
+- [x] 🟢 **Bảng giá nạp xu mới + mã ưu đãi — go-live prod 2026-07-09** — test trên demo trước, chốt giá xong, lên `hatgiongchiemtinh.com`: Gói 1 69k/250xu, Gói 2 99k/450xu, Gói 3 199k/800xu, Gói 4 399k/2000xu (gói 4 mở, trước đó "chờ giá"). Mã ưu đãi "Thanhphuong" → 300 xu/50.000đ, validate cả ở API lộ gói ẩn (`/api/coin/promo`) lẫn lúc tạo đơn (`topup-order`). Không còn phân biệt giá demo/prod — 1 bảng giá chung (`src/lib/coin/packages.ts`, bỏ nhánh `COIN_TEST_PRICES`). Đồng thời phát hiện + fix: `hgct-demo` git từng bị tụt 18 commit so với `origin/main` (do quick-deploy chỉ rsync file, không đụng git) — đã đồng bộ lại, ghi rule chống lặp lại vào `CLAUDE.md`.
 - [ ] **Off-site DB backup (Cloudflare R2)** — hiện chỉ backup local trên server → SPOF. Đã chốt: R2 + rclone crypt + retention 30 ngày + monthly snapshot 12 tháng. Plan chi tiết: `/home/hgct/TODO_OFFSITE_BACKUP.md` trên server. Cần ~20 phút: user tạo bucket + API token trong CF dashboard → Claude config rclone + sửa `backup-db.sh` + test restore.
 - [ ] **Lucky wheel first-time buyer check** — hiện code KHÔNG verify user đã mua trước đó, ai vào checkout cũng quay được giảm giá. Cần query `prisma.order.count({ where: { userUid, paymentStatus: 'paid' } }) > 0` → ẩn wheel, chỉ cho referral code. Files ảnh hưởng: `src/components/checkout/DiscountModal.tsx`, `src/components/checkout/LuckyWheelModal.tsx`, cần tạo `src/app/api/user/has-previous-order/route.ts`.
 - [ ] Rate limiting — chưa có; cân nhắc lại khi traffic tăng đột biến
