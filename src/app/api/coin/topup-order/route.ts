@@ -21,9 +21,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Cần đăng nhập để nạp xu' }, { status: 401 })
   }
 
-  let body: { packageCode?: unknown }
+  let body: { packageCode?: unknown; promoCode?: unknown }
   try {
-    body = (await request.json()) as { packageCode?: unknown }
+    body = (await request.json()) as { packageCode?: unknown; promoCode?: unknown }
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
@@ -32,6 +32,15 @@ export async function POST(request: Request) {
   const pkg = getPackage(code)
   if (!pkg || !pkg.enabled) {
     return NextResponse.json({ error: 'Gói nạp không hợp lệ' }, { status: 400 })
+  }
+
+  // Gói gắn mã ưu đãi (vd PROMO001) — bắt buộc nhập đúng mã dù đã biết packageCode,
+  // tránh bypass thẳng qua API mà không cần qua bước nhập mã ở UI.
+  if (pkg.promoCode) {
+    const entered = typeof body.promoCode === 'string' ? body.promoCode.trim().toLowerCase() : ''
+    if (entered !== pkg.promoCode.toLowerCase()) {
+      return NextResponse.json({ error: 'Mã ưu đãi không hợp lệ' }, { status: 400 })
+    }
   }
 
   // Persist the top-up as an Order so the existing SePay reconciliation works.

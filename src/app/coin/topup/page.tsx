@@ -37,6 +37,11 @@ export default function CoinTopupPage() {
   const [back, setBack] = useState('') // màn quay lại sau khi nạp xong (vd trang reading)
   const [packages, setPackages] = useState<CoinPackage[]>([]) // giá theo env (fetch từ server)
 
+  const [promoInput, setPromoInput] = useState('')
+  const [promoApplying, setPromoApplying] = useState(false)
+  const [promoError, setPromoError] = useState('')
+  const [promoPkg, setPromoPkg] = useState<{ packageCode: string; coins: number; amountVnd: number; label: string } | null>(null)
+
   useEffect(() => {
     fetch('/api/coin/packages', { cache: 'no-store' })
       .then(r => r.json())
@@ -105,7 +110,7 @@ export default function CoinTopupPage() {
     }
   }, [order, paid])
 
-  const create = async (code: string) => {
+  const create = async (code: string, promoCode?: string) => {
     setError('')
     setCreating(true)
     setCreatingCode(code)
@@ -113,7 +118,7 @@ export default function CoinTopupPage() {
       const res = await fetch('/api/coin/topup-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageCode: code }),
+        body: JSON.stringify({ packageCode: code, ...(promoCode ? { promoCode } : {}) }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -124,6 +129,29 @@ export default function CoinTopupPage() {
     } finally {
       setCreating(false)
       setCreatingCode(null)
+    }
+  }
+
+  const applyPromo = async () => {
+    const code = promoInput.trim()
+    if (!code) return
+    setPromoApplying(true)
+    setPromoError('')
+    try {
+      const res = await fetch('/api/coin/promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setPromoError(data.error || 'Mã ưu đãi không hợp lệ')
+        setPromoPkg(null)
+        return
+      }
+      setPromoPkg(data)
+    } finally {
+      setPromoApplying(false)
     }
   }
 
@@ -421,6 +449,71 @@ export default function CoinTopupPage() {
                 </button>
               )
             })}
+          </div>
+
+          {/* Mã ưu đãi */}
+          <div style={{ marginTop: '1.75rem' }}>
+            <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--as-border-gold), transparent)', marginBottom: '1.25rem' }} />
+            <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem', fontWeight: 700, marginBottom: '0.6rem' }}>
+              🎁 Mã ưu đãi
+            </p>
+            {promoPkg ? (
+              <button
+                type="button"
+                onClick={() => !creating && create(promoPkg.packageCode, promoInput.trim())}
+                disabled={creating}
+                className="w-full flex items-center justify-between"
+                style={{
+                  textAlign: 'left', background: 'var(--as-champagne)', border: '1px solid var(--as-cta)',
+                  borderRadius: 12, padding: '1rem 1.15rem', cursor: creating ? 'not-allowed' : 'pointer',
+                }}
+              >
+                <div>
+                  <p style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+                    {promoPkg.label}
+                  </p>
+                  <p style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '1.35rem', fontWeight: 800, lineHeight: 1.1 }}>
+                    {fmtXu(promoPkg.coins)} <span style={{ fontSize: '0.8rem', color: 'var(--as-copper-deep)', fontWeight: 600 }}>xu</span>
+                  </p>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: '1rem' }}>
+                  <p style={{ color: 'var(--as-cta)', fontFamily: 'var(--font-vietnam)', fontSize: '1.05rem', fontWeight: 700 }}>
+                    {creatingCode === promoPkg.packageCode ? '…' : formatAmount(promoPkg.amountVnd)}
+                  </p>
+                  <p style={{ color: 'var(--as-copper-deep)', fontFamily: 'var(--font-vietnam)', fontSize: '0.7rem', marginTop: '0.15rem' }}>
+                    {creatingCode === promoPkg.packageCode ? 'Đang tạo…' : 'Chọn →'}
+                  </p>
+                </div>
+              </button>
+            ) : (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  value={promoInput}
+                  onChange={e => setPromoInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') applyPromo() }}
+                  placeholder="Nhập mã"
+                  style={{
+                    flex: 1, padding: '0.7rem 0.9rem', borderRadius: 999, border: '1px solid var(--as-border-gold)',
+                    background: 'var(--as-surface-raised)', color: 'var(--as-text-strong)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={applyPromo}
+                  disabled={promoApplying || !promoInput.trim()}
+                  style={{
+                    background: 'var(--as-cta)', color: 'var(--as-text-on-dark)', fontFamily: 'var(--font-vietnam)', fontWeight: 700,
+                    fontSize: '0.82rem', padding: '0.7rem 1.25rem', borderRadius: 999, border: 'none',
+                    cursor: promoApplying || !promoInput.trim() ? 'not-allowed' : 'pointer', opacity: promoApplying || !promoInput.trim() ? 0.6 : 1,
+                  }}
+                >
+                  {promoApplying ? '…' : 'Áp dụng'}
+                </button>
+              </div>
+            )}
+            {promoError && (
+              <p style={{ marginTop: '0.6rem', color: '#f87171', fontFamily: 'var(--font-vietnam)', fontSize: '0.8rem' }}>⚠ {promoError}</p>
+            )}
           </div>
 
           {error && (
