@@ -1,6 +1,6 @@
 # GOAL
 
-_Last reviewed: 2026-07-09_
+_Last reviewed: 2026-07-19_
 
 ## Mục tiêu cuối cùng
 
@@ -61,6 +61,8 @@ App chiêm tinh học HGCT vận hành thương mại ổn định — có khác
 - [x] 🟢 **Coin rework — production hardening (v3.4)** — đã thực thi A–E + nhiều fix UX + mở lại đăng ký, **go-live prod 2026-06-04**. Chi tiết `docs/UPGRADE_LOG.md`.
 
 - [x] 🟢 **Bảng giá nạp xu mới + mã ưu đãi — go-live prod 2026-07-09** — test trên demo trước, chốt giá xong, lên `hatgiongchiemtinh.com`: Gói 1 69k/250xu, Gói 2 99k/450xu, Gói 3 199k/800xu, Gói 4 399k/2000xu (gói 4 mở, trước đó "chờ giá"). Mã ưu đãi "Thanhphuong" → 300 xu/50.000đ, validate cả ở API lộ gói ẩn (`/api/coin/promo`) lẫn lúc tạo đơn (`topup-order`). Không còn phân biệt giá demo/prod — 1 bảng giá chung (`src/lib/coin/packages.ts`, bỏ nhánh `COIN_TEST_PRICES`). Đồng thời phát hiện + fix: `hgct-demo` git từng bị tụt 18 commit so với `origin/main` (do quick-deploy chỉ rsync file, không đụng git) — đã đồng bộ lại, ghi rule chống lặp lại vào `CLAUDE.md`.
+- [x] 🟢 **Mã ưu đãi "Thanhphuongxinhgai" — go-live prod 2026-07-19** — 1000 xu / 29.000đ, cùng cơ chế mã ẩn như "Thanhphuong". Commit `06f0d05`.
+- [x] 🟡 **Incident: tạo nội dung lỗi 402 do OpenRouter key chạm limit (2026-07-18 → 19)** — key `sk-or-v1-2a0...ba5` có `limit` riêng $10, dùng gần hết → mọi request 32k max_tokens bị OpenRouter từ chối ("cần thêm credit hoặc giảm max_tokens"). Tài khoản gốc KHÔNG hết tiền (tổng nạp $135, còn dư ~$10 ở mức account) — chỉ là limit riêng của key gần chạm trần. Owner đã nâng limit key 10 → 15 (`openrouter.ai` dashboard) — verify qua API: `limit:15, remaining:$5.16` khớp đúng. **Chưa 100% chắc hết lỗi** — $5.16 theo đúng pattern lỗi cũ có thể vẫn chưa đủ cho mọi request 32k token lớn nhất; cần owner tự tạo 1 báo cáo thật để xác nhận (Claude không tự test vì tốn tiền thật). Nếu còn lỗi 402 → nâng tiếp limit key, hoặc giảm `max_tokens` mặc định trong code (`src/lib/openrouter.ts`) để mỗi request rẻ hơn.
 - [ ] **Off-site DB backup (Cloudflare R2)** — hiện chỉ backup local trên server → SPOF. Đã chốt: R2 + rclone crypt + retention 30 ngày + monthly snapshot 12 tháng. Plan chi tiết: `/home/hgct/TODO_OFFSITE_BACKUP.md` trên server. Cần ~20 phút: user tạo bucket + API token trong CF dashboard → Claude config rclone + sửa `backup-db.sh` + test restore.
 - [ ] **Lucky wheel first-time buyer check** — hiện code KHÔNG verify user đã mua trước đó, ai vào checkout cũng quay được giảm giá. Cần query `prisma.order.count({ where: { userUid, paymentStatus: 'paid' } }) > 0` → ẩn wheel, chỉ cho referral code. Files ảnh hưởng: `src/components/checkout/DiscountModal.tsx`, `src/components/checkout/LuckyWheelModal.tsx`, cần tạo `src/app/api/user/has-previous-order/route.ts`.
 - [ ] Rate limiting — chưa có; cân nhắc lại khi traffic tăng đột biến
