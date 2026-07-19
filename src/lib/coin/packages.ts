@@ -18,7 +18,8 @@ export const COIN_PACKAGES: CoinPackage[] = [
   { code: 'COIN003', coins: 800,  amountVnd: 199000, enabled: true,                label: 'Gói 3' },
   { code: 'COIN004', coins: 2000, amountVnd: 399000, enabled: true,                label: 'Gói 4' },
   // Mã ưu đãi "Thanhphuong" — ẩn khỏi UI mặc định, chỉ lộ ra sau khi nhập đúng mã ở trang nạp xu.
-  { code: 'PROMO001', coins: 300, amountVnd: 50000, enabled: true, hidden: true, label: 'Ưu đãi mã Thanhphuong', promoCode: 'thanhphuong' },
+  { code: 'PROMO001', coins: 300,  amountVnd: 50000, enabled: true, hidden: true, label: 'Ưu đãi mã Thanhphuong', promoCode: 'thanhphuong' },
+  { code: 'PROMO002', coins: 1000, amountVnd: 29000, enabled: true, hidden: true, label: 'Ưu đãi mã Thanhphuongxinhgai', promoCode: 'thanhphuongxinhgai' },
 ]
 
 export function getPackage(code: string): CoinPackage | null {
