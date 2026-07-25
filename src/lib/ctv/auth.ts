@@ -4,9 +4,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'crypto'
 import bcrypt from 'bcryptjs'
 
-const SECRET = new TextEncoder().encode(
-  process.env.CTV_JWT_SECRET || process.env.NEXTAUTH_SECRET || 'ctv-fallback-secret'
-)
+const ctvSecretValue = process.env.CTV_JWT_SECRET || process.env.NEXTAUTH_SECRET
+if (!ctvSecretValue) {
+  throw new Error('CTV_JWT_SECRET or NEXTAUTH_SECRET must be set')
+}
+const SECRET = new TextEncoder().encode(ctvSecretValue)
 const COOKIE_NAME = 'ctv_token'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
 

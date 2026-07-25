@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server'
 import { google } from 'googleapis'
+import { timingSafeEqual } from 'crypto'
 import prisma from '@/lib/db'
 
 const IMPORTANT_TABS = ['LÕI TÍNH CÁCH', 'TÀI NĂNG NỔI BẬT', 'love-CẶP ĐÔI', 'VẬN HẠN']
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  const secret = process.env.CRON_SECRET
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  const authHeader = request.headers.get('authorization') || ''
+  const secret = process.env.CRON_SECRET || ''
+  const expected = `Bearer ${secret}`
+  const keyMatch = secret.length > 0
+    && authHeader.length === expected.length
+    && timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected))
+  if (!keyMatch) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

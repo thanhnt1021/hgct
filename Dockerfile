@@ -12,6 +12,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-cert
     && rm -rf /var/lib/apt/lists/*
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Build-time-only secrets — CHỈ để `next build` collect page data qua các module-level
+# check (vd src/lib/db.ts PrismaClient, src/lib/ctv/auth.ts) không throw. KHÔNG copy sang
+# stage `runner` — giá trị thật lúc RUNTIME container vẫn lấy qua `env_file` trong
+# docker-compose.yml, không phải từ ARG này. Fix tạm ngoài scope phiếu P001 — xem ticket.
+ARG DATABASE_URL
+ARG NEXTAUTH_SECRET
+ARG CTV_JWT_SECRET
+ENV DATABASE_URL=${DATABASE_URL}
+ENV NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+ENV CTV_JWT_SECRET=${CTV_JWT_SECRET}
 RUN npx prisma generate
 RUN npm run build
 

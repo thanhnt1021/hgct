@@ -41,6 +41,8 @@ function ProfileContent() {
   const [activeTab, setActiveTab] = useState<TabId>(urlTab)
   // Tab "Gói dịch vụ" + "Lịch sử & Báo cáo" chỉ hiện cho tài khoản Lifetime.
   const isLifetime = user?.planType === 'lifetime'
+  // [F4 — V3] Check theo ĐÚNG username, KHÔNG phải cờ admin (khác cơ chế F1 — xem A-CORE Task 0).
+  const isHentaiikidd = user?.username === 'hentaiikidd'
   const LIFETIME_ONLY: TabId[] = ['plans', 'history']
   const visibleTabs = TABS.filter(t => !LIFETIME_ONLY.includes(t.id) || isLifetime)
   const [displayTen, setDisplayTen] = useState('')
@@ -50,8 +52,8 @@ function ProfileContent() {
   useEffect(() => { setActiveTab(urlTab) }, [urlTab])
 
   useEffect(() => {
-    if (!isLoading && !user) router.push('/auth/login')
-  }, [user, isLoading, router])
+    if (!isLoading && !user) router.push(`/auth/login?next=${encodeURIComponent('/profile' + (urlTab !== 'info' ? `?tab=${urlTab}` : ''))}`)
+  }, [user, isLoading, router, urlTab])
 
   useEffect(() => {
     if (!user) return
@@ -133,28 +135,30 @@ function ProfileContent() {
         ))}
       </nav>
 
-      {/* Link to services */}
-      <div className="px-3 mt-3">
-        <div className="mx-1 mb-3" style={{ height: 1, background: 'var(--as-border-soft)' }} />
-        <Link
-          href="/services"
-          className="w-full flex items-center gap-3 rounded-xl text-sm"
-          style={{
-            color: 'var(--as-text-muted)',
-            padding: '0.625rem 0.75rem',
-            fontFamily: 'var(--font-vietnam)',
-            minHeight: 44,
-            transition: 'color 0.15s, background 0.15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'var(--as-cta)'; e.currentTarget.style.background = 'rgba(22,54,83,0.06)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--as-text-muted)'; e.currentTarget.style.background = 'transparent' }}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
-          </svg>
-          Đặt báo cáo
-        </Link>
-      </div>
+      {/* Link to services — [F4 — V3] ẩn cho mọi tài khoản KHÔNG phải hentaiikidd (AC-F4.2) */}
+      {isHentaiikidd && (
+        <div className="px-3 mt-3">
+          <div className="mx-1 mb-3" style={{ height: 1, background: 'var(--as-border-soft)' }} />
+          <Link
+            href="/services"
+            className="w-full flex items-center gap-3 rounded-xl text-sm"
+            style={{
+              color: 'var(--as-text-muted)',
+              padding: '0.625rem 0.75rem',
+              fontFamily: 'var(--font-vietnam)',
+              minHeight: 44,
+              transition: 'color 0.15s, background 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--as-cta)'; e.currentTarget.style.background = 'rgba(22,54,83,0.06)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--as-text-muted)'; e.currentTarget.style.background = 'transparent' }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+            Đặt báo cáo
+          </Link>
+        </div>
+      )}
 
       {/* Spacer + Logout */}
       <div className="flex-1" />

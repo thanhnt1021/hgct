@@ -14,13 +14,13 @@ export async function POST(request: Request) {
   }
 
   const code = typeof body.code === 'string' ? body.code : ''
-  const pkg = getPackageByPromoCode(code)
+  const { pkg, error } = await getPackageByPromoCode(code)
   if (!pkg) {
-    return NextResponse.json({ error: 'Mã ưu đãi không hợp lệ' }, { status: 404 })
+    return NextResponse.json({ error: `Mã ưu đãi ${error}` }, { status: 404 })
   }
 
   return NextResponse.json({
-    packageCode: pkg.code,
+    packageCode: pkg.packageCode,
     coins: pkg.coins,
     amountVnd: pkg.amountVnd,
     label: pkg.label,

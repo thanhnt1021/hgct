@@ -33,7 +33,11 @@ const YEARS = Array.from({length: 101}, (_, i) => CUR_YEAR - i)
 const HOURS = Array.from({length: 24}, (_, i) => i)
 const MINUTES = Array.from({length: 60}, (_, i) => i)
 
-const labelStyle: React.CSSProperties = {
+// [F1 — V3] "variant" cho phép modal thêm bản đồ sao ở /profile (ChartList.tsx) dùng
+// format DARK giống hệt luồng input công khai (/input) — trong khi mọi nơi khác đang
+// gọi ProfileFormModal (ServicesClient, GuestSynastryModal, chart/page, ProfileInfo)
+// giữ NGUYÊN variant 'light' mặc định, không đổi hiển thị.
+const LIGHT_LABEL: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.25rem',
   color: 'var(--as-text-strong)',
@@ -41,11 +45,25 @@ const labelStyle: React.CSSProperties = {
   fontSize: '0.75rem',
   fontWeight: 500,
 }
-
-const subLabelStyle: React.CSSProperties = {
+const LIGHT_SUBLABEL: React.CSSProperties = {
   display: 'block',
   marginBottom: '0.25rem',
   color: 'var(--as-text-muted)',
+  fontFamily: 'var(--font-vietnam)',
+  fontSize: '0.75rem',
+}
+const DARK_LABEL: React.CSSProperties = {
+  display: 'block',
+  marginBottom: '0.25rem',
+  color: 'var(--as-text-on-dark)',
+  fontFamily: 'var(--font-vietnam)',
+  fontSize: '0.75rem',
+  fontWeight: 500,
+}
+const DARK_SUBLABEL: React.CSSProperties = {
+  display: 'block',
+  marginBottom: '0.25rem',
+  color: 'rgba(247,236,217,0.6)',
   fontFamily: 'var(--font-vietnam)',
   fontSize: '0.75rem',
 }
@@ -64,11 +82,16 @@ interface Props {
   draftKey?: string
   /** Hồ sơ đã lưu của user — hiện thành danh sách chọn nhanh ở đầu modal. */
   savedProfiles?: { id: string; name: string; data: ProfileFormData }[]
+  /** [F1 — V3] 'dark' = format mới giống /input (card tối, chữ on-dark). Mặc định 'light' (giữ nguyên mọi nơi gọi cũ). */
+  variant?: 'light' | 'dark'
   onSave: (data: ProfileFormData, saveProfile: boolean, action?: 'free' | 'paid' | 'reading', email?: string) => void
   onClose: () => void
 }
 
-export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, hideNote, showEmailField, twoActionMode, draftKey, savedProfiles, onSave, onClose }: Props) {
+export default function ProfileFormModal({ open, title, initialData, saving, showSaveCheckbox, defaultSaveChecked, submitLabel, hideNote, showEmailField, twoActionMode, draftKey, savedProfiles, variant = 'light', onSave, onClose }: Props) {
+  const isDark = variant === 'dark'
+  const labelStyle = isDark ? DARK_LABEL : LIGHT_LABEL
+  const subLabelStyle = isDark ? DARK_SUBLABEL : LIGHT_SUBLABEL
   const [form, setForm] = useState<ProfileFormData>(initialData ?? EMPTY_PROFILE_FORM)
   const [yearMode, setYearMode] = useState<'select' | 'custom'>('select')
   const [customYearText, setCustomYearText] = useState('')
@@ -200,20 +223,20 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
     >
       <div
         className="w-full max-h-[90vh] overflow-y-auto rounded-2xl"
-        style={{ maxWidth: 560, background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)', boxShadow: 'var(--as-shadow-card)' }}
+        style={{ maxWidth: 560, background: isDark ? '#063755' : 'var(--as-surface-raised)', border: `1px solid ${isDark ? 'var(--as-border-soft)' : 'var(--as-border-gold)'}`, boxShadow: 'var(--as-shadow-card)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: '1px solid var(--as-border-gold)' }}>
-          <h3 className="font-bold text-lg" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
+        <div className="flex items-center justify-between px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${isDark ? 'rgba(247,236,217,0.12)' : 'var(--as-border-gold)'}` }}>
+          <h3 className="font-bold text-lg" style={{ color: isDark ? 'var(--as-gold-cream)' : 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
             {title ?? 'Hồ sơ'}
           </h3>
-          <button onClick={handleClose} className="p-1.5 rounded-lg" style={{ color: 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)' }}>
+          <button onClick={handleClose} className="p-1.5 rounded-lg" style={{ color: isDark ? 'var(--as-champagne)' : 'var(--as-text-strong)', background: 'transparent', border: `1px solid ${isDark ? 'var(--as-border-gold)' : 'var(--as-border-gold)'}` }}>
             <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 space-y-4 form-compact as-form" style={{ paddingBottom: '60px' }}>
+        <div className={`px-6 py-5 space-y-4 form-compact ${isDark ? 'as-form-dark' : 'as-form'}`} style={{ paddingBottom: '60px' }}>
 
           {/* Chọn nhanh hồ sơ đã lưu */}
           {savedProfiles && savedProfiles.length > 0 && (
@@ -358,7 +381,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
           {!hideNote && <div>
             <label style={labelStyle}>
               Biệt danh / Ghi chú{' '}
-              <span style={{ color: 'var(--as-text-muted)', fontSize: '0.7rem', fontWeight: 400 }}>(tuỳ chọn)</span>
+              <span style={{ color: isDark ? 'rgba(247,236,217,0.6)' : 'var(--as-text-muted)', fontSize: '0.7rem', fontWeight: 400 }}>(tuỳ chọn)</span>
             </label>
             <input
               type="text"
@@ -377,7 +400,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
                 onChange={e => setSaveProfile(e.target.checked)}
                 style={{ width: '1rem', height: '1rem', padding: 0, accentColor: 'var(--as-cta)' }}
               />
-              <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
+              <span style={{ color: isDark ? 'var(--as-text-on-dark)' : 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.82rem' }}>
                 Lưu hồ sơ vào danh sách
               </span>
             </label>
@@ -413,7 +436,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
           <button
             onClick={handleReading}
             disabled={saving}
-            className="w-full h-11 rounded-lg font-bold tracking-wider"
+            className={`w-full h-11 font-bold tracking-wider ${isDark ? 'rounded-full' : 'rounded-lg'}`}
             style={{
               background: 'var(--as-cta)',
               color: 'var(--as-text-on-dark)',
@@ -421,7 +444,7 @@ export default function ProfileFormModal({ open, title, initialData, saving, sho
               fontSize: '0.9rem',
               letterSpacing: '0.06em',
               opacity: saving ? 0.7 : 1,
-              boxShadow: 'var(--as-shadow-card)',
+              boxShadow: isDark ? 'var(--as-shadow-glow)' : 'var(--as-shadow-card)',
               cursor: saving ? 'not-allowed' : 'pointer',
             }}
           >

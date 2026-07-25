@@ -256,6 +256,11 @@ export default function ReadingClient({
   const handleUnlock = async (section: CatalogSection) => {
     if (!input) return
     if (!user) { router.push(topupHref); return } // guest → nạp xu/đăng nhập trước
+    // Tính trước — đủ xu chưa? Không đủ → dẫn thẳng sang trang nạp xu, không nháy modal rồi tắt.
+    if (balance != null && balance < section.coinPrice) {
+      router.push(`${topupHref}&need=${section.coinPrice}`)
+      return
+    }
     const willGen = Object.keys(unlocked).length === 0 // essay chưa có → gen lần đầu (hiện modal)
     setUnlocking(section.id)
     setError('')
@@ -270,7 +275,7 @@ export default function ReadingClient({
         (data) => { content = data.content as string; charged = (data.coinsCharged as number) ?? 0; typed = !data.alreadyUnlocked },
         (list) => { const f = list.find(u => u.sectionId === section.id); if (f) { content = f.content; typed = true } },
       )
-      if ('insufficient' in r) { setError(r.insufficient); return }
+      if ('insufficient' in r) { router.push(`${topupHref}&need=${section.coinPrice}`); return }
       if (content == null) { setError('Tạo nội dung gặp sự cố, vui lòng thử lại.'); return }
 
       const finalContent: string = content
@@ -289,6 +294,12 @@ export default function ReadingClient({
   const handleUnlockBundle = async () => {
     if (!input) return
     if (!user) { router.push(topupHref); return } // guest → nạp xu/đăng nhập trước
+    // Tính trước — đủ xu chưa? Không đủ → dẫn thẳng sang trang nạp xu, không nháy modal rồi tắt.
+    const bundleNeed = catalog?.bundlePrice ?? totalCost
+    if (balance != null && balance < bundleNeed) {
+      router.push(`${topupHref}&need=${bundleNeed}`)
+      return
+    }
     const willGen = Object.keys(unlocked).length === 0
     setUnlocking('__bundle__')
     setError('')
@@ -301,7 +312,7 @@ export default function ReadingClient({
         (data) => { secs = data.sections as { sectionId: string; content: string }[] },
         (list) => { secs = list },
       )
-      if ('insufficient' in r) { setError(r.insufficient); return }
+      if ('insufficient' in r) { router.push(`${topupHref}&need=${bundleNeed}`); return }
       if (!secs) { setError('Tạo nội dung gặp sự cố, vui lòng thử lại.'); return }
 
       const finalSecs: { sectionId: string; content: string }[] = secs
@@ -375,7 +386,7 @@ export default function ReadingClient({
               <div
                 style={{
                   width: `${progress}%`, height: '100%', borderRadius: 999,
-                  background: 'var(--as-cta)',
+                  background: '#f0cc78',
                   transition: 'width 0.9s ease',
                 }}
               />

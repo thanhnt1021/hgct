@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { getPackage } from '@/lib/coin/packages'
+import { getPackage, getPackageByPromoCode } from '@/lib/coin/packages'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,18 +29,33 @@ export async function POST(request: Request) {
   }
 
   const code = typeof body.packageCode === 'string' ? body.packageCode : ''
-  const pkg = getPackage(code)
-  if (!pkg || !pkg.enabled) {
-    return NextResponse.json({ error: 'Gói nạp không hợp lệ' }, { status: 400 })
-  }
+  const enteredPromo = typeof body.promoCode === 'string' ? body.promoCode.trim() : ''
 
-  // Gói gắn mã ưu đãi (vd PROMO001) — bắt buộc nhập đúng mã dù đã biết packageCode,
-  // tránh bypass thẳng qua API mà không cần qua bước nhập mã ở UI.
-  if (pkg.promoCode) {
-    const entered = typeof body.promoCode === 'string' ? body.promoCode.trim().toLowerCase() : ''
-    if (entered !== pkg.promoCode.toLowerCase()) {
-      return NextResponse.json({ error: 'Mã ưu đãi không hợp lệ' }, { status: 400 })
+  // profileData ghi thêm khi là đơn promo (O1.4/O2.1/O2.3) — webhook đọc lại đúng field này,
+  // KHÔNG tra lại DB PromoCode lúc cộng xu (tránh lệch nếu admin sửa/xoá mã giữa chừng).
+  let coins: number
+  let amountVnd: number
+  let profileData: { packageCode: string; coins: number; promoCode?: string; amountVnd?: number }
+
+  if (enteredPromo) {
+    // Đơn dùng mã ưu đãi — bắt buộc nhập đúng mã dù đã biết packageCode (tránh bypass qua API
+    // mà không qua bước nhập mã ở UI). packageCode gửi lên PHẢI khớp đúng mã đã nhập.
+    const { pkg, error } = await getPackageByPromoCode(enteredPromo)
+    if (!pkg || pkg.packageCode !== code.trim().toLowerCase()) {
+      return NextResponse.json({ error: `Mã ưu đãi ${error ?? 'không hợp lệ'}` }, { status: 400 })
     }
+    coins = pkg.coins
+    amountVnd = pkg.amountVnd
+    profileData = { packageCode: pkg.packageCode, coins: pkg.coins, promoCode: pkg.packageCode, amountVnd: pkg.amountVnd }
+  } else {
+    // Gói mua thường (COIN001-004) — KHÔNG đụng, giữ nguyên logic cũ.
+    const pkg = getPackage(code)
+    if (!pkg || !pkg.enabled) {
+      return NextResponse.json({ error: 'Gói nạp không hợp lệ' }, { status: 400 })
+    }
+    coins = pkg.coins
+    amountVnd = pkg.amountVnd
+    profileData = { packageCode: pkg.code, coins: pkg.coins }
   }
 
   // Persist the top-up as an Order so the existing SePay reconciliation works.
@@ -55,11 +70,11 @@ export async function POST(request: Request) {
       data: {
         userUid,
         service: 'coin-topup',
-        profileData: { packageCode: pkg.code, coins: pkg.coins },
+        profileData,
         email: user?.email || `${user?.username || 'user'}@local`,
         status: 'pending',
         paymentStatus: 'unpaid',
-        amount: pkg.amountVnd,
+        amount: amountVnd,
       },
     })
     const transferCode = `HGCT${created.id.toString().padStart(6, '0')}`
@@ -72,8 +87,8 @@ export async function POST(request: Request) {
   return NextResponse.json({
     orderId: order.id,
     transferCode: order.transferCode,
-    amount: pkg.amountVnd,
-    coins: pkg.coins,
+    amount: amountVnd,
+    coins,
     bankAccount: process.env.BANK_ACCOUNT_NUMBER || '',
     bankName: process.env.BANK_NAME || '',
     bankAccountName: process.env.BANK_ACCOUNT_NAME || '',
