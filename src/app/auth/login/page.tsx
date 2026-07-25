@@ -33,7 +33,16 @@ export default function LoginPage() {
   useEffect(() => {
     const p = new URLSearchParams(window.location.search)
     const n = p.get('next')
-    if (n && n.startsWith('/')) setNext(n)
+    // Same-origin guard — startsWith('/') không đủ, bị bypass bởi URL scheme-relative
+    // (//evil.com), backslash (/\evil.com) hay scheme thiếu "//" (https:evil.com).
+    // Parse ra URL tuyệt đối, so origin, RỒI CHỈ LẤY path+search+hash (không bao giờ
+    // push nguyên chuỗi input gốc — tránh lọt chuỗi có "scheme:" xuống router.push).
+    if (n) {
+      try {
+        const u = new URL(n, window.location.origin)
+        if (u.origin === window.location.origin) setNext(u.pathname + u.search + u.hash)
+      } catch { /* URL không hợp lệ → giữ fallback /profile */ }
+    }
     setReason(p.get('reason') || '')
   }, [])
 

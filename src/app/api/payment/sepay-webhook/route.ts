@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { timingSafeEqual } from 'crypto'
 import prisma from '@/lib/db'
 import { createReportJob } from '@/lib/astrology/reportProcessor'
-import { sendUnderpaymentAlert, sendPaymentReceivedNotification, sendUnmatchedPaymentAlert } from '@/lib/notify'
+import { sendUnderpaymentAlert, sendPaymentReceivedNotification, sendUnmatchedPaymentAlert, sendAdminAlert } from '@/lib/notify'
 import { recordDemosepay } from '@/lib/demosepay-state'
 import { addCoin } from '@/lib/coin/service'
 import { getPackage } from '@/lib/coin/packages'
@@ -123,14 +123,20 @@ export async function POST(request: Request) {
 
     // 8a. Dual-mode router — COIN top-up vs legacy HGCT (PDF/email) order
     if (order.service === 'coin-topup') {
-      const pd = order.profileData as { packageCode?: string; coins?: number }
-      const pkg = pd?.packageCode ? getPackage(pd.packageCode) : null
+      // [O2.1] promoCode có → đơn dùng mã ưu đãi: KHÔNG gọi getPackage() (entry PROMO đã bỏ
+      // khỏi COIN_PACKAGES), lấy coins/label từ profileData đã chốt lúc tạo đơn (B5). Đơn gói
+      // thường: GIỮ NGUYÊN getPackage(pd.packageCode) như cũ (không đụng nhánh gói thường).
+      const pd = order.profileData as { packageCode?: string; coins?: number; promoCode?: string; amountVnd?: number }
+      const pkg = pd?.promoCode
+        ? { coins: pd.coins ?? 0, code: pd.promoCode, label: `Ưu đãi mã ${pd.promoCode}` }
+        : (pd?.packageCode ? getPackage(pd.packageCode) : null)
       if (!pkg || !order.userUid) {
         console.warn(`[sepay-webhook] coin-topup misconfigured: order=${order.id} pkg=${pd?.packageCode} user=${order.userUid}`)
         sendUnmatchedPaymentAlert({ txnId, code, amount: transferAmount }).catch(() => {})
         return OK()
       }
 
+      let overCap: { code: string; redeemedCount: number; maxRedemptions: number } | null = null
       try {
         await prisma.$transaction(async (tx) => {
           const locked = await tx.order.updateMany({
@@ -154,6 +160,18 @@ export async function POST(request: Request) {
             refId: String(order.id),
             tx,
           })
+          // [QĐ5] Increment redeemedCount atomic tại thời điểm thanh toán thành công (KHÔNG
+          // phải lúc tạo đơn) — idempotent nhờ guard locked.count ở trên. Vượt cap tại đây
+          // (race hiếm) → vẫn cộng xu (tiền đã nhận), chỉ alert admin, không nuốt tiền khách.
+          if (pd.promoCode) {
+            const updated = await tx.promoCode.update({
+              where: { code: pd.promoCode },
+              data: { redeemedCount: { increment: 1 } },
+            })
+            if (updated.maxRedemptions != null && updated.redeemedCount > updated.maxRedemptions) {
+              overCap = { code: pd.promoCode, redeemedCount: updated.redeemedCount, maxRedemptions: updated.maxRedemptions }
+            }
+          }
         })
       } catch (e) {
         if ((e as Error).message === 'already-paid') {
@@ -161,6 +179,12 @@ export async function POST(request: Request) {
           return OK()
         }
         throw e
+      }
+
+      if (overCap) {
+        const c = overCap as { code: string; redeemedCount: number; maxRedemptions: number }
+        console.warn(`[sepay-webhook] promo code over cap: ${c.code} redeemedCount=${c.redeemedCount} maxRedemptions=${c.maxRedemptions}`)
+        sendAdminAlert(`⚠️ Mã ưu đãi "${c.code}" đã VƯỢT cap (${c.redeemedCount}/${c.maxRedemptions}) — đơn ${order.id} vẫn được cộng xu vì đã nhận tiền.`).catch(() => {})
       }
 
       console.log(`[sepay-webhook] coin-topup ${order.id} → +${pkg.coins} xu for user ${order.userUid}`)

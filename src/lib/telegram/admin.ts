@@ -321,7 +321,7 @@ export async function showFailedOrders(ctx: Ctx) {
     }
     const lines = orders.map(o => {
       const d = new Date(o.createdAt)
-      return `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${o.email} — Retry: ${o.retryCount}/3 — ${fmtTimeVN(d)} (${timeAgoStr(d)} trước)`
+      return `#${o.id} — ${SERVICE_LABELS[o.service] ?? o.service} — ${escHtml(o.email)} — Retry: ${o.retryCount}/3 — ${fmtTimeVN(d)} (${timeAgoStr(d)} trước)`
     })
     const buttons: TgKeyboard = orders.map(o => [
       { text: `🔄 #${o.id}`, callback_data: `o_retry_${o.id}` },
@@ -455,7 +455,7 @@ export async function handleResendEmail(ctx: Ctx, orderId: number) {
 
     await respond(
       ctx,
-      `📧 <b>Đã gửi email recovery đến ${order.email}</b>\nToken: <code>${token}</code>`,
+      `📧 <b>Đã gửi email recovery đến ${escHtml(order.email)}</b>\nToken: <code>${token}</code>`,
       [[{ text: '↩️ Quay lại', callback_data: 'm_orders' }]],
     )
   } catch (err) {

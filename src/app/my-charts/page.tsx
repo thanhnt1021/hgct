@@ -72,7 +72,7 @@ export default function MyChartsPage() {
   }
 
   useEffect(() => {
-    if (!isLoading && !user) router.push('/auth/login')
+    if (!isLoading && !user) router.push('/auth/login?next=/my-charts')
   }, [user, isLoading, router])
 
   useEffect(() => {

@@ -2,11 +2,15 @@
 
 import Link from 'next/link'
 import { useEffect, useState, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function CoinBalance() {
   const { user } = useAuth()
   const [coin, setCoin] = useState<number | null>(null)
+  // usePathname (không phải useSearchParams) — tránh phải bọc Suspense vì
+  // CoinBalance render trên MỌI trang qua Navbar.
+  const pathname = usePathname()
 
   const fetchBalance = useCallback(async () => {
     if (!user) {
@@ -38,7 +42,7 @@ export default function CoinBalance() {
   if (!user) {
     return (
       <Link
-        href="/auth/login?reason=topup"
+        href={`/auth/login?reason=topup&next=${encodeURIComponent(pathname || '/profile')}`}
         title="Đăng nhập để nạp xu vào tài khoản"
         style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.4rem',

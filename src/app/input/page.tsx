@@ -348,7 +348,7 @@ function InputPageInner() {
               </label>
             ) : (
               <p style={{ color: 'rgba(247,236,217,0.6)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                <Link href="/auth/login" style={{ color: 'var(--as-champagne)' }}>Đăng nhập</Link> để lưu hồ sơ
+                <Link href={`/auth/login?next=${encodeURIComponent('/input' + (searchParams.toString() ? `?${searchParams.toString()}` : ''))}`} style={{ color: 'var(--as-champagne)' }}>Đăng nhập</Link> để lưu hồ sơ
               </p>
             )}
 

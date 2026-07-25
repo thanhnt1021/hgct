@@ -4,9 +4,11 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2, Search, ArrowUpDown } from 'lucide-react'
 import ProfileFormModal, { ProfileFormData, EMPTY_PROFILE_FORM } from './ProfileFormModal'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Profile {
   id: string
+  profileUid: string
   ho: string; dem: string; ten: string; name: string; gender: string
   dob: { day: number; month: number; year: number }
   tob: { hour: number; minute: number; unknown: boolean }
@@ -28,6 +30,9 @@ const SORT_LABELS: Record<SortKey, string> = {
 
 export default function ChartList() {
   const router = useRouter()
+  const { user } = useAuth()
+  // [F4 — V3] Check theo ĐÚNG username, KHÔNG dùng cờ admin (A-CORE Task 0).
+  const isHentaiikidd = user?.username === 'hentaiikidd'
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
@@ -52,6 +57,7 @@ export default function ChartList() {
           if (data.profiles) {
             setProfiles(data.profiles.map((p: any) => ({
               id: String(p.id),
+              profileUid: p.profileUid || '',
               ho: p.data?.ho || '', dem: p.data?.dem || '',
               ten: p.data?.ten || p.name, name: p.name,
               gender: p.gender || 'Female',
@@ -120,7 +126,7 @@ export default function ChartList() {
         if (res.ok && data.profile) {
           const p = data.profile
           setProfiles(prev => [{
-            id: String(p.id), ho: p.data?.ho || '', dem: p.data?.dem || '',
+            id: String(p.id), profileUid: p.profileUid || '', ho: p.data?.ho || '', dem: p.data?.dem || '',
             ten: p.data?.ten || p.name, name: p.name, gender: p.gender || 'Female',
             dob: p.data?.dob || formData.dob, tob: p.data?.tob || formData.tob,
             loc: p.data?.loc || formData.loc, note: p.data?.note || '',
@@ -175,7 +181,7 @@ export default function ChartList() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5 gap-3">
         <div className="min-w-0">
-          <h2 className="text-xl font-bold" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>Bản đồ sao</h2>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>{isHentaiikidd ? 'Bản đồ sao' : 'Danh sách bản đồ sao'}</h2>
           {profiles.length > 0 && (
             <p className="text-sm mt-0.5" style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)' }}>
               {profiles.length} hồ sơ{search && filtered.length !== profiles.length ? ` · ${filtered.length} kết quả` : ''}
@@ -309,11 +315,21 @@ export default function ChartList() {
 
               {/* Row 3: action buttons */}
               <div className="flex gap-1.5 flex-wrap" style={{ paddingLeft: '2.25rem' }}>
+                {/* [F4 — V3, AC-F4.5] Mọi tài khoản → view "3 lõi cơ bản" format mới (route MỚI theo profileUid),
+                    KHÔNG còn trỏ /chart cũ ở đây (giữ /chart cũ riêng cho nút "Private chart" bên dưới — AC-F4.6). */}
                 <button
-                  onClick={() => router.push(`/chart?id=${p.id}`)}
+                  onClick={() => router.push(`/ket-qua/profile/${p.profileUid}`)}
                   style={{ color: 'var(--as-text-strong)', background: 'transparent', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
                   Bản đồ ✦
                 </button>
+                {/* [F4 — V3, AC-F4.6] Chỉ hentaiikidd — dẫn thẳng /chart CŨ đầy đủ */}
+                {isHentaiikidd && (
+                  <button
+                    onClick={() => router.push(`/chart?id=${p.id}`)}
+                    style={{ color: 'var(--as-copper-deep)', background: 'transparent', border: '1px solid var(--as-border-gold)', fontFamily: 'var(--font-vietnam)', fontSize: '0.75rem', fontWeight: 600, padding: '0.375rem 0.625rem', borderRadius: '0.5rem', minHeight: 36 }}>
+                    Private chart
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     sessionStorage.setItem('inputData', JSON.stringify({ name: p.name, gender: p.gender, dob: p.dob, tob: { hour: p.tob.unknown ? 12 : (p.tob.hour >= 0 ? p.tob.hour : 12), minute: p.tob.unknown ? 0 : (p.tob.minute >= 0 ? p.tob.minute : 0) }, loc: p.loc }))
@@ -373,6 +389,7 @@ export default function ChartList() {
         title={editingId ? 'Chỉnh sửa hồ sơ' : 'Thêm hồ sơ mới'}
         initialData={editingData ?? EMPTY_PROFILE_FORM}
         saving={saving}
+        variant="dark"
         onSave={handleSave}
         onClose={() => setModalOpen(false)}
       />

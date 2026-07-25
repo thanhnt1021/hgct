@@ -26,15 +26,15 @@ Thêm các dòng sau vào cuối file `.env.local` (kiểm tra chưa có trướ
 
 ```env
 # SePay Configuration
-SEPAY_API_KEY=***DA-GO***
-BANK_ACCOUNT_NUMBER=62941624556
-BANK_ACCOUNT_NAME=TA THI THANH PHUONG
+SEPAY_API_KEY=changeme_get_from_sepay_dashboard
+BANK_ACCOUNT_NUMBER=changeme
+BANK_ACCOUNT_NAME=changeme
 BANK_NAME=TPBank
 ```
 
 **Giải thích từng biến:**
-- `SEPAY_API_KEY` — Key xác thực webhook. SePay gửi header `"Authorization": "Apikey ***DA-GO***"` mỗi lần bắn webhook. Backend cần verify header này.
-- `BANK_ACCOUNT_NUMBER` — Số TK TPBank, dùng để gen QR code URL: `https://qr.sepay.vn/img?acc=62941624556&bank=TPBank&amount=...&des=...`
+- `SEPAY_API_KEY` — Key xác thực webhook. SePay gửi header `"Authorization": "Apikey <SEPAY_API_KEY>"` mỗi lần bắn webhook. Backend cần verify header này.
+- `BANK_ACCOUNT_NUMBER` — Số TK ngân hàng, dùng để gen QR code URL: `https://qr.sepay.vn/img?acc=<BANK_ACCOUNT_NUMBER>&bank=<BANK_NAME>&amount=...&des=...`
 - `BANK_ACCOUNT_NAME` — Tên chủ TK, hiển thị trên trang /payment cho user biết CK đúng người.
 - `BANK_NAME` — Tên ngân hàng đúng format SePay (dùng trong QR URL param `bank=TPBank`).
 
@@ -63,9 +63,9 @@ npm run build
 | Key | Value |
 |-----|-------|
 | Ngân hàng | TPBank |
-| Số TK | 62941624556 |
-| Chủ TK | TA THI THANH PHUONG |
-| SePay API Key | ***DA-GO*** |
+| Số TK | (xem `.env.local` — không ghi giá trị thật vào file MD) |
+| Chủ TK | (xem `.env.local`) |
+| SePay API Key | (xem `.env.local` — không ghi giá trị thật vào file MD) |
 | Webhook URL | https://hatgiongchiemtinh.com/api/payment/sepay-webhook |
 | QR base URL | https://qr.sepay.vn/img?acc=62941624556&bank=TPBank |
 | Mã thanh toán format | HGCT + 6 số (ví dụ: HGCT000042) |

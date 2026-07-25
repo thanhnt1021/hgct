@@ -85,7 +85,7 @@ export async function POST(request: Request) {
   const balance = await getBalance(userUid)
   if (balance < section.coinPrice) {
     return NextResponse.json(
-      { error: `Không đủ xu — cần ${section.coinPrice}, hiện có ${balance}`, need: section.coinPrice, have: balance },
+      { error: `Bạn đang thiếu ${section.coinPrice - balance} xu để mở mục này (cần ${section.coinPrice}, hiện có ${balance}) 💛`, need: section.coinPrice, have: balance },
       { status: 402 },
     )
   }
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
       })
     } catch (e) {
       if (e instanceof InsufficientCoinError) {
-        return NextResponse.json({ error: `Không đủ xu — cần ${e.need}, hiện có ${e.have}` }, { status: 402 })
+        return NextResponse.json({ error: `Bạn đang thiếu ${e.need - e.have} xu để mở mục này (cần ${e.need}, hiện có ${e.have}) 💛`, need: e.need, have: e.have }, { status: 402 })
       }
       throw e
     }

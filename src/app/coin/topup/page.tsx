@@ -35,6 +35,7 @@ export default function CoinTopupPage() {
   const [secondsLeft, setSecondsLeft] = useState(Math.floor(TIMEOUT_MS / 1000))
 
   const [back, setBack] = useState('') // màn quay lại sau khi nạp xong (vd trang reading)
+  const [need, setNeed] = useState<number | null>(null) // số xu cần để mở mục vừa bấm (nếu bị dẫn sang từ trang reading do thiếu xu)
   const [packages, setPackages] = useState<CoinPackage[]>([]) // giá theo env (fetch từ server)
 
   const [promoInput, setPromoInput] = useState('')
@@ -53,8 +54,11 @@ export default function CoinTopupPage() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    const b = new URLSearchParams(window.location.search).get('back')
+    const params = new URLSearchParams(window.location.search)
+    const b = params.get('back')
     if (b && b.startsWith('/')) setBack(b)
+    const n = Number(params.get('need'))
+    if (Number.isFinite(n) && n > 0) setNeed(n)
   }, [])
 
   // Guest → đăng nhập trước (kèm thông báo "nạp xu" + giữ nguyên next để quay lại trang nạp xu này).
@@ -390,6 +394,16 @@ export default function CoinTopupPage() {
                 style={{ background: 'var(--as-surface-raised)', border: '1px solid var(--as-border-gold)' }}>
                 <span style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.78rem' }}>Số dư:</span>
                 <span style={{ color: 'var(--as-cta)', fontFamily: 'var(--font-vietnam)', fontSize: '0.95rem', fontWeight: 700 }}>{fmtXu(balance)} xu</span>
+              </div>
+            )}
+            {need != null && (
+              <div className="mt-4 rounded-xl px-4 py-3 text-left"
+                style={{ background: 'rgba(200,148,63,0.1)', border: '1px solid var(--as-border-gold)' }}>
+                <p style={{ color: 'var(--as-cta)', fontFamily: 'var(--font-vietnam)', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                  💛 Mục bạn vừa chọn cần <strong>{fmtXu(need)} xu</strong>
+                  {balance != null && <> — bạn đang thiếu <strong>{fmtXu(Math.max(0, need - balance))} xu</strong></>}.
+                  {' '}Chọn 1 gói bên dưới để nạp thêm, xong quay lại mở ngay nhé!
+                </p>
               </div>
             )}
           </div>

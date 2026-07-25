@@ -10,6 +10,8 @@ import AvatarCropModal from './AvatarCropModal'
 export default function ProfileInfo() {
   const { user, upgradeToPremium } = useAuth()
   const router = useRouter()
+  // [F4 — V3] Check theo ĐÚNG username, KHÔNG dùng cờ admin (A-CORE Task 0).
+  const isHentaiikidd = user?.username === 'hentaiikidd'
 
   // Avatar
   const [avatarCropFile, setAvatarCropFile] = useState<File | null>(null)
@@ -249,21 +251,28 @@ export default function ProfileInfo() {
         </div>
       )}
 
-      {/* Account type */}
+      {/* Account type — [F4 — V3, AC-F4.1] nhãn "LOẠI TÀI KHOẢN" chỉ hiện cho hentaiikidd.
+          Nút "Xem gói dịch vụ"/nhập mã kích hoạt PHẢI giữ nguyên cho user thường — đây là
+          luồng nâng cấp/monetization, KHÔNG nằm trong "2 mục nhỏ" AC yêu cầu ẩn (AC-F5.2
+          cấm phá luồng chính). Card chỉ ẩn hoàn toàn khi không còn gì để hiện (non-hentaiikidd
+          + đã premium → không nhãn, không nút, không ô nhập mã). */}
+      {(isHentaiikidd || !user.isPremium) && (
       <div style={cardStyle}>
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: user.isPremium ? 'rgba(22,54,83,0.08)' : 'rgba(22,54,83,0.05)', border: `1px solid ${user.isPremium ? 'var(--as-border-gold)' : 'var(--as-border-soft)'}` }}>
-              <span style={{ fontSize: '1.1rem' }}>{user.isPremium ? '✦' : '○'}</span>
+          {isHentaiikidd && (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: user.isPremium ? 'rgba(22,54,83,0.08)' : 'rgba(22,54,83,0.05)', border: `1px solid ${user.isPremium ? 'var(--as-border-gold)' : 'var(--as-border-soft)'}` }}>
+                <span style={{ fontSize: '1.1rem' }}>{user.isPremium ? '✦' : '○'}</span>
+              </div>
+              <div>
+                <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginBottom: '0.1rem' }}>LOẠI TÀI KHOẢN</p>
+                <p style={{ color: user.isPremium ? 'var(--as-copper-deep)' : 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontWeight: 700 }}>
+                  {user.planType === 'lifetime' ? 'Lifetime ★' : user.planType === 'cao_cap' ? 'Cao cấp ✦' : user.isPremium ? 'Tiêu chuẩn ✦' : 'Miễn phí'}
+                </p>
+              </div>
             </div>
-            <div>
-              <p style={{ color: 'var(--as-text-muted)', fontFamily: 'var(--font-vietnam)', fontSize: '0.72rem', marginBottom: '0.1rem' }}>LOẠI TÀI KHOẢN</p>
-              <p style={{ color: user.isPremium ? 'var(--as-copper-deep)' : 'var(--as-text)', fontFamily: 'var(--font-vietnam)', fontWeight: 700 }}>
-                {user.planType === 'lifetime' ? 'Lifetime ★' : user.planType === 'cao_cap' ? 'Cao cấp ✦' : user.isPremium ? 'Tiêu chuẩn ✦' : 'Miễn phí'}
-              </p>
-            </div>
-          </div>
+          )}
           {!user.isPremium && (
             <button onClick={() => router.push('/profile?tab=plans')}
               className="px-4 py-2 rounded-xl font-semibold text-sm"
@@ -294,8 +303,10 @@ export default function ProfileInfo() {
           </div>
         )}
       </div>
+      )}
 
-      {/* ── Bản đồ sao chính ── */}
+      {/* ── Bản đồ sao chính — [F4 — V3, AC-F4.1] ẩn hoàn toàn cho non-hentaiikidd ── */}
+      {isHentaiikidd && (
       <div style={cardStyle}>
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -376,6 +387,7 @@ export default function ProfileInfo() {
           </div>
         )}
       </div>
+      )}
 
       {/* Avatar */}
       <div style={cardStyle}>

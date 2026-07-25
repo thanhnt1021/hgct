@@ -236,3 +236,22 @@ model Config {
 
   @@map("config")
 }
+
+// Mã ưu đãi nạp xu — thay hardcode COIN_PACKAGES.promoCode. Cap TỔNG lượt đổi
+// (maxRedemptions/redeemedCount), không phải per-user (xem QĐ1 phiếu P001).
+model PromoCode {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique
+  coins          Int
+  amountVnd      Int
+  label          String?
+  enabled        Boolean   @default(true)
+  maxRedemptions Int?
+  redeemedCount  Int       @default(0)
+  expiresAt      DateTime?
+  note           String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+
+  @@map("promo_codes")
+}
