@@ -240,6 +240,11 @@ export default function ProfileInfo() {
 
   return (
     <div>
+      {/* Toàn bộ mục lớn "Thông tin cá nhân" (heading + account-type/upgrade + Bản đồ sao của
+          bạn) chỉ hiện cho hentaiikidd — Chủ nhà xác nhận lại (2026-07-27) đây là ẨN CẢ MỤC LỚN,
+          không phải chỉ 2 mục nhỏ như hiểu ban đầu ở phiếu P002. */}
+      {isHentaiikidd && (
+      <>
       <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--as-text-strong)', fontFamily: 'var(--font-playfair)' }}>
         Thông tin cá nhân
       </h2>
@@ -387,6 +392,8 @@ export default function ProfileInfo() {
           </div>
         )}
       </div>
+      )}
+      </>
       )}
 
       {/* Avatar */}
