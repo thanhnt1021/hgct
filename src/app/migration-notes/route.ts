@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { redirect } from 'next/navigation'
+import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 
 // Nội dung tĩnh (không chứa giá trị secret thật) — đồng bộ với docs/CLOUDFLARE_MIGRATION.md
@@ -190,8 +190,8 @@ UPSTASH_REDIS_REST_TOKEN, UPSTASH_REDIS_REST_URL
 \`\`\`
 `
 
-// Tên + giá trị thật đọc từ process.env lúc render (server-side, KHÔNG commit git) —
-// chỉ hiện cho đúng user 'hentaiikidd' (check lại session.user.username) — xem middleware.ts.
+// Tên biến đọc giá trị thật từ process.env lúc request — KHÔNG commit git, chỉ build vào
+// response cho đúng user 'hentaiikidd' (check session + middleware.ts chặn sớm hơn nữa).
 const SECRET_VAR_NAMES = [
   'ADMIN_EMAILS', 'ADMIN_TELEGRAM_USER_ID', 'APP_PORT',
   'BANK_ACCOUNT_NAME', 'BANK_ACCOUNT_NUMBER', 'BANK_NAME',
@@ -211,24 +211,27 @@ const SECRET_VAR_NAMES = [
   'UPSTASH_REDIS_REST_TOKEN', 'UPSTASH_REDIS_REST_URL',
 ] as const
 
-export default async function MigrationNotesPage() {
+export async function GET() {
   const session = await getServerSession(authOptions)
   const username = (session?.user as { username?: string } | undefined)?.username
   if (username !== 'hentaiikidd') {
-    redirect('/profile')
+    return new NextResponse('Not found', { status: 404 })
   }
 
   const secretLines = SECRET_VAR_NAMES
     .map((name) => `${name}=${process.env[name] ?? '(chưa set)'}`)
     .join('\n')
 
-  return (
-    <div style={{ maxWidth: 960, margin: '40px auto', padding: 24, fontFamily: 'ui-monospace, monospace', fontSize: 13 }}>
-      <h1>HGCT — Toàn bộ dự án + Kế hoạch Cloudflare + biến môi trường thật</h1>
-      <p style={{ color: '#b91c1c' }}>Trang chỉ hiện cho user hentaiikidd. Có giá trị secret thật phía dưới — không copy/dán ra nơi công khai.</p>
-      <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: '#f5f5f5', padding: 16, borderRadius: 8 }}>{STATIC_DOC}</pre>
-      <h2>Biến môi trường thật (.env.local VPS, giá trị LIVE — không nằm trong git)</h2>
-      <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: '#1e1e1e', color: '#d4d4d4', padding: 16, borderRadius: 8 }}>{secretLines}</pre>
-    </div>
-  )
+  const body = STATIC_DOC
+    + '\n\n---\n\n## Biến môi trường thật (.env.local VPS, giá trị LIVE)\n\n```\n'
+    + secretLines
+    + '\n```\n'
+
+  return new NextResponse(body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="HGCT-du-an-va-cloudflare.md"',
+    },
+  })
 }
