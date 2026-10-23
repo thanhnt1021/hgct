@@ -146,3 +146,40 @@ Bỏ VPS HostHatch, web `hatgiongchiemtinh.com` (+ demo) chạy trên Cloudflare
 3. `docs/univ3/` trong repo `hgct` hiện để nguyên, chưa `.gitignore` — việc đồng bộ SSOT `thanhnt1021/univ3` phụ thuộc workflow trên Macbook, không phải việc của VPS này.
 4. Sau khi có token #2: dựng demo trên Cloudflare (`demo.hatgiongchiemtinh.com`), test đủ 4 dịch vụ (sự nghiệp, tình duyên, cặp đôi, vận hạn) + đối chiếu kết quả lá số demo vs prod trên cùng bộ ngày giờ sinh trước khi tính chuyển prod thật.
 5. Chuyển prod CHỈ sau khi anh duyệt — tạm dừng nhận đơn → chép DB + PDF lần cuối → đổi webhook SePay + Telegram → mở lại. Giữ VPS chạy thêm ít nhất 7 ngày để lùi về nếu cần.
+
+### B.7 Gói Cloudflare — đã chốt: **1A, free trước**
+
+Dùng gói **free** của Cloudflare trước (Workers Free), vượt hạn mức mới báo để quyết tiếp (nâng Paid $5/tháng). Theo B.2, traffic hiện tại (1–4 đơn/ngày) rất khó chạm hạn mức free — nhiều khả năng free là đủ dùng lâu dài.
+
+### B.8 Đối chiếu với báo cáo oHa-23102026-06 (phiên khác, phía Mac, 23/10/2026)
+
+**⚠️ Có ít nhất 2 phiên Claude đang làm cùng việc chuyển HGCT sang Cloudflare song song** — phiên này (VPS, có quyền thật vào server/DB/file) và 1 phiên bên Mac/oHa (không vào được VPS). Để tránh đụng tay trùng hoặc lệch tay nhau: **phiên VPS này nên là nơi thực thi chính** vì là nơi duy nhất có quyền thật vào server, DB, file cũ — phiên kia chỉ nên làm phần Cloudflare-dashboard-side (tạo token, domain, Resend...) rồi giao lại key cho phiên VPS dùng.
+
+Báo cáo bên đó nêu thiếu:
+- Quyền **sửa** domain `hatgiongchiemtinh.com` trên Cloudflare (khoá hiện có chỉ xem, chưa sửa được) — cần token mới đủ quyền Edit (khớp đúng mục B.4 #2).
+- Tài khoản gửi mail **Resend** — khớp đúng mục B.4 #6, chưa có.
+- Bộ khoá + dữ liệu khách trên máy chủ cũ — **phiên Mac không vào được VPS, nhưng phiên VPS này vào được** (đã đo trực tiếp ở B.2) — phần này phiên VPS tự lo, không cần Mac.
+- **Giấy phép dữ liệu thiên văn astro.com cho web thu tiền** — đúng điểm đã flag ở B.4 #7 ("kiểm license trước khi deploy"), giờ có 2 nguồn độc lập cùng nêu → chắc chắn phải đọc kỹ license astro.com trước khi dùng cho web tính phí, không bỏ qua được.
+
+### B.9 Biến môi trường cần có (.env.local VPS, 23/10/2026) — CHỈ TÊN BIẾN, KHÔNG PHẢI GIÁ TRỊ THẬT
+
+> Giá trị thật KHÔNG đưa vào file này / không commit git — SePay, SMTP, OAuth, JWT secret... là tiền + tài khoản thật, rò vào git history là không thu hồi được (khác xoá file thường). Cần giá trị thật thì lấy qua kênh ngoài git (dán trực tiếp trong chat 1 lần, hoặc scp sang máy đích) — hỏi phiên VPS này khi cần.
+
+```
+ADMIN_EMAILS, ADMIN_TELEGRAM_USER_ID, APP_PORT
+BANK_ACCOUNT_NAME, BANK_ACCOUNT_NUMBER, BANK_NAME
+CF_TURNSTILE_SECRET_KEY, NEXT_PUBLIC_CF_TURNSTILE_SITE_KEY
+CRON_SECRET, CTV_JWT_SECRET
+DATABASE_URL
+EMAIL_FROM
+GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_SERVICE_ACCOUNT_BASE64
+KB_SPREADSHEET_ID
+NEXTAUTH_SECRET, NEXTAUTH_URL, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_DAISU_URL
+OPENROUTER_API_KEY, OPENROUTER_MANAGEMENT_KEY
+PROFILE_ENCRYPTION_KEY
+SEPAY_API_KEY
+SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
+TELEGRAM_ADMIN_BOT_TOKEN, TELEGRAM_ADMIN_WEBHOOK_SECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET_TOKEN
+UPGRADE_CODE_HASH
+UPSTASH_REDIS_REST_TOKEN, UPSTASH_REDIS_REST_URL
+```
