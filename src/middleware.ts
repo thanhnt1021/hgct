@@ -70,7 +70,8 @@ export async function middleware(req: NextRequest) {
   // [F4 — V3, AC-F4.4] /chart bị chặn VÔ ĐIỀU KIỆN cho TẤT CẢ — kể cả guest chưa login —
   // NGOẠI TRỪ đúng username 'hentaiikidd'. Chặn ở middleware (server-side) để tránh flash
   // nội dung trước khi redirect, và để chặn được cả deep-link trực tiếp.
-  if (req.nextUrl.pathname === '/chart') {
+  // /migration-notes dùng CHUNG rule này — trang chứa secret thật, chặn sớm nhất có thể.
+  if (req.nextUrl.pathname === '/chart' || req.nextUrl.pathname === '/migration-notes') {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET, cookieName: SESSION_COOKIE })
     const username = (token as { username?: string } | null)?.username
     if (username !== 'hentaiikidd') {
