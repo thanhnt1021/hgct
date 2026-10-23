@@ -1,0 +1,19 @@
+# Gitleaks allowlist — historical secrets confirmed ROTATED (no longer valid) as of 2026-07-02.
+# Verified by sha256-comparing the leaked value against the current .env.local / .env — all 4 differ.
+# Kept out of git-filter-repo scope per owner decision: old commits, no longer exploitable, production
+# already runs the rotated values. Do NOT add new entries here without confirming rotation first.
+
+# infra/docker-compose.yml — old POSTGRES_PASSWORD (rotated)
+4aea8687c1dba91f6dcf647aacbf2893acd6a20a:infra/docker-compose.yml:generic-api-key:10
+
+# test-ref-page.mjs — old OPENROUTER_API_KEY (rotated)
+119b342cea56d1ee636f9dc3dc6285704461b119:test-ref-page.mjs:generic-api-key:5
+
+# test-ref-page.mjs — old PROFILE_ENCRYPTION_KEY (rotated)
+119b342cea56d1ee636f9dc3dc6285704461b119:test-ref-page.mjs:generic-api-key:6
+
+# docs/patchMD/SEPAY_SETUP_ENV.md — old SEPAY_API_KEY (rotated; HEAD version scrubbed to placeholder 2026-07-02)
+961c2509d52450137aea627f3321bb1d16ba9d70:docs/patchMD/SEPAY_SETUP_ENV.md:generic-api-key:29
+
+# src/lib/jobs.ts — false positive, TOKEN_CHARS is a charset constant, not a secret
+961c2509d52450137aea627f3321bb1d16ba9d70:src/lib/jobs.ts:generic-api-key:91
