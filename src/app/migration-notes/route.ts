@@ -259,6 +259,33 @@ Nguồn: đọc từ mã HGCT ở commit \`4f0ff2a\` (kho cũ), không chép gi�
 | Browser Rendering | 10 phút/ngày, 3 trình duyệt cùng lúc | developers.cloudflare.com/browser-rendering/platform/pricing/ |
 | Email Service (gửi) | Chỉ gửi tới địa chỉ đã xác minh; nhận mail (Email Routing) không giới hạn | developers.cloudflare.com/email-service/platform/pricing/ |
 | TCP socket | Chỉ chặn cổng 25 (cổng 465, 587 tài liệu không chặn) | developers.cloudflare.com/workers/runtime-apis/tcp-sockets/ |
+
+---
+
+## PHẦN C — Cập nhật 24/10/2026 (sau khi nhận "Trả lời báo cáo đợt deploy 24/10")
+
+### C.1 Đã đẩy lên kho mới
+
+\`thanhnt1021/hgct\` được cấp quyền ghi cho tài khoản \`hentaiikidd\` (không phải deploy key riêng — GitHub báo khoá VPS đang dùng ở repo khác nên không gắn deploy key mới được, bên Cloudflare đã cấp quyền collaborator cho cả account thay vào đó). Đã \`git push thanhnt1021 main\` thành công từ VPS.
+
+**HEAD mới của \`main\`: \`15e2665\`** (trên nền \`1dbe941\`, cộng thêm cập nhật tài liệu migration). Repo VPS (\`/home/hgct/hgct\`) giờ có 2 remote: \`origin\` (hentaiikidd/hgct, kho cũ, vẫn còn) và \`thanhnt1021\` (kho chính mới, đã đẩy được).
+
+### C.2 Mục 2.5 — 14 CTV: số liệu thật khác với "14 đang hoạt động"
+
+Đo trực tiếp bảng \`ctv\` trên VPS:
+- **Chỉ 6/14 có \`status = 'active'\`.** 8 còn lại là \`pending_setup\` (chưa bao giờ hoàn tất thiết lập tài khoản — chưa chắc cần chép, có thể để họ tự đăng ký lại không mất gì vì chưa dùng).
+- **Bảng \`ctv_commissions\` có 0 dòng** — không có lịch sử hoa hồng nào cần chuyển. Việc "chép lịch sử chi trả nếu có" trong yêu cầu — không có gì để chép.
+- Đã xuất CSV bảng \`ctv\` đầy đủ 14 dòng (\`password_hash\` giữ dạng đã băm, không giải mã) tại \`/tmp/ctv_export.csv\` trên VPS — chưa xuất \`ctv_commissions\` vì rỗng, không cần.
+- **Cần anh Thành xác nhận lại:** chép cả 14 (gồm 8 pending_setup) hay chỉ chép 6 active, để 8 pending_setup tự đăng ký lại bình thường (không mất gì vì họ chưa từng setup xong)?
+
+### C.3 Mục 3.1–3.4 — cần anh Thành/người giữ tài khoản tự làm, VPS không có quyền truy cập các bảng điều khiển này
+
+- **3.1 Hostinger:** VPS chỉ có mailbox credential (\`SMTP_USER\`/\`SMTP_PASS\` để gửi mail), không có đăng nhập bảng điều khiển Hostinger (hPanel) để xem hạn gói/giới hạn gửi. Cần anh tự đăng nhập Hostinger kiểm.
+- **3.2 Google Console:** VPS có \`GOOGLE_CLIENT_ID\`/\`GOOGLE_CLIENT_SECRET\` (dùng để app chạy OAuth) nhưng không phải đăng nhập Google Cloud Console (đó là tài khoản Google cá nhân của ai tạo project, VPS không có). Cần anh tự vào Console thêm redirect URI cho \`demo.\` + chụp màn.
+- **3.3 SePay:** VPS biết \`SEPAY_API_KEY\` (key app dùng để tạo đơn/verify webhook) nhưng không đăng nhập được dashboard SePay (tài khoản ngân hàng/merchant). Cần anh tự vào SePay xem cấu hình webhook + chụp màn (che khoá).
+- **3.4 Người làm + lịch chuyển:** quyết định vận hành, không phải việc kỹ thuật — cần anh Thành chốt.
+
+**Tóm cho anh:** 4 mục này VPS/Claude không tự trả lời được dù có quyền truy cập mã nguồn đầy đủ — đều cần đăng nhập dashboard ngoài (Hostinger, Google, SePay) hoặc là quyết định vận hành của anh. Không phải tao né việc, chỉ là không có đường vào.
 `
 
 export async function GET() {
