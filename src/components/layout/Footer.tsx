@@ -138,6 +138,8 @@ export default function Footer() {
               <Link href="/privacy" className="as-footer-link" rel="privacy-policy" style={{ color: 'var(--as-gold-cream)', textDecoration: 'none' }}>Chính sách bảo mật</Link>
               <span style={{ color: 'var(--as-text-muted)', margin: '0 0.5rem' }}>·</span>
               <Link href="/terms" className="as-footer-link" style={{ color: 'var(--as-gold-cream)', textDecoration: 'none' }}>Điều khoản sử dụng</Link>
+              <span style={{ color: 'var(--as-text-muted)', margin: '0 0.5rem' }}>·</span>
+              <a href="https://github.com/thanhnt1021/hgct" target="_blank" rel="noopener noreferrer" className="as-footer-link" style={{ color: 'var(--as-gold-cream)', textDecoration: 'none' }}>Mã nguồn (AGPL)</a>
             </div>
           </div>
           <p style={{ color: 'var(--as-text-muted)', fontSize: '0.72rem', fontFamily: 'var(--font-vietnam)', textAlign: 'center' }}>
