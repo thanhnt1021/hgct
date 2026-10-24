@@ -78,146 +78,179 @@ src/
 - Lịch sử fix đầy đủ: `docs/FIXES_HISTORY.md`. Lịch sử tính năng: `docs/DONE_HISTORY.md`. Mục tiêu + pending: `docs/GOAL.md`.
 - `docs/univ3/` (bộ luật chung nhiều dự án) hiện nằm **chưa commit** trong working tree — SSOT thật ở repo riêng `thanhnt1021/univ3`, việc đồng bộ phụ thuộc workflow trên Macbook, không phải việc của VPS này.
 
+## PHẦN B — KẾ HOẠCH CHUYỂN SANG CLOUDFLARE (bản mới, 24/10/2026 — thay toàn bộ bản cũ)
+
+> Nguồn: báo cáo chính thức từ bên vận hành hạ tầng Cloudflare ("bên mình" trong văn bản dưới = team Cloudflare, "bên anh/chị" = team mã nguồn HGCT/VPS). Giữ nguyên văn để không làm lệch ý — bản cũ (B.1-B.10 trước đây) đã lỗi thời, xem lịch sử git nếu cần so sánh.
+
+# HGCT lên Cloudflare gói miễn phí: thay đổi hôm nay và những thứ còn xin bên anh/chị (24/10/2026)
+
+- **Mục đích:** báo bên anh/chị các thay đổi kho mã hôm nay, và xin nốt những thứ còn thiếu để đưa hatgiongchiemtinh.com lên Cloudflare gói miễn phí.
+- **Kho mã chính từ nay:** https://github.com/thanhnt1021/hgct (công khai, giấy phép AGPL-3.0, nhánh `main` ở commit `1dbe941`).
+- **Xin bên anh/chị:** mã mới trên VPS (nếu có), tên các biến môi trường, 2 bảng cấu hình, và vài xác nhận về mail, Google, SePay, lịch chuyển (mục 2).
+
+Tệp do trợ lý hệ thống bên mình soạn, đọc từ mã ở commit `4f0ff2a` (kho cũ). Kế hoạch kỹ thuật đầy đủ nằm ở phụ lục cuối tệp này.
+
+## 1. Thay đổi hôm nay bên anh/chị cần biết
+
+- **Kho mới `thanhnt1021/hgct` là kho chính.** Lịch sử đã được làm sạch: mật khẩu DB, khoá OpenRouter, `PROFILE_ENCRYPTION_KEY` và khoá webhook SePay đã được gỡ khỏi mọi commit cũ. Vì vậy **mọi mã commit đều đã đổi**: `4f0ff2a` cũ nay là `f209c64`, trên đó có thêm `1dbe941`.
+- **Kho cũ `hentaiikidd/hgct` đã chuyển sang riêng tư.** VPS vẫn kéo/đẩy được bằng deploy key nên web vẫn chạy bình thường. Hai kho có lịch sử khác nhau nên không đẩy thẳng từ kho này sang kho kia được.
+- **Commit `1dbe941`** thêm `LICENSE` (AGPL v3), `README.md`, trường `"license"` trong `package.json`, và link «Mã nguồn (AGPL)» ở `src/components/layout/Footer.tsx`. **Bên mình chưa build thử commit này**, nhờ bên anh/chị chạy `npm run build` giúp.
+- **Theo AGPL (Điều 13):** từ nay, mỗi lần deploy thì `main` của kho mới phải chứa đúng mã đang chạy.
+- **Chuyển máy VPS và máy dev sang kho mới.** Làm ở `/home/hgct/hgct`, `/home/hgct/hgct-demo` và mọi máy dev:
+  - Kiểm trước: `git status` và `git log --oneline 4f0ff2a..HEAD` (mọi nhánh đang dùng).
+  - **Không có gì mới** (sạch, log trống): `git remote set-url origin git@github.com:thanhnt1021/hgct.git && git fetch origin && git checkout -B main origin/main`
+  - **Có commit mới sau `4f0ff2a`:** `git remote add moi git@github.com:thanhnt1021/hgct.git && git fetch moi && git rebase --onto moi/main 4f0ff2a main`. Sau đó đẩy lên kho mới bằng `git push moi main`, hoặc nếu chưa có quyền đẩy thì xuất patch: `git format-patch 4f0ff2a..main -o ~/hgct-patch` rồi gửi thư mục đó.
+  - **Có thay đổi chưa commit:** commit trước rồi làm như trên, hoặc gửi `git diff > ~/hgct-chua-commit.diff`.
+- **Những thứ bên mình đã chốt, bên anh/chị không cần chuẩn bị:**
+  - Dùng R2 cho PDF và avatar.
+  - Mail giữ SMTP Hostinger.
+  - Giữ nguyên mọi giá trị khoá hiện có.
+  - Không chép dữ liệu khách: DB mới để trống, khách tạo lại tài khoản.
+  - Dùng bản miễn phí AGPL của Swiss Ephemeris.
+  - DNS: zone `bcb2eba2954f8f1134129747068127de` đã nằm trong tài khoản Cloudflare `fc328bd1ba4dde51a9a2f42a72b8a4b8`, khoá Cloudflare do bên mình giữ.
+
+## 2. Xin bên anh/chị
+
+Mỗi mục ghi: cần gì · vì sao cần · gửi dạng gì.
+
+1. **Mã trên VPS chưa có ở kho mới** (cả `hgct`, `hgct-demo`, và mọi nhánh) · vì kho mới dựng từ `4f0ff2a` · gửi bằng `git push` lên kho mới, hoặc thư mục patch như ở mục 1.
+2. **Khoá công khai của deploy key VPS** (dòng `ssh-ed25519 …`, không phải khoá riêng) · để bên mình cấp quyền ghi trên `thanhnt1021/hgct` cho VPS · dán thẳng vào nhóm được.
+3. **Danh sách TÊN biến môi trường đang chạy thật ở prod và demo** · vì giữ nguyên giá trị khi chuyển, mà `.env.example` có thể lệch với bản thật · gửi danh sách tên trong nhóm. **Giá trị gửi riêng 1–1**, không qua tệp này, không qua nhóm.
+4. **Xuất bảng `config` và `promo_codes`** (`prisma/schema.prisma:232,242`), riêng bảng `config` thì bỏ dòng `order_check_last_run` · vì đây là nội dung trang chủ, giá hiển thị, `site_mode` và mã ưu đãi cần mang sang DB mới · gửi 2 tệp CSV, gửi riêng chứ không đăng vào nhóm.
+5. **Hiện có CTV nào đang hoạt động không** · vì bảng `ctv` không mang sang, CTV phải đăng ký lại qua `api/ctv/register` · trả lời có/không và số người. Bên mình không cần thông tin cá nhân của CTV.
+6. **Hộp mail Hostinger** (`SMTP_USER` đang chạy, `src/lib/email.ts:8-18`) · vì Worker sẽ gửi qua TCP socket cổng 465, nếu hỏng thì thử 587 · trả lời: gói mail còn hạn đến ngày nào, Hostinger có chặn gửi từ IP ngoài hoặc giới hạn số mail/ngày không.
+7. **Google OAuth** (`src/lib/auth.ts:54-57`) · cần biết ai có quyền vào Google Cloud Console của client đang dùng, và đã có redirect URI cho `demo.hatgiongchiemtinh.com` chưa · trả lời, kèm ảnh chụp danh sách redirect URI (không chụp client secret).
+8. **Webhook SePay** · prod giữ nguyên tên miền nên URL không đổi; bên mình cần biết webhook đang trỏ đúng `/api/payment/sepay-webhook` chưa, và demo dùng luồng `/demosepay` hay cần một webhook riêng · trả lời, kèm ảnh chụp phần cấu hình webhook (che khoá).
+9. **Route `/migration-notes`** (`src/app/migration-notes/route.ts:14`) · cần xác nhận prod đã build lại bằng bản đã gỡ nội dung (route chỉ còn trả một dòng giữ chỗ) · trả lời có/chưa.
+10. **Người làm và lịch chuyển** · cần biết ai sửa mã, ai deploy (nếu bên anh/chị deploy thì bên mình gửi riêng khoá Cloudflare), ngày dựng demo, khung giờ tạm dừng nhận đơn khi chuyển prod, và VPS giữ thêm bao lâu (đề nghị ít nhất 7 ngày) · trả lời trong nhóm.
+
+## 3. Việc bên anh/chị làm trong mã
+
+Chi tiết từng việc (tệp:dòng, đường lùi) có ở phụ lục cuối tệp.
+
+- Băm mật khẩu: đổi bcrypt sang PBKDF2 của Web Crypto, salt riêng từng tài khoản, bỏ nhánh đọc hash cũ.
+- PDF: đổi Chromium và Ghostscript sang Browser Rendering, đưa bìa, ảnh nền, trang cuối vào trang HTML để in một lần.
+- Ảnh OG: chụp sẵn thành PNG trong `public/`, bỏ route `api/og`.
+- Lá số: đổi `swisseph` (mô-đun C) sang bản WASM, nạp kèm `ephe/`.
+- PDF và avatar: lưu vào R2 thay `/var/hgct/*`. Prompt, font, `imgs/`, `public/` đưa vào Static Assets.
+- Giới hạn lượt gọi: đếm bằng một bảng D1, giữ khung 15 phút và 1 giờ.
+- Mail: thay nodemailer bằng bộ gửi SMTP nhỏ chạy trên TCP socket, vẫn dùng `smtp.hostinger.com`.
+- Việc nền: chuyển sang Queues. Gộp 4 lịch và watchdog thành 1 Cron Trigger chạy mỗi phút.
+- Thay `geo-tz` bằng thư viện tra múi giờ chạy ngay trong mã. `googleapis` đổi sang gọi REST bằng `fetch`. Gỡ các gói không dùng nữa.
+- Next.js qua OpenNext, bật `nodejs_compat`. Prisma lên ≥6.2 với adapter D1, đổi 9 cột `Json`. DB D1 để trống, chỉ nạp `config` và `promo_codes`, chạy kb-sync một lần.
+- Sửa `docs/CLOUDFLARE_MIGRATION.md` theo các quyết định ở mục 1, và sửa CFM:45 (SePay nhận tiền ở `api/payment/sepay-webhook`).
+- Đo trên demo rồi ghi số vào tài liệu, gồm 5 chỗ: CPU trang Next.js, thời gian in PDF, gửi mail cổng 465, lá số WASM, băm PBKDF2. Chỗ nào vượt thì làm theo đường lùi 0 đồng trong bảng của tệp kế hoạch.
+
+## 4. Cách gửi lại
+
+- Trả lời ngắn theo số mục (vd «2.5: không có CTV») trong nhóm.
+- Tệp CSV, patch, ảnh chụp thì gửi tệp riêng.
+- **Không gửi giá trị khoá hay mật khẩu nào qua nhóm chat hoặc qua tệp này**, chỉ gửi tên biến. Giá trị khoá gửi riêng 1–1 qua kênh hai bên đã thống nhất.
+
 ---
 
-## PHẦN B — KẾ HOẠCH CHUYỂN SANG CLOUDFLARE
+# Phụ lục — tệp kế hoạch kỹ thuật kèm theo
 
-### B.1 Mục tiêu & ưu tiên (đã chốt với anh Thành)
+## Kế hoạch kỹ thuật: chuyển hatgiongchiemtinh.com (HGCT) sang Cloudflare gói miễn phí (24/10/2026)
 
-Bỏ VPS HostHatch, web `hatgiongchiemtinh.com` (+ demo) chạy trên Cloudflare. Khách vẫn đặt dịch vụ → trả tiền SePay → nhận PDF/mở luận giải như hiện tại, không đứt đoạn. Thứ tự ưu tiên:
+**1. Chạy miễn phí 100% được, với điều kiện đổi 10 chỗ trong mã ở mục dưới.** Quy mô nhỏ (1–4 đơn/ngày) nên hạn mức theo ngày và theo tháng còn dư xa. Chỗ vướng thật chỉ là **10ms CPU mỗi lượt gọi**.
+**2. Bên mình đã chốt hết.** Giữ mail Hostinger, dùng R2, giữ nguyên khoá, không chép dữ liệu khách, dùng 2 khoá Cloudflare có sẵn. Không còn mục nào bỏ ngỏ.
+**3. Còn 5 chỗ phải đo trên demo** (CPU trang Next.js, in PDF, mail cổng 465, lá số WASM, băm mật khẩu). Mỗi chỗ đã có sẵn đường lùi 0 đồng, người làm HGCT tự xử theo bảng ở mục cuối.
 
-1. **Miễn phí tối đa** — quan trọng hơn việc "100% nằm trong Cloudflare".
-2. **Chấp nhận viết lại** bất kỳ phần nào cần, miễn giữ được free và đúng chức năng.
-3. **Độ chính xác tính toán lá số là bất biến, không đánh đổi** — viết lại cách nào cũng phải khớp 100% bản hiện tại.
-4. Không cần giữ Postgres — chuyển hẳn sang D1 nếu đúng chức năng.
-5. GitHub: tạo repo mới `thanhnt1021/hgct`, giữ `hentaiikidd/hgct` làm bản gốc/dự phòng, không chuyển quyền sở hữu.
+Nguồn: đọc từ mã HGCT ở commit `4f0ff2a` (kho cũ), không chép giá trị khoá nào.
 
-### B.2 Quy mô dữ liệu thật (đo trực tiếp trên VPS, 23/10/2026)
+## Đã chốt
 
-- DB Postgres: **12MB** tổng (bảng lớn nhất `knowledge_base` 816KB).
-- PDF lưu đĩa: prod 39MB (17 file), demo 4KB. Avatar: 56KB.
-- Traffic đơn hàng: 346 đơn trong ~4.5 tháng (13/03–25/07/2026), trung bình 1–2 đơn/ngày, cao nhất 4 đơn/ngày.
-- → Quy mô rất nhỏ, không chạm hạn mức free tier bất kỳ dịch vụ Cloudflare nào bên dưới.
+- **Gói:** miễn phí 100% trên Cloudflare.
+- **Mail gửi khách:** Giữ SMTP Hostinger, Worker gửi qua TCP socket cổng 465. Bỏ hẳn Resend khỏi kế hoạch.
+- **Bộ dữ liệu hành tinh astro.com (Swiss Ephemeris):** giữ như hiện nay, dùng bản miễn phí giống oHa.
+- **28 khoá:** chuyển sang giữ nguyên mọi giá trị khoá, kể cả `PROFILE_ENCRYPTION_KEY`, `NEXTAUTH_SECRET`, `CTV_JWT_SECRET`. Không cần bước mã hoá lại hồ sơ.
+- **Khách và mật khẩu:** không chép dữ liệu khách hay tài khoản. DB mới trống, chỉ mang cấu hình và nội dung.
+- **Kho tệp:** dùng R2. Tài khoản `fc328bd1ba4dde51a9a2f42a72b8a4b8` đã bật R2 và đang có 5 kho (kiểm 13:25 ngày 24/10). Bỏ phương án KV.
+- **Khoá Cloudflare:** bên mình giữ, không gửi qua tệp; cần deploy thì bên mình cấp quyền riêng.
+  - Zone ID `bcb2eba2954f8f1134129747068127de`, Account ID `fc328bd1ba4dde51a9a2f42a72b8a4b8`.
 
-### B.3 Từng chỗ vướng khi lên Cloudflare — và cách xử
+## Phải đổi trong mã để chạy miễn phí
 
-> Đã sửa theo đối chiếu mã thật của phiên oHa/Mac (thẻ oHa-23102026-06, 23/10/2026) — xem B.10.
+- **Băm mật khẩu: bỏ bcrypt cost 12, chuyển sang PBKDF2 của Web Crypto.** Chỗ cần sửa: `src/lib/auth.ts:14,19,25,139`, `src/lib/ctv/auth.ts:69,85`, `api/user/password/route.ts:13,45`, `api/auth/reset-password/route.ts:26`, `api/user/upgrade/route.ts:37`.
+  - Chỉ có tài khoản mới nên bỏ nhánh đọc hash cũ (`auth.ts:22-26`), không băm lại khi đăng nhập.
+  - Salt ngẫu nhiên cho từng tài khoản, không hạ số vòng lặp quá thấp chỉ để lọt 10ms.
+- **In PDF: bỏ Chromium và Ghostscript, chuyển sang Browser Rendering.** Chỗ cần sửa: `src/lib/pdf/generator.ts:744` (puppeteer), `generator.ts:1141` (`gs`), `generator.ts:634-636` (pdf-lib ghép bìa, ảnh nền, trang cuối).
+  - Bỏ bước nén `gs`, vì mã đã có đường lùi trả PDF không nén (`generator.ts:1152-1154`).
+  - Đưa bìa, ảnh nền, trang cuối vào chính trang HTML để in một lần ra PDF trọn vẹn, không ghép bằng pdf-lib.
+- **Ảnh OG:** `api/og/route.ts:45-60` đang mở Chromium để chụp một trang cố định. Chụp một lần thành PNG, bỏ vào `public/`, rồi bỏ route này.
+- **Tính lá số:** `swisseph` là mô-đun C nên Worker không nạp được (`src/lib/astrology/calculations.ts:2,10-11`, `constants.ts:2`, `transit-stubs.ts:2`). Thay bằng bản WASM, nạp kèm `ephe/` (1.9MB), vẫn dùng bản miễn phí như hiện nay.
+- **Lưu PDF và avatar vào R2.** Hiện mã ghi ra `/var/hgct/pdfs` và `/var/hgct/avatars` (`reportProcessor.ts:20`, `api/user/avatar/route.ts:7`, `api/pdf/[id]/route.ts:6,36`).
+- **Tệp đang đọc từ ổ đĩa thì đưa vào Static Assets:** 10 tệp prompt (`src/lib/logic/*/prompt.ts`, gói thẳng vào mã), font (`generator.ts:13`), ảnh nền PDF (`generator.ts:570,634`), thư mục `imgs/` 5.3MB (`api/imgs/[filename]/route.ts:26`), `public/` 78MB.
+- **Giới hạn lượt gọi:** bỏ Upstash (`src/lib/ratelimit.ts:9-14,50-55`), đếm bằng một bảng trong D1 (miễn phí 100.000 lượt ghi/ngày). Giữ nguyên khung 15 phút và 1 giờ đang dùng (`ratelimit.ts:59-75`). Không dùng Rate Limiting binding (chỉ có khung 10/60 giây).
+- **Mail: thay nodemailer bằng một bộ gửi SMTP nhỏ chạy trên TCP socket của Worker.** Vẫn dùng `smtp.hostinger.com`, cổng 465, TLS ngay khi mở kết nối, đúng như cấu hình hiện tại (`src/lib/email.ts:1,8-18`). Giữ các biến `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`/`SMTP_PASSWORD`.
+- **Việc nền, lịch chạy và thư viện nặng:**
+  - Việc nền đang chạy trong bộ nhớ (`src/lib/jobs.ts:396,408`). Chuyển sang Queues (miễn phí 10.000 lượt/ngày).
+  - Gộp 4 lịch (order-check, kb-sync, cleanup 19:00 UTC, retention 02:00 UTC) và watchdog thành **1 Cron Trigger chạy mỗi phút**. Trong mã tự rẽ nhánh theo giờ UTC. Chỉ tốn 1 trong 5 lịch miễn phí của tài khoản.
+  - `geo-tz` đọc dữ liệu từ đĩa (`api/location/search/route.ts:2`). Thay bằng thư viện tra múi giờ chạy ngay trong mã, không gọi dịch vụ ngoài, không cần khoá.
+  - `googleapis` (`api/cron/kb-sync`) đổi sang gọi REST bằng `fetch`.
+  - Bỏ `puppeteer`, `@sparticuz/chromium`, `nodemailer`, `@upstash/*`, `bcrypt`/`bcryptjs` khỏi `package.json`.
+- **Next.js chạy qua OpenNext, bật cờ `nodejs_compat`.** Cỡ gói mã không vướng (64MiB chưa nén).
 
-| Thành phần | Vì sao vướng | Cách xử (đã chốt hướng) |
+## Việc người làm HGCT phải làm
+
+(Mỗi dòng một việc, chuyển nguyên được.)
+
+- Sửa tài liệu chuyển (`docs/CLOUDFLARE_MIGRATION.md`, CFM) theo các quyết định đã chốt:
+  - Bỏ mọi câu khuyên lên gói khác ở mục B.3 (dòng CPU) và B.7. Câu «không chạm hạn mức free tier» ở CFM:100 sửa thành «vướng hạn CPU 10ms/lượt, không vướng hạn theo ngày».
+  - Bỏ Resend, Upstash và `RESEND_API_KEY`. Mail giữ SMTP Hostinger.
+  - Bỏ phần cảnh báo 28 khoá đã lộ (CFM:220-223), ghi là giữ nguyên mọi khoá khi chuyển.
+  - Bỏ việc «chốt giấy phép astro.com» (CFM mục B.4 #7, B.6 #4). Ghi là dùng bản miễn phí như hiện nay.
+  - Bỏ quy trình chép dữ liệu khách Postgres→D1, bỏ bước mã hoá lại hồ sơ, bỏ bước chép avatar.
+- Điền vào tài liệu: Account ID `fc328bd1ba4dde51a9a2f42a72b8a4b8`, Zone ID `bcb2eba2954f8f1134129747068127de`.
+- Deploy Worker, gắn route, tạo D1, Queues, kho R2 cho PDF và avatar bằng khoá Cloudflare bên mình cấp. Không cần Pages.
+- Quyền ghi của khoá chưa kiểm được bằng lệnh chỉ đọc, sẽ biết ở lần deploy demo đầu tiên. Bị từ chối thì ghi lại lệnh và mã lỗi rồi báo về.
+- Dựng DB D1 trống từ `prisma/schema.prisma`: nâng Prisma lên ≥6.2, dùng adapter D1, đổi 9 cột `Json` cho hợp SQLite.
+- **Chỉ mang sang 3 bảng cấu hình/nội dung (không phải dữ liệu khách):**
+  - `config`: nội dung trang chủ (`hero_subtitle`, `cta_body`, tên và mô tả 4 dịch vụ…), giá hiển thị (`display_price_*`), `site_mode`, `order_check_interval`. Bỏ `order_check_last_run` vì đó là trạng thái lúc chạy. (`dashboard/(app)/content/page.tsx:15`, `api/admin/config/route.ts:65`, `api/payment/create-order/route.ts:68`).
+  - `promo_codes`: mã ưu đãi nạp xu (`api/admin/promo-codes/route.ts`, trừ lượt ở `api/payment/sepay-webhook/route.ts:167`). Chép nguyên.
+  - `knowledge_base`: không cần chép. Sau khi deploy, chạy kb-sync một lần để lấy lại từ Google Sheet (`api/cron/kb-sync/route.ts:20,66-68`, cần `GOOGLE_SERVICE_ACCOUNT_BASE64`, `KB_SPREADSHEET_ID`).
+- **Không mang sang** (dữ liệu khách, tài khoản, giao dịch): `users`, `profiles`, `coin_transactions`, `readings`, `essays`, `saved_charts`, `jobs`, `orders`, `ctv`, `ctv_commissions`. Không mang PDF cũ trong `/var/hgct/pdfs` và avatar trong `/var/hgct/avatars`.
+  - Tài khoản admin: tạo lại bằng email có trong `ADMIN_EMAILS` (`src/lib/dashboard-auth.ts:13`).
+  - CTV: đăng ký lại qua `api/ctv/register`. CHƯA RÕ hiện có CTV nào đang hoạt động không. Nếu có thì người làm HGCT báo họ đăng ký lại.
+- Làm lại danh sách biến cho bản Cloudflare:
+  - Bỏ: `DATABASE_URL`, `APP_PORT`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `DOCKER_PROXY_*`.
+  - Giữ nguyên giá trị: mọi khoá còn lại, kể cả `SMTP_*`, `PROFILE_ENCRYPTION_KEY`, `NEXTAUTH_SECRET`, `CTV_JWT_SECRET`.
+  - Thêm vào `wrangler.toml`: kết nối D1, R2, Queues, Browser Rendering, Static Assets, 1 Cron Trigger.
+- Sửa phần cấu trúc thư mục ở CFM:45: chỗ nhận tiền SePay là `api/payment/sepay-webhook`, còn `payment/confirm` chỉ là chỗ giữ chỗ (`confirm/route.ts:13-17`). Liệt kê đủ `create-order`, `claim-transfer`, `status`, `demosepay/status`.
+- Thêm địa chỉ chuyển hướng đăng nhập Google cho `demo.hatgiongchiemtinh.com` trong Google Console nếu chưa có.
+- Chụp sẵn ảnh OG thành PNG tĩnh, bỏ route `api/og`.
+- Gỡ hẳn route `/migration-notes` khi chuyển xong (ở HEAD route chỉ còn trả chuỗi trống, `src/app/migration-notes/route.ts:14`).
+- Chọn thư viện tra múi giờ thay `geo-tz` (chạy trong mã, không cần khoá), rồi thử với các địa danh khách hay nhập, nhất là vùng sát biên giới.
+- Đo 5 chỗ ở mục dưới trên demo, ghi số vào CFM. Chỗ nào vượt thì làm theo đường lùi đã ghi, không cần hỏi lại.
+
+## Phải đo trên demo (kèm đường lùi 0 đồng)
+
+| Chỗ đo | Đo gì | Đạt khi | Vượt thì làm (0 đồng) |
+|---|---|---|---|
+| CPU trang Next.js | CPU mỗi lượt gọi của trang chủ, trang dịch vụ, trang đơn hàng, các API chính | ≤10ms | Làm trang đó thành trang tĩnh (Static Assets không tính CPU), Worker chỉ giữ các API nhỏ. Phần động lấy bằng `fetch` sau khi tải trang. |
+| In PDF qua Browser Rendering | Số giây để in 1 PDF | Tổng ≤10 phút/ngày. Ví dụ 60 giây/bản thì in được khoảng 10 bản/ngày, đủ cho 1–4 đơn | Mỗi bản chỉ mở trình duyệt một lần, giảm cỡ ảnh nền. Còn vượt thì việc in xếp vào Queues, chờ sang ngày sau (hạn reset mỗi ngày), trang đơn hàng báo «đang in». |
+| Mail cổng 465 | Gửi thử 1 mail tới hộp ngoài (Gmail) qua TCP socket, cổng 465, TLS ngay khi mở kết nối | Mail tới hộp thư, không vào spam | (1) Thử cổng 587 với STARTTLS, vẫn là SMTP Hostinger. (2) Nếu cả hai cổng đều hỏng: khách tải PDF ngay trên trang đơn hàng, bot Telegram admin báo đơn mới để gửi tay từ hộp Hostinger, quên mật khẩu thì đăng nhập bằng Google. |
+| Lá số WASM | Thời gian khởi động Worker khi nạp WASM và `ephe/`, CPU tính 1 lá số; đối chiếu kết quả với bản `swisseph` cũ | Khởi động ≤1 giây, CPU ≤10ms, kết quả khớp bản cũ | Không gói `ephe/` vào mã: để trong R2 hoặc Static Assets, chỉ tải tệp cần dùng lúc tính. Vẫn vượt CPU thì chạy WASM trong trình duyệt của khách (tính lá số ở máy khách), Worker chỉ nhận kết quả để lưu và in. |
+| Băm mật khẩu PBKDF2 | CPU mỗi lượt đăng ký/đăng nhập | ≤10ms với số vòng lặp đủ an toàn | Không hạ số vòng lặp xuống quá thấp. Nếu không lọt thì chỉ cho đăng nhập bằng Google và link đăng nhập gửi qua mail, bỏ mật khẩu. |
+
+## Rủi ro ghi nhận
+
+- Bộ dữ liệu hành tinh astro.com: đang dùng bản miễn phí cho web có thu tiền, giống oHa và chiemtinh.jst4.fun. Ghi lại để biết, không có việc phải làm.
+
+## PHỤ LỤC — Giới hạn gói Free (tra 24/10/2026)
+
+| Thứ | Giới hạn Free | Nguồn |
 |---|---|---|
-| `swisseph` (tính lá số) — `src/lib/astrology/calculations.ts`, `constants.ts`, `transit-stubs.ts` | Mô-đun C biên dịch sẵn cho Linux, Worker (V8 isolate) không nạp được | **Dùng bản WebAssembly chính chủ của astro.com** (`astro.com/sweph-wasm/` — nguyên bản C KHÔNG sửa đổi compile sang WASM bằng Emscripten) → giữ đúng 100% thuật toán, không đổi lib khác. Chạy WASM trong Worker bình thường, không cần Containers. **Bắt buộc đối chiếu kết quả** (vị trí hành tinh, nhà, điểm vận hạn) giữa bản cũ và bản WASM trên cùng 1 bộ ngày giờ sinh trước khi dùng thật. Dữ liệu ephemeris `.se1` **đã có sẵn trong repo** (`ephe/`, 1.9MB) — không cần tải lại từ astro.com, chỉ còn vấn đề giấy phép (xem B.4 #7). |
-| Chromium + puppeteer (PDF, ảnh OG) — `src/lib/pdf/generator.ts`, `job-queue.ts`, `api/og` | Worker không chạy trình duyệt được. **Thêm:** `generator.ts:1141` còn gọi `execFileSync('gs', ...)` (Ghostscript) để nén PDF — Worker không chạy được lệnh ngoài này, tách biệt với vấn đề Chromium | Cloudflare **Browser Rendering** free: chỉ 10 phút/ngày, tối đa 3 browser cùng lúc — **hẹp**, cần đo thời gian sinh PDF thật để biết đủ hay không. Nếu không đủ: viết lại PDF bằng lib JS thuần (dự án đã có `pdf-lib` trong dependencies, chưa dùng cho luồng chính) — không ảnh hưởng số liệu tính toán, chỉ ảnh hưởng trình bày. Ghostscript: mã đã có đường lùi trả PDF không nén khi `gs` lỗi — dùng đường lùi đó làm mặc định trên Cloudflare, bỏ bước nén. |
-| Ghi đĩa lúc runtime: `/var/hgct/pdfs` (+ `soon_delete`), avatar, **và đọc tĩnh**: `src/prompts/*.txt` (10 file, prompt AI), `public/chart-symbols/` (icon SVG cho PDF), `imgs/` (5.3MB, ngoài `public/`), đường dẫn `ephe/` cho swisseph | Worker không có ổ đĩa — cả ghi (PDF/avatar) và đọc tĩnh (prompt/icon/ảnh/ephemeris) đều vướng, không chỉ chỗ ghi | PDF/avatar ghi mới → **R2** (free 10GB, hiện dùng chưa tới 40MB). Prompt/icon/ảnh/ephemeris đọc tĩnh → đóng gói thẳng vào Worker bundle (nếu nhỏ) hoặc R2 (nếu gói vượt hạn ~3MB nén của Worker — `imgs/` 5.3MB chắc phải ra R2). |
-| Việc nền chạy vài phút (`processReport()`, `global.__hgctJobs` + `setInterval` watchdog — `src/lib/jobs.ts`, và `unlock-job.ts` cho luồng xu) | Worker tắt khi trả lời xong, không giữ bộ nhớ, không có `setInterval` | **Cloudflare Queues** (giờ có ở free plan, 10.000 operation/ngày) hoặc Workflows. Trạng thái job đọc từ DB, watchdog chuyển thành Cron Trigger. |
-| Gửi mail `nodemailer` SMTP — `src/lib/email.ts` | Worker không mở SMTP kiểu nodemailer | **Resend** (free tier, ngoài Cloudflare) — khuyên dùng vì free tuyệt đối. Giữ MX Hostinger hiện tại cho `support@` (chỉ đổi chiều gửi), thêm bản ghi SPF/DKIM của Resend vào zone + xác thực tên miền gửi cho `EMAIL_FROM`. Cloudflare Email Service có nhưng **chỉ ở Workers Paid plan**, không có bản free. |
-| Postgres trong Docker | Cloudflare không chạy Postgres | **D1** (đã chốt). **Sửa:** schema **không có** cột `Array`/`Decimal` — cái vướng thật là **9 cột kiểu `Json`** trong schema (cần đối chiếu D1/SQLite xử JSON đúng không) và **Prisma hiện `^5.22.0`, phải nâng lên ≥6.2 + cài D1 driver adapter** (D1 cần Prisma 6.2+ mới hỗ trợ chính thức). Chưa có quy trình chuyển dữ liệu: xuất 13 bảng từ Postgres → đổi kiểu phù hợp SQLite → nhập D1 → đối chiếu số dòng từng bảng sau khi nhập — đây là bước còn thiếu hoàn toàn, phải viết script riêng. |
-| Cron sidecar + crontab, chạy giờ **Việt Nam** (`infra/cron/start.sh: TZ=Asia/Ho_Chi_Minh`) — order-check mỗi phút, cleanup 02:00, retention 09:00, kb-sync mỗi 15 phút | Cron Triggers của Cloudflare chạy giờ **UTC** | Đổi giờ: cleanup 02:00 VN → **19:00 UTC** (hôm trước), retention 09:00 VN → **02:00 UTC**. order-check/kb-sync (lặp theo phút) không đổi. Cron Trigger phải tự gọi route kèm header `Authorization: Bearer CRON_SECRET` giống hiện tại. |
-| `docker-socket-proxy` + `src/lib/docker.ts` (admin bot restart container) | Không còn Docker | Bỏ lệnh restart trong admin bot. |
-| `geo-tz` (tra múi giờ theo toạ độ, đọc dữ liệu từ đĩa), `googleapis` (gói nặng) | Phình gói vượt hạn Worker (~3MB nén) | **Còn thiếu quyết định** — chưa chọn API thay `geo-tz` (cần API tra múi giờ theo lat/lng, có free tier). Nominatim (tra địa danh → toạ độ) giữ nguyên, không vướng. Sheets gọi REST thẳng bằng `fetch` thay `googleapis`. |
-| Giới hạn tốc độ (rate limit) — `src/lib/ratelimit.ts` dùng bộ đếm **trong bộ nhớ** vì `UPSTASH_REDIS_REST_URL`/`TOKEN` đang để trống ở prod | Trên Cloudflare mỗi lần chạy Worker là instance riêng, không chia sẻ bộ nhớ → mất chặn hoàn toàn nếu giữ bộ đếm in-memory | Bắt buộc cấu hình **Upstash Redis** thật (dự án đã có `@upstash/ratelimit` + `@upstash/redis` trong dependencies, chỉ chưa điền env) trước khi lên Cloudflare — không phải tuỳ chọn. |
-| `public/` 78MB (`vh99` 30MB, `fonts` 26MB, `chart-symbols` 21MB) | Ảnh tĩnh quá cỡ gói Worker | Static Assets / R2. |
-| **CPU time mỗi request** — bcrypt cost 12 chạy JS thuần ở `src/lib/auth.ts`, `src/lib/ctv/auth.ts`, `api/user/password` (đăng nhập, đăng ký, đổi mật khẩu CTV) | **Phát hiện quan trọng (B.7 cần đọc lại):** Workers Free chỉ cho ~10ms CPU/request — 1 lần bcrypt cost 12 riêng nó đã tốn hàng trăm ms, **tự vượt hạn Free dù traffic rất thấp**. Đánh giá "free đủ dùng" ở B.7 trước đây tính theo SỐ ĐƠN/NGÀY là SAI CƠ SỞ — giới hạn thật là CPU/request, không phải lượt gọi | Cần đo CPU thật/request khi có demo, nhiều khả năng phải lên **Workers Paid** (30s CPU/request) chỉ để chạy được bcrypt, không liên quan gì đến traffic thấp. Xem lại B.7. |
-| Next.js trên Worker, cần `nodejs_compat` (mã dùng `crypto` AES-GCM ở `profileCrypto.ts`, `fs`, `path`, `Buffer`) | Cần `@opennextjs/cloudflare`; 5 route có `runtime='nodejs'` + flag compat phải bật trong `wrangler.toml` | Dựng demo thử trước khi chuyển prod. |
-| Subdomain `dashboard.`/`daisu.`/`admin.`/`mo.`/`demo.` (middleware rewrite theo Host, nginx hiện tại) | Mỗi subdomain cần gắn Worker Route riêng trên Cloudflare, cần quyền DNS Edit cho zone (xem B.4 #2) | Gắn Worker Routes cho đủ 5 subdomain khi có quyền; `demo.` cần thêm redirect URI riêng cho Google OAuth nếu domain demo khác prod. |
-
-### B.4 Những thứ cần chuẩn bị (key/tài khoản) — ai setup cũng cần đủ list này
-
-| # | Cần gì | Dùng để | Lấy ở đâu | Free? |
-|---|---|---|---|---|
-| 1 | Tài khoản Cloudflare (domain đã gắn sẵn) | Gốc mọi dịch vụ | dash.cloudflare.com | Free |
-| 2 | **Cloudflare API Token** đủ quyền **DNS Edit + Workers Routes + Workers Scripts/D1/R2/Queues Edit** cho zone `hatgiongchiemtinh.com` | Deploy qua `wrangler`, gắn subdomain, thêm bản ghi mail | Dash → My Profile → API Tokens. **Sửa:** Mac đã có 1 token chạy được nhưng thiếu đúng quyền zone này (lỗi 10000 khi sửa DNS) — không phải "chưa có token" như bản trước ghi, mà là **token hiện tại thiếu quyền**. |
-| 3 | Account ID + Zone ID | Config `wrangler.toml` | Dash → Overview — không phải bí mật, điền được ngay khi có |
-| 4 | D1 database (`wrangler d1 create`) + **nâng Prisma lên ≥6.2 + D1 driver adapter** | Thay Postgres | Tự tạo bằng token #2 | Free (500MB/DB, 5GB/account) |
-| 5 | R2 bucket + R2 API Token | Lưu PDF/avatar/ảnh tĩnh ghi runtime + file đọc tĩnh quá cỡ bundle (`imgs/`) | Dash → R2 → Manage API Tokens | Free (10GB) |
-| 6 | **`RESEND_API_KEY`** (biến mới) + xác thực tên miền gửi + bản ghi SPF/DKIM cho zone | Thay SMTP Hostinger (giữ nguyên MX nhận mail) | resend.com | Free tier |
-| 7 | Giấy phép dữ liệu ephemeris astro.com cho web thu tiền — **còn thiếu kết luận** (AGPL hay mua giấy phép thương mại), file `.se1` **đã có sẵn trong repo**, không cần tải lại | Hợp lệ hoá dùng swisseph-WASM cho web tính phí | astro.com/ftp (license) | Cần đọc kỹ, có thể không free |
-| 8 | **Upstash Redis** (REST URL + token) | Rate limit thật trên nhiều instance Worker — hiện đang trống, dùng bộ đếm in-memory sẽ mất tác dụng trên Cloudflare | upstash.com | Free tier |
-| 9 | API tra múi giờ theo toạ độ thay `geo-tz` — **chưa chọn** | Tính giờ sinh chính xác theo kinh độ/vĩ độ | — | Cần tìm, có free tier |
-| 10 | Cập nhật webhook SePay/Telegram — **chỉ cần cho bản demo** (domain riêng); **prod giữ nguyên domain `hatgiongchiemtinh.com` nên KHÔNG cần đổi URL webhook** | — | Dashboard SePay / BotFather (chỉ demo) | — |
-| 11 | (Tuỳ chọn) Browser Rendering binding — hoặc quyết viết lại PDF bằng `pdf-lib` (đã có sẵn trong dependencies, chưa dùng cho luồng chính) | Xuất PDF, bỏ luôn Ghostscript | `wrangler.toml` | Free (hẹp 10p/ngày) |
-
-### B.5 Trạng thái đã làm (tính đến 23/10/2026)
-
-- [x] Đồng bộ code VPS mới nhất lên `hentaiikidd/hgct` (commit `4795f2d`, sau đó nhiều commit thêm/sửa file này).
-- [x] Tạo + đồng bộ `thanhnt1021/hgct` (public, khớp code mới nhất) — không cần deploy key nữa, chỉ cần bản đọc được, không cần VPS đẩy thẳng vào đó.
-- [x] Đo dung lượng DB/file/traffic thật (B.2).
-- [x] Xác nhận swisseph có bản WASM chính chủ astro.com (B.3).
-- [x] Xác nhận Browser Rendering + Email Service free-tier hẹp/không free (B.3).
-- [x] Kiểm repo `thanhnt1021/chiemtinh` (oHa) — **không phải ví dụ Cloudflare đã chuyển thành công**, chỉ có 1 Worker bot Telegram, không liên quan đến swisseph/PDF/D1 của app chính.
-- [x] Đối chiếu toàn bộ tài liệu với mã thật qua phiên oHa/Mac (thẻ oHa-23102026-06) — 21 điểm sai/thiếu đã sửa vào B.3/B.4/B.7, xem B.10.
-
-### B.6 Còn thiếu — cần anh (hoặc bên được báo) làm
-
-1. Cloudflare API Token đủ quyền DNS Edit cho zone (B.4 #2) — chưa có thì chưa gắn được domain/subdomain.
-2. Quyết kênh báo cáo Telegram cho các ticket loại này — tạm gác, chưa cần gấp.
-3. `docs/univ3/` trong repo `hgct` hiện để nguyên, chưa `.gitignore` — việc đồng bộ SSOT `thanhnt1021/univ3` phụ thuộc workflow trên Macbook, không phải việc của VPS này.
-4. Quyết thay thế `geo-tz` (B.4 #9), và kết luận giấy phép astro.com (B.4 #7) — 2 điểm còn treo chưa ai quyết.
-5. Viết quy trình chuyển dữ liệu Postgres → D1 (xuất 13 bảng, đổi kiểu, nhập, đối chiếu số dòng) — hiện chưa có, cần làm trước khi dựng demo thật.
-6. Sau khi có token #2: dựng demo trên Cloudflare (`demo.hatgiongchiemtinh.com`), đo CPU time/request thật (xem B.7), test đủ 4 dịch vụ (sự nghiệp, tình duyên, cặp đôi, vận hạn) + đối chiếu kết quả lá số demo vs prod trên cùng bộ ngày giờ sinh trước khi tính chuyển prod thật.
-7. Chuyển prod CHỈ sau khi anh duyệt — tạm dừng nhận đơn → chép DB + PDF lần cuối → mở lại (không cần đổi webhook vì giữ nguyên domain, xem B.4 #10). Giữ VPS chạy thêm ít nhất 7 ngày để lùi về nếu cần.
-8. **Đổi toàn bộ secret trong B.9 sau khi chuyển xong** (xem B.10 — lý do bắt buộc, không phải tuỳ chọn) — trừ `PROFILE_ENCRYPTION_KEY`/`NEXTAUTH_SECRET`/`CTV_JWT_SECRET` cần kế hoạch riêng, không đổi trực tiếp (xem B.10).
-
-### B.7 Gói Cloudflare — **cần xem lại, chưa chắc free đủ**
-
-Quyết định trước đó (free trước, vượt mới báo) **dựa trên cơ sở sai** — tính theo số đơn/ngày (1–4 đơn), nhưng giới hạn thật của Workers Free là **CPU time mỗi request (~10ms)**, không phải số lượt gọi. Mã đang băm mật khẩu bằng bcrypt cost 12 (đăng nhập, đăng ký, đổi mật khẩu CTV) — một lượt băm này riêng nó nhiều khả năng đã vượt 10ms, **không liên quan gì đến traffic thấp**. Phải đo CPU thật/request trên demo trước khi chốt lại — nhiều khả năng cần Workers Paid (30s CPU/request) chỉ để chạy được các route có bcrypt, bất kể traffic.
-
-### B.8 Đối chiếu với báo cáo oHa-23102026-06 (phiên khác, phía Mac, 23/10/2026)
-
-**⚠️ Có ít nhất 2 phiên Claude đang làm cùng việc chuyển HGCT sang Cloudflare song song** — phiên này (VPS, có quyền thật vào server/DB/file) và 1 phiên bên Mac/oHa (không vào được VPS). Để tránh đụng tay trùng hoặc lệch tay nhau: **phiên VPS này nên là nơi thực thi chính** vì là nơi duy nhất có quyền thật vào server, DB, file cũ — phiên kia chỉ nên làm phần Cloudflare-dashboard-side (tạo token, domain, Resend...) rồi giao lại key cho phiên VPS dùng.
-
-Báo cáo bên đó nêu thiếu:
-- Quyền **sửa** domain `hatgiongchiemtinh.com` trên Cloudflare (khoá hiện có chỉ xem, chưa sửa được) — cần token mới đủ quyền Edit (khớp đúng mục B.4 #2).
-- Tài khoản gửi mail **Resend** — khớp đúng mục B.4 #6, chưa có.
-- Bộ khoá + dữ liệu khách trên máy chủ cũ — **phiên Mac không vào được VPS, nhưng phiên VPS này vào được** (đã đo trực tiếp ở B.2) — phần này phiên VPS tự lo, không cần Mac.
-- **Giấy phép dữ liệu thiên văn astro.com cho web thu tiền** — đúng điểm đã flag ở B.4 #7 ("kiểm license trước khi deploy"), giờ có 2 nguồn độc lập cùng nêu → chắc chắn phải đọc kỹ license astro.com trước khi dùng cho web tính phí, không bỏ qua được.
-
-### B.9 Biến môi trường cần có (.env.local VPS, 23/10/2026) — CHỈ TÊN BIẾN, KHÔNG PHẢI GIÁ TRỊ THẬT
-
-> Giá trị thật KHÔNG đưa vào file này / không commit git — SePay, SMTP, OAuth, JWT secret... là tiền + tài khoản thật, rò vào git history là không thu hồi được (khác xoá file thường). Cần giá trị thật thì lấy qua kênh ngoài git (dán trực tiếp trong chat 1 lần, hoặc scp sang máy đích) — hỏi phiên VPS này khi cần.
-
-**Giữ nguyên (prod hiện có):**
-```
-ADMIN_EMAILS, ADMIN_TELEGRAM_USER_ID, APP_PORT
-BANK_ACCOUNT_NAME, BANK_ACCOUNT_NUMBER, BANK_NAME
-CF_TURNSTILE_SECRET_KEY, NEXT_PUBLIC_CF_TURNSTILE_SITE_KEY
-CRON_SECRET, CTV_JWT_SECRET
-DATABASE_URL
-EMAIL_FROM
-GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_SERVICE_ACCOUNT_BASE64
-KB_SPREADSHEET_ID
-NEXTAUTH_SECRET, NEXTAUTH_URL, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_DAISU_URL
-OPENROUTER_API_KEY, OPENROUTER_MANAGEMENT_KEY
-PROFILE_ENCRYPTION_KEY
-SEPAY_API_KEY
-SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
-TELEGRAM_ADMIN_BOT_TOKEN, TELEGRAM_ADMIN_WEBHOOK_SECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET_TOKEN
-UPGRADE_CODE_HASH
-UPSTASH_REDIS_REST_TOKEN, UPSTASH_REDIS_REST_URL
-```
-
-**Bị bản trước bỏ sót (mã có đọc, cần thêm vào list thật):**
-```
-NEXT_PUBLIC_ENABLE_PDF_FLOW   # bật/tắt luồng PDF cũ — PHẢI set LÚC BUILD (biến NEXT_PUBLIC_), không phải lúc chạy
-ENABLE_TEST_ROUTES           # bật route test, nên tắt (bỏ biến) trên prod Cloudflare
-SMTP_PASSWORD, EMAIL_PASS    # tên dự phòng cho SMTP_PASS trong lib/email.ts — chỉ cần 1 trong các tên, kiểm code trước khi set
-```
-
-**Bỏ khi lên Cloudflare (không còn Docker):**
-```
-DOCKER_PROXY_HOST, DOCKER_PROXY_PORT
-```
-
-**Mới cần thêm:**
-```
-RESEND_API_KEY   # xem B.4 #6
-```
-
-### B.10 Đối chiếu W04 (oHa/Mac, thẻ oHa-23102026-06, 23/10/2026) — 21 điểm đã sửa vào bản này
-
-Phiên oHa/Mac clone riêng (chỉ đọc, không sửa/push) `hentaiikidd/hgct` ở HEAD `e43a741`, đối chiếu từng dòng tài liệu với mã thật, tự kiểm lại bằng `grep` ngay trên VPS này — khớp. Danh sách sai/thiếu đã sửa thẳng vào B.3/B.4/B.6/B.7/B.9 ở trên, không lặp lại ở đây. Tóm 2 điểm quan trọng nhất không nằm trong bảng:
-
-1. **B.7 (gói Cloudflare) đã đổi từ "chốt 1A free" sang "cần đo lại"** — lý do cơ bản: giới hạn Workers Free là CPU time/request (~10ms), không phải số đơn/ngày. Đừng dùng lại kết luận "free chắc đủ" ở các bản cũ.
-2. **An toàn — 28 secret trong bản file trước đã bị xem là lộ**, vì file đi qua route tải xuống công khai được (ai login đúng `hentaiikidd` là tải hết) và đã được chuyển tiếp qua Telegram. Route `src/app/migration-notes/route.ts` đã bị xoá nội dung (còn route rỗng, chờ cần lại thì báo phiên VPS). **Phải đổi toàn bộ 28 giá trị sau khi chuyển Cloudflare xong** — trừ 3 cái sau cần kế hoạch riêng, **không đổi trực tiếp**:
-   - `PROFILE_ENCRYPTION_KEY` — đổi thẳng làm toàn bộ hồ sơ đã mã hoá AES-256-GCM không đọc lại được. Phải giải mã bằng khoá cũ → mã hoá lại bằng khoá mới, chạy migration thật trước khi đổi khoá trong env.
-   - `NEXTAUTH_SECRET`, `CTV_JWT_SECRET` — đổi thẳng đăng xuất toàn bộ khách + CTV đang đăng nhập. Nên đổi đúng lúc cutover (khách đang tạm dừng nhận đơn theo B.6 mục 7), không đổi giữa lúc web đang chạy bình thường.
-   - Các khoá còn lại (SePay, SMTP, OAuth, Telegram bot token, OpenRouter, CRON_SECRET, Turnstile...) đổi được ngay, không ảnh hưởng session khách — nên làm sớm, không cần chờ cutover.
+| Workers: CPU mỗi lượt gọi | 10ms (chờ mạng, DB không tính) | developers.cloudflare.com/workers/platform/limits/ |
+| Workers: lượt gọi mỗi ngày | 100.000 (tính chung với Pages Functions) | developers.cloudflare.com/workers/platform/limits/, developers.cloudflare.com/pages/functions/pricing/ |
+| Workers: cỡ gói mã | 64MiB chưa nén, không giới hạn bản nén; khởi động tối đa 1 giây; bộ nhớ 128MB | developers.cloudflare.com/workers/platform/limits/ |
+| Workers: subrequest | 50 mỗi lượt; tối đa 6 kết nối cùng lúc | developers.cloudflare.com/workers/platform/limits/ |
+| Cron Triggers | 5 lịch cho cả tài khoản, 10ms CPU mỗi lượt, chạy giờ UTC | developers.cloudflare.com/workers/platform/limits/, developers.cloudflare.com/workers/configuration/cron-triggers/ |
+| Static Assets | 20.000 tệp, mỗi tệp 25MiB, lượt tải không giới hạn, không mất phí | developers.cloudflare.com/workers/platform/limits/, developers.cloudflare.com/workers/static-assets/billing-and-limitations/ |
+| D1 | 500MB mỗi DB, 5GB mỗi tài khoản, đọc 5 triệu dòng/ngày, ghi 100.000 dòng/ngày, 50 truy vấn mỗi lượt, mỗi dòng tối đa 2MB; vượt hạn ngày thì truy vấn bị dừng | developers.cloudflare.com/d1/platform/limits/, developers.cloudflare.com/d1/platform/pricing/ |
+| R2 | 10GB-tháng, 1 triệu lượt A/tháng, 10 triệu lượt B/tháng, tải ra miễn phí; tài khoản HGCT đã bật R2 | developers.cloudflare.com/r2/pricing/ |
+| Queues | 10.000 lượt/ngày, giữ tin 24 giờ | developers.cloudflare.com/queues/platform/pricing/ |
+| Browser Rendering | 10 phút/ngày, 3 trình duyệt cùng lúc | developers.cloudflare.com/browser-rendering/platform/pricing/ |
+| Email Service (gửi) | Chỉ gửi tới địa chỉ đã xác minh; nhận mail (Email Routing) không giới hạn | developers.cloudflare.com/email-service/platform/pricing/ |
+| TCP socket | Chỉ chặn cổng 25 (cổng 465, 587 tài liệu không chặn) | developers.cloudflare.com/workers/runtime-apis/tcp-sockets/ |
